@@ -3,6 +3,7 @@ package baidu
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"one-api/common"
@@ -39,7 +40,7 @@ func (baiduResponse *BaiduChatResponse) ResponseHandler(resp *http.Response) (Op
 				{
 					Id:       baiduResponse.Id,
 					Type:     "function",
-					Function: *baiduResponse.FunctionCall,
+					Function: baiduResponse.FunctionCall,
 				},
 			}
 			choice.FinishReason = &base.StopFinishReasonToolFunction
@@ -73,6 +74,15 @@ func (p *BaiduProvider) getChatRequestBody(request *types.ChatCompletionRequest)
 			messages = append(messages, BaiduMessage{
 				Role:    "assistant",
 				Content: "Okay",
+			})
+		} else if message.Role == "function" {
+			messages = append(messages, BaiduMessage{
+				Role:    "assistant",
+				Content: "Okay",
+			})
+			messages = append(messages, BaiduMessage{
+				Role:    "user",
+				Content: "请根据以下相关内容回答：" + message.StringContent(),
 			})
 		} else {
 			messages = append(messages, BaiduMessage{
@@ -141,8 +151,14 @@ func (p *BaiduProvider) ChatAction(request *types.ChatCompletionRequest, isModel
 
 }
 
-func (p *BaiduProvider) streamResponseBaidu2OpenAI(baiduResponse *BaiduChatStreamResponse) *types.ChatCompletionStreamResponse {
-	var choice types.ChatCompletionStreamChoice
+func (p *BaiduProvider) streamResponseBaidu2OpenAI(baiduResponse *BaiduChatStreamResponse) []*types.ChatCompletionStreamResponse {
+	// var choice types.ChatCompletionStreamChoice
+	choice := types.ChatCompletionStreamChoice{
+		Index: 0,
+		Delta: types.ChatCompletionStreamChoiceDelta{
+			Role: "assistant",
+		},
+	}
 
 	if baiduResponse.FunctionCall != nil {
 		if baiduResponse.FunctionCate == "tool" {
@@ -150,7 +166,7 @@ func (p *BaiduProvider) streamResponseBaidu2OpenAI(baiduResponse *BaiduChatStrea
 				{
 					Id:       baiduResponse.Id,
 					Type:     "function",
-					Function: *baiduResponse.FunctionCall,
+					Function: baiduResponse.FunctionCall,
 				},
 			}
 			choice.FinishReason = &base.StopFinishReasonToolFunction
@@ -165,14 +181,28 @@ func (p *BaiduProvider) streamResponseBaidu2OpenAI(baiduResponse *BaiduChatStrea
 		}
 	}
 
-	response := types.ChatCompletionStreamResponse{
+	chatCompletion := types.ChatCompletionStreamResponse{
 		ID:      baiduResponse.Id,
 		Object:  "chat.completion.chunk",
 		Created: baiduResponse.Created,
 		Model:   baiduResponse.Model,
-		Choices: []types.ChatCompletionStreamChoice{choice},
+		// Choices: []types.ChatCompletionStreamChoice{choice},
 	}
-	return &response
+	var response []*types.ChatCompletionStreamResponse
+
+	if baiduResponse.FunctionCall == nil {
+		chatCompletion.Choices = []types.ChatCompletionStreamChoice{choice}
+		response = append(response, &chatCompletion)
+	} else {
+		choices := choice.ConvertOpenaiStream()
+		for _, choice := range choices {
+			chatCompletionCopy := chatCompletion
+			chatCompletionCopy.Choices = []types.ChatCompletionStreamChoice{choice}
+			response = append(response, &chatCompletionCopy)
+		}
+	}
+
+	return response
 }
 
 func (p *BaiduProvider) sendStreamRequest(req *http.Request, model string, functionCate string) (usage *types.Usage, errWithCode *types.OpenAIErrorWithStatusCode) {
@@ -189,6 +219,28 @@ func (p *BaiduProvider) sendStreamRequest(req *http.Request, model string, funct
 
 	if common.IsFailureStatusCode(resp) {
 		return nil, common.HandleErrorResp(resp)
+	}
+
+	// 如果返回的是json，则直接返回
+	contentType := resp.Header.Get("Content-Type")
+	if strings.Contains(contentType, "application/json") {
+		var baiduResponse BaiduChatResponse
+		err = common.DecodeResponse(resp.Body, &baiduResponse)
+		if err != nil {
+			return nil, common.ErrorWrapper(err, "decode_response_failed", http.StatusInternalServerError)
+		}
+		if baiduResponse.ErrorMsg != "" {
+			return nil, &types.OpenAIErrorWithStatusCode{
+				OpenAIError: types.OpenAIError{
+					Message: baiduResponse.ErrorMsg,
+					Type:    "baidu_error",
+					Param:   "",
+					Code:    baiduResponse.ErrorCode,
+				},
+				StatusCode: resp.StatusCode,
+			}
+		}
+		return
 	}
 
 	defer resp.Body.Close()
@@ -230,19 +282,11 @@ func (p *BaiduProvider) sendStreamRequest(req *http.Request, model string, funct
 				common.SysError("error unmarshalling stream response: " + err.Error())
 				return true
 			}
-			if baiduResponse.Usage.TotalTokens != 0 {
-				usage.TotalTokens = baiduResponse.Usage.TotalTokens
-				usage.PromptTokens = baiduResponse.Usage.PromptTokens
-				usage.CompletionTokens = baiduResponse.Usage.TotalTokens - baiduResponse.Usage.PromptTokens
-			}
 			baiduResponse.Model = model
-			response := p.streamResponseBaidu2OpenAI(&baiduResponse)
-			jsonResponse, err := json.Marshal(response)
-			if err != nil {
-				common.SysError("error marshalling stream response: " + err.Error())
+			if err := p.handleStreamResponse(&baiduResponse, usage); err != nil {
+				common.SysError(err.Error())
 				return true
 			}
-			p.Context.Render(-1, common.CustomEvent{Data: "data: " + string(jsonResponse)})
 			return true
 		case <-stopChan:
 			p.Context.Render(-1, common.CustomEvent{Data: "data: [DONE]"})
@@ -251,4 +295,22 @@ func (p *BaiduProvider) sendStreamRequest(req *http.Request, model string, funct
 	})
 
 	return usage, nil
+}
+
+func (p *BaiduProvider) handleStreamResponse(baiduResponse *BaiduChatStreamResponse, usage *types.Usage) error {
+	if baiduResponse.Usage.TotalTokens != 0 {
+		usage.TotalTokens = baiduResponse.Usage.TotalTokens
+		usage.PromptTokens = baiduResponse.Usage.PromptTokens
+		usage.CompletionTokens = baiduResponse.Usage.TotalTokens - baiduResponse.Usage.PromptTokens
+	}
+	responses := p.streamResponseBaidu2OpenAI(baiduResponse)
+
+	for _, response := range responses {
+		jsonResponse, err := json.Marshal(response)
+		if err != nil {
+			return fmt.Errorf("error marshalling stream response: %w", err)
+		}
+		p.Context.Render(-1, common.CustomEvent{Data: "data: " + string(jsonResponse)})
+	}
+	return nil
 }

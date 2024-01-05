@@ -69,10 +69,24 @@ func (p *XunfeiProvider) sendRequest(dataChan chan XunfeiChatResponse, stopChan 
 	return usage, nil
 }
 
+func (p *XunfeiProvider) handleStreamResponse(xunfeiResponse *XunfeiChatResponse, functionCate string, usage *types.Usage) error {
+	usage.PromptTokens += xunfeiResponse.Payload.Usage.Text.PromptTokens
+	usage.CompletionTokens += xunfeiResponse.Payload.Usage.Text.CompletionTokens
+	usage.TotalTokens += xunfeiResponse.Payload.Usage.Text.TotalTokens
+	responses := p.streamResponseXunfei2OpenAI(xunfeiResponse, functionCate)
+	for _, response := range responses {
+		jsonResponse, err := json.Marshal(response)
+		if err != nil {
+			return fmt.Errorf("error marshalling stream response: %w", err)
+		}
+		p.Context.Render(-1, common.CustomEvent{Data: "data: " + string(jsonResponse)})
+	}
+	return nil
+}
+
 func (p *XunfeiProvider) sendStreamRequest(dataChan chan XunfeiChatResponse, stopChan chan bool, functionCate string) (usage *types.Usage, errWithCode *types.OpenAIErrorWithStatusCode) {
 	usage = &types.Usage{}
 
-	// 等待第一个dataChan的响应
 	xunfeiResponse, ok := <-dataChan
 	if !ok {
 		return nil, common.ErrorWrapper(fmt.Errorf("xunfei response channel closed"), "xunfei_response_error", http.StatusInternalServerError)
@@ -82,22 +96,13 @@ func (p *XunfeiProvider) sendStreamRequest(dataChan chan XunfeiChatResponse, sto
 		return nil, errWithCode
 	}
 
-	// 如果第一个响应没有错误，设置StreamHeaders并开始streaming
 	common.SetEventStreamHeaders(p.Context)
 	p.Context.Stream(func(w io.Writer) bool {
-		// 处理第一个响应
-		usage.PromptTokens += xunfeiResponse.Payload.Usage.Text.PromptTokens
-		usage.CompletionTokens += xunfeiResponse.Payload.Usage.Text.CompletionTokens
-		usage.TotalTokens += xunfeiResponse.Payload.Usage.Text.TotalTokens
-		response := p.streamResponseXunfei2OpenAI(&xunfeiResponse, functionCate)
-		jsonResponse, err := json.Marshal(response)
-		if err != nil {
-			common.SysError("error marshalling stream response: " + err.Error())
+		if err := p.handleStreamResponse(&xunfeiResponse, functionCate, usage); err != nil {
+			common.SysError(err.Error())
 			return true
 		}
-		p.Context.Render(-1, common.CustomEvent{Data: "data: " + string(jsonResponse)})
 
-		// 处理后续的响应
 		for {
 			select {
 			case xunfeiResponse, ok := <-dataChan:
@@ -105,16 +110,10 @@ func (p *XunfeiProvider) sendStreamRequest(dataChan chan XunfeiChatResponse, sto
 					p.Context.Render(-1, common.CustomEvent{Data: "data: [DONE]"})
 					return false
 				}
-				usage.PromptTokens += xunfeiResponse.Payload.Usage.Text.PromptTokens
-				usage.CompletionTokens += xunfeiResponse.Payload.Usage.Text.CompletionTokens
-				usage.TotalTokens += xunfeiResponse.Payload.Usage.Text.TotalTokens
-				response := p.streamResponseXunfei2OpenAI(&xunfeiResponse, functionCate)
-				jsonResponse, err := json.Marshal(response)
-				if err != nil {
-					common.SysError("error marshalling stream response: " + err.Error())
+				if err := p.handleStreamResponse(&xunfeiResponse, functionCate, usage); err != nil {
+					common.SysError(err.Error())
 					return true
 				}
-				p.Context.Render(-1, common.CustomEvent{Data: "data: " + string(jsonResponse)})
 			case <-stopChan:
 				p.Context.Render(-1, common.CustomEvent{Data: "data: [DONE]"})
 				return false
@@ -136,6 +135,11 @@ func (p *XunfeiProvider) requestOpenAI2Xunfei(request *types.ChatCompletionReque
 				Role:    "assistant",
 				Content: "Okay",
 			})
+		} else if message.Role == "function" {
+			messages = append(messages, XunfeiMessage{
+				Role:    "user",
+				Content: "请根据以下相关内容回答：" + message.StringContent(),
+			})
 		} else {
 			messages = append(messages, XunfeiMessage{
 				Role:    message.Role,
@@ -143,6 +147,7 @@ func (p *XunfeiProvider) requestOpenAI2Xunfei(request *types.ChatCompletionReque
 			})
 		}
 	}
+
 	xunfeiRequest := XunfeiChatRequest{}
 
 	if request.Tools != nil {
@@ -188,7 +193,7 @@ func (p *XunfeiProvider) responseXunfei2OpenAI(response *XunfeiChatResponse, fun
 				{
 					Id:       response.Header.Sid,
 					Type:     "function",
-					Function: *xunfeiText.FunctionCall,
+					Function: xunfeiText.FunctionCall,
 				},
 			}
 			choice.FinishReason = &base.StopFinishReasonToolFunction
@@ -259,11 +264,17 @@ func (p *XunfeiProvider) xunfeiMakeRequest(textRequest *types.ChatCompletionRequ
 	return dataChan, stopChan, nil
 }
 
-func (p *XunfeiProvider) streamResponseXunfei2OpenAI(xunfeiResponse *XunfeiChatResponse, functionCate string) *types.ChatCompletionStreamResponse {
+func (p *XunfeiProvider) streamResponseXunfei2OpenAI(xunfeiResponse *XunfeiChatResponse, functionCate string) []*types.ChatCompletionStreamResponse {
 	if len(xunfeiResponse.Payload.Choices.Text) == 0 {
 		xunfeiResponse.Payload.Choices.Text = []XunfeiChatResponseTextItem{{}}
 	}
-	var choice types.ChatCompletionStreamChoice
+
+	choice := types.ChatCompletionStreamChoice{
+		Index: 0,
+		Delta: types.ChatCompletionStreamChoiceDelta{
+			Role: "assistant",
+		},
+	}
 	xunfeiText := xunfeiResponse.Payload.Choices.Text[0]
 
 	if xunfeiText.FunctionCall != nil {
@@ -273,7 +284,7 @@ func (p *XunfeiProvider) streamResponseXunfei2OpenAI(xunfeiResponse *XunfeiChatR
 					Id:       xunfeiResponse.Header.Sid,
 					Index:    0,
 					Type:     "function",
-					Function: *xunfeiText.FunctionCall,
+					Function: xunfeiText.FunctionCall,
 				},
 			}
 			choice.FinishReason = &base.StopFinishReasonToolFunction
@@ -289,12 +300,26 @@ func (p *XunfeiProvider) streamResponseXunfei2OpenAI(xunfeiResponse *XunfeiChatR
 		}
 	}
 
-	response := types.ChatCompletionStreamResponse{
+	chatCompletion := types.ChatCompletionStreamResponse{
 		ID:      xunfeiResponse.Header.Sid,
 		Object:  "chat.completion.chunk",
 		Created: common.GetTimestamp(),
 		Model:   "SparkDesk",
-		Choices: []types.ChatCompletionStreamChoice{choice},
+		// Choices: []types.ChatCompletionStreamChoice{choice},
 	}
-	return &response
+
+	var response []*types.ChatCompletionStreamResponse
+	if xunfeiText.FunctionCall == nil {
+		chatCompletion.Choices = []types.ChatCompletionStreamChoice{choice}
+		response = append(response, &chatCompletion)
+	} else {
+		choices := choice.ConvertOpenaiStream()
+		for _, choice := range choices {
+			chatCompletionCopy := chatCompletion
+			chatCompletionCopy.Choices = []types.ChatCompletionStreamChoice{choice}
+			response = append(response, &chatCompletionCopy)
+		}
+	}
+
+	return response
 }
