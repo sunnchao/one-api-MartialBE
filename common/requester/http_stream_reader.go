@@ -45,12 +45,16 @@ func (stream *streamReader[T]) Recv() (response *[]T, err error) {
 //nolint:gocognit
 func (stream *streamReader[T]) processLines() (*[]T, error) {
 	for {
+
 		rawLine, readErr := stream.reader.ReadBytes('\n')
 		if readErr != nil {
 			return nil, readErr
 		}
 
 		noSpaceLine := bytes.TrimSpace(rawLine)
+		if len(noSpaceLine) == 0 {
+			continue
+		}
 
 		var response []T
 		err := stream.handlerPrefix(&noSpaceLine, &stream.isFinished, &response)

@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"math"
 	"net/http"
 	"one-api/common"
@@ -69,8 +68,6 @@ func RelayChat(c *gin.Context) {
 		}
 		errWithCode = responseJsonClient(c, response)
 	}
-
-	fmt.Println(usage)
 
 	// 如果报错，则退还配额
 	if errWithCode != nil {

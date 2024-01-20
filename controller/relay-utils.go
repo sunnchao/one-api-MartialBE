@@ -157,31 +157,32 @@ func responseJsonClient(c *gin.Context, data interface{}) *types.OpenAIErrorWith
 func responseStreamClient[T any](c *gin.Context, stream requester.StreamReaderInterface[T]) *types.OpenAIErrorWithStatusCode {
 	requester.SetEventStreamHeaders(c)
 	defer stream.Close()
-
-	for {
+	c.Stream(func(w io.Writer) bool {
 		response, err := stream.Recv()
 		if errors.Is(err, io.EOF) {
 			if response != nil && len(*response) > 0 {
 				for _, streamResponse := range *response {
 					responseBody, _ := json.Marshal(streamResponse)
-					c.Render(-1, common.CustomEvent{Data: "data: " + string(responseBody)})
+					fmt.Fprintln(w, "data: "+string(responseBody)+"\n")
 				}
 			}
-			c.Render(-1, common.CustomEvent{Data: "data: [DONE]"})
-			break
+			fmt.Fprintln(w, "data: [DONE]")
+			return false
 		}
 
 		if err != nil {
-			c.Render(-1, common.CustomEvent{Data: "data: " + err.Error()})
-			c.Render(-1, common.CustomEvent{Data: "data: [DONE]"})
-			break
+			fmt.Fprintln(w, "data: "+err.Error()+"\n")
+			fmt.Fprintln(w, "data: [DONE]")
+			return false
 		}
 
 		for _, streamResponse := range *response {
 			responseBody, _ := json.Marshal(streamResponse)
-			c.Render(-1, common.CustomEvent{Data: "data: " + string(responseBody)})
+			fmt.Fprintln(w, "data: "+string(responseBody)+"\n")
 		}
-	}
+
+		return true
+	})
 
 	return nil
 }
