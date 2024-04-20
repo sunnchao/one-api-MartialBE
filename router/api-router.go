@@ -146,6 +146,12 @@ func SetApiRouter(router *gin.Engine) {
 
 		}
 
+		userOperationRouter := apiRouter.Group("/operation")
+		userOperationRouter.Use(middleware.UserAuth())
+		{
+			userOperationRouter.POST("/checkin", controller.UserOperationCheckIn)
+		}
+
 		mjRoute := apiRouter.Group("/mj")
 		mjRoute.GET("/self", middleware.UserAuth(), controller.GetUserMidjourney)
 		mjRoute.GET("/", middleware.AdminAuth(), controller.GetAllMidjourney)

@@ -3,7 +3,8 @@ import { showError, showNotice } from 'utils/common';
 import { API } from 'utils/api';
 import { marked } from 'marked';
 import BaseIndex from './baseIndex';
-import { Box, Container } from '@mui/material';
+import { Box } from '@mui/material';
+import HomeContent from './HomeContent';
 
 const Home = () => {
   const [homePageContentLoaded, setHomePageContentLoaded] = useState(false);
@@ -61,7 +62,7 @@ const Home = () => {
       ) : (
         <>
           <Box>
-            {homePageContent.startsWith('https://') ? (
+            {/* {homePageContent.startsWith('https://') ? (
               <iframe title="home_page_content" src={homePageContent} style={{ width: '100%', height: '100vh', border: 'none' }} />
             ) : (
               <>
@@ -69,7 +70,8 @@ const Home = () => {
                   <div style={{ fontSize: 'larger' }} dangerouslySetInnerHTML={{ __html: homePageContent }}></div>
                 </Container>
               </>
-            )}
+            )} */}
+            <HomeContent />
           </Box>
         </>
       )}

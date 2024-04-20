@@ -16,6 +16,7 @@
     "@mui/x-data-grid": "^6.19.4",
     "@mui/x-date-pickers": "^6.18.5",
     "@tabler/icons-react": "^2.46.0",
+    "@vitejs/plugin-react": "^4.2.1",
     "apexcharts": "^3.45.2",
     "axios": "^0.28.0",
     "dayjs": "^1.11.10",
@@ -37,10 +38,12 @@
     "react-scripts": "^5.0.1",
     "react-turnstile": "^1.1.2",
     "redux": "^5.0.1",
+    "vite": "^5.2.9",
     "yup": "^0.32.11"
   },
   "scripts": {
     "start": "react-scripts start",
+    "dev": "vite",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Grid, Typography } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 import { gridSpacing } from 'store/constant';
 import StatisticalLineChartCard from './component/StatisticalLineChartCard';
 import ApexCharts from 'ui-component/chart/ApexCharts';
 import SupportModels from './component/SupportModels';
 import { generateLineChartOptions, getLastSevenDays, generateBarChartOptions, renderChartNumber } from 'utils/chart';
 import { API } from 'utils/api';
-import { showError, calculateQuota, renderNumber } from 'utils/common';
+import { showError, calculateQuota, renderNumber, showSuccess } from 'utils/common';
 import UserCard from 'ui-component/cards/UserCard';
 
 const Dashboard = () => {
@@ -16,6 +17,7 @@ const Dashboard = () => {
   const [quotaChart, setQuotaChart] = useState(null);
   const [tokenChart, setTokenChart] = useState(null);
   const [users, setUsers] = useState([]);
+  const [checkinLoading, setCheckinLoading] = useState(false);
 
   const userDashboard = async () => {
     try {
@@ -48,6 +50,25 @@ const Dashboard = () => {
         showError(message);
       }
     } catch (error) {
+      return;
+    }
+  };
+
+  // 签到
+  const handleUserOperationCheckIn = async () => {
+    setCheckinLoading(true);
+    try {
+      let res = await API.post(`/api/operation/checkin`);
+      const { success, message } = res.data;
+      if (success) {
+        showSuccess(message);
+        loadUser();
+      } else {
+        showError(message);
+      }
+      setCheckinLoading(false);
+    } catch (error) {
+      setCheckinLoading(false);
       return;
     }
   };
@@ -116,6 +137,19 @@ const Dashboard = () => {
                 </Grid>
                 <Grid item xs={8}>
                   <Typography variant="h3"> {users?.request_count || '未知'}</Typography>
+                </Grid>
+                <Grid item xs={4}>
+                  <Typography variant="h4">签到:</Typography>
+                </Grid>
+                <Grid item xs={8}>
+                  <LoadingButton
+                    disabled={!!users?.check_in}
+                    loading={checkinLoading}
+                    onClick={handleUserOperationCheckIn}
+                    variant="contained"
+                  >
+                    {users?.check_in ? '已签到' : '立即签到'}
+                  </LoadingButton>
                 </Grid>
               </Grid>
             </UserCard>

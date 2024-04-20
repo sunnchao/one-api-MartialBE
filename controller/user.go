@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"one-api/common"
 	"one-api/model"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -323,10 +324,32 @@ func GetSelf(c *gin.Context) {
 		})
 		return
 	}
+
+	result := gin.H{}
+	val := reflect.ValueOf(user)
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+	for i := 0; i < val.Type().NumField(); i++ {
+		field := val.Type().Field(i)
+		value := val.Field(i)
+		// 将User的字段添加到结果映射中
+		result[field.Tag.Get("json")] = value.Interface()
+	}
+
+	// 查询签到信息
+	checkInTime, err := model.IsCheckInToday(id)
+	if err != nil {
+		common.SysLog(err.Error())
+	}
+
+	// 添加新的键值对到映射中
+	result["check_in"] = checkInTime
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
-		"data":    user,
+		"data":    result,
 	})
 }
 

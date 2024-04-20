@@ -52,7 +52,6 @@ const Header = ({ handleLeftDrawerToggle }) => {
           </Avatar>
         </ButtonBase>
       </Box>
-
       <Box sx={{ flexGrow: 1 }} />
       <Box sx={{ flexGrow: 1 }} />
       <ThemeButton />

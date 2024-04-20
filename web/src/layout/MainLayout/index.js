@@ -82,10 +82,8 @@ const MainLayout = () => {
           <Header handleLeftDrawerToggle={handleLeftDrawerToggle} />
         </Toolbar>
       </AppBar>
-
       {/* drawer */}
       <Sidebar drawerOpen={!matchDownMd ? leftDrawerOpened : !leftDrawerOpened} drawerToggle={handleLeftDrawerToggle} />
-
       {/* main content */}
       <Main theme={theme} open={leftDrawerOpened}>
         {/* breadcrumb */}

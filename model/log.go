@@ -30,6 +30,7 @@ const (
 	LogTypeConsume
 	LogTypeManage
 	LogTypeSystem
+	LogTypeUserQuotoIncrease
 )
 
 func RecordLog(userId int, logType int, content string) {

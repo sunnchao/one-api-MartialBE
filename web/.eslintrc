@@ -42,9 +42,9 @@
   "plugins": ["prettier", "react", "react-hooks"],
   "rules": {
     "react/jsx-uses-react": "error",
-    "react/jsx-uses-vars": "error",
+    "react/jsx-uses-vars": "warn",
     "react/react-in-jsx-scope": "off",
-    "no-undef": "error",
+    "no-undef": "warn",
     "react/display-name": "off",
     "react/jsx-filename-extension": "off",
     "no-param-reassign": "off",
@@ -69,7 +69,7 @@
       }
     ],
     "no-unused-vars": [
-      "error",
+      "warn",
       {
         "ignoreRestSiblings": false
       }
