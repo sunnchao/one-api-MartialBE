@@ -16,14 +16,6 @@ import {
 import { Box } from '@mui/system';
 
 const renderModalTable = (data, provider) => {
-  function renderSupportColumn(text, record) {
-    return (
-      <Stack>
-        <Chip label={record.isSupport}></Chip>
-        {record.isVip && <Chip color={'primary'}>需升级为VIP用户</Chip>}
-      </Stack>
-    );
-  }
 
   function renderReplayTokensColumn(record) {
     return record.timesPrice ? (
