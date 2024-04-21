@@ -30,7 +30,7 @@ func UserOperationCheckIn(c *gin.Context) {
 	if err != nil {
 		common.SysLog(fmt.Sprintf("IsCheckInToday: %s", err.Error()))
 	}
-	if checkInTime > 0 {
+	if len(checkInTime) > 0 {
 		// 已签到
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,

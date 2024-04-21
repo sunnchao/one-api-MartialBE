@@ -9,11 +9,11 @@ import (
 )
 
 type UserOperation struct {
-	Id          int    `json:"id"`
-	UserId      int    `json:"user_id"`
-	CreatedTime int64  `json:"created_time" gorm:"bigint"`
-	Type        int    `json:"type"`
-	Remark      string `json:"remark"`
+	Id          int       `json:"id"`
+	UserId      int       `json:"user_id"`
+	CreatedTime time.Time `json:"created_time"`
+	Type        int       `json:"type"`
+	Remark      string    `json:"remark"`
 }
 
 // 获取用户今日的UserOperation
@@ -51,17 +51,17 @@ func InsertOperationCheckIn(userId int) (quota int, err error) {
 		UserId:      userId,
 		Type:        1,
 		Remark:      strings.Join(operationRemark, ""),
-		CreatedTime: common.GetTimestamp(),
+		CreatedTime: time.Now(),
 	})
 	return
 }
 
 // 判断是否已经签到
-func IsCheckInToday(userId int) (checkInTime int64, err error) {
+func IsCheckInToday(userId int) (checkInTime string, err error) {
 	var userOperation UserOperation
 	userOperation, err = GetOperationCheckInByUserId(userId)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 	// 获取当前的UTC时间
 	nowUTC := time.Now().UTC()
@@ -76,9 +76,9 @@ func IsCheckInToday(userId int) (checkInTime int64, err error) {
 	fmt.Printf("beijingMidnight: %v, userOperation.CreateAt: %v\n", beijingMidnight, userOperation.CreatedTime)
 
 	// 比较签到时间是否晚于北京时间的今日零点
-	if userOperation.CreatedTime > beijingMidnight.Unix() {
+	if userOperation.CreatedTime.After(beijingMidnight) {
 		// 已签到
-		return userOperation.CreatedTime, err
+		return userOperation.CreatedTime.GoString(), err
 	}
-	return 0, err
+	return "", err
 }
