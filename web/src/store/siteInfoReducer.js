@@ -1,4 +1,4 @@
-import config from 'config';
+import config from '@/config';
 import * as actionTypes from './actions';
 
 export const initialState = config.siteInfo;

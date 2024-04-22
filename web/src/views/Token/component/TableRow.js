@@ -19,8 +19,8 @@ import {
   ButtonGroup
 } from '@mui/material';
 
-import TableSwitch from 'ui-component/Switch';
-import { renderQuota, timestamp2string, copy } from 'utils/common';
+import TableSwitch from '@/ui-component/Switch';
+import { renderQuota, timestamp2string, copy } from '@/utils/common';
 
 import { IconDotsVertical, IconEdit, IconTrash, IconCaretDownFilled } from '@tabler/icons-react';
 

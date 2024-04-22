@@ -1,10 +1,10 @@
 import { Stack, Typography, Container, Box, OutlinedInput, InputAdornment, Button } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import SubCard from 'ui-component/cards/SubCard';
-import inviteImage from 'assets/images/invite/cwok_casual_19.webp';
+import SubCard from '@/ui-component/cards/SubCard';
+import inviteImage from '@/assets/images/invite/cwok_casual_19.webp';
 import { useState } from 'react';
-import { API } from 'utils/api';
-import { showError, copy } from 'utils/common';
+import { API } from '@/utils/api';
+import { showError, copy } from '@/utils/common';
 
 const InviteCard = () => {
   const theme = useTheme();

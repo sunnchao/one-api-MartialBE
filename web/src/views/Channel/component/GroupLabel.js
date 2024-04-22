@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import Label from 'ui-component/Label';
+import Label from '@/ui-component/Label';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 

@@ -1,6 +1,6 @@
-import { API } from 'utils/api';
+import { API } from '@/utils/api';
 import { useNavigate } from 'react-router';
-import { showSuccess } from 'utils/common';
+import { showSuccess } from '@/utils/common';
 
 const useRegister = () => {
   const navigate = useNavigate();

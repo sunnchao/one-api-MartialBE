@@ -1,8 +1,8 @@
-import { API } from 'utils/api';
+import { API } from '@/utils/api';
 import { useDispatch } from 'react-redux';
-import { LOGIN } from 'store/actions';
+import { LOGIN } from '@/store/actions';
 import { useNavigate } from 'react-router';
-import { showSuccess } from 'utils/common';
+import { showSuccess } from '@/utils/common';
 
 const useLogin = () => {
   const dispatch = useDispatch();

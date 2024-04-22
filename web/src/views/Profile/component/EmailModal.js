@@ -15,11 +15,11 @@ import {
   FormHelperText
 } from '@mui/material';
 import { Formik } from 'formik';
-import { showError, showSuccess } from 'utils/common';
+import { showError, showSuccess } from '@/utils/common';
 import { useTheme } from '@mui/material/styles';
 import * as Yup from 'yup';
-import useRegister from 'hooks/useRegister';
-import { API } from 'utils/api';
+import useRegister from '@/hooks/useRegister';
+import { API } from '@/utils/api';
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().email('请输入正确的邮箱地址').required('邮箱不能为空'),

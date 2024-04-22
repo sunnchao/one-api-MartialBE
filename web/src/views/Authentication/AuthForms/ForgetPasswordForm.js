@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import Turnstile from 'react-turnstile';
-import { API } from 'utils/api';
+import { API } from '@/utils/api';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -12,10 +12,10 @@ import * as Yup from 'yup';
 import { Formik } from 'formik';
 
 // project imports
-import AnimateButton from 'ui-component/extended/AnimateButton';
+import AnimateButton from '@/ui-component/extended/AnimateButton';
 
 // assets
-import { showError, showInfo, showSuccess } from 'utils/common';
+import { showError, showInfo, showSuccess } from '@/utils/common';
 
 // ===========================|| FIREBASE - REGISTER ||=========================== //
 

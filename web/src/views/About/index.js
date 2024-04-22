@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { API } from 'utils/api';
-import { showError } from 'utils/common';
+import { API } from '@/utils/api';
+import { showError } from '@/utils/common';
 import { marked } from 'marked';
 import { Box, Container, Typography } from '@mui/material';
-import MainCard from 'ui-component/cards/MainCard';
+import MainCard from '@/ui-component/cards/MainCard';
 
 const About = () => {
   const [about, setAbout] = useState('');

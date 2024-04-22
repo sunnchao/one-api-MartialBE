@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { useEffect, useContext } from 'react';
-import { UserContext } from 'contexts/UserContext';
+import { UserContext } from '@/contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 
 const AuthGuard = ({ children }) => {

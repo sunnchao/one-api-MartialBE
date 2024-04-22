@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
-import { showError, showSuccess } from 'utils/common';
+import { showError, showSuccess } from '@/utils/common';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -9,8 +9,8 @@ import PerfectScrollbar from 'react-perfect-scrollbar';
 
 import { Button, Card, Stack } from '@mui/material';
 import PricesTableRow from './component/TableRow';
-import KeywordTableHead from 'ui-component/TableHead';
-import { API } from 'utils/api';
+import KeywordTableHead from '@/ui-component/TableHead';
+import { API } from '@/utils/api';
 import { IconRefresh, IconPlus } from '@tabler/icons-react';
 import EditeModal from './component/EditModal';
 

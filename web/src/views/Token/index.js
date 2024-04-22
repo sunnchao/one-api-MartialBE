@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { showError, showSuccess, trims } from 'utils/common';
+import { showError, showSuccess, trims } from '@/utils/common';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -13,9 +13,9 @@ import Toolbar from '@mui/material/Toolbar';
 
 import { Button, Card, Box, Stack, Container, Typography } from '@mui/material';
 import TokensTableRow from './component/TableRow';
-import KeywordTableHead from 'ui-component/TableHead';
-import TableToolBar from 'ui-component/TableToolBar';
-import { API } from 'utils/api';
+import KeywordTableHead from '@/ui-component/TableHead';
+import TableToolBar from '@/ui-component/TableToolBar';
+import { API } from '@/utils/api';
 import { IconRefresh, IconPlus } from '@tabler/icons-react';
 import EditeModal from './component/EditModal';
 import { useSelector } from 'react-redux';

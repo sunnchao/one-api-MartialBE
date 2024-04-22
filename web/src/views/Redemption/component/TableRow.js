@@ -16,9 +16,9 @@ import {
   Stack
 } from '@mui/material';
 
-import Label from 'ui-component/Label';
-import TableSwitch from 'ui-component/Switch';
-import { timestamp2string, renderQuota, copy } from 'utils/common';
+import Label from '@/ui-component/Label';
+import TableSwitch from '@/ui-component/Switch';
+import { timestamp2string, renderQuota, copy } from '@/utils/common';
 
 import { IconDotsVertical, IconEdit, IconTrash } from '@tabler/icons-react';
 

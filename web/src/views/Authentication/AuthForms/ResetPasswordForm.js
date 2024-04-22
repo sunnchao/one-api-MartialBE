@@ -5,8 +5,8 @@ import { useSearchParams } from 'react-router-dom';
 import { Button, Stack, Typography, Alert } from '@mui/material';
 
 // assets
-import { showError, copy } from 'utils/common';
-import { API } from 'utils/api';
+import { showError, copy } from '@/utils/common';
+import { API } from '@/utils/api';
 
 // ===========================|| FIREBASE - REGISTER ||=========================== //
 

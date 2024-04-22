@@ -25,18 +25,18 @@ import * as Yup from 'yup';
 import { Formik } from 'formik';
 
 // project imports
-import useLogin from 'hooks/useLogin';
-import AnimateButton from 'ui-component/extended/AnimateButton';
-import WechatModal from 'views/Authentication/AuthForms/WechatModal';
+import useLogin from '@/hooks/useLogin';
+import AnimateButton from '@/ui-component/extended/AnimateButton';
+import WechatModal from '@/views/Authentication/AuthForms/WechatModal';
 
 // assets
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-import Github from 'assets/images/icons/github.svg';
-import Wechat from 'assets/images/icons/wechat.svg';
-import Lark from 'assets/images/icons/lark.svg';
-import { onGitHubOAuthClicked, onLarkOAuthClicked } from 'utils/common';
+import Github from '@/assets/images/icons/github.svg';
+import Wechat from '@/assets/images/icons/wechat.svg';
+import Lark from '@/assets/images/icons/lark.svg';
+import { onGitHubOAuthClicked, onLarkOAuthClicked } from '@/utils/common';
 
 // ============================|| FIREBASE - LOGIN ||============================ //
 

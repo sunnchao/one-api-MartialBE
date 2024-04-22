@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
-import { CHANNEL_OPTIONS } from 'constants/ChannelConstants';
+import { CHANNEL_OPTIONS } from '@/constants/ChannelConstants';
 import { useTheme } from '@mui/material/styles';
-import { API } from 'utils/api';
-import { showError, showSuccess, trims } from 'utils/common';
+import { API } from '@/utils/api';
+import { showError, showSuccess, trims } from '@/utils/common';
 import {
   Dialog,
   DialogTitle,

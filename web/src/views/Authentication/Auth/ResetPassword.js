@@ -8,7 +8,7 @@ import { Divider, Grid, Stack, Typography, useMediaQuery } from '@mui/material';
 import AuthWrapper from '../AuthWrapper';
 import AuthCardWrapper from '../AuthCardWrapper';
 import ResetPasswordForm from '../AuthForms/ResetPasswordForm';
-import Logo from 'ui-component/Logo';
+import Logo from '@/ui-component/Logo';
 
 // ================================|| AUTH3 - LOGIN ||================================ //
 

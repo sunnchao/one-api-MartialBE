@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import SubCard from 'ui-component/cards/SubCard';
-// import { gridSpacing } from 'store/constant';
-import { API } from 'utils/api';
-import { showError, copy } from 'utils/common';
+import SubCard from '@/ui-component/cards/SubCard';
+// import { gridSpacing } from '@/store/constant';
+import { API } from '@/utils/api';
+import { showError, copy } from '@/utils/common';
 import { Typography, Accordion, AccordionSummary, AccordionDetails, Box, Stack } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Label from 'ui-component/Label';
+import Label from '@/ui-component/Label';
 
 const SupportModels = () => {
   const [modelList, setModelList] = useState([]);

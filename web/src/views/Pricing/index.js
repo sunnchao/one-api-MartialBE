@@ -5,9 +5,9 @@ import { IconTag, IconTags } from '@tabler/icons-react';
 import Single from './single';
 import Multiple from './multiple';
 import { useLocation, useNavigate } from 'react-router-dom';
-import AdminContainer from 'ui-component/AdminContainer';
-import { API } from 'utils/api';
-import { showError } from 'utils/common';
+import AdminContainer from '@/ui-component/AdminContainer';
+import { API } from '@/utils/api';
+import { showError } from '@/utils/common';
 import { CheckUpdates } from './component/CheckUpdates';
 
 function CustomTabPanel(props) {

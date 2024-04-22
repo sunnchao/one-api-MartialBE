@@ -3,21 +3,21 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline, StyledEngineProvider } from '@mui/material';
-import { SET_THEME } from 'store/actions';
+import { SET_THEME } from '@/store/actions';
 // routing
-import Routes from 'routes';
+import Routes from '@/routes';
 
 // defaultTheme
-import themes from 'themes';
+import themes from '@/themes';
 
 // project imports
-import NavigationScroll from 'layout/NavigationScroll';
+import NavigationScroll from '@/layout/NavigationScroll';
 
 // auth
-import UserProvider from 'contexts/UserContext';
-import StatusProvider from 'contexts/StatusContext';
+import UserProvider from '@/contexts/UserContext';
+import StatusProvider from '@/contexts/StatusContext';
 import { SnackbarProvider } from 'notistack';
-import CopySnackbar from 'ui-component/Snackbar';
+import CopySnackbar from '@/ui-component/Snackbar';
 
 // ==============================|| APP ||============================== //
 

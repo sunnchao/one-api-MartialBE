@@ -23,8 +23,8 @@ import {
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-import { renderQuotaWithPrompt, showSuccess, showError, trims } from 'utils/common';
-import { API } from 'utils/api';
+import { renderQuotaWithPrompt, showSuccess, showError, trims } from '@/utils/common';
+import { API } from '@/utils/api';
 
 const validationSchema = Yup.object().shape({
   is_edit: Yup.boolean(),

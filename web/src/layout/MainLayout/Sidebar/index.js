@@ -12,7 +12,7 @@ import { BrowserView, MobileView } from 'react-device-detect';
 import MenuList from './MenuList';
 import LogoSection from '../LogoSection';
 import MenuCard from './MenuCard';
-import { drawerWidth } from 'store/constant';
+import { drawerWidth } from '@/store/constant';
 
 // ==============================|| SIDEBAR DRAWER ||============================== //
 
@@ -40,7 +40,7 @@ const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
           <MenuCard />
           <Stack direction="row" justifyContent="center" sx={{ mb: 2 }}>
             <Chip
-              label={process.env.REACT_APP_VERSION || '未知版本'}
+              label={import.meta.env.REACT_APP_VERSION || '未知版本'}
               disabled
               chipcolor="secondary"
               size="small"
@@ -55,7 +55,7 @@ const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
           <MenuCard />
           <Stack direction="row" justifyContent="center" sx={{ mb: 2 }}>
             <Chip
-              label={process.env.REACT_APP_VERSION || '未知版本'}
+              label={import.meta.env.REACT_APP_VERSION || '未知版本'}
               disabled
               chipcolor="secondary"
               size="small"

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import useRegister from 'hooks/useRegister';
+import useRegister from '@/hooks/useRegister';
 import Turnstile from 'react-turnstile';
 import { useSearchParams } from 'react-router-dom';
 // import { useSelector } from 'react-redux';
@@ -25,13 +25,13 @@ import * as Yup from 'yup';
 import { Formik } from 'formik';
 
 // project imports
-import AnimateButton from 'ui-component/extended/AnimateButton';
-import { strengthColor, strengthIndicator } from 'utils/password-strength';
+import AnimateButton from '@/ui-component/extended/AnimateButton';
+import { strengthColor, strengthIndicator } from '@/utils/password-strength';
 
 // assets
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { showError, showInfo } from 'utils/common';
+import { showError, showInfo } from '@/utils/common';
 
 // ===========================|| FIREBASE - REGISTER ||=========================== //
 

@@ -11,12 +11,13 @@ import {
   List,
   Typography,
   TableBody,
-  ListItem
+  ListItem,
+  ButtonBase
 } from '@mui/material';
 import { Box } from '@mui/system';
+import { copy } from '@/utils/common';
 
 const renderModalTable = (data, provider) => {
-
   function renderReplayTokensColumn(record) {
     return record.timesPrice ? (
       <div>{record.timesPrice}</div>
@@ -108,6 +109,7 @@ const renderModalTable = (data, provider) => {
 
 const Index = () => {
   const changelog = ['2024-4-15：赠送的额度可直接使用全模型'];
+
   return (
     <>
       <Stack direction={'column'}>
@@ -168,7 +170,9 @@ const Index = () => {
               <ListItem>注册完成后，创建一个令牌，复制令牌的 key 填写到对应的地方</ListItem>
               <ListItem>
                 <Typography>
-                  接口转发地址请修改为：<a href="https://api.wochirou.com">https://api.wochirou.com</a>
+                  接口转发地址请修改为：<ButtonBase onClick={() => copy("https://api.wochirou.com", "https://api.wochirou.com")} type={"button"}>
+                    <Typography>https://api.wochirou.com</Typography>
+                  </ButtonBase>
                   即可使用
                 </Typography>
               </ListItem>

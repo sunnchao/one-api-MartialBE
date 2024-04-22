@@ -18,10 +18,10 @@ import {
 } from '@mui/material';
 
 // project imports
-import MainCard from 'ui-component/cards/MainCard';
-import Transitions from 'ui-component/extended/Transitions';
-import User1 from 'assets/images/users/user-round.svg';
-import useLogin from 'hooks/useLogin';
+import MainCard from '@/ui-component/cards/MainCard';
+import Transitions from '@/ui-component/extended/Transitions';
+import User1 from '@/assets/images/users/user-round.svg';
+import useLogin from '@/hooks/useLogin';
 
 // assets
 import { IconLogout, IconSettings, IconUserScan } from '@tabler/icons-react';

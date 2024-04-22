@@ -15,8 +15,8 @@ import {
   Tooltip
 } from '@mui/material';
 
-import { timestamp2string, copy } from 'utils/common';
-import Label from 'ui-component/Label';
+import { timestamp2string, copy } from '@/utils/common';
+import Label from '@/ui-component/Label';
 import { ACTION_TYPE, CODE_TYPE, STATUS_TYPE } from '../type/Type';
 import { IconCaretDownFilled, IconCopy, IconDownload, IconExternalLink } from '@tabler/icons-react';
 

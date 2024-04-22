@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { SET_THEME } from 'store/actions';
+import { SET_THEME } from '@/store/actions';
 import { useTheme } from '@mui/material/styles';
 import { Avatar, Box, ButtonBase } from '@mui/material';
 import { IconSun, IconMoon } from '@tabler/icons-react';

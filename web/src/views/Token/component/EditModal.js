@@ -24,8 +24,8 @@ import {
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { renderQuotaWithPrompt, showSuccess, showError } from 'utils/common';
-import { API } from 'utils/api';
+import { renderQuotaWithPrompt, showSuccess, showError } from '@/utils/common';
+import { API } from '@/utils/api';
 import { useSelector } from 'react-redux';
 require('dayjs/locale/zh-cn');
 

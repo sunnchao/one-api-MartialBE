@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Grid } from '@mui/material';
-import DataCard from 'ui-component/cards/DataCard';
-import { gridSpacing } from 'store/constant';
-import { showError, renderQuota } from 'utils/common';
-import { API } from 'utils/api';
+import DataCard from '@/ui-component/cards/DataCard';
+import { gridSpacing } from '@/store/constant';
+import { showError, renderQuota } from '@/utils/common';
+import { API } from '@/utils/api';
 
 export default function Overview() {
   const [userLoading, setUserLoading] = useState(true);

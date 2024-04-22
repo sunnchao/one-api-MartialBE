@@ -1,6 +1,6 @@
-import { gridSpacing } from 'store/constant';
+import { gridSpacing } from '@/store/constant';
 import { Grid } from '@mui/material';
-import MainCard from 'ui-component/cards/MainCard';
+import MainCard from '@/ui-component/cards/MainCard';
 import Statistics from './component/Statistics';
 import Overview from './component/Overview';
 

@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Grid, Typography, Divider } from '@mui/material';
-import { gridSpacing } from 'store/constant';
-import DateRangePicker from 'ui-component/DateRangePicker';
-import ApexCharts from 'ui-component/chart/ApexCharts';
-import { showError, calculateQuota } from 'utils/common';
+import { gridSpacing } from '@/store/constant';
+import DateRangePicker from '@/ui-component/DateRangePicker';
+import ApexCharts from '@/ui-component/chart/ApexCharts';
+import { showError, calculateQuota } from '@/utils/common';
 import dayjs from 'dayjs';
-import { API } from 'utils/api';
-import { generateBarChartOptions, renderChartNumber } from 'utils/chart';
+import { API } from '@/utils/api';
+import { generateBarChartOptions, renderChartNumber } from '@/utils/chart';
 
 export default function Overview() {
   const [channelLoading, setChannelLoading] = useState(true);

@@ -8,8 +8,8 @@ import { Box, Grid, Typography } from '@mui/material';
 import Chart from 'react-apexcharts';
 
 // project imports
-import MainCard from 'ui-component/cards/MainCard';
-import SkeletonTotalOrderCard from 'ui-component/cards/Skeleton/EarningCard';
+import MainCard from '@/ui-component/cards/MainCard';
+import SkeletonTotalOrderCard from '@/ui-component/cards/Skeleton/EarningCard';
 
 const CardWrapper = styled(MainCard)(({ theme }) => ({
   ...theme.typography.CardWrapper,

@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import NotFound from 'assets/images/404.svg';
+import NotFound from '@/assets/images/404.svg';
 import { useNavigate } from 'react-router';
 
 // ----------------------------------------------------------------------

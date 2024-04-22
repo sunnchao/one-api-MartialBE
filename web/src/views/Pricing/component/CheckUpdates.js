@@ -14,10 +14,10 @@ import {
   Stack,
   Typography
 } from '@mui/material';
-import { API } from 'utils/api';
-import { showError, showSuccess } from 'utils/common';
+import { API } from '@/utils/api';
+import { showError, showSuccess } from '@/utils/common';
 import LoadingButton from '@mui/lab/LoadingButton';
-import Label from 'ui-component/Label';
+import Label from '@/ui-component/Label';
 
 export const CheckUpdates = ({ open, onCancel, onOk, row }) => {
   const [url, setUrl] = useState('https://raw.githubusercontent.com/MartialBE/one-api/prices/prices.json');

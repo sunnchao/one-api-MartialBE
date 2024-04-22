@@ -16,7 +16,7 @@ import {
   Typography
   // linearProgressClasses
 } from '@mui/material';
-import User1 from 'assets/images/users/user-round.svg';
+import User1 from '@/assets/images/users/user-round.svg';
 import { useNavigate } from 'react-router-dom';
 
 // assets

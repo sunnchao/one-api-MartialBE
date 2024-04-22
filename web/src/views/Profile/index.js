@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import UserCard from 'ui-component/cards/UserCard';
+import UserCard from '@/ui-component/cards/UserCard';
 import {
   Card,
   Button,
@@ -15,17 +15,17 @@ import {
   useMediaQuery
 } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
-import SubCard from 'ui-component/cards/SubCard';
+import SubCard from '@/ui-component/cards/SubCard';
 import { IconBrandWechat, IconBrandGithub, IconMail, IconBrandTelegram } from '@tabler/icons-react';
-import Label from 'ui-component/Label';
-import { API } from 'utils/api';
-import { showError, showSuccess, onGitHubOAuthClicked, copy, trims, onLarkOAuthClicked } from 'utils/common';
+import Label from '@/ui-component/Label';
+import { API } from '@/utils/api';
+import { showError, showSuccess, onGitHubOAuthClicked, copy, trims, onLarkOAuthClicked } from '@/utils/common';
 import * as Yup from 'yup';
-import WechatModal from 'views/Authentication/AuthForms/WechatModal';
+import WechatModal from '@/views/Authentication/AuthForms/WechatModal';
 import { useSelector } from 'react-redux';
 import EmailModal from './component/EmailModal';
 import Turnstile from 'react-turnstile';
-import { ReactComponent as Lark } from 'assets/images/icons/lark.svg';
+import { ReactComponent as Lark } from '@/assets/images/icons/lark.svg';
 import { useTheme } from '@mui/material/styles';
 
 const validationSchema = Yup.object().shape({

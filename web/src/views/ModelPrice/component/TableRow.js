@@ -2,8 +2,8 @@ import PropTypes from 'prop-types';
 
 import { TableRow, TableCell } from '@mui/material';
 
-import Label from 'ui-component/Label';
-import { copy } from 'utils/common';
+import Label from '@/ui-component/Label';
+import { copy } from '@/utils/common';
 
 export default function PricesTableRow({ item }) {
   return (

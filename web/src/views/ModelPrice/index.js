@@ -7,11 +7,11 @@ import PerfectScrollbar from 'react-perfect-scrollbar';
 
 import { Card } from '@mui/material';
 import PricesTableRow from './component/TableRow';
-import TableNoData from 'ui-component/TableNoData';
-import KeywordTableHead from 'ui-component/TableHead';
-import { API } from 'utils/api';
-import { showError } from 'utils/common';
-import { ValueFormatter, priceType } from 'views/Pricing/component/util';
+import TableNoData from '@/ui-component/TableNoData';
+import KeywordTableHead from '@/ui-component/TableHead';
+import { API } from '@/utils/api';
+import { showError } from '@/utils/common';
+import { ValueFormatter, priceType } from '@/views/Pricing/component/util';
 
 // ----------------------------------------------------------------------
 export default function ModelPrice() {

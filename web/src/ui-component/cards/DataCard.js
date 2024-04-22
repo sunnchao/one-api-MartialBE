@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
-import SubCard from 'ui-component/cards/SubCard';
+import SubCard from '@/ui-component/cards/SubCard';
 import { Typography, Tooltip, Divider } from '@mui/material';
-import SkeletonDataCard from 'ui-component/cards/Skeleton/DataCard';
+import SkeletonDataCard from '@/ui-component/cards/Skeleton/DataCard';
 
 export default function DataCard({ isLoading, title, content, tip, subContent }) {
   return (

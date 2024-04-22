@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import SubCard from 'ui-component/cards/SubCard';
+import SubCard from '@/ui-component/cards/SubCard';
 import {
   Stack,
   FormControl,
@@ -18,8 +18,8 @@ import {
   TextField
 } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
-import { showError, showSuccess, removeTrailingSlash } from 'utils/common'; //,
-import { API } from 'utils/api';
+import { showError, showSuccess, removeTrailingSlash } from '@/utils/common'; //,
+import { API } from '@/utils/api';
 import { createFilterOptions } from '@mui/material/Autocomplete';
 
 const filter = createFilterOptions();

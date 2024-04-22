@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Grid, Typography } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { gridSpacing } from 'store/constant';
+import { gridSpacing } from '@/store/constant';
 import StatisticalLineChartCard from './component/StatisticalLineChartCard';
-import ApexCharts from 'ui-component/chart/ApexCharts';
+import ApexCharts from '@/ui-component/chart/ApexCharts';
 import SupportModels from './component/SupportModels';
-import { generateLineChartOptions, getLastSevenDays, generateBarChartOptions, renderChartNumber } from 'utils/chart';
-import { API } from 'utils/api';
-import { showError, calculateQuota, renderNumber, showSuccess } from 'utils/common';
-import UserCard from 'ui-component/cards/UserCard';
+import { generateLineChartOptions, getLastSevenDays, generateBarChartOptions, renderChartNumber } from '@/utils/chart';
+import { API } from '@/utils/api';
+import { showError, calculateQuota, renderNumber, showSuccess } from '@/utils/common';
+import UserCard from '@/ui-component/cards/UserCard';
 
 const Dashboard = () => {
   const [isLoading, setLoading] = useState(true);

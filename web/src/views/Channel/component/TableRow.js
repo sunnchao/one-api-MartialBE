@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 
-import { showInfo, showError, renderNumber } from 'utils/common';
-import { API } from 'utils/api';
-import { CHANNEL_OPTIONS } from 'constants/ChannelConstants';
+import { showInfo, showError, renderNumber } from '@/utils/common';
+import { API } from '@/utils/api';
+import { CHANNEL_OPTIONS } from '@/constants/ChannelConstants';
 
 import {
   Popover,
@@ -27,8 +27,8 @@ import {
   Box
 } from '@mui/material';
 
-import Label from 'ui-component/Label';
-import TableSwitch from 'ui-component/Switch';
+import Label from '@/ui-component/Label';
+import TableSwitch from '@/ui-component/Switch';
 
 import ResponseTimeLabel from './ResponseTimeLabel';
 import GroupLabel from './GroupLabel';
@@ -37,7 +37,7 @@ import { IconDotsVertical, IconEdit, IconTrash, IconCopy, IconWorldWww } from '@
 import { styled, alpha } from '@mui/material/styles';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { copy, renderQuota } from 'utils/common';
+import { copy, renderQuota } from '@/utils/common';
 
 const StyledMenu = styled((props) => (
   <Menu

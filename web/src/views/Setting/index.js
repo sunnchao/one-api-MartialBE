@@ -5,7 +5,7 @@ import { IconSettings2, IconActivity, IconSettings } from '@tabler/icons-react';
 import OperationSetting from './component/OperationSetting';
 import SystemSetting from './component/SystemSetting';
 import OtherSetting from './component/OtherSetting';
-import AdminContainer from 'ui-component/AdminContainer';
+import AdminContainer from '@/ui-component/AdminContainer';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 function CustomTabPanel(props) {

@@ -2,8 +2,8 @@ import PropTypes from 'prop-types';
 
 import { TableRow, TableCell, Stack } from '@mui/material';
 
-import { timestamp2string, renderQuota } from 'utils/common';
-import Label from 'ui-component/Label';
+import { timestamp2string, renderQuota } from '@/utils/common';
+import Label from '@/ui-component/Label';
 import LogType from '../type/LogType';
 
 function renderType(type) {

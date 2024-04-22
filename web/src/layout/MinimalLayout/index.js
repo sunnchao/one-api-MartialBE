@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import { AppBar, Box, CssBaseline, Toolbar, Container } from '@mui/material';
 import Header from './Header';
-import Footer from 'ui-component/Footer';
+import Footer from '@/ui-component/Footer';
 
 // ==============================|| MINIMAL LAYOUT ||============================== //
 

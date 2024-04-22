@@ -23,8 +23,8 @@ import { IconDotsVertical, IconEdit, IconTrash } from '@tabler/icons-react';
 import { ValueFormatter, priceType } from './util';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import Label from 'ui-component/Label';
-import { copy } from 'utils/common';
+import Label from '@/ui-component/Label';
+import { copy } from '@/utils/common';
 
 export default function PricesTableRow({ item, managePrices, handleOpenModal, setModalPricesItem, ownedby }) {
   const [open, setOpen] = useState(null);

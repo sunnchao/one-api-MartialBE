@@ -1,19 +1,19 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { Outlet } from 'react-router-dom';
-import AuthGuard from 'utils/route-guard/AuthGuard';
+import AuthGuard from '@/utils/route-guard/AuthGuard';
 
 // material-ui
 import { styled, useTheme } from '@mui/material/styles';
 import { AppBar, Box, CssBaseline, Toolbar, useMediaQuery } from '@mui/material';
-import AdminContainer from 'ui-component/AdminContainer';
+import AdminContainer from '@/ui-component/AdminContainer';
 
 // project imports
-import Breadcrumbs from 'ui-component/extended/Breadcrumbs';
+import Breadcrumbs from '@/ui-component/extended/Breadcrumbs';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import navigation from 'menu-items';
-import { drawerWidth } from 'store/constant';
-import { SET_MENU } from 'store/actions';
+import navigation from '@/menu-items';
+import { drawerWidth } from '@/store/constant';
+import { SET_MENU } from '@/store/actions';
 
 // assets
 import { IconChevronRight } from '@tabler/icons-react';

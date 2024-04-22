@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import { Tooltip, Stack, Container } from '@mui/material';
-import Label from 'ui-component/Label';
+import Label from '@/ui-component/Label';
 import { styled } from '@mui/material/styles';
-import { copy } from 'utils/common';
+import { copy } from '@/utils/common';
 
 const TooltipContainer = styled(Container)({
   maxHeight: '250px',

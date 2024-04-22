@@ -1,7 +1,7 @@
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
-import { showError } from 'utils/common';
-import useLogin from 'hooks/useLogin';
+import { showError } from '@/utils/common';
+import useLogin from '@/hooks/useLogin';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -10,7 +10,7 @@ import { Grid, Stack, Typography, useMediaQuery, CircularProgress } from '@mui/m
 // project imports
 import AuthWrapper from '../AuthWrapper';
 import AuthCardWrapper from '../AuthCardWrapper';
-import Logo from 'ui-component/Logo';
+import Logo from '@/ui-component/Logo';
 
 // assets
 

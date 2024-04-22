@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { showError, showNotice } from 'utils/common';
-import { API } from 'utils/api';
+import { showError, showNotice } from '@/utils/common';
+import { API } from '@/utils/api';
 import { marked } from 'marked';
 import BaseIndex from './baseIndex';
 import { Box } from '@mui/material';

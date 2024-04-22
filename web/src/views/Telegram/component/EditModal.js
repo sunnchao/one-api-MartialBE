@@ -19,8 +19,8 @@ import {
   TextField
 } from '@mui/material';
 
-import { showSuccess, showError } from 'utils/common';
-import { API } from 'utils/api';
+import { showSuccess, showError } from '@/utils/common';
+import { API } from '@/utils/api';
 
 const validationSchema = Yup.object().shape({
   is_edit: Yup.boolean(),

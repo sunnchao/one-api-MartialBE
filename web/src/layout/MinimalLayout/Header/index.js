@@ -15,15 +15,15 @@ import {
   Divider,
   ClickAwayListener
 } from '@mui/material';
-import LogoSection from 'layout/MainLayout/LogoSection';
+import LogoSection from '@/layout/MainLayout/LogoSection';
 import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import ThemeButton from 'ui-component/ThemeButton';
-import ProfileSection from 'layout/MainLayout/Header/ProfileSection';
+import ThemeButton from '@/ui-component/ThemeButton';
+import ProfileSection from '@/layout/MainLayout/Header/ProfileSection';
 import { IconMenu2 } from '@tabler/icons-react';
-import Transitions from 'ui-component/extended/Transitions';
-import MainCard from 'ui-component/cards/MainCard';
+import Transitions from '@/ui-component/extended/Transitions';
+import MainCard from '@/ui-component/cards/MainCard';
 import { useMediaQuery } from '@mui/material';
 
 // ==============================|| MAIN NAVBAR / HEADER ||============================== //

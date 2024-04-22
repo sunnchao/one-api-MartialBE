@@ -1,7 +1,7 @@
 import { useEffect, useCallback, createContext } from 'react';
-import { API } from 'utils/api';
-import { showNotice, showError } from 'utils/common';
-import { SET_SITE_INFO } from 'store/actions';
+import { API } from '@/utils/api';
+import { showNotice, showError } from '@/utils/common';
+import { SET_SITE_INFO } from '@/store/actions';
 import { useDispatch } from 'react-redux';
 
 export const LoadStatusContext = createContext();
@@ -24,10 +24,10 @@ const StatusProvider = ({ children }) => {
         localStorage.setItem('display_in_currency', data.display_in_currency);
         dispatch({ type: SET_SITE_INFO, payload: data });
         if (
-          data.version !== process.env.REACT_APP_VERSION &&
+          data.version !== import.meta.env.REACT_APP_VERSION &&
           data.version !== 'v0.0.0' &&
           data.version !== '' &&
-          process.env.REACT_APP_VERSION !== ''
+          import.meta.env.REACT_APP_VERSION !== ''
         ) {
           showNotice(`新版本可用：${data.version}，请使用快捷键 Shift + F5 刷新页面`);
         }

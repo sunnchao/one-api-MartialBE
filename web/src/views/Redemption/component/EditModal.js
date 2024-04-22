@@ -17,8 +17,8 @@ import {
   FormHelperText
 } from '@mui/material';
 
-import { renderQuotaWithPrompt, showSuccess, showError, downloadTextAsFile, trims } from 'utils/common';
-import { API } from 'utils/api';
+import { renderQuotaWithPrompt, showSuccess, showError, downloadTextAsFile, trims } from '@/utils/common';
+import { API } from '@/utils/api';
 
 const validationSchema = Yup.object().shape({
   is_edit: Yup.boolean(),

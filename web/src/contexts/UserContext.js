@@ -1,6 +1,6 @@
 // contexts/User/index.jsx
 import React, { useEffect, useCallback, createContext, useState } from 'react';
-import { LOGIN } from 'store/actions';
+import { LOGIN } from '@/store/actions';
 import { useDispatch } from 'react-redux';
 
 export const UserContext = createContext();

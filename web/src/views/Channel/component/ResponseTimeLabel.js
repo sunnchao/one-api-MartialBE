@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
-import Label from 'ui-component/Label';
+import Label from '@/ui-component/Label';
 import Tooltip from '@mui/material/Tooltip';
-import { timestamp2string } from 'utils/common';
+import { timestamp2string } from '@/utils/common';
 
 const ResponseTimeLabel = ({ test_time, response_time, handle_action }) => {
   let color = 'default';

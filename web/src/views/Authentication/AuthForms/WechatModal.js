@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, TextField, Button, Typography, Grid } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
-import { showError } from 'utils/common';
+import { showError } from '@/utils/common';
 import * as Yup from 'yup';
 
 const validationSchema = Yup.object().shape({

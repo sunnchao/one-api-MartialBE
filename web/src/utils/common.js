@@ -1,5 +1,5 @@
 import { enqueueSnackbar } from 'notistack';
-import { snackbarConstants } from 'constants/SnackbarConstants';
+import { snackbarConstants } from '@/constants/SnackbarConstants';
 import { API } from './api';
 
 export function getSystemName() {

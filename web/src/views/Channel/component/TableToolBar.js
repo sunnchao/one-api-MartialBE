@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
 import { IconKey, IconBrandGithubCopilot, IconSitemap, IconVersions } from '@tabler/icons-react';
 import { InputAdornment, OutlinedInput, Stack, FormControl, InputLabel, Select, MenuItem } from '@mui/material'; //
-import { CHANNEL_OPTIONS } from 'constants/ChannelConstants';
+import { CHANNEL_OPTIONS } from '@/constants/ChannelConstants';
 // ----------------------------------------------------------------------
 
 export default function TableToolBar({ filterName, handleFilterName, groupOptions }) {

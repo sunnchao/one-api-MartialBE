@@ -1,6 +1,6 @@
 // material-ui
 import Skeleton from '@mui/material/Skeleton';
-import SubCard from 'ui-component/cards/SubCard';
+import SubCard from '@/ui-component/cards/SubCard';
 import { Divider, Stack } from '@mui/material';
 
 const DataCard = () => (

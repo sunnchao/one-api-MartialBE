@@ -1,4 +1,4 @@
-import { isAdmin } from 'utils/common';
+import { isAdmin } from '@/utils/common';
 import { useNavigate } from 'react-router-dom';
 
 const useAuth = () => {

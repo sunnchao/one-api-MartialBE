@@ -1,12 +1,12 @@
 import { Typography, Stack, OutlinedInput, InputAdornment, Button, InputLabel, FormControl } from '@mui/material';
 import { IconWallet } from '@tabler/icons-react';
 import { useTheme } from '@mui/material/styles';
-import SubCard from 'ui-component/cards/SubCard';
-import UserCard from 'ui-component/cards/UserCard';
+import SubCard from '@/ui-component/cards/SubCard';
+import UserCard from '@/ui-component/cards/UserCard';
 
-import { API } from 'utils/api';
+import { API } from '@/utils/api';
 import React, { useEffect, useState } from 'react';
-import { showError, showInfo, showSuccess, renderQuota, trims } from 'utils/common';
+import { showError, showInfo, showSuccess, renderQuota, trims } from '@/utils/common';
 
 const TopupCard = () => {
   const theme = useTheme();
