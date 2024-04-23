@@ -34,7 +34,9 @@ import { createFilterOptions } from '@mui/material/Autocomplete';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
-const pluginList = require('../type/Plugin.json');
+const pluginList = import.meta.glob('../type/Plugin.json', {
+  eager: true,
+});
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 

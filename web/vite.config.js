@@ -44,7 +44,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://sunwangwang-freeask.hf.space/',
+        target: 'https://api.wochirou.com/',
         changeOrigin: true
       }
     }

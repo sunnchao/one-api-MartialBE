@@ -95,8 +95,8 @@ export default function Log() {
         });
         const { success, message, data } = res.data;
         if (success) {
-          setListCount(data.total_count);
-          setLogs(data.data);
+          setListCount(data.total_count ?? 0);
+          setLogs(data.data ?? []);
         } else {
           showError(message);
         }
@@ -221,7 +221,7 @@ export default function Log() {
                 ]}
               />
               <TableBody>
-                {logs.map((row, index) => (
+                {logs?.map((row, index) => (
                   <LogTableRow item={row} key={`${row.id}_${index}`} userIsAdmin={userIsAdmin} />
                 ))}
               </TableBody>

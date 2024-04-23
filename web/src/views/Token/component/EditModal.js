@@ -27,7 +27,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { renderQuotaWithPrompt, showSuccess, showError } from '@/utils/common';
 import { API } from '@/utils/api';
 import { useSelector } from 'react-redux';
-require('dayjs/locale/zh-cn');
+import 'dayjs/locale/zh-cn';
 
 const validationSchema = Yup.object().shape({
   is_edit: Yup.boolean(),
