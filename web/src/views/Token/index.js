@@ -19,7 +19,7 @@ import { API } from '@/utils/api';
 import { IconRefresh, IconPlus } from '@tabler/icons-react';
 import EditeModal from './component/EditModal';
 import { useSelector } from 'react-redux';
-import { ITEMS_PER_PAGE } from 'constants';
+import { ITEMS_PER_PAGE } from '@/constants';
 
 export default function Token() {
   const [page, setPage] = useState(0);

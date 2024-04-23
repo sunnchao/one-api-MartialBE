@@ -19,7 +19,7 @@ import KeywordTableHead from '@/ui-component/TableHead';
 import { API } from '@/utils/api';
 import { IconRefresh, IconHttpDelete, IconPlus, IconMenu2, IconBrandSpeedtest, IconCoinYuan, IconSearch } from '@tabler/icons-react';
 import EditeModal from './component/EditModal';
-import { ITEMS_PER_PAGE } from 'constants';
+import { ITEMS_PER_PAGE } from '@/constants';
 import TableToolBar from './component/TableToolBar';
 import BatchModal from './component/BatchModal';
 

@@ -15,7 +15,7 @@ import UsersTableRow from './component/TableRow';
 import KeywordTableHead from '@/ui-component/TableHead';
 import TableToolBar from '@/ui-component/TableToolBar';
 import { API } from '@/utils/api';
-import { ITEMS_PER_PAGE } from 'constants';
+import { ITEMS_PER_PAGE } from '@/constants';
 import { IconRefresh, IconPlus } from '@tabler/icons-react';
 import EditeModal from './component/EditModal';
 

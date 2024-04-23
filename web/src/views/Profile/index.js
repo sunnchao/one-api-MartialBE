@@ -25,7 +25,7 @@ import WechatModal from '@/views/Authentication/AuthForms/WechatModal';
 import { useSelector } from 'react-redux';
 import EmailModal from './component/EmailModal';
 import Turnstile from 'react-turnstile';
-import { ReactComponent as Lark } from '@/assets/images/icons/lark.svg';
+import  Lark from '@/assets/images/icons/lark.svg';
 import { useTheme } from '@mui/material/styles';
 
 const validationSchema = Yup.object().shape({

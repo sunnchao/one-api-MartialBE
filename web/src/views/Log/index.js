@@ -16,7 +16,7 @@ import KeywordTableHead from '@/ui-component/TableHead';
 import TableToolBar from './component/TableToolBar';
 import { API } from '@/utils/api';
 import { isAdmin } from '@/utils/common';
-import { ITEMS_PER_PAGE } from 'constants';
+import { ITEMS_PER_PAGE } from '@/constants';
 import { IconRefresh, IconSearch } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 
