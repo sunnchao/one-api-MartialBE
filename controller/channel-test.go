@@ -79,7 +79,7 @@ func buildTestRequest() *types.ChatCompletionRequest {
 		Messages: []types.ChatCompletionMessage{
 			{
 				Role:    "user",
-				Content: "You just need to output 'hi' next.",
+				Content: "You just need to output 'now is' next.",
 			},
 		},
 		Model:     "",
