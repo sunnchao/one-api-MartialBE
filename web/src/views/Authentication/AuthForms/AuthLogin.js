@@ -38,7 +38,7 @@ import Wechat from '@/assets/images/icons/wechat.svg';
 import Lark from '@/assets/images/icons/lark.svg';
 import LinuxDo from '@/assets/images/icons/linuxdo.svg';
 
-import { onGitHubOAuthClicked, onLarkOAuthClicked } from '@/utils/common';
+import { onGitHubOAuthClicked, onLarkOAuthClicked, onLinuxDOAuthClicked } from '@/utils/common';
 
 // ============================|| FIREBASE - LOGIN ||============================ //
 
@@ -52,7 +52,7 @@ const LoginForm = ({ ...others }) => {
   // const [checked, setChecked] = useState(true);
 
   let tripartiteLogin = false;
-  if (siteInfo.github_oauth || siteInfo.wechat_login || siteInfo.lark_client_id) {
+  if (siteInfo.github_oauth || siteInfo.linuxdo_oauth || siteInfo.wechat_login || siteInfo.lark_client_id) {
     tripartiteLogin = true;
   }
 
@@ -104,7 +104,7 @@ const LoginForm = ({ ...others }) => {
                 <Button
                   disableElevation
                   fullWidth
-                  onClick={() => onLinuxDOAuthClicked(siteInfo.linuxdo_client_id, siteInfo.linuxdo_client_secret)}
+                  onClick={() => onLinuxDOAuthClicked(siteInfo.linuxdo_client_id, true)}
                   size="large"
                   variant="outlined"
                   sx={{
@@ -147,7 +147,7 @@ const LoginForm = ({ ...others }) => {
                 <Button
                   disableElevation
                   fullWidth
-                  onClick={() => onLinuxDOAuthClicked(siteInfo.lark_client_id)}
+                  onClick={() => onLarkOAuthClicked(siteInfo.lark_client_id)}
                   size="large"
                   variant="outlined"
                   sx={{

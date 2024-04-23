@@ -74,7 +74,16 @@ func UpdateOption(c *gin.Context) {
 			})
 			return
 		}
+	case "LinuxDoOAuthEnabled":
+		if option.Value == "true" && (len(common.LinuxDoClientSecret) == 0 || len(common.LinuxDoClientId) == 0) {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": "无法启用 LinuxDO OAuth，请先填入 LinuxDO Client Id 以及 LinuxDO Client Secret！",
+			})
+			return
+		}
 	}
+
 	err = model.UpdateOption(option.Key, option.Value)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{

@@ -79,6 +79,11 @@ func InitOptionMap() {
 	common.OptionMap["ChatCacheEnabled"] = strconv.FormatBool(common.ChatCacheEnabled)
 	common.OptionMap["ChatCacheExpireMinute"] = strconv.Itoa(common.ChatCacheExpireMinute)
 
+	common.OptionMap["LinuxDoOAuthEnabled"] = strconv.FormatBool(common.LinuxDoOAuthEnabled)
+	common.OptionMap["LinuxDoClientId"] = ""
+	common.OptionMap["LinuxDoClientSecret"] = ""
+	common.OptionMap["LinuxDoMinLevel"] = strconv.Itoa(common.LinuxDoMinLevel)
+
 	common.OptionMapRWMutex.Unlock()
 	loadOptionsFromDatabase()
 }
@@ -127,6 +132,7 @@ var optionIntMap = map[string]*int{
 	"RetryTimes":            &common.RetryTimes,
 	"RetryCooldownSeconds":  &common.RetryCooldownSeconds,
 	"ChatCacheExpireMinute": &common.ChatCacheExpireMinute,
+	"LinuxMinLevel":         &common.LinuxDoMinLevel,
 }
 
 var optionBoolMap = map[string]*bool{
@@ -134,6 +140,7 @@ var optionBoolMap = map[string]*bool{
 	"PasswordLoginEnabled":           &common.PasswordLoginEnabled,
 	"EmailVerificationEnabled":       &common.EmailVerificationEnabled,
 	"GitHubOAuthEnabled":             &common.GitHubOAuthEnabled,
+	"LinuxDoOAuthEnabled":            &common.LinuxDoOAuthEnabled,
 	"WeChatAuthEnabled":              &common.WeChatAuthEnabled,
 	"TurnstileCheckEnabled":          &common.TurnstileCheckEnabled,
 	"RegisterEnabled":                &common.RegisterEnabled,
@@ -156,6 +163,8 @@ var optionStringMap = map[string]*string{
 	"ServerAddress":               &common.ServerAddress,
 	"GitHubClientId":              &common.GitHubClientId,
 	"GitHubClientSecret":          &common.GitHubClientSecret,
+	"LinuxDoClientId":             &common.LinuxDoClientId,
+	"LinuxDoClientSecret":         &common.LinuxDoClientSecret,
 	"Footer":                      &common.Footer,
 	"SystemName":                  &common.SystemName,
 	"Logo":                        &common.Logo,

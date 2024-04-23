@@ -31,6 +31,7 @@ export default defineConfig({
     }
   },
   build: {
+    outDir: 'build',
     rollupOptions: {
       output: {
         // manualChunks: {
@@ -44,7 +45,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://api.wochirou.com/',
+        target: 'http://localhost:3000',
         changeOrigin: true
       }
     }

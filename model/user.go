@@ -279,6 +279,18 @@ func IsGitHubIdAlreadyTaken(githubId string) bool {
 	return DB.Where("github_id = ?", githubId).Find(&User{}).RowsAffected == 1
 }
 
+func IsLinuxDoIdAlreadyTaken(linuxdoId string) bool {
+	return DB.Where("linuxdo_id = ?", linuxdoId).Find(&User{}).RowsAffected == 1
+}
+
+func (user *User) FillUserByLinuxDoId() error {
+	if user.LinuxDoId == "" {
+		return errors.New("LINUX DO id 为空！")
+	}
+	DB.Where(User{LinuxDoId: user.LinuxDoId}).First(user)
+	return nil
+}
+
 func IsLarkIdAlreadyTaken(githubId string) bool {
 	return DB.Where("lark_id = ?", githubId).Find(&User{}).RowsAffected == 1
 }

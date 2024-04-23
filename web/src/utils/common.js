@@ -230,6 +230,13 @@ export function trims(values) {
 }
 
 // LinkDO auth
-export async function onLinuxDOAuthClicked(linuxdo_client_id, linuxdo_client_secret) {
-  
+export async function onLinuxDOAuthClicked(linuxdo_client_id, openInNewTab) {
+  const state = await getOAuthState();
+  if (!state) return;
+  let url = `https://connect.linux.do/oauth2/authorize?client_id=${linuxdo_client_id}&response_type=code&state=${state}&scope=user:profile`;
+  if (openInNewTab) {
+    window.open(url);
+  } else {
+    window.location.href = url;
+  }
 }

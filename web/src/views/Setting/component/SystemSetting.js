@@ -31,6 +31,10 @@ const SystemSetting = () => {
     GitHubOAuthEnabled: '',
     GitHubClientId: '',
     GitHubClientSecret: '',
+    LinuxDoOAuthEnabled: '',
+    LinuxDoClientId: '',
+    LinuxDoClientSecret: '',
+    LinuxDoMinLevel: '0',
     LarkClientId: '',
     LarkClientSecret: '',
     Notice: '',
@@ -96,6 +100,7 @@ const SystemSetting = () => {
       case 'TurnstileCheckEnabled':
       case 'EmailDomainRestrictionEnabled':
       case 'RegisterEnabled':
+      case 'LinuxDoOAuthEnabled':
         value = inputs[key] === 'true' ? 'false' : 'true';
         break;
       default:
@@ -148,7 +153,10 @@ const SystemSetting = () => {
       name === 'TurnstileSecretKey' ||
       name === 'EmailDomainWhitelist' ||
       name === 'LarkClientId' ||
-      name === 'LarkClientSecret'
+      name === 'LarkClientSecret' ||
+      name === 'LinuxDoClientId' ||
+      name === 'LinuxDoClientSecret' ||
+      name === 'LinuxDoMinLevel'
     ) {
       setInputs((inputs) => ({ ...inputs, [name]: value }));
     } else {
@@ -202,6 +210,16 @@ const SystemSetting = () => {
     if (originInputs['GitHubClientSecret'] !== inputs.GitHubClientSecret && inputs.GitHubClientSecret !== '') {
       await updateOption('GitHubClientSecret', inputs.GitHubClientSecret);
     }
+  };
+
+  const submitLinuxDoOAuth = async () => {
+    if (originInputs['LinuxDoClientId'] !== inputs.LinuxDoClientId) {
+      await updateOption('LinuxDoClientId', inputs.LinuxDoClientId);
+    }
+    if (originInputs['LinuxDoClientSecret'] !== inputs.LinuxDoClientSecret && inputs.LinuxDoClientSecret !== '') {
+      await updateOption('LinuxDoClientSecret', inputs.LinuxDoClientSecret);
+    }
+    await updateOption('LinuxDoMinLevel', inputs.LinuxDoMinLevel);
   };
 
   const submitTurnstile = async () => {
@@ -286,6 +304,14 @@ const SystemSetting = () => {
               <FormControlLabel
                 label="允许通过 GitHub 账户登录 & 注册"
                 control={<Checkbox checked={inputs.GitHubOAuthEnabled === 'true'} onChange={handleInputChange} name="GitHubOAuthEnabled" />}
+              />
+            </Grid>
+            <Grid xs={12} md={3}>
+              <FormControlLabel
+                label="允许通过 LinuxDO 账户登录 & 注册"
+                control={
+                  <Checkbox checked={inputs.LinuxDoOAuthEnabled === 'true'} onChange={handleInputChange} name="LinuxDoOAuthEnabled" />
+                }
               />
             </Grid>
             <Grid xs={12} md={3}>
@@ -496,6 +522,77 @@ const SystemSetting = () => {
             </Grid>
           </Grid>
         </SubCard>
+        {/*  Linux do*/}
+        <SubCard
+          title="配置 LinuxDO OAuth App"
+          subTitle={
+            <span>
+              {' '}
+              用以支持通过 LinuxDO 进行登录注册，
+              <a href="https://connect.linux.do/" target="_blank" rel="noopener noreferrer">
+                点击此处
+              </a>
+              管理你的 LinuxDO OAuth App
+            </span>
+          }
+        >
+          <Grid container spacing={{ xs: 3, sm: 2, md: 4 }}>
+            <Grid xs={12}>
+              <Alert severity="info" sx={{ wordWrap: 'break-word' }}>
+                Homepage URL 填 <b>{inputs.ServerAddress}</b>
+                ，Authorization callback URL 填 <b>{`${inputs.ServerAddress}/oauth/linuxdo`}</b>
+              </Alert>
+            </Grid>
+            <Grid xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="LinuxDoClientId">LinuxDO Client ID</InputLabel>
+                <OutlinedInput
+                  id="LinuxDoClientId"
+                  name="LinuxDoClientId"
+                  value={inputs.LinuxDoClientId || ''}
+                  onChange={handleInputChange}
+                  label="LinuxDO Client ID"
+                  placeholder="输入你注册的 LinuxDO Client ID"
+                  disabled={loading}
+                />
+              </FormControl>
+            </Grid>
+            <Grid xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="LinuxDoClientSecret">LinuxDO Client Secret</InputLabel>
+                <OutlinedInput
+                  id="LinuxDoClientSecret"
+                  name="LinuxDoClientSecret"
+                  value={inputs.LinuxDoClientSecret || ''}
+                  onChange={handleInputChange}
+                  label="LinuxDO Client Secret"
+                  placeholder="敏感信息不会发送到前端显示"
+                  disabled={loading}
+                />
+              </FormControl>
+            </Grid>
+            <Grid xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="LinuxDoMinLevel">限制最低信任等级</InputLabel>
+                <OutlinedInput
+                  id="LinuxDoMinLevel"
+                  name="LinuxDoMinLevel"
+                  value={inputs.LinuxDoMinLevel}
+                  onChange={handleInputChange}
+                  label="LinuxDO Min Level"
+                  placeholder="输入允许使用的最低 LINUX DO 信任等级"
+                  disabled={loading}
+                />
+              </FormControl>
+            </Grid>
+            <Grid xs={12}>
+              <Button variant="contained" onClick={submitLinuxDoOAuth}>
+                保存 LinuxDO OAuth 设置
+              </Button>
+            </Grid>
+          </Grid>
+        </SubCard>
+        {/*  Linux do end*/}
         <SubCard
           title="配置 WeChat Server"
           subTitle={
