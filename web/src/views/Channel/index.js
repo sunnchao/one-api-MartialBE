@@ -15,8 +15,8 @@ import Alert from '@mui/material/Alert';
 
 import { Button, IconButton, Card, Box, Stack, Container, Typography, Divider } from '@mui/material';
 import ChannelTableRow from './component/TableRow';
-import KeywordTableHead from 'ui-component/TableHead';
-import { API } from 'utils/api';
+import KeywordTableHead from '@/ui-component/TableHead';
+import { API } from '@/utils/api';
 import { IconRefresh, IconTrash, IconPlus, IconMenu2, IconBrandSpeedtest, IconCoinYuan, IconSearch } from '@tabler/icons-react';
 import EditeModal from './component/EditModal';
 import { ITEMS_PER_PAGE } from '@/constants';

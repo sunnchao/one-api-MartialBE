@@ -170,9 +170,15 @@ const Index = () => {
               <ListItem>注册完成后，创建一个令牌，复制令牌的 key 填写到对应的地方</ListItem>
               <ListItem>
                 <Typography>
-                  接口转发地址请修改为：<ButtonBase onClick={() => copy("https://api.wochirou.com", "https://api.wochirou.com")} type={"button"}>
-                    <Typography>https://api.wochirou.com</Typography>
-                  </ButtonBase>
+                  接口转发地址请修改为：
+                  <Chip
+                    onClick={() => copy('https://api.wochirou.com', 'https://api.wochirou.com')}
+                    size="small"
+                    label="https://api.wochirou.com"
+                    style={{
+                      margin: '0 5px'
+                    }}
+                  ></Chip>
                   即可使用
                 </Typography>
               </ListItem>
