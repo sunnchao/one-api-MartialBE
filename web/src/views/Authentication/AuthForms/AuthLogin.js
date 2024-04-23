@@ -36,6 +36,8 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Github from '@/assets/images/icons/github.svg';
 import Wechat from '@/assets/images/icons/wechat.svg';
 import Lark from '@/assets/images/icons/lark.svg';
+import LinuxDo from '@/assets/images/icons/linuxdo.svg';
+
 import { onGitHubOAuthClicked, onLarkOAuthClicked } from '@/utils/common';
 
 // ============================|| FIREBASE - LOGIN ||============================ //
@@ -96,6 +98,27 @@ const LoginForm = ({ ...others }) => {
               </AnimateButton>
             </Grid>
           )}
+          {siteInfo.linuxdo_oauth && (
+            <Grid item xs={12}>
+              <AnimateButton>
+                <Button
+                  disableElevation
+                  fullWidth
+                  onClick={() => onLinuxDOAuthClicked(siteInfo.linuxdo_client_id, siteInfo.linuxdo_client_secret)}
+                  size="large"
+                  variant="outlined"
+                  sx={{
+                    ...theme.typography.LoginButton
+                  }}
+                >
+                  <Box sx={{ mr: { xs: 1, sm: 2, width: 20 }, display: 'flex', alignItems: 'center' }}>
+                    <img src={LinuxDo} alt="LinuxDO" width={25} height={25} style={{ marginRight: matchDownSM ? 8 : 16 }} />
+                  </Box>
+                  使用 Linux DO 登录
+                </Button>
+              </AnimateButton>
+            </Grid>
+          )}
           {siteInfo.wechat_login && (
             <Grid item xs={12}>
               <AnimateButton>
@@ -124,7 +147,7 @@ const LoginForm = ({ ...others }) => {
                 <Button
                   disableElevation
                   fullWidth
-                  onClick={() => onLarkOAuthClicked(siteInfo.lark_client_id)}
+                  onClick={() => onLinuxDOAuthClicked(siteInfo.lark_client_id)}
                   size="large"
                   variant="outlined"
                   sx={{

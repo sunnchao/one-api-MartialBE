@@ -22,7 +22,10 @@ const config = {
     turnstile_site_key: '',
     version: '',
     wechat_login: false,
-    wechat_qrcode: ''
+    wechat_qrcode: '',
+    linuxdo_oauth: false,
+    linuxdo_client_id: '',
+    linuxdo_client_secret: '',
   }
 };
 

@@ -228,3 +228,8 @@ export function trims(values) {
 
   return values;
 }
+
+// LinkDO auth
+export async function onLinuxDOAuthClicked(linuxdo_client_id, linuxdo_client_secret) {
+  
+}
