@@ -25,7 +25,7 @@ import WechatModal from '@/views/Authentication/AuthForms/WechatModal';
 import { useSelector } from 'react-redux';
 import EmailModal from './component/EmailModal';
 import Turnstile from 'react-turnstile';
-import  Lark from '@/assets/images/icons/lark.svg';
+import Lark from '@/assets/images/icons/lark.svg';
 import { useTheme } from '@mui/material/styles';
 
 const validationSchema = Yup.object().shape({
@@ -157,7 +157,7 @@ export default function Profile() {
                 <IconBrandTelegram /> {inputs.telegram_id || '未绑定'}
               </Label>
               <Label variant="ghost" color={inputs.lark_id ? 'primary' : 'default'}>
-                <SvgIcon component={Lark} inheritViewBox="0 0 24 24" /> {inputs.lark_id || '未绑定'}
+                <img src={Lark} style={{ width: 24, height: 24 }} /> {inputs.lark_id || '未绑定'}
               </Label>
             </Stack>
             <SubCard title="个人信息">
