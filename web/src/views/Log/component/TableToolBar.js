@@ -16,7 +16,7 @@ export default function TableToolBar({ filterName, handleFilterName, userIsAdmin
   return (
     <>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 3, sm: 2, md: 4 }} padding={'24px'} paddingBottom={'0px'}>
-        <FormControl>
+        <FormControl size="small">
           <InputLabel htmlFor="channel-token_name-label">令牌名称</InputLabel>
           <OutlinedInput
             id="token_name"
@@ -35,7 +35,7 @@ export default function TableToolBar({ filterName, handleFilterName, userIsAdmin
             }
           />
         </FormControl>
-        <FormControl>
+        <FormControl size="small">
           <InputLabel htmlFor="channel-model_name-label">模型名称</InputLabel>
           <OutlinedInput
             id="model_name"
@@ -55,7 +55,7 @@ export default function TableToolBar({ filterName, handleFilterName, userIsAdmin
           />
         </FormControl>
 
-        <FormControl>
+        <FormControl size={'small'}>
           <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={'zh-cn'}>
             <DateTimePicker
               label="起始时间"
@@ -78,7 +78,7 @@ export default function TableToolBar({ filterName, handleFilterName, userIsAdmin
           </LocalizationProvider>
         </FormControl>
 
-        <FormControl>
+        <FormControl size="small">
           <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={'zh-cn'}>
             <DateTimePicker
               label="结束时间"
@@ -100,7 +100,7 @@ export default function TableToolBar({ filterName, handleFilterName, userIsAdmin
             />
           </LocalizationProvider>
         </FormControl>
-        <FormControl sx={{ minWidth: '22%' }}>
+        <FormControl sx={{ minWidth: '22%' }} size="small">
           <InputLabel htmlFor="channel-log_type-label">类型</InputLabel>
           <Select
             id="channel-type-label"
@@ -132,7 +132,7 @@ export default function TableToolBar({ filterName, handleFilterName, userIsAdmin
 
       {userIsAdmin && (
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 3, sm: 2, md: 4 }} padding={'24px'}>
-          <FormControl>
+          <FormControl size="small">
             <InputLabel htmlFor="channel-channel-label">渠道ID</InputLabel>
             <OutlinedInput
               id="channel"
@@ -152,7 +152,7 @@ export default function TableToolBar({ filterName, handleFilterName, userIsAdmin
             />
           </FormControl>
 
-          <FormControl>
+          <FormControl size="small">
             <InputLabel htmlFor="channel-username-label">用户名称</InputLabel>
             <OutlinedInput
               id="username"

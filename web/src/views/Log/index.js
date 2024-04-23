@@ -154,7 +154,7 @@ export default function Log() {
         {searching && <LinearProgress />}
         <PerfectScrollbar component="div">
           <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 800 }}>
+            <Table sx={{ minWidth: 800 }} size="small">
               <KeywordTableHead
                 order={order}
                 orderBy={orderBy}
