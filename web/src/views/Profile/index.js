@@ -26,6 +26,7 @@ import { useSelector } from 'react-redux';
 import EmailModal from './component/EmailModal';
 import Turnstile from 'react-turnstile';
 import Lark from '@/assets/images/icons/lark.svg';
+import LinuxDo from '@/assets/images/icons/linuxdo.svg';
 import { useTheme } from '@mui/material/styles';
 
 const validationSchema = Yup.object().shape({
@@ -156,8 +157,11 @@ export default function Profile() {
               <Label variant="ghost" color={inputs.telegram_id ? 'primary' : 'default'}>
                 <IconBrandTelegram /> {inputs.telegram_id || '未绑定'}
               </Label>
+              <Label variant="ghost" color={inputs.linux_id ? 'primary' : 'default'}>
+                <img src={LinuxDo} style={{ width: 24, height: 24 }} alt={''} /> {inputs.linux_id || '未绑定'}
+              </Label>
               <Label variant="ghost" color={inputs.lark_id ? 'primary' : 'default'}>
-                <img src={Lark} style={{ width: 24, height: 24 }} /> {inputs.lark_id || '未绑定'}
+                <img src={Lark} style={{ width: 24, height: 24 }} alt={''} /> {inputs.lark_id || '未绑定'}
               </Label>
             </Stack>
             <SubCard title="个人信息">
