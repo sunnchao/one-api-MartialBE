@@ -57,24 +57,7 @@ const Home = () => {
 
   return (
     <>
-      {homePageContentLoaded && homePageContent === '' ? (
-        <BaseIndex />
-      ) : (
-        <>
-          <Box>
-            {/* {homePageContent.startsWith('https://') ? (
-              <iframe title="home_page_content" src={homePageContent} style={{ width: '100%', height: '100vh', border: 'none' }} />
-            ) : (
-              <>
-                <Container>
-                  <div style={{ fontSize: 'larger' }} dangerouslySetInnerHTML={{ __html: homePageContent }}></div>
-                </Container>
-              </>
-            )} */}
-            <HomeContent />
-          </Box>
-        </>
-      )}
+      <HomeContent />
     </>
   );
 };

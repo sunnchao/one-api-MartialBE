@@ -115,7 +115,13 @@ const Index = () => {
       <Stack direction={'column'}>
         <Card>
           <CardContent>
+
+            <Typography typography={'h3'}>
+              你好👋   因成本上涨，为了维持本站正常运行，本站将于本周四即2024.4.25日上调模型计费。 调整政策为，在保持充值汇率不变的情况下将提高分组倍率，调整后的倍率为2.5倍，最终计费折算将调整为5元1刀，部分模型也将下调单价计费，届时请以日志页实际计费为准。
+            </Typography>
+
             <Button>更新日志</Button>
+            
             <List disablePadding={true}>
               <ListItem>
                 {changelog.map((item, index) => (
