@@ -22,6 +22,7 @@ import TableSwitch from '@/ui-component/Switch';
 import { renderQuota, renderNumber, timestamp2string } from '@/utils/common';
 import { IconDotsVertical, IconEdit, IconTrash, IconUser, IconBrandWechat, IconBrandGithub, IconMail } from '@tabler/icons-react';
 import { useTheme } from '@mui/material/styles';
+import LinuxDoIcon from '@/assets/images/icons/linuxdo.svg?react';
 
 function renderRole(role) {
   switch (role) {
@@ -103,6 +104,12 @@ export default function UsersTableRow({ item, manageUser, handleOpenModal, setMo
                 {renderNumber(item.request_count)}{' '}
               </Label>
             </Tooltip>
+            {/*  邀请人 inviter_id*/}
+            <Tooltip title={'邀请人'} placement="top">
+              <Label color={'primary'} variant="outlined">
+                {item.inviter_id}
+              </Label>
+            </Tooltip>
           </Stack>
         </TableCell>
         <TableCell>{renderRole(item.role)}</TableCell>
@@ -116,6 +123,9 @@ export default function UsersTableRow({ item, manageUser, handleOpenModal, setMo
             </Tooltip>
             <Tooltip title={item.email ? item.email : '未绑定'} placement="top">
               <IconMail color={item.email ? theme.palette.grey[900] : theme.palette.grey[400]} />
+            </Tooltip>
+            <Tooltip title={item.linuxdo_id ? item.linuxdo_id : '未绑定'} placement="top">
+              <LinuxDoIcon style={{ width: 24, height: 24, color: item.linuxdo_id ? theme.palette.grey[900] : theme.palette.grey[400] }} />
             </Tooltip>
           </Stack>
         </TableCell>

@@ -8,6 +8,7 @@ import MinimalLayout from '@/layout/MinimalLayout';
 const AuthLogin = Loadable(lazy(() => import('@/views/Authentication/Auth/Login')));
 const AuthRegister = Loadable(lazy(() => import('@/views/Authentication/Auth/Register')));
 const GitHubOAuth = Loadable(lazy(() => import('@/views/Authentication/Auth/GitHubOAuth')));
+const LinuxDoOAuth = Loadable(lazy(() => import('@/views/Authentication/Auth/LinuxDoOAuth')));
 const LarkOAuth = Loadable(lazy(() => import('@/views/Authentication/Auth/LarkOAuth')));
 const ForgetPassword = Loadable(lazy(() => import('@/views/Authentication/Auth/ForgetPassword')));
 const ResetPassword = Loadable(lazy(() => import('@/views/Authentication/Auth/ResetPassword')));
@@ -49,6 +50,10 @@ const OtherRoutes = {
     {
       path: '/oauth/github',
       element: <GitHubOAuth />
+    },
+    {
+      path: '/oauth/linuxdo',
+      element: <LinuxDoOAuth />
     },
     {
       path: '/oauth/lark',

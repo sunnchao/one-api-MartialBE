@@ -11,8 +11,7 @@ import {
   List,
   Typography,
   TableBody,
-  ListItem,
-  ButtonBase
+  ListItem
 } from '@mui/material';
 import { Box } from '@mui/system';
 import { copy } from '@/utils/common';
@@ -20,35 +19,42 @@ import { copy } from '@/utils/common';
 const renderModalTable = (data, provider) => {
   function renderReplayTokensColumn(record) {
     return record.timesPrice ? (
-      <div>{record.timesPrice}</div>
+      <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} spacing={1}>
+        <Typography>{record.timesPrice}</Typography>
+        <Typography>* 分组倍率</Typography>
+      </Stack>
     ) : record.characterPrice ? (
-      <div>{record.characterPrice}</div>
+      <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} spacing={1}>
+        <Typography>{record.characterPrice}</Typography>
+        <Typography>* 分组倍率</Typography>
+      </Stack>
     ) : (
-      <Stack direction={'column'} spacing={1}>
-        <div>
-          <Chip
-            size="small"
-            variant="outlined"
-            color="primary"
-            label={'输入'}
-            style={{
-              marginRight: 10
-            }}
-          ></Chip>
-          {record.inputTokens + ' / 1k tokens'}
-        </div>
-        <div>
-          <Chip
-            size="small"
-            variant="outlined"
-            color="primary"
-            label={'输出'}
-            style={{
-              marginRight: 10
-            }}
-          ></Chip>
-          {record.outputTokens + ' / 1k tokens'}
-        </div>
+      <Stack direction={'row'} justifyContent={'center'} alignItems={'center'} spacing={1}>
+        <Stack direction={'column'} spacing={1}>
+          <div>
+            <Chip
+              size="small"
+              label={'输入'}
+              style={{
+                marginRight: 10,
+                fontSize: 10
+              }}
+            ></Chip>
+            {record.inputTokens + ' / 1k tokens'}
+          </div>
+          <div>
+            <Chip
+              size="small"
+              label={'输出'}
+              style={{
+                marginRight: 10,
+                fontSize: 10
+              }}
+            ></Chip>
+            {record.outputTokens + ' / 1k tokens'}
+          </div>
+        </Stack>
+        <Typography>* 分组倍率</Typography>
       </Stack>
     );
   }
@@ -67,7 +73,7 @@ const renderModalTable = (data, provider) => {
                   </TableCell>
                   {/* <TableCell>官方费率</TableCell> */}
                   <TableCell size="small" style={{ width: '45%' }}>
-                    本站费率
+                    计费模式
                   </TableCell>
                   {/* <TableCell>折扣</TableCell> */}
                   <TableCell>备注</TableCell>
@@ -115,13 +121,13 @@ const Index = () => {
       <Stack direction={'column'}>
         <Card>
           <CardContent>
-
             <Typography typography={'h3'}>
-              你好👋   因成本上涨，为了维持本站正常运行，本站将于本周四即2024.4.25日上调模型计费。 调整政策为，在保持充值汇率不变的情况下将提高分组倍率，调整后的倍率为2.5倍，最终计费折算将调整为5元1刀，部分模型也将下调单价计费，届时请以日志页实际计费为准。
+              你好👋 因成本上涨，为了维持本站正常运行，本站将于本周四即2024.4.25日上调模型计费。
+              调整政策为，在保持充值汇率不变的情况下将提高分组倍率，调整后的倍率为2.5倍，最终计费折算将调整为5元1刀，部分模型也将下调单价计费，届时请以日志页实际计费为准。
             </Typography>
 
             <Button>更新日志</Button>
-            
+
             <List disablePadding={true}>
               <ListItem>
                 {changelog.map((item, index) => (
@@ -359,22 +365,22 @@ const Index = () => {
                       },
                       {
                         name: 'gpt-4-v',
-                        timesPrice: '$0.1 每次, 轻度 GPT-4 用户性价比远超官网',
+                        timesPrice: '$0.1 每次',
                         isSupport: '支持'
                       },
                       {
                         name: 'gpt-4-dalle',
-                        timesPrice: '$0.1 每次, 轻度 GPT-4 用户性价比远超官网',
+                        timesPrice: '$0.1 每次',
                         isSupport: '支持'
                       },
                       {
                         name: 'gpt-4-all',
-                        timesPrice: '$0.1 每次, 轻度 GPT-4 用户性价比远超官网',
+                        timesPrice: '$0.1 每次',
                         isSupport: '支持'
                       },
                       {
                         name: 'gpt-4-gizmo-*',
-                        timesPrice: '$0.1 每次, 轻度 GPT-4 用户性价比远超官网'
+                        timesPrice: '$0.1 每次'
                       },
                       {
                         name: 'tts-1',

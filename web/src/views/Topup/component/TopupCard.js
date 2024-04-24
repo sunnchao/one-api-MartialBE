@@ -8,7 +8,7 @@ import { API } from '@/utils/api';
 import React, { useEffect, useState } from 'react';
 import { showError, showInfo, showSuccess, renderQuota, trims } from '@/utils/common';
 
-const TopupCard = () => {
+const TopupCard = (props) => {
   const theme = useTheme();
   const [redemptionCode, setRedemptionCode] = useState('');
   const [topUpLink, setTopUpLink] = useState('');
@@ -50,18 +50,12 @@ const TopupCard = () => {
     window.open(topUpLink, '_blank');
   };
 
-  const getUserQuota = async () => {
-    try {
-      let res = await API.get(`/api/user/self`);
-      const { success, message, data } = res.data;
-      if (success) {
-        setUserQuota(data.quota);
-      } else {
-        showError(message);
-      }
-    } catch (error) {
+  const openTopUpLink2 = () => {
+    if (!topUpLink) {
+      showError('超级管理员未设置充值链接！');
       return;
     }
+    window.open('https://www.zaofaka.com/links/F8373848', '_blank');
   };
 
   useEffect(() => {
@@ -72,8 +66,13 @@ const TopupCard = () => {
         setTopUpLink(status.top_up_link);
       }
     }
-    getUserQuota().then();
   }, []);
+
+  useEffect(() => {
+    if (props.user?.quota) {
+      setUserQuota(props.user.quota);
+    }
+  }, [props.user]);
 
   return (
     <UserCard>
@@ -87,7 +86,7 @@ const TopupCard = () => {
           marginTop: '40px'
         }}
       >
-        <FormControl fullWidth variant="outlined">
+        <FormControl fullWidth>
           <InputLabel htmlFor="key">兑换码</InputLabel>
           <OutlinedInput
             id="key"
@@ -112,11 +111,14 @@ const TopupCard = () => {
 
         <Stack justifyContent="center" alignItems={'center'} spacing={3} paddingTop={'20px'}>
           <Typography variant={'h4'} color={theme.palette.grey[700]}>
-            还没有兑换码？ 点击获取兑换码：
+            还没有兑换码？ 点击购买兑换码：
           </Typography>
-          <Button variant="contained" onClick={openTopUpLink}>
-            获取兑换码
-          </Button>
+          <Stack direction={'row'} spacing={3}>
+            <Button variant="contained" onClick={openTopUpLink}>
+              立即购买
+            </Button>
+            <Button onClick={openTopUpLink2}>备用地址</Button>
+          </Stack>
         </Stack>
       </SubCard>
     </UserCard>

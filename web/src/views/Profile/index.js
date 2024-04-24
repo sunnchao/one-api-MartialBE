@@ -19,14 +19,14 @@ import SubCard from '@/ui-component/cards/SubCard';
 import { IconBrandWechat, IconBrandGithub, IconMail, IconBrandTelegram } from '@tabler/icons-react';
 import Label from '@/ui-component/Label';
 import { API } from '@/utils/api';
-import { showError, showSuccess, onGitHubOAuthClicked, copy, trims, onLarkOAuthClicked } from '@/utils/common';
+import { showError, showSuccess, onGitHubOAuthClicked, copy, trims, onLarkOAuthClicked, onLinuxDOAuthClicked } from '@/utils/common';
 import * as Yup from 'yup';
 import WechatModal from '@/views/Authentication/AuthForms/WechatModal';
 import { useSelector } from 'react-redux';
 import EmailModal from './component/EmailModal';
 import Turnstile from 'react-turnstile';
-import Lark from '@/assets/images/icons/lark.svg';
-import LinuxDo from '@/assets/images/icons/linuxdo.svg';
+import Lark from '@/assets/images/icons/lark.svg?react';
+import LinuxDo from '@/assets/images/icons/linuxdo.svg?react';
 import { useTheme } from '@mui/material/styles';
 
 const validationSchema = Yup.object().shape({
@@ -157,11 +157,11 @@ export default function Profile() {
               <Label variant="ghost" color={inputs.telegram_id ? 'primary' : 'default'}>
                 <IconBrandTelegram /> {inputs.telegram_id || '未绑定'}
               </Label>
-              <Label variant="ghost" color={inputs.linux_id ? 'primary' : 'default'}>
-                <img src={LinuxDo} style={{ width: 24, height: 24 }} alt={''} /> {inputs.linux_id || '未绑定'}
+              <Label variant="ghost" color={inputs.linuxdo_id ? 'primary' : 'default'}>
+                <LinuxDo style={{ width: 24, height: 24 }} alt={''} /> {inputs.linuxdo_id || '未绑定'}
               </Label>
               <Label variant="ghost" color={inputs.lark_id ? 'primary' : 'default'}>
-                <img src={Lark} style={{ width: 24, height: 24 }} alt={''} /> {inputs.lark_id || '未绑定'}
+                <Lark style={{ width: 24, height: 24 }} alt={''} /> {inputs.lark_id || '未绑定'}
               </Label>
             </Stack>
             <SubCard title="个人信息">
@@ -228,6 +228,14 @@ export default function Profile() {
                   <Grid xs={12} md={4}>
                     <Button variant="contained" onClick={() => onGitHubOAuthClicked(status.github_client_id, true)}>
                       绑定GitHub账号
+                    </Button>
+                  </Grid>
+                )}
+
+                {status.linuxdo_oauth && !inputs.linuxdo_id && (
+                  <Grid xs={12} md={4}>
+                    <Button variant="contained" onClick={() => onLinuxDOAuthClicked(status.linuxdo_client_id, true)}>
+                      绑定LinuxDO账号
                     </Button>
                   </Grid>
                 )}

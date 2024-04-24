@@ -16,18 +16,18 @@ import Logo from '@/ui-component/Logo';
 
 // ================================|| AUTH3 - LOGIN ||================================ //
 
-const GitHubOAuth = () => {
+const LinuxDoOAuth = () => {
   const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('md'));
 
   const [searchParams] = useSearchParams();
   const [prompt, setPrompt] = useState('处理中...');
-  const { githubLogin } = useLogin();
+  const { linuxDoLogin } = useLogin();
 
   let navigate = useNavigate();
 
   const sendCode = async (code, state, count) => {
-    const { success, message } = await githubLogin(code, state);
+    const { success, message } = await linuxDoLogin(code, state);
     if (!success) {
       if (message) {
         showError(message);
@@ -70,7 +70,7 @@ const GitHubOAuth = () => {
                       <Grid item>
                         <Stack alignItems="center" justifyContent="center" spacing={1}>
                           <Typography color={theme.palette.primary.main} gutterBottom variant={matchDownSM ? 'h3' : 'h2'}>
-                            GitHub 登录
+                            LinuxDO 登录
                           </Typography>
                         </Stack>
                       </Grid>
@@ -92,4 +92,4 @@ const GitHubOAuth = () => {
   );
 };
 
-export default GitHubOAuth;
+export default LinuxDoOAuth;

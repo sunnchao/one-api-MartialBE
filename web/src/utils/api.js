@@ -1,10 +1,10 @@
 import { showError } from './common';
 import axios from 'axios';
-import { store } from '@/store/index';
+import { store } from '@/store';
 import { LOGIN } from '@/store/actions';
 
 export const API = axios.create({
-  baseURL: import.meta.env.VITE_REACT_APP_SERVER ? import.meta.env.VITE_REACT_APP_SERVER : '/'
+  // baseURL: import.meta.env.VITE_REACT_APP_SERVER ? import.meta.env.VITE_REACT_APP_SERVER : '/'
 });
 
 API.interceptors.response.use(

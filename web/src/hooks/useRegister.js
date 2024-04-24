@@ -6,7 +6,7 @@ const useRegister = () => {
   const navigate = useNavigate();
   const register = async (input, turnstile) => {
     try {
-      let affCode = localStorage.getItem('aff');
+      let affCode = sessionStorage.getItem('aff');
       if (affCode) {
         input = { ...input, aff_code: affCode };
       }

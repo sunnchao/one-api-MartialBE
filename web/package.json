@@ -79,6 +79,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "immutable": "^4.3.5",
     "prettier": "^3.2.4",
-    "sass": "^1.70.0"
+    "sass": "^1.70.0",
+    "vite-plugin-svgr": "^4.2.0"
   }
 }

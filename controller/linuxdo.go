@@ -81,7 +81,7 @@ func getLinuxDoUserInfoByCode(code string) (*LinuxDoUser, error) {
 	if linuxdoUser.ID == 0 {
 		return nil, errors.New("返回值非法，用户字段为空，请稍后重试！")
 	}
-	if linuxdoUser.TrustLevel < common.LinuxDoMinLevel {
+	if linuxdoUser.TrustLevel < int(common.LinuxDoMinLevel) {
 		return nil, errors.New("用户 LINUX DO 信任等级不足！")
 	}
 	return &linuxdoUser, nil

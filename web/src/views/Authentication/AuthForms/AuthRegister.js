@@ -32,6 +32,7 @@ import { strengthColor, strengthIndicator } from '@/utils/password-strength';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { showError, showInfo } from '@/utils/common';
+import AuthClient from '@/views/Authentication/AuthForms/AuthClient';
 
 // ===========================|| FIREBASE - REGISTER ||=========================== //
 
@@ -83,7 +84,7 @@ const RegisterForm = ({ ...others }) => {
   useEffect(() => {
     let affCode = searchParams.get('aff');
     if (affCode) {
-      localStorage.setItem('aff', affCode);
+      sessionStorage.setItem('aff', affCode);
     }
 
     setShowEmailVerification(siteInfo.email_verification);
@@ -96,6 +97,7 @@ const RegisterForm = ({ ...others }) => {
 
   return (
     <>
+      <AuthClient></AuthClient>
       <Formik
         initialValues={{
           username: '',

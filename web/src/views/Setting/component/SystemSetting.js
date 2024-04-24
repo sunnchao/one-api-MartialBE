@@ -247,7 +247,9 @@ const SystemSetting = () => {
           <Grid container spacing={{ xs: 3, sm: 2, md: 4 }}>
             <Grid xs={12}>
               <FormControl fullWidth>
-                <InputLabel htmlFor="ServerAddress">服务器地址</InputLabel>
+                <InputLabel htmlFor="ServerAddress" size={'small'}>
+                  服务器地址
+                </InputLabel>
                 <OutlinedInput
                   id="ServerAddress"
                   name="ServerAddress"
@@ -256,6 +258,7 @@ const SystemSetting = () => {
                   label="服务器地址"
                   placeholder="例如：https://yourdomain.com"
                   disabled={loading}
+                  size={'small'}
                 />
               </FormControl>
             </Grid>
@@ -351,8 +354,9 @@ const SystemSetting = () => {
               />
             </Grid>
             <Grid xs={12}>
-              <FormControl fullWidth>
+              <FormControl fullWidth size={'small'}>
                 <Autocomplete
+                  size={'small'}
                   multiple
                   freeSolo
                   id="EmailDomainWhitelist"
@@ -382,7 +386,7 @@ const SystemSetting = () => {
               </FormControl>
             </Grid>
             <Grid xs={12}>
-              <Button variant="contained" onClick={submitEmailDomainWhitelist}>
+              <Button variant="contained" onClick={submitEmailDomainWhitelist} size={'small'}>
                 保存邮箱域名白名单设置
               </Button>
             </Grid>

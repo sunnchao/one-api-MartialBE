@@ -34,6 +34,7 @@ export default function TableToolBar({ placeholder }) {
             <IconSearch stroke={1.5} size="20px" color={grey500} />
           </InputAdornment>
         }
+        size={'small'}
       />
     </Toolbar>
   );

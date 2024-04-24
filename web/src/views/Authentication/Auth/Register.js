@@ -1,13 +1,12 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
-import { Divider, Grid, Stack, Typography, useMediaQuery } from '@mui/material';
+import { Divider, Grid, Stack, Typography, useMediaQuery, Button } from '@mui/material';
 
 // project imports
 import AuthWrapper from '../AuthWrapper';
 import AuthCardWrapper from '../AuthCardWrapper';
-import Logo from '@/ui-component/Logo';
 import AuthRegister from '../AuthForms/AuthRegister';
 
 // assets
@@ -17,6 +16,12 @@ import AuthRegister from '../AuthForms/AuthRegister';
 const Register = () => {
   const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('md'));
+  const navigate = useNavigate();
+
+  function toLoginPage() {
+    sessionStorage.removeItem('aff');
+    navigate('/login');
+  }
 
   return (
     <AuthWrapper>
@@ -26,11 +31,11 @@ const Register = () => {
             <Grid item sx={{ m: { xs: 1, sm: 3 }, mb: 0 }}>
               <AuthCardWrapper>
                 <Grid container spacing={2} alignItems="center" justifyContent="center">
-                  <Grid item sx={{ mb: 3 }}>
-                    <Link to="#">
-                      <Logo />
-                    </Link>
-                  </Grid>
+                  {/*<Grid item sx={{ mb: 3 }}>*/}
+                  {/*  <Link to="#">*/}
+                  {/*    <Logo />*/}
+                  {/*  </Link>*/}
+                  {/*</Grid>*/}
                   <Grid item xs={12}>
                     <Grid container direction={matchDownSM ? 'column-reverse' : 'row'} alignItems="center" justifyContent="center">
                       <Grid item>
@@ -50,7 +55,7 @@ const Register = () => {
                   </Grid>
                   <Grid item xs={12}>
                     <Grid item container direction="column" alignItems="center" xs={12}>
-                      <Typography component={Link} to="/login" variant="subtitle1" sx={{ textDecoration: 'none' }}>
+                      <Typography component={Button} onClick={toLoginPage} variant="subtitle1" sx={{ textDecoration: 'none' }}>
                         已经有帐号了?点击登录
                       </Typography>
                     </Grid>

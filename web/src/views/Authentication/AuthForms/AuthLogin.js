@@ -27,42 +27,18 @@ import { Formik } from 'formik';
 // project imports
 import useLogin from '@/hooks/useLogin';
 import AnimateButton from '@/ui-component/extended/AnimateButton';
-import WechatModal from '@/views/Authentication/AuthForms/WechatModal';
 
 // assets
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-import Github from '@/assets/images/icons/github.svg';
-import Wechat from '@/assets/images/icons/wechat.svg';
-import Lark from '@/assets/images/icons/lark.svg';
-import LinuxDo from '@/assets/images/icons/linuxdo.svg';
-
-import { onGitHubOAuthClicked, onLarkOAuthClicked, onLinuxDOAuthClicked } from '@/utils/common';
+import AuthClient from '@/views/Authentication/AuthForms/AuthClient';
 
 // ============================|| FIREBASE - LOGIN ||============================ //
 
 const LoginForm = ({ ...others }) => {
   const theme = useTheme();
-  const { login, wechatLogin } = useLogin();
-  const [openWechat, setOpenWechat] = useState(false);
-  const matchDownSM = useMediaQuery(theme.breakpoints.down('md'));
-  const customization = useSelector((state) => state.customization);
-  const siteInfo = useSelector((state) => state.siteInfo);
-  // const [checked, setChecked] = useState(true);
-
-  let tripartiteLogin = false;
-  if (siteInfo.github_oauth || siteInfo.linuxdo_oauth || siteInfo.wechat_login || siteInfo.lark_client_id) {
-    tripartiteLogin = true;
-  }
-
-  const handleWechatOpen = () => {
-    setOpenWechat(true);
-  };
-
-  const handleWechatClose = () => {
-    setOpenWechat(false);
-  };
+  const { login } = useLogin();
 
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => {
@@ -75,126 +51,7 @@ const LoginForm = ({ ...others }) => {
 
   return (
     <>
-      {tripartiteLogin && (
-        <Grid container direction="column" justifyContent="center" spacing={2}>
-          {siteInfo.github_oauth && (
-            <Grid item xs={12}>
-              <AnimateButton>
-                <Button
-                  disableElevation
-                  fullWidth
-                  onClick={() => onGitHubOAuthClicked(siteInfo.github_client_id)}
-                  size="large"
-                  variant="outlined"
-                  sx={{
-                    ...theme.typography.LoginButton
-                  }}
-                >
-                  <Box sx={{ mr: { xs: 1, sm: 2, width: 20 }, display: 'flex', alignItems: 'center' }}>
-                    <img src={Github} alt="github" width={25} height={25} style={{ marginRight: matchDownSM ? 8 : 16 }} />
-                  </Box>
-                  使用 Github 登录
-                </Button>
-              </AnimateButton>
-            </Grid>
-          )}
-          {siteInfo.linuxdo_oauth && (
-            <Grid item xs={12}>
-              <AnimateButton>
-                <Button
-                  disableElevation
-                  fullWidth
-                  onClick={() => onLinuxDOAuthClicked(siteInfo.linuxdo_client_id, true)}
-                  size="large"
-                  variant="outlined"
-                  sx={{
-                    ...theme.typography.LoginButton
-                  }}
-                >
-                  <Box sx={{ mr: { xs: 1, sm: 2, width: 20 }, display: 'flex', alignItems: 'center' }}>
-                    <img src={LinuxDo} alt="LinuxDO" width={25} height={25} style={{ marginRight: matchDownSM ? 8 : 16 }} />
-                  </Box>
-                  使用 Linux DO 登录
-                </Button>
-              </AnimateButton>
-            </Grid>
-          )}
-          {siteInfo.wechat_login && (
-            <Grid item xs={12}>
-              <AnimateButton>
-                <Button
-                  disableElevation
-                  fullWidth
-                  onClick={handleWechatOpen}
-                  size="large"
-                  variant="outlined"
-                  sx={{
-                    ...theme.typography.LoginButton
-                  }}
-                >
-                  <Box sx={{ mr: { xs: 1, sm: 2, width: 20 }, display: 'flex', alignItems: 'center' }}>
-                    <img src={Wechat} alt="Wechat" width={25} height={25} style={{ marginRight: matchDownSM ? 8 : 16 }} />
-                  </Box>
-                  使用 Wechat 登录
-                </Button>
-              </AnimateButton>
-              <WechatModal open={openWechat} handleClose={handleWechatClose} wechatLogin={wechatLogin} qrCode={siteInfo.wechat_qrcode} />
-            </Grid>
-          )}
-          {siteInfo.lark_client_id && (
-            <Grid item xs={12}>
-              <AnimateButton>
-                <Button
-                  disableElevation
-                  fullWidth
-                  onClick={() => onLarkOAuthClicked(siteInfo.lark_client_id)}
-                  size="large"
-                  variant="outlined"
-                  sx={{
-                    ...theme.typography.LoginButton
-                  }}
-                >
-                  <Box sx={{ mr: { xs: 1, sm: 2, width: 20 }, display: 'flex', alignItems: 'center' }}>
-                    <img src={Lark} alt="Lark" width={25} height={25} style={{ marginRight: matchDownSM ? 8 : 16 }} />
-                  </Box>
-                  使用飞书登录
-                </Button>
-              </AnimateButton>
-            </Grid>
-          )}
-          <Grid item xs={12}>
-            <Box
-              sx={{
-                alignItems: 'center',
-                display: 'flex'
-              }}
-            >
-              <Divider sx={{ flexGrow: 1 }} orientation="horizontal" />
-
-              <Button
-                variant="outlined"
-                sx={{
-                  cursor: 'unset',
-                  m: 2,
-                  py: 0.5,
-                  px: 7,
-                  borderColor: `${theme.palette.grey[100]} !important`,
-                  color: `${theme.palette.grey[900]}!important`,
-                  fontWeight: 500,
-                  borderRadius: `${customization.borderRadius}px`
-                }}
-                disableRipple
-                disabled
-              >
-                OR
-              </Button>
-
-              <Divider sx={{ flexGrow: 1 }} orientation="horizontal" />
-            </Box>
-          </Grid>
-        </Grid>
-      )}
-
+      <AuthClient></AuthClient>
       <Formik
         initialValues={{
           username: '',
