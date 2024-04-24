@@ -51,10 +51,10 @@ const OtherRoutes = {
       path: '/oauth/github',
       element: <GitHubOAuth />
     },
-    {
-      path: '/oauth/linuxdo',
-      element: <LinuxDoOAuth />
-    },
+    // {
+    //   path: '/oauth/linuxdo',
+    //   element: <LinuxDoOAuth />
+    // },
     {
       path: '/oauth/lark',
       element: <LarkOAuth />
