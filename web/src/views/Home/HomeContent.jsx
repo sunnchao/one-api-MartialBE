@@ -114,26 +114,19 @@ const renderModalTable = (data, provider) => {
 };
 
 const Index = () => {
-  const changelog = ['2024-4-15：赠送的额度可直接使用全模型'];
+  const changelog = ['正式接入LINUX DO 授权登录','恢复计价分组倍率为2.5倍，充值汇率为2元1刀'];
 
   return (
     <>
       <Stack direction={'column'}>
         <Card>
           <CardContent>
-            <Typography typography={'h3'}>
-              你好👋 因成本上涨，为了维持本站正常运行，本站将于本周四即2024.4.25日上调模型计费。
-              调整政策为，在保持充值汇率不变的情况下将提高分组倍率，调整后的倍率为2.5倍，最终计费折算将调整为5元1刀，部分模型也将下调单价计费，届时请以日志页实际计费为准。
-            </Typography>
-
-            <Button>更新日志</Button>
+            <Button>2024-4-24 更新日志</Button>
 
             <List disablePadding={true}>
-              <ListItem>
                 {changelog.map((item, index) => (
-                  <div key={index}>{item}</div>
+                  <ListItem key={index}>{index + 1}.{item}</ListItem>
                 ))}
-              </ListItem>
             </List>
           </CardContent>
         </Card>
@@ -144,6 +137,7 @@ const Index = () => {
             <List disablePadding>
               <ListItem>OpenAI 接口转发站</ListItem>
               <ListItem>本站渠道来源：官网正规渠道 、 逆向解析渠道 、 上游代理渠道</ListItem>
+              <ListItem>接口服务含官网直连以及整理了一些比较优秀的三方渠道商，所以能保持相对低价</ListItem>
               <ListItem>支持模型请查看下方模型介绍</ListItem>
               <ListItem>
                 使用过程中有问题请发邮件至
@@ -166,7 +160,8 @@ const Index = () => {
               <ListItem>为了维持转发服务正常使用，将不定期清除非法用户，请使用真实邮箱注册</ListItem>
               <ListItem>
                 <Typography>
-                  受供应商和OpenAI政策影响，价格会随时调整，本站充值汇率为
+                  受供应商和OpenAI政策影响，价格会随时调整，本站计价分组倍率<Chip color={'error'} label={'2.5倍'} size="small" variant="outlined"></Chip> 
+                  ，充值汇率为 
                   <Chip color={'error'} label={'2元=1刀'} size="small" variant="outlined"></Chip>（模型计费详情请查看下方表格）
                 </Typography>
               </ListItem>
@@ -232,25 +227,13 @@ const Index = () => {
                   {renderModalTable(
                     [
                       {
-                        name: 'gpt-3.5-turbo',
-                        inputTokens: '$0.003',
-                        outputTokens: '$0.006',
-                        isSupport: '支持'
-                      },
-                      {
-                        name: 'gpt-3.5-turbo-0125',
+                        name: 'gpt-3.5-turbo, gpt-3.5-turbo-0125',
                         inputTokens: '$0.0005',
                         outputTokens: '$0.0015',
                         isSupport: '支持'
                       },
                       {
-                        name: 'gpt-3.5-turbo-0301',
-                        inputTokens: '$0.0015',
-                        outputTokens: '$0.002',
-                        isSupport: '支持'
-                      },
-                      {
-                        name: 'gpt-3.5-turbo-0613',
+                        name: 'gpt-3.5-turbo-0301, gpt-3.5-turbo-0613',
                         inputTokens: '$0.0015',
                         outputTokens: '$0.002',
                         isSupport: '支持'
@@ -274,39 +257,21 @@ const Index = () => {
                         isSupport: '支持'
                       },
                       {
-                        name: 'gpt-4',
+                        name: 'gpt-4, gpt-4-0613',
                         inputTokens: '$0.03',
                         outputTokens: '$0.06',
                         isSupport: '支持'
                       },
                       {
-                        name: 'gpt-4-0613',
-                        inputTokens: '$0.03',
-                        outputTokens: '$0.06',
-                        isSupport: '支持'
-                      },
-                      {
-                        name: 'gpt-4-0125-preview',
+                        name: 'gpt-4-0125-preview, gpt-4-1106-preview, gpt-4-vision-preview',
                         inputTokens: '$0.01',
                         outputTokens: '$0.03',
                         isSupport: '支持'
                       },
                       {
-                        name: 'gpt-4-1106-preview',
+                        name: 'gpt-4-turbo, gpt-4-turbo-2024-04-09',
                         inputTokens: '$0.01',
                         outputTokens: '$0.03',
-                        isSupport: '支持'
-                      },
-                      {
-                        name: 'gpt-4-vision-preview',
-                        inputTokens: '$0.01',
-                        outputTokens: '$0.03',
-                        isSupport: '支持'
-                      },
-                      {
-                        name: 'gpt-4-turbo-2024-04-09',
-                        inputTokens: '$0.03',
-                        outputTokens: '$0.06',
                         isSupport: '支持'
                       },
                       {
@@ -335,34 +300,25 @@ const Index = () => {
                       },
                       {
                         name: 'dall-e-3 1024x1024',
-                        timesPrice: '$0.1 每次',
+                        timesPrice: '$0.04 每次',
                         isSupport: '支持'
                       },
                       {
-                        name: 'dall-e-3 1024x1792',
-                        timesPrice: '$0.2 每次',
-                        isSupport: '支持'
-                      },
-                      {
-                        name: 'dall-e-3 1792x1792',
-                        timesPrice: '$0.2 每次',
+                        name: 'dall-e-3 1024x1792 / 1792x1024',
+                        timesPrice: '$0.08 每次',
                         isSupport: '支持'
                       },
                       {
                         name: 'dall-e-3 hd 1024x1024',
-                        timesPrice: '$0.2 每次',
+                        timesPrice: '$0.08 每次',
                         isSupport: '支持'
                       },
                       {
-                        name: 'dall-e-3 hd 1024x1792',
-                        timesPrice: '$0.3 每次',
+                        name: 'dall-e-3 hd 1024x1792 / 1792x1024 ',
+                        timesPrice: '$0.12 每次',
                         isSupport: '支持'
                       },
-                      {
-                        name: 'dall-e-3 hd 1792x1792',
-                        timesPrice: '$0.3 每次',
-                        isSupport: '支持'
-                      },
+                      
                       {
                         name: 'gpt-4-v',
                         timesPrice: '$0.1 每次',
@@ -388,20 +344,10 @@ const Index = () => {
                         isSupport: '支持'
                       },
                       {
-                        name: 'tts-1-1106',
-                        characterPrice: '$0.015 / 1k characters',
-                        isSupport: '支持'
-                      },
-                      {
                         name: 'tts-1-hd',
                         characterPrice: '$0.03 / 1k characters',
                         isSupport: '支持'
                       },
-                      {
-                        name: 'tts-1-hd-1106',
-                        characterPrice: '$0.03 / 1k characters',
-                        isSupport: '支持'
-                      }
                     ],
                     'OpenAI'
                   )}
@@ -411,20 +357,20 @@ const Index = () => {
                     [
                       {
                         name: 'glm-3-turbo',
-                        inputTokens: '$0.0025',
-                        outputTokens: '$0.0025',
+                        inputTokens: '$0.001',
+                        outputTokens: '$0.001',
                         isSupport: '支持'
                       },
                       {
                         name: 'glm-4',
-                        inputTokens: '$0.05',
-                        outputTokens: '$0.05',
+                        inputTokens: '$0.02',
+                        outputTokens: '$0.02',
                         isSupport: '支持'
                       },
                       {
                         name: 'glm-4v',
-                        inputTokens: '$0.05',
-                        outputTokens: '$0.05',
+                        inputTokens: '$0.02',
+                        outputTokens: '$0.02',
                         isSupport: '支持'
                       }
                     ],
@@ -461,26 +407,26 @@ const Index = () => {
                     [
                       {
                         name: 'qwen-plus',
-                        inputTokens: '$0.1',
+                        inputTokens: '$0.04',
                         outputTokens: '$0.1',
                         isSupport: '支持'
                       },
                       {
                         name: 'qwen-plus-net',
-                        inputTokens: '$0.1',
+                        inputTokens: '$0.04',
                         outputTokens: '$0.1',
                         isSupport: '支持'
                       },
                       {
                         name: 'qwen-turbo',
-                        inputTokens: '$0.04',
-                        outputTokens: '$0.04',
+                        inputTokens: '$0.016',
+                        outputTokens: '$0.016',
                         isSupport: '支持'
                       },
                       {
                         name: 'qwen-turbo-net',
-                        inputTokens: '$0.04',
-                        outputTokens: '$0.04',
+                        inputTokens: '$0.016',
+                        outputTokens: '$0.016',
                         isSupport: '支持'
                       }
                     ],
