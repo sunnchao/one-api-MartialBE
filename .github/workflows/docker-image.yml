@@ -3,16 +3,16 @@ name: one-api docker image
 on:
   push:
     branches:
-      - main
+      - sunnchao_main
     tags:
       - "v*"
     paths-ignore:
       - "README.md"
-
-env:
-  # github.repository as <account>/<repo>
-  DOCKER_HUB_USERNAME: martialbe
-  DOCKER_HUB_REPO: one-api
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'reason'
+        required: false
 
 jobs:
   build-and-push:
@@ -77,7 +77,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: docker.io
-          username: ${{ env.DOCKER_HUB_USERNAME }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }} # Replace with your Docker Hub password secret
 
       - name: Docker meta
@@ -87,7 +87,7 @@ jobs:
           # list of Docker images to use as base name for tags
           images: |
             ghcr.io/${{ github.repository }}
-            docker.io/${{ env.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_HUB_REPO }}
+            docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPO }}
           # generate Docker tags based on the following events/attributes
           tags: |
             type=raw,value=dev,enable=${{ github.ref == 'refs/heads/main' }}
