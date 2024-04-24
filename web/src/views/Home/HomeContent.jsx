@@ -408,13 +408,13 @@ const Index = () => {
                       {
                         name: 'qwen-plus',
                         inputTokens: '$0.04',
-                        outputTokens: '$0.1',
+                        outputTokens: '$0.04',
                         isSupport: '支持'
                       },
                       {
                         name: 'qwen-plus-net',
                         inputTokens: '$0.04',
-                        outputTokens: '$0.1',
+                        outputTokens: '$0.04',
                         isSupport: '支持'
                       },
                       {
