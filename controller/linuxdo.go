@@ -155,14 +155,17 @@ func LinuxDoOAuth(c *gin.Context) {
 			}
 			user.Role = common.RoleCommonUser
 			user.Status = common.UserStatusEnabled
+			err := user.Insert(user.InviterId)
 
-			if err := user.Insert(user.InviterId); err != nil {
+			if err != nil {
 				c.JSON(http.StatusOK, gin.H{
 					"success": false,
 					"message": err.Error(),
 				})
 				return
 			}
+
+			user.QuotaForNewLinuxDoUser()
 		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,

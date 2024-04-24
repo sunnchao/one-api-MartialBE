@@ -132,7 +132,7 @@ var optionIntMap = map[string]*int{
 	"RetryTimes":            &common.RetryTimes,
 	"RetryCooldownSeconds":  &common.RetryCooldownSeconds,
 	"ChatCacheExpireMinute": &common.ChatCacheExpireMinute,
-	"LinuxMinLevel":         &common.LinuxDoMinLevel,
+	"LinuxDoMinLevel":       &common.LinuxDoMinLevel,
 }
 
 var optionBoolMap = map[string]*bool{

@@ -23,19 +23,19 @@ const InviteCard = (props) => {
       return;
     }
 
-    // try {
-    //   const res = await API.get('/api/user/aff');
-    //   const { success, message, data } = res.data;
-    //   if (success) {
-    //     let link = `${window.location.origin}/register?aff=${data}`;
-    //     setInviteUrl(link);
-    //     copy(link, '邀请链接');
-    //   } else {
-    //     showError(message);
-    //   }
-    // } catch (error) {
-    //   return;
-    // }
+    try {
+      const res = await API.get('/api/user/aff');
+      const { success, message, data } = res.data;
+      if (success) {
+        let link = `${window.location.origin}/register?aff=${data}`;
+        setInviteUrl(link);
+        copy(link, '邀请链接');
+      } else {
+        showError(message);
+      }
+    } catch (error) {
+      return;
+    }
   };
 
   return (
