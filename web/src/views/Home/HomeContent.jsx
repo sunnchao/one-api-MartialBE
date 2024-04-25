@@ -114,7 +114,7 @@ const renderModalTable = (data, provider) => {
 };
 
 const Index = () => {
-  const changelog = ['正式接入LINUX DO 授权登录','恢复计价分组倍率为2.5倍，充值汇率为2元1刀'];
+  const changelog = ['正式接入LINUX DO 授权登录', '恢复计价分组倍率为2.5倍，充值汇率为2元1刀'];
 
   return (
     <>
@@ -124,9 +124,11 @@ const Index = () => {
             <Button>2024-4-24 更新日志</Button>
 
             <List disablePadding={true}>
-                {changelog.map((item, index) => (
-                  <ListItem key={index}>{index + 1}.{item}</ListItem>
-                ))}
+              {changelog.map((item, index) => (
+                <ListItem key={index}>
+                  {index + 1}.{item}
+                </ListItem>
+              ))}
             </List>
           </CardContent>
         </Card>
@@ -152,6 +154,16 @@ const Index = () => {
               </ListItem>
               <ListItem>
                 <Typography>
+                  <Typography component={Button} onClick={() => window.open('https://linux.do', 'blank')}>
+                    LinuxDO 论坛
+                  </Typography>
+                  用户可额外获得
+                  <Chip color={'error'} label={'论坛等级 + 1'} size="small" variant="outlined"></Chip> 的使用额度, 已注册本站的用户请在绑定
+                  LD 授权后在论坛私信<Chip size={'small'} label={'@sunnysun'}></Chip>UserId
+                </Typography>
+              </ListItem>
+              <ListItem>
+                <Typography>
                   当前仅支持 <Chip color={'error'} label={'Github'} size="small" variant="outlined"></Chip>{' '}
                   <Chip color={'error'} label={'QQ'} size="small" variant="outlined"></Chip>
                   <Chip color={'error'} label={'Gmail'} size="small" variant="outlined"></Chip>的账号注册 ，谢谢🙏
@@ -160,8 +172,9 @@ const Index = () => {
               <ListItem>为了维持转发服务正常使用，将不定期清除非法用户，请使用真实邮箱注册</ListItem>
               <ListItem>
                 <Typography>
-                  受供应商和OpenAI政策影响，价格会随时调整，本站计价分组倍率<Chip color={'error'} label={'2.5倍'} size="small" variant="outlined"></Chip> 
-                  ，充值汇率为 
+                  受供应商和OpenAI政策影响，价格会随时调整，本站计价分组倍率
+                  <Chip color={'error'} label={'2.5倍'} size="small" variant="outlined"></Chip>
+                  ，充值汇率为
                   <Chip color={'error'} label={'2元=1刀'} size="small" variant="outlined"></Chip>（模型计费详情请查看下方表格）
                 </Typography>
               </ListItem>
@@ -318,7 +331,7 @@ const Index = () => {
                         timesPrice: '$0.12 每次',
                         isSupport: '支持'
                       },
-                      
+
                       {
                         name: 'gpt-4-v',
                         timesPrice: '$0.1 每次',
@@ -347,7 +360,7 @@ const Index = () => {
                         name: 'tts-1-hd',
                         characterPrice: '$0.03 / 1k characters',
                         isSupport: '支持'
-                      },
+                      }
                     ],
                     'OpenAI'
                   )}
