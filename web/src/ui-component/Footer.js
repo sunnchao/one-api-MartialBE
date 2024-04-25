@@ -16,7 +16,7 @@ const Footer = () => {
         ) : (
           <>
             <Link href="https://github.com/MartialBE/one-api" target="_blank">
-              {siteInfo.system_name} {import.meta.env.REACT_APP_VERSION}{' '}
+              {siteInfo.system_name} {import.meta.env.VITE_REACT_APP_VERSION}{' '}
             </Link>
             由{' '}
             <Link href="https://github.com/MartialBE" target="_blank">

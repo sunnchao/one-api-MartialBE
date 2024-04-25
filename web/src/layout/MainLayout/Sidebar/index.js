@@ -40,7 +40,7 @@ const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
           <MenuCard />
           <Stack direction="row" justifyContent="center" sx={{ mb: 2 }}>
             <Chip
-              label={import.meta.env.REACT_APP_VERSION || '未知版本'}
+              label={import.meta.env.VITE_REACT_APP_VERSION || '未知版本'}
               disabled
               chipcolor="secondary"
               size="small"
@@ -55,7 +55,7 @@ const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
           <MenuCard />
           <Stack direction="row" justifyContent="center" sx={{ mb: 2 }}>
             <Chip
-              label={import.meta.env.REACT_APP_VERSION || '未知版本'}
+              label={import.meta.env.VITE_REACT_APP_VERSION || '未知版本'}
               disabled
               chipcolor="secondary"
               size="small"
