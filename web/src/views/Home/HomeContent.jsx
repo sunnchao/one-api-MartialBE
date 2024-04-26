@@ -395,20 +395,20 @@ const Index = () => {
                     [
                       {
                         name: 'claude-3-opus-20240229',
-                        inputTokens: '$0.15',
-                        outputTokens: '$0.75',
+                        inputTokens: '$0.015',
+                        outputTokens: '$0.075',
                         isSupport: '支持'
                       },
                       {
                         name: 'claude-3-sonnet-20240229',
-                        inputTokens: '$0.03',
-                        outputTokens: '$0.15',
+                        inputTokens: '$0.003',
+                        outputTokens: '$0.015',
                         isSupport: '支持'
                       },
                       {
                         name: 'claude-3-haiku-20240307',
-                        inputTokens: '$0.0025',
-                        outputTokens: '$0.0125',
+                        inputTokens: '$0.00025',
+                        outputTokens: '$0.00125',
                         isSupport: '支持'
                       }
                     ],
