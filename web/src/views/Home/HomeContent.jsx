@@ -394,6 +394,25 @@ const Index = () => {
                   {renderModalTable(
                     [
                       {
+                        name: 'command-r',
+                        inputTokens: '$0.0005',
+                        outputTokens: '$0.0015',
+                        isSupport: '支持'
+                      },
+                      {
+                        name: 'command-r-plus',
+                        inputTokens: '$0.003',
+                        outputTokens: '$0.015',
+                        isSupport: '支持'
+                      },
+                    ],
+                    'Cohere (不支持高并发, 不保证稳定性)'
+                  )}
+                </ListItem>
+                <ListItem>
+                  {renderModalTable(
+                    [
+                      {
                         name: 'claude-3-opus-20240229',
                         inputTokens: '$0.015',
                         outputTokens: '$0.075',
