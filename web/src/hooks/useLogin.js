@@ -17,7 +17,7 @@ const useLogin = () => {
       if (success) {
         localStorage.setItem('user', JSON.stringify(data));
         dispatch({ type: LOGIN, payload: data });
-        navigate('/panel');
+        navigate('/panel/dashboard');
       }
       return { success, message };
     } catch (err) {
@@ -34,12 +34,12 @@ const useLogin = () => {
       if (success) {
         if (message === 'bind') {
           showSuccess('绑定成功！');
-          navigate('/panel');
+          navigate('/panel/dashboard');
         } else {
           dispatch({ type: LOGIN, payload: data });
           localStorage.setItem('user', JSON.stringify(data));
           showSuccess('登录成功！');
-          navigate('/panel');
+          navigate('/panel/dashboard');
         }
       }
       return { success, message };
@@ -56,12 +56,13 @@ const useLogin = () => {
       if (success) {
         if (message === 'bind') {
           showSuccess('绑定成功！');
-          navigate('/panel');
+          navigate('/panel/dashboard');
         } else {
           dispatch({ type: LOGIN, payload: data });
           localStorage.setItem('user', JSON.stringify(data));
           showSuccess('登录成功！');
-          navigate('/panel');
+          sessionStorage.removeItem('aff');
+          navigate('/panel/dashboard');
         }
       }
       return { success, message };
@@ -79,7 +80,7 @@ const useLogin = () => {
         dispatch({ type: LOGIN, payload: data });
         localStorage.setItem('user', JSON.stringify(data));
         showSuccess('登录成功！');
-        navigate('/panel');
+        navigate('/panel/dashboard');
       }
       return { success, message };
     } catch (err) {
@@ -97,12 +98,12 @@ const useLogin = () => {
       if (success) {
         if (message === 'bind') {
           showSuccess('绑定成功！');
-          navigate('/panel');
+          navigate('/panel/dashboard');
         } else {
           dispatch({ type: LOGIN, payload: data });
           localStorage.setItem('user', JSON.stringify(data));
           showSuccess('登录成功！');
-          navigate('/panel');
+          navigate('/panel/dashboard');
         }
       }
       return { success, message };

@@ -14,7 +14,7 @@ func GetOptions(c *gin.Context) {
 	var options []*model.Option
 	common.OptionMapRWMutex.Lock()
 	for k, v := range common.OptionMap {
-		if strings.HasSuffix(k, "Token") || strings.HasSuffix(k, "Secret") {
+		if strings.Contains(k, "Token") || strings.Contains(k, "Secret") {
 			continue
 		}
 		options = append(options, &model.Option{
@@ -23,6 +23,40 @@ func GetOptions(c *gin.Context) {
 		})
 	}
 	common.OptionMapRWMutex.Unlock()
+
+	keys := string(c.Query("keys"))
+	_, ifExist := c.Get("username")
+	if !ifExist {
+		// 只能带参查询配置
+		if keys == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "无效的参数",
+			})
+			return
+		}
+	}
+	if keys != "" {
+		keysArr := strings.Split(keys, ",")
+		var filteredOptions []*model.Option
+		// 字符串类型
+		var val string
+		for _, key := range keysArr {
+			if strings.Contains(key, "Token") || strings.Contains(key, "Secret") {
+				val = ""
+			} else {
+				val = common.OptionMap[key]
+			}
+			filteredOptions = append(filteredOptions, &model.Option{
+				Key:   key,
+				Value: common.Interface2String(val),
+			})
+		}
+		options = filteredOptions
+	} else {
+		options = []*model.Option{}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",

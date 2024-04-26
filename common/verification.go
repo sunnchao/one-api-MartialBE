@@ -1,8 +1,7 @@
 package common
 
 import (
-	"github.com/google/uuid"
-	"strings"
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -22,13 +21,21 @@ var verificationMap map[string]verificationValue
 var verificationMapMaxSize = 10
 var VerificationValidMinutes = 10
 
+//	func GenerateVerificationCode(length int) string {
+//		code := uuid.New().String()
+//		code = strings.Replace(code, "-", "", -1)
+//		if length == 0 {
+//			return code
+//		}
+//		return code[:length]
+//	}
 func GenerateVerificationCode(length int) string {
-	code := uuid.New().String()
-	code = strings.Replace(code, "-", "", -1)
-	if length == 0 {
-		return code
+	rand.Seed(time.Now().UnixNano())
+	code := ""
+	for i := 0; i < length; i++ {
+		code += string(rune(rand.Intn(10) + 48))
 	}
-	return code[:length]
+	return code
 }
 
 func RegisterVerificationCodeWithKey(key string, code string, purpose string) {

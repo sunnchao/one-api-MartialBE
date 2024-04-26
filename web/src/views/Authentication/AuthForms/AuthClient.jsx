@@ -44,7 +44,7 @@ const AuthClient = () => {
       {tripartiteLogin ? (
         <Grid container direction="row" justifyContent="center" spacing={2}>
           {siteInfo.github_oauth && (
-            <Grid item xs={12 / oauthClientCounts}>
+            <Grid item xs={12}>
               <AnimateButton>
                 <Button
                   disableElevation
@@ -65,7 +65,7 @@ const AuthClient = () => {
             </Grid>
           )}
           {siteInfo.linuxdo_oauth && (
-            <Grid item xs={12 / oauthClientCounts}>
+            <Grid item xs={12}>
               <AnimateButton>
                 <Button
                   disableElevation
