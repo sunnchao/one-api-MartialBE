@@ -147,9 +147,9 @@ const Index = () => {
               </ListItem>
               <ListItem>
                 <Typography>
-                  每位注册用户都将获得 <Chip color={'error'} label={'$1'} size="small" variant="outlined"></Chip> 的初始使用额度,
+                  每位注册用户都将获得 <Chip color={'error'} label={'$5'} size="small" variant="outlined"></Chip> 的初始使用额度,
                   邀请新用户奖励
-                  <Chip color={'error'} label={'$0.5'} size="small" variant="outlined"></Chip>的额度, 可使用全模型
+                  <Chip color={'error'} label={'$1'} size="small" variant="outlined"></Chip>的额度, 可使用全模型
                 </Typography>
               </ListItem>
               <ListItem>
@@ -394,21 +394,40 @@ const Index = () => {
                   {renderModalTable(
                     [
                       {
+                        name: 'command-r',
+                        inputTokens: '$0.0005',
+                        outputTokens: '$0.0015',
+                        isSupport: '支持'
+                      },
+                      {
+                        name: 'command-r-plus',
+                        inputTokens: '$0.003',
+                        outputTokens: '$0.015',
+                        isSupport: '支持'
+                      },
+                    ],
+                    'Cohere (不支持高并发, 不保证稳定性)'
+                  )}
+                </ListItem>
+                <ListItem>
+                  {renderModalTable(
+                    [
+                      {
                         name: 'claude-3-opus-20240229',
-                        inputTokens: '$0.15',
-                        outputTokens: '$0.75',
+                        inputTokens: '$0.015',
+                        outputTokens: '$0.075',
                         isSupport: '支持'
                       },
                       {
                         name: 'claude-3-sonnet-20240229',
-                        inputTokens: '$0.03',
-                        outputTokens: '$0.15',
+                        inputTokens: '$0.003',
+                        outputTokens: '$0.015',
                         isSupport: '支持'
                       },
                       {
                         name: 'claude-3-haiku-20240307',
-                        inputTokens: '$0.0025',
-                        outputTokens: '$0.0125',
+                        inputTokens: '$0.00025',
+                        outputTokens: '$0.00125',
                         isSupport: '支持'
                       }
                     ],

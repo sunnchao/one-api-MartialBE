@@ -18,7 +18,7 @@ const AuthWrapper = ({ children }) => {
   const navigate = useNavigate();
   useEffect(() => {
     if (isUserLoaded && account.user) {
-      navigate('/panel');
+      navigate('/panel/dashboard');
     }
   }, [account, navigate, isUserLoaded]);
 
