@@ -108,20 +108,20 @@ const RegisterForm = ({ ...others }) => {
   }, [siteInfo]);
   useEffect(() => {
     // 获取选项数据
-    setLoading(true);
-    API.get('/api/site/option/', {
-      params: {
-        keys: 'EmailDomainRestrictionEnabled,EmailDomainWhitelist,TurnstileSecretKey'
-      }
-    })
-      .then((response) => {
-        let options = response.data.data || [];
-        const optionsMap = new Map(options.map((item) => [item.key, item.value]));
-        setOptionsMap(optionsMap);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    // setLoading(true);
+    // API.get('/api/site/option/', {
+    //   params: {
+    //     keys: 'EmailDomainRestrictionEnabled,EmailDomainWhitelist,TurnstileSecretKey'
+    //   }
+    // })
+    //   .then((response) => {
+    //     let options = response.data.data || [];
+    //     const optionsMap = new Map(options.map((item) => [item.key, item.value]));
+    //     setOptionsMap(optionsMap);
+    //   })
+    //   .finally(() => {
+    //     setLoading(false);
+    //   });
   }, []);
 
   return (
