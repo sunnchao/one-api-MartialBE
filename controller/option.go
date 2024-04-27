@@ -53,8 +53,6 @@ func GetOptions(c *gin.Context) {
 			})
 		}
 		options = filteredOptions
-	} else {
-		options = []*model.Option{}
 	}
 
 	c.JSON(http.StatusOK, gin.H{

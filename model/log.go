@@ -44,7 +44,6 @@ func RecordLog(userId int, logType int, content string) {
 		CreatedAt: common.GetTimestamp(),
 		Type:      logType,
 		Content:   content,
-		ClientIP:  common.GetIp(),
 	}
 	err := DB.Create(log).Error
 	if err != nil {

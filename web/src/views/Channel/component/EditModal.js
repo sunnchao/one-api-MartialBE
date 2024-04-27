@@ -35,7 +35,7 @@ import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
 const pluginList = import.meta.glob('../type/Plugin.json', {
-  eager: true,
+  eager: true
 });
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -294,7 +294,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
         <Formik initialValues={initialInput} enableReinitialize validationSchema={validationSchema} onSubmit={submit}>
           {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values, setFieldValue }) => (
             <form noValidate onSubmit={handleSubmit}>
-              <FormControl fullWidth error={Boolean(touched.type && errors.type)} sx={{ ...theme.typography.otherInput }}>
+              <FormControl fullWidth error={Boolean(touched.type && errors.type)} sx={{ ...theme.typography.otherInput }} size={'small'}>
                 <InputLabel htmlFor="channel-type-label">{inputLabel.type}</InputLabel>
                 <Select
                   id="channel-type-label"
@@ -313,6 +313,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                       }
                     }
                   }}
+                  size={'small'}
                 >
                   {Object.values(CHANNEL_OPTIONS).map((option) => {
                     return (
@@ -331,7 +332,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                 )}
               </FormControl>
 
-              <FormControl fullWidth error={Boolean(touched.name && errors.name)} sx={{ ...theme.typography.otherInput }}>
+              <FormControl fullWidth error={Boolean(touched.name && errors.name)} sx={{ ...theme.typography.otherInput }} size={'small'}>
                 <InputLabel htmlFor="channel-name-label">{inputLabel.name}</InputLabel>
                 <OutlinedInput
                   id="channel-name-label"
@@ -343,6 +344,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                   onChange={handleChange}
                   inputProps={{ autoComplete: 'name' }}
                   aria-describedby="helper-text-channel-name-label"
+                  size={'small'}
                 />
                 {touched.name && errors.name ? (
                   <FormHelperText error id="helper-tex-channel-name-label">
@@ -354,7 +356,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
               </FormControl>
 
               {inputPrompt.base_url && (
-                <FormControl fullWidth error={Boolean(touched.base_url && errors.base_url)} sx={{ ...theme.typography.otherInput }}>
+                <FormControl fullWidth error={Boolean(touched.base_url && errors.base_url)} sx={{ ...theme.typography.otherInput }} size={'small'}>
                   <InputLabel htmlFor="channel-base_url-label">{inputLabel.base_url}</InputLabel>
                   <OutlinedInput
                     id="channel-base_url-label"
@@ -366,6 +368,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                     onChange={handleChange}
                     inputProps={{}}
                     aria-describedby="helper-text-channel-base_url-label"
+                    size={'small'}
                   />
                   {touched.base_url && errors.base_url ? (
                     <FormHelperText error id="helper-tex-channel-base_url-label">
@@ -378,7 +381,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
               )}
 
               {inputPrompt.other && (
-                <FormControl fullWidth error={Boolean(touched.other && errors.other)} sx={{ ...theme.typography.otherInput }}>
+                <FormControl fullWidth error={Boolean(touched.other && errors.other)} sx={{ ...theme.typography.otherInput }} size={'small'}>
                   <InputLabel htmlFor="channel-other-label">{inputLabel.other}</InputLabel>
                   <OutlinedInput
                     id="channel-other-label"
@@ -390,6 +393,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                     onChange={handleChange}
                     inputProps={{}}
                     aria-describedby="helper-text-channel-other-label"
+                    size={'small'}
                   />
                   {touched.other && errors.other ? (
                     <FormHelperText error id="helper-tex-channel-other-label">
@@ -401,7 +405,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                 </FormControl>
               )}
 
-              <FormControl fullWidth sx={{ ...theme.typography.otherInput }}>
+              <FormControl fullWidth sx={{ ...theme.typography.otherInput }} size={'small'}>
                 <Autocomplete
                   multiple
                   id="channel-groups-label"
@@ -420,6 +424,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                   filterSelectedOptions
                   renderInput={(params) => <TextField {...params} name="groups" error={Boolean(errors.groups)} label={inputLabel.groups} />}
                   aria-describedby="helper-text-channel-groups-label"
+                  size={'small'}
                 />
                 {errors.groups ? (
                   <FormHelperText error id="helper-tex-channel-groups-label">
@@ -430,7 +435,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                 )}
               </FormControl>
 
-              <FormControl fullWidth sx={{ ...theme.typography.otherInput }}>
+              <FormControl fullWidth sx={{ ...theme.typography.otherInput }} size={'small'}>
                 <Autocomplete
                   multiple
                   freeSolo
@@ -474,10 +479,11 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                   }}
                   renderOption={(props, option, { selected }) => (
                     <li {...props}>
-                      <Checkbox icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
+                      <Checkbox size='small' icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
                       {option.id}
                     </li>
                   )}
+                  size={'small'}
                 />
                 {errors.models ? (
                   <FormHelperText error id="helper-tex-channel-models-label">
@@ -497,6 +503,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                     onClick={() => {
                       setFieldValue('models', basicModels(values.type));
                     }}
+                    size={'small'}
                   >
                     填入渠道支持模型
                   </Button>
@@ -504,6 +511,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                     onClick={() => {
                       setFieldValue('models', modelOptions);
                     }}
+                    size={'small'}
                   >
                     填入所有模型
                   </Button>
@@ -512,7 +520,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
               <FormControl fullWidth error={Boolean(touched.key && errors.key)} sx={{ ...theme.typography.otherInput }}>
                 {!batchAdd ? (
                   <>
-                    <InputLabel htmlFor="channel-key-label">{inputLabel.key}</InputLabel>
+                    <InputLabel htmlFor="channel-key-label" size={'small'}>{inputLabel.key}</InputLabel>
                     <OutlinedInput
                       id="channel-key-label"
                       label={inputLabel.key}
@@ -523,6 +531,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                       onChange={handleChange}
                       inputProps={{}}
                       aria-describedby="helper-text-channel-key-label"
+                      size={'small'}
                     />
                   </>
                 ) : (
@@ -537,6 +546,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                     aria-describedby="helper-text-channel-key-label"
                     minRows={5}
                     placeholder={inputPrompt.key + '，一行一个密钥'}
+                    size={'small'}
                   />
                 )}
 
@@ -564,6 +574,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                   fullWidth
                   error={Boolean(touched.model_mapping && errors.model_mapping)}
                   sx={{ ...theme.typography.otherInput }}
+                  size={'small'}
                 >
                   {/* <InputLabel htmlFor="channel-model_mapping-label">{inputLabel.model_mapping}</InputLabel> */}
                   <TextField
@@ -577,6 +588,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                     aria-describedby="helper-text-channel-model_mapping-label"
                     minRows={5}
                     placeholder={inputPrompt.model_mapping}
+                    size={'small'}
                   />
                   {touched.model_mapping && errors.model_mapping ? (
                     <FormHelperText error id="helper-tex-channel-model_mapping-label">
@@ -587,7 +599,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                   )}
                 </FormControl>
               )}
-              <FormControl fullWidth error={Boolean(touched.proxy && errors.proxy)} sx={{ ...theme.typography.otherInput }}>
+              <FormControl fullWidth error={Boolean(touched.proxy && errors.proxy)} sx={{ ...theme.typography.otherInput }} size={'small'}>
                 <InputLabel htmlFor="channel-proxy-label">{inputLabel.proxy}</InputLabel>
                 <OutlinedInput
                   id="channel-proxy-label"
@@ -609,7 +621,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                 )}
               </FormControl>
               {inputPrompt.test_model && (
-                <FormControl fullWidth error={Boolean(touched.test_model && errors.test_model)} sx={{ ...theme.typography.otherInput }}>
+                <FormControl fullWidth error={Boolean(touched.test_model && errors.test_model)} sx={{ ...theme.typography.otherInput }} size='small'>
                   <InputLabel htmlFor="channel-test_model-label">{inputLabel.test_model}</InputLabel>
                   <OutlinedInput
                     id="channel-test_model-label"
@@ -662,7 +674,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions }) => {
                             <FormHelperText id="helper-tex-channel-key-label"> {param.description} </FormHelperText>
                           </FormControl>
                         ) : (
-                          <FormControl key={name} fullWidth sx={{ ...theme.typography.otherInput }}>
+                          <FormControl key={name} fullWidth sx={{ ...theme.typography.otherInput }} size={'small'}>
                             <TextField
                               multiline
                               key={name}

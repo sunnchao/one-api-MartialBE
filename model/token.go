@@ -295,7 +295,7 @@ func CreateInitialToken(userId int, username string) (err error) {
 	var token = &Token{
 		UserId:         userId,
 		Key:            common.GenerateKey(),
-		Name:           username + "的默认令牌",
+		Name:           username + "的初始令牌",
 		CreatedTime:    common.GetTimestamp(),
 		AccessedTime:   common.GetTimestamp(),
 		ExpiredTime:    -1,
