@@ -107,6 +107,16 @@ func tokenAuth(c *gin.Context, key string) {
 	c.Set("token_id", token.Id)
 	c.Set("token_name", token.Name)
 	c.Set("chat_cache", token.ChatCache)
+	c.Set("token_unlimited_quota", token.UnlimitedQuota)
+	if !token.UnlimitedQuota {
+		c.Set("token_quota", token.RemainQuota)
+	}
+	if token.ModelLimitsEnabled {
+		c.Set("token_model_limit_enabled", true)
+		c.Set("token_model_limit", token.GetModelLimitsMap())
+	} else {
+		c.Set("token_model_limit_enabled", false)
+	}
 	if len(parts) > 1 {
 		if model.IsAdmin(token.UserId) {
 			channelId := common.String2Int(parts[1])

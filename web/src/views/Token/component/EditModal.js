@@ -43,7 +43,9 @@ const originInputs = {
   remain_quota: 0,
   expired_time: -1,
   unlimited_quota: false,
-  chat_cache: false
+  chat_cache: false,
+  model_limits_enabled: false,
+  model_limits: ''
 };
 
 const EditModal = ({ open, tokenId, onCancel, onOk }) => {
@@ -117,8 +119,10 @@ const EditModal = ({ open, tokenId, onCancel, onOk }) => {
         <Formik initialValues={inputs} enableReinitialize validationSchema={validationSchema} onSubmit={submit}>
           {({ errors, handleBlur, handleChange, handleSubmit, touched, values, setFieldError, setFieldValue, isSubmitting }) => (
             <form noValidate onSubmit={handleSubmit}>
-              <FormControl fullWidth error={Boolean(touched.name && errors.name)} sx={{ ...theme.typography.otherInput }}>
-                <InputLabel htmlFor="channel-name-label">名称</InputLabel>
+              <FormControl fullWidth error={Boolean(touched.name && errors.name)} sx={{ ...theme.typography.otherInput }} size={'small'}>
+                <InputLabel htmlFor="channel-name-label" size={'small'}>
+                  名称
+                </InputLabel>
                 <OutlinedInput
                   id="channel-name-label"
                   label="名称"
@@ -129,6 +133,7 @@ const EditModal = ({ open, tokenId, onCancel, onOk }) => {
                   onChange={handleChange}
                   inputProps={{ autoComplete: 'name' }}
                   aria-describedby="helper-text-channel-name-label"
+                  size={'small'}
                 />
                 {touched.name && errors.name && (
                   <FormHelperText error id="helper-tex-channel-name-label">
@@ -137,7 +142,12 @@ const EditModal = ({ open, tokenId, onCancel, onOk }) => {
                 )}
               </FormControl>
               {values.expired_time !== -1 && (
-                <FormControl fullWidth error={Boolean(touched.expired_time && errors.expired_time)} sx={{ ...theme.typography.otherInput }}>
+                <FormControl
+                  fullWidth
+                  error={Boolean(touched.expired_time && errors.expired_time)}
+                  sx={{ ...theme.typography.otherInput }}
+                  size={'small'}
+                >
                   <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={'zh-cn'}>
                     <DateTimePicker
                       label="过期时间"
@@ -183,7 +193,12 @@ const EditModal = ({ open, tokenId, onCancel, onOk }) => {
                 label="永不过期"
               />
 
-              <FormControl fullWidth error={Boolean(touched.remain_quota && errors.remain_quota)} sx={{ ...theme.typography.otherInput }}>
+              <FormControl
+                fullWidth
+                error={Boolean(touched.remain_quota && errors.remain_quota)}
+                sx={{ ...theme.typography.otherInput }}
+                size={'small'}
+              >
                 <InputLabel htmlFor="channel-remain_quota-label">额度</InputLabel>
                 <OutlinedInput
                   id="channel-remain_quota-label"
@@ -196,6 +211,7 @@ const EditModal = ({ open, tokenId, onCancel, onOk }) => {
                   onChange={handleChange}
                   aria-describedby="helper-text-channel-remain_quota-label"
                   disabled={values.unlimited_quota}
+                  size={'small'}
                 />
 
                 {touched.remain_quota && errors.remain_quota && (
@@ -204,7 +220,7 @@ const EditModal = ({ open, tokenId, onCancel, onOk }) => {
                   </FormHelperText>
                 )}
               </FormControl>
-              <FormControl fullWidth>
+              <FormControl fullWidth size={'small'}>
                 <FormControlLabel
                   control={
                     <Switch
@@ -230,6 +246,44 @@ const EditModal = ({ open, tokenId, onCancel, onOk }) => {
                   />
                 )}
               </FormControl>
+              {/* 模型限制 */}
+              {values.model_limits_enabled && (
+                <FormControl
+                  fullWidth
+                  error={Boolean(touched.model_limits && errors.model_limits)}
+                  sx={{ ...theme.typography.otherInput }}
+                  size={'small'}
+                >
+                  <InputLabel htmlFor="channel-model_limits-label" size={'small'}>
+                    模型限制
+                  </InputLabel>
+                  {/* 下拉框*/}
+                  <OutlinedInput
+                    id="channel-model_limits-label"
+                    label="模型限制"
+                    type="text"
+                    value={values.model_limits}
+                    name="model_limits"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    inputProps={{ autoComplete: 'model_limits' }}
+                    aria-describedby="helper-text-channel-model_limits-label"
+                    size={'small'}
+                  />
+                </FormControl>
+              )}
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={values.model_limits_enabled}
+                    onClick={() => {
+                      setFieldValue('model_limits_enabled', !values.model_limits_enabled);
+                    }}
+                  />
+                }
+                label="模型限制"
+              />
+
               <DialogActions>
                 <Button onClick={onCancel}>取消</Button>
                 <Button disableElevation disabled={isSubmitting} type="submit" variant="contained" color="primary">

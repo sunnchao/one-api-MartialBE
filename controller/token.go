@@ -70,11 +70,13 @@ func GetTokenStatus(c *gin.Context) {
 		expiredAt = 0
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"object":          "credit_summary",
-		"total_granted":   token.RemainQuota,
-		"total_used":      0, // not supported currently
-		"total_available": token.RemainQuota,
-		"expires_at":      expiredAt * 1000,
+		"object":               "credit_summary",
+		"total_granted":        token.RemainQuota,
+		"total_used":           0, // not supported currently
+		"total_available":      token.RemainQuota,
+		"expires_at":           expiredAt * 1000,
+		"model_limits":         token.ModelLimits,
+		"model_limits_enabled": token.ModelLimitsEnabled,
 	})
 }
 
@@ -96,15 +98,17 @@ func AddToken(c *gin.Context) {
 		return
 	}
 	cleanToken := model.Token{
-		UserId:         c.GetInt("id"),
-		Name:           token.Name,
-		Key:            common.GenerateKey(),
-		CreatedTime:    common.GetTimestamp(),
-		AccessedTime:   common.GetTimestamp(),
-		ExpiredTime:    token.ExpiredTime,
-		RemainQuota:    token.RemainQuota,
-		UnlimitedQuota: token.UnlimitedQuota,
-		ChatCache:      token.ChatCache,
+		UserId:             c.GetInt("id"),
+		Name:               token.Name,
+		Key:                common.GenerateKey(),
+		CreatedTime:        common.GetTimestamp(),
+		AccessedTime:       common.GetTimestamp(),
+		ExpiredTime:        token.ExpiredTime,
+		RemainQuota:        token.RemainQuota,
+		UnlimitedQuota:     token.UnlimitedQuota,
+		ChatCache:          token.ChatCache,
+		ModelLimitsEnabled: token.ModelLimitsEnabled,
+		ModelLimits:        token.ModelLimits,
 	}
 	err = cleanToken.Insert()
 	if err != nil {
@@ -189,6 +193,8 @@ func UpdateToken(c *gin.Context) {
 		cleanToken.RemainQuota = token.RemainQuota
 		cleanToken.UnlimitedQuota = token.UnlimitedQuota
 		cleanToken.ChatCache = token.ChatCache
+		cleanToken.ModelLimitsEnabled = token.ModelLimitsEnabled
+		cleanToken.ModelLimits = token.ModelLimits
 	}
 	err = cleanToken.Update()
 	if err != nil {

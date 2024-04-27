@@ -41,14 +41,14 @@ func ErrorToOpenAIError(err error) *types.OpenAIError {
 	return &types.OpenAIError{
 		Code:    "system error",
 		Message: err.Error(),
-		Type:    "one_api_error",
+		Type:    "chirou_api_error",
 	}
 }
 
 func StringErrorWrapper(err string, code string, statusCode int) *types.OpenAIErrorWithStatusCode {
 	openAIError := types.OpenAIError{
 		Message: err,
-		Type:    "one_api_error",
+		Type:    "chirou_api_error",
 		Code:    code,
 	}
 	return &types.OpenAIErrorWithStatusCode{
@@ -61,7 +61,7 @@ func AbortWithMessage(c *gin.Context, statusCode int, message string) {
 	c.JSON(statusCode, gin.H{
 		"error": gin.H{
 			"message": message,
-			"type":    "one_api_error",
+			"type":    "chirou_api_error",
 		},
 	})
 	c.Abort()

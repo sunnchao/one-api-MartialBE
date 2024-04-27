@@ -61,7 +61,7 @@ func (p *AzureProvider) ResponseAzureImageHandler(resp *http.Response, azure *Im
 		errWithCode = &types.OpenAIErrorWithStatusCode{
 			OpenAIError: types.OpenAIError{
 				Message: azure.Error.Message,
-				Type:    "one_api_error",
+				Type:    "chirou_api_error",
 				Code:    azure.Error.Code,
 			},
 			StatusCode: resp.StatusCode,
