@@ -22,6 +22,7 @@ type Log struct {
 	CompletionTokens int    `json:"completion_tokens" gorm:"default:0"`
 	ChannelId        int    `json:"channel" gorm:"index"`
 	RequestTime      int    `json:"request_time" gorm:"default:0"`
+	ClientIP         string `json:"client_ip" gorm:"default:''"`
 }
 
 const (
@@ -43,6 +44,7 @@ func RecordLog(userId int, logType int, content string) {
 		CreatedAt: common.GetTimestamp(),
 		Type:      logType,
 		Content:   content,
+		ClientIP:  common.GetIp(),
 	}
 	err := DB.Create(log).Error
 	if err != nil {

@@ -289,3 +289,24 @@ func PostConsumeTokenQuota(tokenId int, quota int) (err error) {
 	}
 	return nil
 }
+
+// 创建初始令牌
+func CreateInitialToken(userId int, username string) (err error) {
+	var token = &Token{
+		UserId:         userId,
+		Key:            common.GenerateKey(),
+		Name:           username + "的默认令牌",
+		CreatedTime:    common.GetTimestamp(),
+		AccessedTime:   common.GetTimestamp(),
+		ExpiredTime:    -1,
+		RemainQuota:    0,
+		UnlimitedQuota: true,
+		UsedQuota:      0,
+		ChatCache:      false,
+	}
+	err = token.Insert()
+	if err != nil {
+		common.SysError("failed to create initial token: " + err.Error())
+	}
+	return err
+}

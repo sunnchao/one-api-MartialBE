@@ -171,6 +171,9 @@ func Register(c *gin.Context) {
 		})
 		return
 	}
+
+	// 创建初始令牌
+	model.CreateInitialToken(cleanUser.Id, cleanUser.Username)
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
