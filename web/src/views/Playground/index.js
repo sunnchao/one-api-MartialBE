@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import { useEffect, useState, useCallback } from 'react';
-import { API } from 'utils/api';
-import { getChatLinks, showError, replaceChatPlaceholders } from 'utils/common';
+import { API } from '@/utils/api';
+import { getChatLinks, showError, replaceChatPlaceholders } from '@/utils/common';
 import { Typography, Tabs, Tab, Box, Card } from '@mui/material';
-import SubCard from 'ui-component/cards/SubCard';
+import SubCard from '@/ui-component/cards/SubCard';
 // import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
