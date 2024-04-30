@@ -147,7 +147,7 @@ const Index = () => {
               </ListItem>
               <ListItem>
                 <Typography>
-                  每位注册用户都将获得 <Chip color={'error'} label={'$5'} size="small" variant="outlined"></Chip> 的初始使用额度,
+                  每位注册用户都将获得 <Chip color={'error'} label={'$2.5'} size="small" variant="outlined"></Chip> 的初始使用额度,
                   邀请新用户奖励
                   <Chip color={'error'} label={'$1'} size="small" variant="outlined"></Chip>的额度, 可使用全模型
                 </Typography>
