@@ -63,20 +63,14 @@ func IsCheckInToday(userId int) (checkInTime string, err error) {
 	if err != nil {
 		return "", err
 	}
-	// 获取当前的UTC时间
-	nowUTC := time.Now().UTC()
 
-	// 将UTC时间转换为北京时间（UTC+8）
-	beijingLocation, err := time.LoadLocation("Asia/Shanghai")
-
-	nowBeijing := nowUTC.In(beijingLocation)
-
-	// 将北京时间截断至当天的开始（即零点）
-	beijingMidnight := nowBeijing.Truncate(24 * time.Hour)
-	fmt.Printf("beijingMidnight: %v, userOperation.CreateAt: %v\n", beijingMidnight, userOperation.CreatedTime)
+	// 获取当前地区的当天零点时间
+	localZeroTime := common.GetLocalZeroTime()
+	// beijingMidnight := nowBeijing.Truncate(24 * time.Hour)
+	fmt.Printf("beijingMidnight: %v, userOperation.CreateAt: %v\n", localZeroTime, userOperation.CreatedTime)
 
 	// 比较签到时间是否晚于北京时间的今日零点
-	if userOperation.CreatedTime.After(beijingMidnight) {
+	if int(userOperation.CreatedTime.Unix()) >= int(localZeroTime.Unix()) {
 		// 已签到
 		return userOperation.CreatedTime.GoString(), err
 	}

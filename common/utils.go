@@ -262,3 +262,10 @@ func Marshal[T interface{}](data T) string {
 	}
 	return string(res)
 }
+
+// 获取当地0 点时间
+func GetLocalZeroTime() time.Time {
+	now := time.Now()
+	toDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	return toDay
+}
