@@ -17,10 +17,7 @@ type Redemption struct {
 	Quota        int    `json:"quota" gorm:"default:100"`
 	CreatedTime  int64  `json:"created_time" gorm:"bigint"`
 	RedeemedTime int64  `json:"redeemed_time" gorm:"bigint"`
-	// 其它参数
-	OtherParams string `json:"other_params" gorm:"text;default:''"`
-
-	Count int `json:"count" gorm:"-:all"` // only for api request
+	Count        int    `json:"count" gorm:"-:all"` // only for api request
 
 }
 
