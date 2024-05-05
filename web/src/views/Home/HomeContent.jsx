@@ -11,7 +11,8 @@ import {
   List,
   Typography,
   TableBody,
-  ListItem
+  ListItem,
+  ButtonBase
 } from '@mui/material';
 import { Box } from '@mui/system';
 import { copy } from '@/utils/common';
@@ -116,6 +117,10 @@ const renderModalTable = (data, provider) => {
 const Index = () => {
   const changelog = ['正式接入LINUX DO 授权登录', '恢复计价分组倍率为2.5倍，充值汇率为2元1刀'];
 
+  const handleCopyQQGroupNumber = () => {
+    copy('924076327');
+  };
+
   return (
     <>
       <Stack direction={'column'}>
@@ -144,6 +149,10 @@ const Index = () => {
               <ListItem>
                 使用过程中有问题请发邮件至
                 <a href="mailto:chirou.api@outlook.com">chirou.api@outlook.com</a>
+                或者加入QQ群{' '}
+                <ButtonBase onClick={handleCopyQQGroupNumber} style={{ padding: '0 5px' }}>
+                  924076327
+                </ButtonBase>
               </ListItem>
               <ListItem>
                 <Typography>
@@ -404,7 +413,7 @@ const Index = () => {
                         inputTokens: '$0.003',
                         outputTokens: '$0.015',
                         isSupport: '支持'
-                      },
+                      }
                     ],
                     'Cohere (不支持高并发, 不保证稳定性)'
                   )}
