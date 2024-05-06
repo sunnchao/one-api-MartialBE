@@ -9,25 +9,32 @@ import (
 )
 
 type Redemption struct {
-	Id           int    `json:"id"`
-	UserId       int    `json:"user_id"`
-	Key          string `json:"key" gorm:"type:char(32);uniqueIndex"`
-	Status       int    `json:"status" gorm:"default:1"`
-	Name         string `json:"name" gorm:"index"`
-	Quota        int    `json:"quota" gorm:"default:100"`
-	CreatedTime  int64  `json:"created_time" gorm:"bigint"`
-	RedeemedTime int64  `json:"redeemed_time" gorm:"bigint"`
-	Count        int    `json:"count" gorm:"-:all"` // only for api request
-
+	Id                int            `json:"id"`
+	UserId            int            `json:"user_id"`
+	Key               string         `json:"key" gorm:"type:char(32);uniqueIndex"`
+	Status            int            `json:"status" gorm:"default:1"`
+	Name              string         `json:"name" gorm:"index"`
+	Quota             int            `json:"quota" gorm:"default:100"`
+	CreatedTime       int64          `json:"created_time" gorm:"bigint"`
+	RedeemedTime      int64          `json:"redeemed_time" gorm:"bigint"`
+	BatchId           string         `json:"batch_id" gorm:"type:char(32);index;default:''"` // 批次唯一标识, 默认UUID
+	BatchPerUserLimit int            `json:"per_user_limit" gorm:"default:1"`                // 批次每人限领次数
+	ExpireTime        int64          `json:"expire_time" gorm:"bigint"`                      // 有效期
+	Count             int            `json:"count" gorm:"-:all"`                             // only for api request
+	UsedUserId        int            `json:"used_user_id"`
+	DeletedAt         gorm.DeletedAt `gorm:"index"`
 }
 
 var allowedRedemptionslOrderFields = map[string]bool{
-	"id":            true,
-	"name":          true,
-	"status":        true,
-	"quota":         true,
-	"created_time":  true,
-	"redeemed_time": true,
+	"id":                   true,
+	"name":                 true,
+	"status":               true,
+	"quota":                true,
+	"created_time":         true,
+	"redeemed_time":        true,
+	"batch_id":             true,
+	"batch_per_user_limit": true,
+	"expire_time":          true,
 }
 
 func GetRedemptionsList(params *GenericParams) (*DataResult[Redemption], error) {
@@ -72,12 +79,25 @@ func Redeem(key string, userId int) (quota int, err error) {
 		if redemption.Status != common.RedemptionCodeStatusEnabled {
 			return errors.New("该兑换码已被使用")
 		}
+		// 查看是否有批次限制
+		if redemption.BatchId != "" {
+			// 有批次限制
+			var count int64
+			err = tx.Model(&Redemption{}).Where("batch_id = ? AND used_user_id = ?", redemption.BatchId, userId).Count(&count).Error
+			if err != nil {
+				return err
+			}
+			if count >= int64(redemption.BatchPerUserLimit) {
+				return errors.New("已达到该批次限领次数")
+			}
+		}
 		err = tx.Model(&User{}).Where("id = ?", userId).Update("quota", gorm.Expr("quota + ?", redemption.Quota)).Error
 		if err != nil {
 			return err
 		}
 		redemption.RedeemedTime = common.GetTimestamp()
 		redemption.Status = common.RedemptionCodeStatusUsed
+		redemption.UsedUserId = userId
 		err = tx.Save(redemption).Error
 		return err
 	})
