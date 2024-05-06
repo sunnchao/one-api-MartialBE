@@ -24,7 +24,9 @@ import User1 from '@/assets/images/users/user-round.svg';
 import useLogin from '@/hooks/useLogin';
 
 // assets
-import { IconLogout, IconSettings, IconUserScan } from '@tabler/icons-react';
+import { IconLogout, IconSettings, IconUserScan, IconLicense } from '@tabler/icons-react';
+import { showError, showSuccess } from '@/utils/common';
+import { API } from '@/utils/api';
 
 // ==============================|| PROFILE MENU ||============================== //
 
@@ -41,6 +43,18 @@ const ProfileSection = () => {
   const anchorRef = useRef(null);
   const handleLogout = async () => {
     logout();
+  };
+
+  const handleUserOperationCheckIn = async () => {
+    try {
+      let res = await API.post(`/api/operation/checkin`);
+      const { success, message } = res.data;
+      if (success) {
+        showSuccess(message);
+      } else {
+        showError(message);
+      }
+    } catch (error) {}
   };
 
   const handleClose = (event) => {
@@ -152,7 +166,12 @@ const ProfileSection = () => {
                       </ListItemIcon>
                       <ListItemText primary={<Typography variant="body2">设置</Typography>} />
                     </ListItemButton>
-
+                    <ListItemButton sx={{ borderRadius: `${customization.borderRadius}px` }} onClick={handleUserOperationCheckIn}>
+                      <ListItemIcon>
+                        <IconLicense stroke={1.5} size="1.3rem" />
+                      </ListItemIcon>
+                      <ListItemText primary={<Typography variant="body2">签到</Typography>} />
+                    </ListItemButton>
                     <ListItemButton sx={{ borderRadius: `${customization.borderRadius}px` }} onClick={handleLogout}>
                       <ListItemIcon>
                         <IconLogout stroke={1.5} size="1.3rem" />

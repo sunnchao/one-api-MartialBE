@@ -110,16 +110,16 @@ func Redeem(key string, userId int) (quota int, err error) {
 	var redeQuota = redemption.Quota
 
 	// 2024.5.1 1714492800 - 2024.5.5 活动兑换 加倍
-	if redemption.RedeemedTime >= 1714448138 && redemption.RedeemedTime <= 1714924799 {
-		err = DB.Model(&User{}).Where("id = ?", userId).Update("quota", gorm.Expr("quota + ?", redemption.Quota)).Error
-		if err != nil {
-			common.SysLog("活动兑换加倍失败，" + err.Error())
-		} else {
-			RecordLog(userId, LogTypeTopup, fmt.Sprintf("51活动兑换赠送 %s", common.LogQuota(redemption.Quota)))
-			redeQuota = redemption.Quota * 2
-		}
-
-	}
+	//if redemption.RedeemedTime >= 1714448138 && redemption.RedeemedTime <= 1714924799 {
+	//	err = DB.Model(&User{}).Where("id = ?", userId).Update("quota", gorm.Expr("quota + ?", redemption.Quota)).Error
+	//	if err != nil {
+	//		common.SysLog("活动兑换加倍失败，" + err.Error())
+	//	} else {
+	//		RecordLog(userId, LogTypeTopup, fmt.Sprintf("51活动兑换赠送 %s", common.LogQuota(redemption.Quota)))
+	//		redeQuota = redemption.Quota * 2
+	//	}
+	//
+	//}
 
 	return redeQuota, nil
 }

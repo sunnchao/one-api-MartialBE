@@ -13,7 +13,8 @@ import {
   ListItemText,
   Typography,
   Divider,
-  ClickAwayListener
+  ClickAwayListener,
+  ButtonBase
 } from '@mui/material';
 import LogoSection from '@/layout/MainLayout/LogoSection';
 import { Link } from 'react-router-dom';
@@ -152,9 +153,11 @@ const Header = () => {
                     </ListItemButton>
                     <Divider />
                     {account.user ? (
-                      <ListItemButton component={Link} variant="contained" to="/panel" color="primary">
-                        控制台
-                      </ListItemButton>
+                      <>
+                        <ListItemButton component={Link} variant="contained" to="/panel" color="primary">
+                          控制台
+                        </ListItemButton>
+                      </>
                     ) : (
                       <ListItemButton component={Link} variant="contained" to="/login" color="primary">
                         登录
