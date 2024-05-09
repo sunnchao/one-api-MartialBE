@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -7,17 +7,14 @@ import { useTheme } from '@mui/material/styles';
 import {
   Box,
   Button,
-  Divider,
   FormControl,
   FormHelperText,
-  Grid,
   IconButton,
   InputAdornment,
   InputLabel,
   OutlinedInput,
   Stack,
-  Typography,
-  useMediaQuery
+  Typography
 } from '@mui/material';
 
 // third party
@@ -33,14 +30,21 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 import AuthClient from '@/views/Authentication/AuthForms/AuthClient';
+import { showInfo } from '@/utils/common';
+import Turnstile from 'react-turnstile';
 
 // ============================|| FIREBASE - LOGIN ||============================ //
 
 const LoginForm = ({ ...others }) => {
   const theme = useTheme();
   const { login } = useLogin();
+  const siteInfo = useSelector((state) => state.siteInfo);
 
   const [showPassword, setShowPassword] = useState(false);
+  const [turnstileEnabled, setTurnstileEnabled] = useState(false);
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -48,6 +52,14 @@ const LoginForm = ({ ...others }) => {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
+
+  useEffect(() => {
+    if (siteInfo.turnstile_check) {
+      setTurnstileEnabled(true);
+      setTurnstileSiteKey(siteInfo.turnstile_site_key);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [siteInfo]);
 
   return (
     <>
@@ -63,7 +75,12 @@ const LoginForm = ({ ...others }) => {
           password: Yup.string().max(255).required('密码是必填项')
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
-          const { success, message } = await login(values.username, values.password);
+          if (turnstileEnabled && turnstileToken === '') {
+            showInfo('请稍后几秒重试，Turnstile 正在检查用户环境！');
+            setSubmitting(false);
+            return;
+          }
+          const { success, message } = await login(values.username, values.password, turnstileToken);
           if (success) {
             setStatus({ success: true });
           } else {
@@ -149,6 +166,16 @@ const LoginForm = ({ ...others }) => {
               </Box>
             )}
 
+            {turnstileEnabled ? (
+              <Turnstile
+                sitekey={turnstileSiteKey}
+                onVerify={(token) => {
+                  setTurnstileToken(token);
+                }}
+              />
+            ) : (
+              <></>
+            )}
             <Box sx={{ mt: 2 }}>
               <AnimateButton>
                 <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="primary">

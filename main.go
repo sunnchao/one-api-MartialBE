@@ -98,4 +98,5 @@ func initHttpServer() {
 	if err != nil {
 		common.FatalLog("failed to start HTTP server: " + err.Error())
 	}
+	notify.Send("One API started", "One API started successfully.")
 }

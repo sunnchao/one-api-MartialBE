@@ -27,6 +27,7 @@ import useLogin from '@/hooks/useLogin';
 import { IconLogout, IconSettings, IconUserScan, IconLicense } from '@tabler/icons-react';
 import { showError, showSuccess } from '@/utils/common';
 import { API } from '@/utils/api';
+import BaseCheckin from '@/ui-component/BaseCheckInButton';
 
 // ==============================|| PROFILE MENU ||============================== //
 
@@ -166,11 +167,17 @@ const ProfileSection = () => {
                       </ListItemIcon>
                       <ListItemText primary={<Typography variant="body2">设置</Typography>} />
                     </ListItemButton>
-                    <ListItemButton sx={{ borderRadius: `${customization.borderRadius}px` }} onClick={handleUserOperationCheckIn}>
+                    <ListItemButton sx={{ borderRadius: `${customization.borderRadius}px` }}>
                       <ListItemIcon>
                         <IconLicense stroke={1.5} size="1.3rem" />
                       </ListItemIcon>
-                      <ListItemText primary={<Typography variant="body2">签到</Typography>} />
+                      <ListItemText
+                        primary={
+                          <Typography variant="body2">
+                            <BaseCheckin></BaseCheckin>
+                          </Typography>
+                        }
+                      />
                     </ListItemButton>
                     <ListItemButton sx={{ borderRadius: `${customization.borderRadius}px` }} onClick={handleLogout}>
                       <ListItemIcon>

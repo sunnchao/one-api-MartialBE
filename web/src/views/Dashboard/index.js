@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Grid, Typography } from '@mui/material';
-import LoadingButton from '@mui/lab/LoadingButton';
+import { Grid, Typography, Button } from '@mui/material';
 import { gridSpacing } from '@/store/constant';
 import StatisticalLineChartCard from './component/StatisticalLineChartCard';
 import ApexCharts from '@/ui-component/chart/ApexCharts';
 import SupportModels from './component/SupportModels';
 import { generateLineChartOptions, getLastSevenDays, generateBarChartOptions, renderChartNumber } from '@/utils/chart';
 import { API } from '@/utils/api';
-import { showError, calculateQuota, renderNumber, showSuccess } from '@/utils/common';
+import { showError, calculateQuota, renderNumber } from '@/utils/common';
 import UserCard from '@/ui-component/cards/UserCard';
+import BaseCheckInButton from '@/ui-component/BaseCheckInButton';
 
 const Dashboard = () => {
   const [isLoading, setLoading] = useState(true);
@@ -17,7 +17,7 @@ const Dashboard = () => {
   const [quotaChart, setQuotaChart] = useState(null);
   const [tokenChart, setTokenChart] = useState(null);
   const [users, setUsers] = useState([]);
-  const [checkinLoading, setCheckinLoading] = useState(false);
+
   // 是否显示 51 活动的文案
   const [show51Panel, setShow51Panel] = useState(true);
 
@@ -52,25 +52,6 @@ const Dashboard = () => {
         showError(message);
       }
     } catch (error) {
-      return;
-    }
-  };
-
-  // 签到
-  const handleUserOperationCheckIn = async () => {
-    setCheckinLoading(true);
-    try {
-      let res = await API.post(`/api/operation/checkin`);
-      const { success, message } = res.data;
-      if (success) {
-        showSuccess(message);
-        loadUser();
-      } else {
-        showError(message);
-      }
-      setCheckinLoading(false);
-    } catch (error) {
-      setCheckinLoading(false);
       return;
     }
   };
@@ -147,14 +128,12 @@ const Dashboard = () => {
                   <Typography variant="h4">签到:</Typography>
                 </Grid>
                 <Grid item xs={8}>
-                  <LoadingButton
-                    disabled={!!users?.check_in}
-                    loading={checkinLoading}
-                    onClick={handleUserOperationCheckIn}
-                    variant="contained"
-                  >
+                  <Button variant="contained" disabled={!!users?.check_in}>
+                    <BaseCheckInButton check_in={!!users?.check_in} loadUser={loadUser}></BaseCheckInButton>
+                  </Button>
+                  {/* <LoadingButton disabled={!!users?.check_in} variant="contained">
                     {users?.check_in ? '已签到' : '立即签到'}
-                  </LoadingButton>
+                  </LoadingButton> */}
                 </Grid>
                 {show51Panel && (
                   <Grid item xs={12}>
