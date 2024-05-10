@@ -52,7 +52,7 @@ func UserOperationCheckIn(c *gin.Context) {
 	// 签到成功
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": fmt.Sprintf("签到成功, 获得额度 %v", quota),
+		"message": fmt.Sprintf("签到成功, 获得额度 %v", common.LogQuota(quota)),
 	})
 
 }
