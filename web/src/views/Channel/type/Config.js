@@ -173,7 +173,7 @@ const typeConfig = {
   },
   27: {
     input: {
-      models: ['abab5.5-chat', 'abab5.5s-chat', 'abab6-chat', 'embo-01'],
+      models: ['abab5.5-chat', 'abab5.5s-chat', 'abab6-chat', 'abab6.5-chat','abab6.5s-chat', 'embo-01'],
       test_model: 'abab5.5-chat'
     },
     prompt: {
@@ -324,6 +324,15 @@ const typeConfig = {
       base_url: '请输入你部署的Ollama地址，例如：http://127.0.0.1:11434，如果你使用了cloudflare Zero Trust，可以在下方插件填入授权信息',
       key: '请随意填写'
     }
+  },
+  40: {
+    input: {
+      models: ["meta-llama/Llama-3-70b-chat-hf", "deepseek-ai/deepseek-coder-33b-instruct", "mistralai/Mixtral-8x22B-Instruct-v0.1", "Qwen/Qwen1.5-72B-Chat",],
+    },
+    prompt: {
+      test_model: ''
+    },
+    modelGroup: 'Together AI'
   }
 };
 
