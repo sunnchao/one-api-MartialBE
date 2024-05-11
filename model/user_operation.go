@@ -38,7 +38,7 @@ func InsertOperationCheckIn(userId int) (quota int, err error) {
 
 	quota = int(rand.Float64() * rand.Float64() * common.QuotaPerUnit)
 
-	operationRemark := []string{"签到", ", ", fmt.Sprintf("获得额度 %v", quota)}
+	operationRemark := []string{"签到", ", ", fmt.Sprintf("获得额度 %v", common.LogQuota(quota))}
 
 	// 更新用户额度
 	err = increaseUserQuota(userId, quota)

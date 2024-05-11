@@ -259,10 +259,12 @@ func GetDefaultPrice() []*Price {
 		"Baichuan2-53B":           {[]float64{1.4286, 1.4286}, common.ChannelTypeBaichuan}, // ¥0.02 / 1k tokens
 		"Baichuan-Text-Embedding": {[]float64{0.0357, 0.0357}, common.ChannelTypeBaichuan}, // ¥0.0005 / 1k tokens
 
-		"abab5.5s-chat": {[]float64{0.3572, 0.3572}, common.ChannelTypeMiniMax},   // ¥0.005 / 1k tokens
-		"abab5.5-chat":  {[]float64{1.0714, 1.0714}, common.ChannelTypeMiniMax},   // ¥0.015 / 1k tokens
-		"abab6-chat":    {[]float64{14.2857, 14.2857}, common.ChannelTypeMiniMax}, // ¥0.2 / 1k tokens
-		"embo-01":       {[]float64{0.0357, 0.0357}, common.ChannelTypeMiniMax},   // ¥0.0005 / 1k tokens
+		"abab5.5s-chat": {[]float64{0.3572, 0.3572}, common.ChannelTypeMiniMax}, // ¥0.005 / 1k tokens
+		"abab5.5-chat":  {[]float64{1.0714, 1.0714}, common.ChannelTypeMiniMax}, // ¥0.015 / 1k tokens
+		"abab6-chat":    {[]float64{7.144, 7.144}, common.ChannelTypeMiniMax},   // ¥0.1 / 1k tokens
+		"abab6.5-chat":  {[]float64{0.7144, 0.7144}, common.ChannelTypeMiniMax}, // ¥0.01 / 1k tokens
+		"abab6.5s-chat": {[]float64{2.1432, 2.1432}, common.ChannelTypeMiniMax}, // ¥0.03 / 1k tokens
+		"embo-01":       {[]float64{0.0357, 0.0357}, common.ChannelTypeMiniMax}, // ¥0.0005 / 1k tokens
 
 		"deepseek-coder": {[]float64{0.75, 0.75}, common.ChannelTypeDeepseek}, // 暂定 $0.0015 / 1K tokens
 		"deepseek-chat":  {[]float64{0.75, 0.75}, common.ChannelTypeDeepseek}, // 暂定 $0.0015 / 1K tokens

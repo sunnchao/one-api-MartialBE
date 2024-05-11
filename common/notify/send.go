@@ -32,6 +32,11 @@ func Send(params ...string) {
 	ctx := context.WithValue(context.Background(), common.RequestIdKey, "NotifyTask")
 	title := params[0]
 	message := params[1]
-	notifier := params[2]
+
+	var notifier string
+	if len(params) > 2 {
+		notifier = params[2]
+
+	}
 	notifyChannels.Send(ctx, title, message, notifier)
 }

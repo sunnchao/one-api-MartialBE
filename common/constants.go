@@ -183,6 +183,7 @@ const (
 	ChannelTypeStabilityAI    = 37
 	ChannelTypeCoze           = 38
 	ChannelTypeOllama         = 39
+	ChanneklTogetherai        = 40
 )
 
 var ChannelBaseURLs = []string{
@@ -226,6 +227,7 @@ var ChannelBaseURLs = []string{
 	"https://api.stability.ai/v2beta",   //37
 	"https://api.coze.com/open_api",     //38
 	"",                                  //39
+	"https://api.together.xyz",          //40
 }
 
 const (
