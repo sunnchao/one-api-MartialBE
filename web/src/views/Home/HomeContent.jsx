@@ -143,7 +143,7 @@ const Index = () => {
 
             <List disablePadding>
               <ListItem>OpenAI 接口转发站</ListItem>
-              <ListItem>本站渠道来源：官网正规渠道 、 逆向解析渠道 、 上游代理渠道</ListItem>
+              <ListItem>本站渠道来源：OP、AZ、AWS渠道 、 逆向渠道 、 上游代理渠道</ListItem>
               <ListItem>接口服务含官网直连以及整理了一些比较优秀的三方渠道商，所以能保持相对低价</ListItem>
               <ListItem>支持模型请查看下方模型介绍</ListItem>
               <ListItem>
