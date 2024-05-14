@@ -85,7 +85,12 @@ func IsCheckInToday(userId int) (checkInTime string, lastDayUsed int64, err erro
 				lastDayUsed += v.Quota
 			}
 		} else {
-			lastDayUsed = 2
+			lastDayUsed = 0
+		}
+
+		// 保底值
+		if float64(lastDayUsed) < (common.QuotaPerUnit * 0.5) {
+			lastDayUsed = int64(common.QuotaPerUnit * 0.5)
 		}
 		return "", lastDayUsed, err
 	}
