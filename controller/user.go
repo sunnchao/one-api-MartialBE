@@ -341,7 +341,7 @@ func GetSelf(c *gin.Context) {
 	}
 
 	// 查询签到信息
-	checkInTime, err := model.IsCheckInToday(id)
+	checkInTime, _, err := model.IsCheckInToday(id)
 	if err != nil {
 		common.SysLog(err.Error())
 	}

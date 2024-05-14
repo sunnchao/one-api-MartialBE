@@ -26,7 +26,7 @@ func UserOperationCheckIn(c *gin.Context) {
 	fmt.Println(user, "user")
 
 	// 检查是否已经签到
-	checkInTime, err := model.IsCheckInToday(user.Id)
+	checkInTime, lastDayUsed, err := model.IsCheckInToday(user.Id)
 	if err != nil {
 		common.SysLog(fmt.Sprintf("IsCheckInToday: %s", err.Error()))
 	}
@@ -38,9 +38,17 @@ func UserOperationCheckIn(c *gin.Context) {
 		})
 		return
 	}
+	if lastDayUsed == -1 {
+		// 无法获取统计信息
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": "无法获取统计信息.",
+		})
+		return
+	}
 
 	// 插入一条数据
-	quota, err := model.InsertOperationCheckIn(user.Id)
+	quota, err := model.InsertOperationCheckIn(user.Id, lastDayUsed)
 	if err != nil {
 		// 签到失败
 		c.JSON(http.StatusBadRequest, gin.H{
