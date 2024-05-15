@@ -20,9 +20,10 @@ type Log struct {
 	Quota            int    `json:"quota" gorm:"default:0"`
 	PromptTokens     int    `json:"prompt_tokens" gorm:"default:0"`
 	CompletionTokens int    `json:"completion_tokens" gorm:"default:0"`
-	ChannelId        int    `json:"channel" gorm:"index"`
+	ChannelId        int    `json:"channel_id" gorm:"index"`
 	RequestTime      int    `json:"request_time" gorm:"default:0"`
-	ClientIP         string `json:"client_ip" gorm:"default:''"`
+
+	Channel *Channel `json:"channel" gorm:"foreignKey:Id;references:ChannelId"`
 }
 
 const (
@@ -84,7 +85,7 @@ type LogsListParams struct {
 	ModelName      string `form:"model_name"`
 	Username       string `form:"username"`
 	TokenName      string `form:"token_name"`
-	Channel        int    `form:"channel"`
+	ChannelId      int    `form:"channel_id"`
 }
 
 var allowedLogsOrderFields = map[string]bool{
@@ -100,10 +101,12 @@ func GetLogsList(params *LogsListParams) (*DataResult[Log], error) {
 	var tx *gorm.DB
 	var logs []*Log
 
-	if params.LogType == LogTypeUnknown {
-		tx = DB
-	} else {
-		tx = DB.Where("type = ?", params.LogType)
+	tx = DB.Preload("Channel", func(db *gorm.DB) *gorm.DB {
+		return db.Select("id, name")
+	})
+
+	if params.LogType != LogTypeUnknown {
+		tx = tx.Where("type = ?", params.LogType)
 	}
 	if params.ModelName != "" {
 		tx = tx.Where("model_name = ?", params.ModelName)
@@ -120,8 +123,8 @@ func GetLogsList(params *LogsListParams) (*DataResult[Log], error) {
 	if params.EndTimestamp != 0 {
 		tx = tx.Where("created_at <= ?", params.EndTimestamp)
 	}
-	if params.Channel != 0 {
-		tx = tx.Where("channel_id = ?", params.Channel)
+	if params.ChannelId != 0 {
+		tx = tx.Where("channel_id = ?", params.ChannelId)
 	}
 
 	return PaginateAndOrder[Log](tx, &params.PaginationParams, &logs, allowedLogsOrderFields)
