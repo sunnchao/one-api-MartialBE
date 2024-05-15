@@ -6,10 +6,9 @@ import (
 	"math"
 	"strings"
 
+	"github.com/MartialBE/tiktoken-go"
 	"one-api/common/image"
 	"one-api/types"
-
-	"github.com/MartialBE/tiktoken-go"
 )
 
 var tokenEncoderMap = map[string]*tiktoken.Tiktoken{}
