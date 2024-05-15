@@ -60,12 +60,15 @@ func InsertOperationCheckIn(userId int, lastDayUsed int64) (quota int, err error
 func IsCheckInToday(userId int) (checkInTime string, lastDayUsed int64, err error) {
 	var userOperation UserOperation
 	userOperation, err = GetOperationCheckInByUserId(userId)
-	if err != nil {
-		return "", -1, err
-	}
 
 	// 获取当前地区的当天零点时间
 	localZeroTime := common.GetLocalZeroTime()
+
+	if err != nil {
+		// 获取昨日的累计使用额度
+		lastDayUsed, err := GetUserQuotaUsedByPeriod(userId, localZeroTime)
+		return "", lastDayUsed, err
+	}
 
 	// 比较签到时间是否晚于北京时间的今日零点
 	if int(userOperation.CreatedTime.Unix()) >= int(localZeroTime.Unix()) {
@@ -73,25 +76,31 @@ func IsCheckInToday(userId int) (checkInTime string, lastDayUsed int64, err erro
 		return userOperation.CreatedTime.GoString(), -1, err
 	} else {
 		// 获取昨日的累计使用额度
-		endOfDay := localZeroTime.Unix()
-		startOfDay := localZeroTime.AddDate(0, 0, -1).Unix()
-		dashboards, err := GetUserModelExpensesByPeriod(userId, int(startOfDay), int(endOfDay))
-		if err != nil {
-			return "", -1, err
-		}
-		// dashboards 是个数组, 循环获取每个Quota, 接下来获取昨日的累计使用额度
-		if len(dashboards) > 0 {
-			for _, v := range dashboards {
-				lastDayUsed += v.Quota
-			}
-		} else {
-			lastDayUsed = 0
-		}
-
-		// 保底值
-		if float64(lastDayUsed) < (common.QuotaPerUnit * 0.5) {
-			lastDayUsed = int64(common.QuotaPerUnit * 0.5)
-		}
+		lastDayUsed, err := GetUserQuotaUsedByPeriod(userId, localZeroTime)
 		return "", lastDayUsed, err
 	}
+}
+
+// 获取昨日的累计使用额度
+func GetUserQuotaUsedByPeriod(userId int, zeroTime time.Time) (used int64, err error) {
+	endOfDay := zeroTime.Unix()
+	startOfDay := zeroTime.AddDate(0, 0, -1).Unix()
+	dashboards, err := GetUserModelExpensesByPeriod(userId, int(startOfDay), int(endOfDay))
+	if err != nil {
+		return -1, err
+	}
+	// dashboards 是个数组, 循环获取每个Quota, 接下来获取昨日的累计使用额度
+	if len(dashboards) > 0 {
+		for _, v := range dashboards {
+			used += v.Quota
+		}
+	} else {
+		used = 0
+	}
+
+	// 保底值
+	if float64(used) < (common.QuotaPerUnit * 0.5) {
+		used = int64(common.QuotaPerUnit * 0.5)
+	}
+	return used, err
 }
