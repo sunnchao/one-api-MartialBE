@@ -52,6 +52,7 @@ jobs:
           go-version: ">=1.18.0"
       - name: Build Backend (amd64)
         run: |
+          go clean -modcache  # 清除依赖包缓存
           go mod download
           go build -ldflags "-s -w -X 'one-api/common.Version=$(cat VERSION)' -extldflags '-static'" -o one-api-amd64
 

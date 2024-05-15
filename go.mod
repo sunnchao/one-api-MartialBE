@@ -19,6 +19,7 @@ require (
 	github.com/gomarkdown/markdown v0.0.0-20240328165702-4d01890c35c0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.1
+	github.com/linux-do/tiktoken-go v0.7.0
 	github.com/shopspring/decimal v1.4.0
 	github.com/spf13/viper v1.18.2
 	github.com/stretchr/testify v1.9.0
