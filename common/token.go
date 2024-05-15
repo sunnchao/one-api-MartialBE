@@ -9,7 +9,7 @@ import (
 	"one-api/common/image"
 	"one-api/types"
 
-	"github.com/linux-do/tiktoken-go"
+	"github.com/MartialBE/tiktoken-go"
 )
 
 var tokenEncoderMap = map[string]*tiktoken.Tiktoken{}
