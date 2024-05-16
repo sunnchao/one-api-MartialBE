@@ -6,9 +6,11 @@ package controller
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"one-api/common"
 	"one-api/common/requester"
@@ -163,7 +165,9 @@ func UpdateMidjourneyTaskBulk() {
 				task.SubmitTime = responseItem.SubmitTime
 				task.StartTime = responseItem.StartTime
 				task.FinishTime = responseItem.FinishTime
-				task.ImageUrl = responseItem.ImageUrl
+				//task.ImageUrl, _: = DownloadAndConvertImage(responseItem.ImageUrl)
+				base64Img, err := DownloadAndConvertImage(responseItem.ImageUrl)
+				task.ImageUrl = base64Img
 				task.Status = responseItem.Status
 				task.FailReason = responseItem.FailReason
 				if responseItem.Properties != nil {
@@ -282,4 +286,29 @@ func GetUserMidjourney(c *gin.Context) {
 		"message": "",
 		"data":    midjourneys,
 	})
+}
+
+func DownloadAndConvertImage(imgURL string) (string, error) {
+	// 1. 下载图片
+	resp, err := http.Get(imgURL)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// 确保响应状态为 200 OK
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to download image: status code %d", resp.StatusCode)
+	}
+
+	// 2. 读取图片数据
+	imgData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	// 3. 转换为 Base64
+	base64Img := base64.StdEncoding.EncodeToString(imgData)
+
+	return base64Img, nil
 }

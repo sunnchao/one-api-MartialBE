@@ -89,13 +89,13 @@ export default function UsersTableRow({ item, manageUser, handleOpenModal, setMo
             <Tooltip title={'剩余额度'} placement="top">
               <Label color={'primary'} variant="outlined">
                 {' '}
-                {renderQuota(item.quota)}{' '}
+                {renderQuota(item.quota, 6)}{' '}
               </Label>
             </Tooltip>
             <Tooltip title={'已用额度'} placement="top">
               <Label color={'primary'} variant="outlined">
                 {' '}
-                {renderQuota(item.used_quota)}{' '}
+                {renderQuota(item.used_quota, 6)}{' '}
               </Label>
             </Tooltip>
             <Tooltip title={'请求次数'} placement="top">
