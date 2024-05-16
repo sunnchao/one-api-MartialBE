@@ -24,6 +24,7 @@ export default function Log() {
   const originalKeyword = {
     p: 0,
     username: '',
+    user_id: '',
     token_name: '',
     model_name: '',
     start_timestamp: 0,

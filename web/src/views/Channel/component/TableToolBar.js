@@ -13,6 +13,25 @@ export default function TableToolBar({ filterName, handleFilterName, groupOption
     <>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 3, sm: 2, md: 4 }} padding={'24px'} paddingBottom={'0px'}>
         <FormControl>
+          <InputLabel htmlFor="channel-name-label">渠道ID</InputLabel>
+          <OutlinedInput
+            id="id"
+            name="id"
+            sx={{
+              minWidth: '100%'
+            }}
+            label="渠道ID"
+            value={filterName.id}
+            onChange={handleFilterName}
+            placeholder="渠道ID"
+            startAdornment={
+              <InputAdornment position="start">
+                <IconSitemap stroke={1.5} size="20px" color={grey500} />
+              </InputAdornment>
+            }
+          />
+        </FormControl>
+        <FormControl>
           <InputLabel htmlFor="channel-name-label">渠道名称</InputLabel>
           <OutlinedInput
             id="name"

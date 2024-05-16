@@ -31,7 +31,8 @@ const originalKeyword = {
   models: '',
   key: '',
   test_model: '',
-  other: ''
+  other: '',
+  id: ''
 };
 
 export async function fetchChannelData(page, rowsPerPage, keyword, order, orderBy) {

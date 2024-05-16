@@ -171,6 +171,26 @@ export default function TableToolBar({ filterName, handleFilterName, userIsAdmin
               }
             />
           </FormControl>
+
+          <FormControl size="small">
+            <InputLabel htmlFor="channel-username-label">用户ID</InputLabel>
+            <OutlinedInput
+              id="user_id"
+              name="user_id"
+              sx={{
+                minWidth: '100%'
+              }}
+              label="用户ID"
+              value={filterName.user_id}
+              onChange={handleFilterName}
+              placeholder="用户ID"
+              startAdornment={
+                <InputAdornment position="start">
+                  <IconUser stroke={1.5} size="20px" color={grey500} />
+                </InputAdornment>
+              }
+            />
+          </FormControl>
         </Stack>
       )}
     </>

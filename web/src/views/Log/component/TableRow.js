@@ -73,9 +73,7 @@ export default function LogTableRow({ item, userIsAdmin }) {
         {userIsAdmin && <TableCell>{(item.channel_id || '') + '(' + (item.channel?.name || '未知') + ')'}</TableCell>}
         {userIsAdmin && (
           <TableCell>
-            <Label color="default" variant="outlined">
-              {item.username}
-            </Label>
+            {item.user_id}({item.username})
           </TableCell>
         )}
         <TableCell>

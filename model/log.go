@@ -86,6 +86,7 @@ type LogsListParams struct {
 	Username       string `form:"username"`
 	TokenName      string `form:"token_name"`
 	ChannelId      int    `form:"channel_id"`
+	UserId         int    `form:"user_id"`
 }
 
 var allowedLogsOrderFields = map[string]bool{
@@ -125,6 +126,9 @@ func GetLogsList(params *LogsListParams) (*DataResult[Log], error) {
 	}
 	if params.ChannelId != 0 {
 		tx = tx.Where("channel_id = ?", params.ChannelId)
+	}
+	if params.UserId != 0 {
+		tx = tx.Where("user_id = ?", params.UserId)
 	}
 
 	return PaginateAndOrder[Log](tx, &params.PaginationParams, &logs, allowedLogsOrderFields)

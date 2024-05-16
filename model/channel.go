@@ -9,7 +9,7 @@ import (
 )
 
 type Channel struct {
-	Id                 int     `json:"id"`
+	Id                 int     `json:"id" form:"id"`
 	Type               int     `json:"type" form:"type" gorm:"default:0"`
 	Key                string  `json:"key" form:"key" gorm:"type:varchar(767);not null;index"`
 	Status             int     `json:"status" form:"status" gorm:"default:1"`
@@ -87,6 +87,10 @@ func GetChannelsList(params *SearchChannelsParams) (*DataResult[Channel], error)
 
 	if params.TestModel != "" {
 		db = db.Where("test_model LIKE ?", params.TestModel+"%")
+	}
+
+	if params.Id != 0 {
+		db = db.Where("id = ?", params.Id)
 	}
 
 	return PaginateAndOrder[Channel](db, &params.PaginationParams, &channels, allowedChannelOrderFields)
