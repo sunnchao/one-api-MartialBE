@@ -166,8 +166,8 @@ func UpdateMidjourneyTaskBulk() {
 				task.StartTime = responseItem.StartTime
 				task.FinishTime = responseItem.FinishTime
 				//task.ImageUrl, _: = DownloadAndConvertImage(responseItem.ImageUrl)
-				base64Img, err := DownloadAndConvertImage(responseItem.ImageUrl)
-				task.ImageUrl = base64Img
+				//base64Img, err := DownloadAndConvertImage(responseItem.ImageUrl)
+				task.ImageUrl = responseItem.ImageUrl
 				task.Status = responseItem.Status
 				task.FailReason = responseItem.FailReason
 				if responseItem.Properties != nil {

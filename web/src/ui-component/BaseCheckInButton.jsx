@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Dialog, DialogContent, DialogActions, ButtonBase, Button, DialogTitle } from '@mui/material';
+import { Dialog, DialogContent, DialogActions, ButtonBase, Button, DialogTitle, CircularProgress, Typography, Stack } from '@mui/material';
 import Turnstile from 'react-turnstile';
 import { showError, showSuccess, showInfo } from '@/utils/common';
 import { API } from '@/utils/api';
@@ -32,8 +32,11 @@ const BaseCheckin = (props) => {
     setOpen(false);
   };
 
-  const handleTurnStileOnLoad = () => {
-    console.log('handleTurnStileOnLoad');
+  const handleTurnStileOnLoad = (widgetId, bound) => {
+    // before:
+    // window.turnstile.execute(widgetId);
+    // now:
+    // bound.execute();
     setTimeout(() => {
       setTurnstileLoaded(true);
     }, 1);
@@ -78,18 +81,23 @@ const BaseCheckin = (props) => {
       <Dialog open={open} onClose={handleClose} aria-labelledby="draggable-dialog-title">
         <DialogTitle>正在检查用户环境</DialogTitle>
         <DialogContent>
-          {turnstileEnabled ? (
-            <div style={{ width: 300, height: 65 }}>
-              <Turnstile
-                sitekey={turnstileSiteKey}
-                onVerify={(token) => {
-                  setTurnstileToken(token);
-                }}
-              />
-            </div>
-          ) : (
-            <></>
-          )}
+          <Stack direction={'column'} spacing={2}>
+            <Typography>温馨提示：每日签到获得的额度以前一日的总消耗额度为基础获得随机返赠🤓</Typography>
+            {turnstileEnabled ? (
+              <div style={{ width: 300, height: 65 }}>
+                {!turnstileLoaded && <CircularProgress />}
+                <Turnstile
+                  sitekey={turnstileSiteKey}
+                  onVerify={(token) => {
+                    setTurnstileToken(token);
+                  }}
+                  onLoad={handleTurnStileOnLoad}
+                />
+              </div>
+            ) : (
+              <></>
+            )}
+          </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>取消</Button>
