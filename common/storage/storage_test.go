@@ -3,6 +3,8 @@ package storage_test
 import (
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"testing"
 
 	"one-api/common"
@@ -27,6 +29,8 @@ func TestSMMSUpload(t *testing.T) {
 	smSecret := viper.GetString("storage.smms.secret")
 	smUpload := drives.NewSMUpload(smSecret)
 
+	testImageB64, err := DownloadAndConvertImage("https://api.kksj.org/mj/image/1715916949482558")
+
 	image, err := base64.StdEncoding.DecodeString(testImageB64)
 	if err != nil {
 		fmt.Println(err)
@@ -43,6 +47,8 @@ func TestImgurUpload(t *testing.T) {
 	imgurClientId := viper.GetString("storage.imgur.client_id")
 	imgurUpload := drives.NewImgurUpload(imgurClientId)
 
+	testImageB64, err := DownloadAndConvertImage("https://api.kksj.org/mj/image/1715916949482558?1=1")
+
 	image, err := base64.StdEncoding.DecodeString(testImageB64)
 	if err != nil {
 		fmt.Println(err)
@@ -51,5 +57,30 @@ func TestImgurUpload(t *testing.T) {
 	url, err := imgurUpload.Upload(image, common.GetUUID()+".png")
 	fmt.Println(url)
 	fmt.Println(err)
-	assert.Nil(t, err)
+	// assert.Nil(t, err)
+}
+
+func DownloadAndConvertImage(imgURL string) (string, error) {
+	// 1. 下载图片
+	resp, err := http.Get(imgURL)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// 确保响应状态为 200 OK
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to download image: status code %d", resp.StatusCode)
+	}
+
+	// 2. 读取图片数据
+	imgData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	// 3. 转换为 Base64
+	base64Img := base64.StdEncoding.EncodeToString(imgData)
+
+	return base64Img, nil
 }

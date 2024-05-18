@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"one-api/common/storage/drives"
 
 	"github.com/spf13/viper"
@@ -27,6 +28,8 @@ func InitSMStorage() {
 
 func InitImgurStorage() {
 	imgurClientId := viper.GetString("storage.imgur.client_id")
+	fmt.Printf("imgurClientId" + imgurClientId)
+
 	if imgurClientId == "" {
 		return
 	}

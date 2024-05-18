@@ -166,7 +166,15 @@ func UpdateMidjourneyTaskBulk() {
 				task.StartTime = responseItem.StartTime
 				task.FinishTime = responseItem.FinishTime
 				//task.ImageUrl, _: = DownloadAndConvertImage(responseItem.ImageUrl)
-				//base64Img, err := DownloadAndConvertImage(responseItem.ImageUrl)
+				// if responseItem.ImageUrl != "" {
+				// 	base64Img, err := DownloadAndConvertImage(responseItem.ImageUrl)
+				// 	if err != nil {
+				// 		common.LogError(ctx, "DownloadAndConvertImage error: "+err.Error())
+				// 	} else {
+				// 		image, _ := base64.StdEncoding.DecodeString(base64Img)
+				// 		task.ImageUrl = storage.Upload(image, common.GetUUID()+".png")
+				// 	}
+				// }
 				task.ImageUrl = responseItem.ImageUrl
 				task.Status = responseItem.Status
 				task.FailReason = responseItem.FailReason
