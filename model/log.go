@@ -22,6 +22,7 @@ type Log struct {
 	CompletionTokens int    `json:"completion_tokens" gorm:"default:0"`
 	ChannelId        int    `json:"channel_id" gorm:"index"`
 	RequestTime      int    `json:"request_time" gorm:"default:0"`
+	RequestIp        string `json:"request_ip" gorm:"default:''"`
 
 	Channel *Channel `json:"channel" gorm:"foreignKey:Id;references:ChannelId"`
 }
@@ -70,6 +71,7 @@ func RecordConsumeLog(ctx context.Context, userId int, channelId int, promptToke
 		Quota:            quota,
 		ChannelId:        channelId,
 		RequestTime:      requestTime,
+		RequestIp:        common.GetIp(),
 	}
 	err := DB.Create(log).Error
 	if err != nil {
