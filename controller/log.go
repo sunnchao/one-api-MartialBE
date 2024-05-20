@@ -31,6 +31,8 @@ func GetLogsList(c *gin.Context) {
 func GetUserLogsList(c *gin.Context) {
 	userId := c.GetInt("id")
 
+	role := c.GetInt("role")
+
 	var params model.LogsListParams
 	if err := c.ShouldBindQuery(&params); err != nil {
 		common.APIRespondWithError(c, http.StatusOK, err)
@@ -38,10 +40,21 @@ func GetUserLogsList(c *gin.Context) {
 	}
 
 	logs, err := model.GetUserLogsList(userId, &params)
+
 	if err != nil {
 		common.APIRespondWithError(c, http.StatusOK, err)
 		return
 	}
+
+	if role < common.RoleAdminUser {
+		//	删除 logs 的 channel id
+		for _, log := range *logs.Data {
+			log.ChannelId = -1
+			log.Channel = nil
+			log.RequestIp = ""
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
