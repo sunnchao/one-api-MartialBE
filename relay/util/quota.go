@@ -88,7 +88,7 @@ func (q *Quota) preQuotaConsumption() *types.OpenAIErrorWithStatusCode {
 	return nil
 }
 
-func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, ctx context.Context) error {
+func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, ctx context.Context, requestIP string) error {
 	quota := 0
 	promptTokens := usage.PromptTokens
 	completionTokens := usage.CompletionTokens
@@ -140,7 +140,7 @@ func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, 
 	}
 
 	logContent := fmt.Sprintf("模型费率 %s，分组倍率 %.2f", modelRatioStr, q.groupRatio)
-	model.RecordConsumeLog(ctx, q.userId, q.channelId, promptTokens, completionTokens, q.modelName, tokenName, quota, logContent, requestTime)
+	model.RecordConsumeLog(ctx, q.userId, q.channelId, promptTokens, completionTokens, q.modelName, tokenName, quota, logContent, requestTime, requestIP)
 	model.UpdateUserUsedQuotaAndRequestCount(q.userId, quota)
 	model.UpdateChannelUsedQuota(q.channelId, quota)
 
@@ -162,9 +162,10 @@ func (q *Quota) Undo(c *gin.Context) {
 
 func (q *Quota) Consume(c *gin.Context, usage *types.Usage) {
 	tokenName := c.GetString("token_name")
+	requestIP := common.GetRequestIP(c)
 	// 如果没有报错，则消费配额
 	go func(ctx context.Context) {
-		err := q.completedQuotaConsumption(usage, tokenName, ctx)
+		err := q.completedQuotaConsumption(usage, tokenName, ctx, requestIP)
 		if err != nil {
 			common.LogError(ctx, err.Error())
 		}
