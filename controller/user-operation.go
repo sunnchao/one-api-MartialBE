@@ -48,7 +48,7 @@ func UserOperationCheckIn(c *gin.Context) {
 	}
 
 	// 插入一条数据
-	quota, err := model.InsertOperationCheckIn(user.Id, lastDayUsed)
+	quota, err := model.InsertOperationCheckIn(user.Id, lastDayUsed, common.GetRequestIP(c))
 	if err != nil {
 		// 签到失败
 		c.JSON(http.StatusBadRequest, gin.H{

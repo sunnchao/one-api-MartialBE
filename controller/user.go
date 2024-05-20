@@ -82,6 +82,8 @@ func setupLogin(user *model.User, c *gin.Context) {
 		Role:        user.Role,
 		Status:      user.Status,
 	}
+
+	model.RecordLogWithRequestIP(user.Id, model.LogLogin, "登录", common.GetRequestIP(c))
 	c.JSON(http.StatusOK, gin.H{
 		"message": "",
 		"success": true,

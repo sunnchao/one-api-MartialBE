@@ -32,7 +32,7 @@ func insertOperation(user_operation UserOperation) (err error) {
 }
 
 // 插入一条 InsertOperationCheckIn
-func InsertOperationCheckIn(userId int, lastDayUsed int64) (quota int, err error) {
+func InsertOperationCheckIn(userId int, lastDayUsed int64, requestIP string) (quota int, err error) {
 	rand.Seed(time.Now().UnixNano())
 
 	// 随机生成一个额度
@@ -46,7 +46,7 @@ func InsertOperationCheckIn(userId int, lastDayUsed int64) (quota int, err error
 		return 0, err
 	}
 
-	RecordLog(userId, LogTypeUserQuotoIncrease, strings.Join(operationRemark, ""))
+	RecordLogWithRequestIP(userId, LogTypeUserQuotoIncrease, strings.Join(operationRemark, ""), requestIP)
 	err = insertOperation(UserOperation{
 		UserId:      userId,
 		Type:        1,
