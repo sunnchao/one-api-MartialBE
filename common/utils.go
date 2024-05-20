@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/google/uuid"
 	"github.com/spf13/viper"
 )
@@ -273,4 +275,9 @@ func GetLocalZeroTime() time.Time {
 	now := time.Now()
 	toDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	return toDay
+}
+
+func GetRequestIP(c *gin.Context) string {
+	ip := c.ClientIP()
+	return ip
 }

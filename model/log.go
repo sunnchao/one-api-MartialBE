@@ -22,6 +22,7 @@ type Log struct {
 	CompletionTokens int    `json:"completion_tokens" gorm:"default:0"`
 	ChannelId        int    `json:"channel_id" gorm:"index"`
 	RequestTime      int    `json:"request_time" gorm:"default:0"`
+	RequestIp        string `json:"request_ip" gorm:"default:''"`
 
 	Channel *Channel `json:"channel" gorm:"foreignKey:Id;references:ChannelId"`
 }
@@ -33,6 +34,7 @@ const (
 	LogTypeManage
 	LogTypeSystem
 	LogTypeUserQuotoIncrease
+	LogLogin
 )
 
 func RecordLog(userId int, logType int, content string) {
@@ -52,8 +54,26 @@ func RecordLog(userId int, logType int, content string) {
 	}
 }
 
-func RecordConsumeLog(ctx context.Context, userId int, channelId int, promptTokens int, completionTokens int, modelName string, tokenName string, quota int, content string, requestTime int) {
-	common.LogInfo(ctx, fmt.Sprintf("record consume log: userId=%d, channelId=%d, promptTokens=%d, completionTokens=%d, modelName=%s, tokenName=%s, quota=%d, content=%s", userId, channelId, promptTokens, completionTokens, modelName, tokenName, quota, content))
+func RecordLogWithRequestIP(userId int, logType int, content string, requestIP string) {
+	if logType == LogTypeConsume && !common.LogConsumeEnabled {
+		return
+	}
+	log := &Log{
+		UserId:    userId,
+		Username:  GetUsernameById(userId),
+		CreatedAt: common.GetTimestamp(),
+		Type:      logType,
+		Content:   content,
+		RequestIp: requestIP,
+	}
+	err := DB.Create(log).Error
+	if err != nil {
+		common.SysError("failed to record log: " + err.Error())
+	}
+}
+
+func RecordConsumeLog(ctx context.Context, userId int, channelId int, promptTokens int, completionTokens int, modelName string, tokenName string, quota int, content string, requestTime int, requestIP string) {
+	common.LogInfo(ctx, fmt.Sprintf("record consume log: userId=%d, channelId=%d, promptTokens=%d, completionTokens=%d, modelName=%s, tokenName=%s, quota=%d, content=%s, requestIP=%s", userId, channelId, promptTokens, completionTokens, modelName, tokenName, quota, content, requestIP))
 	if !common.LogConsumeEnabled {
 		return
 	}
@@ -70,6 +90,7 @@ func RecordConsumeLog(ctx context.Context, userId int, channelId int, promptToke
 		Quota:            quota,
 		ChannelId:        channelId,
 		RequestTime:      requestTime,
+		RequestIp:        requestIP,
 	}
 	err := DB.Create(log).Error
 	if err != nil {
