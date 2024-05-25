@@ -122,9 +122,9 @@ export default function LogTableRow({ item, userIsAdmin }) {
             {request_ts_str && <Label color={requestTSLabelOptions(request_ts)}> {request_ts_str} </Label>}
           </Stack>
         </TableCell>
-        <TableCell>{item.prompt_tokens || '0'}</TableCell>
-        <TableCell>{item.completion_tokens || '0'}</TableCell>
-        <TableCell>{item.quota ? renderQuota(item.quota, 6) : '$0'}</TableCell>
+        <TableCell>{String(item.type) === LogType['2'].value ? item.prompt_tokens || '0' : ''}</TableCell>
+        <TableCell>{String(item.type) === LogType['2'].value ? item.completion_tokens || '0' : ''}</TableCell>
+        <TableCell>{String(item.type) === LogType['2'].value ? (item.quota ? renderQuota(item.quota, 6) : '$0') : ''}</TableCell>
         <TableCell>{item.content}</TableCell>
       </TableRow>
     </>

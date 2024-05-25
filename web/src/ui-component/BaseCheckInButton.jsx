@@ -83,6 +83,7 @@ const BaseCheckin = (props) => {
         <DialogContent>
           <Stack direction={'column'} spacing={2}>
             <Typography>温馨提示：每日签到获得的额度以前一日的总消耗额度为基础获得随机返赠🤓</Typography>
+            <Typography>即日起，截止到 2024.6.18，充值额度额外赠送50%</Typography>
             {turnstileEnabled ? (
               <div style={{ width: 300, height: 65 }}>
                 {!turnstileLoaded && <CircularProgress />}

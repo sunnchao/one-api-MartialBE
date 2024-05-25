@@ -109,17 +109,18 @@ func Redeem(key string, userId int) (quota int, err error) {
 	// 本次充值的额度
 	var redeQuota = redemption.Quota
 
-	// 2024.5.1 1714492800 - 2024.5.5 活动兑换 加倍
-	//if redemption.RedeemedTime >= 1714448138 && redemption.RedeemedTime <= 1714924799 {
-	//	err = DB.Model(&User{}).Where("id = ?", userId).Update("quota", gorm.Expr("quota + ?", redemption.Quota)).Error
-	//	if err != nil {
-	//		common.SysLog("活动兑换加倍失败，" + err.Error())
-	//	} else {
-	//		RecordLog(userId, LogTypeTopup, fmt.Sprintf("51活动兑换赠送 %s", common.LogQuota(redemption.Quota)))
-	//		redeQuota = redemption.Quota * 2
-	//	}
-	//
-	//}
+	// 截止到2024.6.19 活动兑换 加50%
+	if redemption.RedeemedTime <= 1718726399 {
+		otherQuota := redemption.Quota / 2
+		err = DB.Model(&User{}).Where("id = ?", userId).Update("quota", gorm.Expr("quota + ?", otherQuota)).Error
+		if err != nil {
+			common.SysLog("活动兑换加倍失败，" + err.Error())
+		} else {
+			RecordLog(userId, LogTypeTopup, fmt.Sprintf("6.18活动兑换赠送 %s", common.LogQuota(otherQuota)))
+			redeQuota = redemption.Quota + otherQuota
+		}
+
+	}
 
 	return redeQuota, nil
 }
