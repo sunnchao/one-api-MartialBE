@@ -109,9 +109,9 @@ func Redeem(key string, userId int) (quota int, err error) {
 	// 本次充值的额度
 	var redeQuota = redemption.Quota
 
-	// 截止到2024.6.19 活动兑换 加50%
+	// 截止到2024.6.19 活动兑换 加25%
 	if redemption.RedeemedTime <= 1718726399 {
-		otherQuota := redemption.Quota / 2
+		otherQuota := redemption.Quota * 25 / 100
 		err = DB.Model(&User{}).Where("id = ?", userId).Update("quota", gorm.Expr("quota + ?", otherQuota)).Error
 		if err != nil {
 			common.SysLog("活动兑换加倍失败，" + err.Error())
