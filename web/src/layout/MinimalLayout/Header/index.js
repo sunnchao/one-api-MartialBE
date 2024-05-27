@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import {
   Box,
-  Button,
   Stack,
   Popper,
   IconButton,
@@ -13,12 +12,11 @@ import {
   ListItemText,
   Typography,
   Divider,
-  ClickAwayListener,
-  ButtonBase
+  ClickAwayListener
 } from '@mui/material';
 import LogoSection from '@/layout/MainLayout/LogoSection';
 import { Link } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import ThemeButton from '@/ui-component/ThemeButton';
 import ContactButton from '@/ui-component/ContactButton';
@@ -27,12 +25,14 @@ import { IconMenu2 } from '@tabler/icons-react';
 import Transitions from '@/ui-component/extended/Transitions';
 import MainCard from '@/ui-component/cards/MainCard';
 import { useMediaQuery } from '@mui/material';
+import { Button } from 'antd';
 
 // ==============================|| MAIN NAVBAR / HEADER ||============================== //
 
 const Header = () => {
   const theme = useTheme();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const account = useSelector((state) => state.account);
   const [open, setOpen] = useState(null);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -73,28 +73,28 @@ const Header = () => {
           </>
         ) : (
           <>
-            <Button component={Link} variant="text" to="/" color={pathname === '/' ? 'primary' : 'inherit'}>
+            <Button variant="text" onClick={() => navigate('/')} type={pathname === '/' ? 'link' : 'text'}>
               首页
             </Button>
             {account.user && (
-              <Button component={Link} variant="text" to="/playground" color={pathname === '/playground' ? 'primary' : 'inherit'}>
+              <Button variant="text" onClick={() => navigate('/playground')} type={pathname === '/playground' ? 'link' : 'text'}>
                 Playground
               </Button>
             )}
-            <Button component={Link} variant="text" to="/about" color={pathname === '/about' ? 'primary' : 'inherit'}>
+            <Button variant="text" onClick={() => navigate('/about')} type={pathname === '/about' ? 'link' : 'text'}>
               关于
             </Button>
             <ContactButton />
             <ThemeButton />
             {account.user ? (
               <>
-                <Button component={Link} variant="contained" to="/panel" color="primary">
+                <Button type="primary" variant="contained" onClick={() => navigate('/panel/dashboard')} color="primary">
                   控制台
                 </Button>
                 <ProfileSection />
               </>
             ) : (
-              <Button component={Link} variant="contained" to="/login" color="primary">
+              <Button component={Link} variant="contained" onClick={() => navigate('/login')} color="primary">
                 登录
               </Button>
             )}

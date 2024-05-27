@@ -1,7 +1,8 @@
-import { enqueueSnackbar } from 'notistack';
+// import { enqueueSnackbar } from 'notistack';
 import { snackbarConstants } from '@/constants/SnackbarConstants';
 import { API } from './api';
 import { CHAT_LINKS } from '@/constants/chatLinks';
+import { notification } from 'antd';
 
 export function getSystemName() {
   let system_name = localStorage.getItem('system_name');
@@ -19,12 +20,13 @@ export function SnackbarHTMLContent({ htmlContent }) {
 }
 
 export function getSnackbarOptions(variant) {
-  let options = snackbarConstants.Common[variant];
-  if (isMobile()) {
-    // 合并 options 和 snackbarConstants.Mobile
-    options = { ...options, ...snackbarConstants.Mobile };
-  }
-  return options;
+  // let options = snackbarConstants.Common[variant];
+  // if (isMobile()) {
+  //   // 合并 options 和 snackbarConstants.Mobile
+  //   options = { ...options, ...snackbarConstants.Mobile };
+  // }
+  // return options;
+  return String(variant).toLowerCase();
 }
 
 export function showError(error) {
@@ -277,4 +279,11 @@ export function getChatLinks(filterShow = false) {
 
 export function replaceChatPlaceholders(text, key, server) {
   return text.replace('{key}', key).replace('{server}', server);
+}
+
+function enqueueSnackbar(message, type = 'info') {
+  notification.open({
+    message,
+    type
+  });
 }

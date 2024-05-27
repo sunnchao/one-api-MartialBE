@@ -80,7 +80,7 @@ const AuthClient = () => {
                   <Box sx={{ mr: { xs: 1, sm: 2, width: 20 }, display: 'flex', alignItems: 'center' }}>
                     <LinuxDo style={{ width: '25px', height: '25px' }} />
                   </Box>
-                  使用LinuxDO登录
+                  使用 LinuxDO 登录
                 </Button>
               </AnimateButton>
             </Grid>
@@ -107,7 +107,7 @@ const AuthClient = () => {
               <WechatModal open={openWechat} handleClose={handleWechatClose} wechatLogin={wechatLogin} qrCode={siteInfo.wechat_qrcode} />
             </Grid>
           )}
-          {siteInfo.lark_client_id && (
+          {siteInfo.lark_login && (
             <Grid item xs={12}>
               <AnimateButton>
                 <Button
