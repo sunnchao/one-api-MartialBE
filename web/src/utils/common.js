@@ -283,7 +283,7 @@ export function replaceChatPlaceholders(text, key, server) {
 
 function enqueueSnackbar(message, type = 'info') {
   notification.open({
-    message,
+    description: message,
     type
   });
 }
