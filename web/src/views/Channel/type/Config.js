@@ -212,6 +212,9 @@ const typeConfig = {
     modelGroup: 'Deepseek'
   },
   29: {
+    inputLabel: {
+      provider_models_list: '从Moonshot获取模型列表'
+    },
     input: {
       models: ['moonshot-v1-8k', 'moonshot-v1-32k', 'moonshot-v1-128k'],
       test_model: 'moonshot-v1-8k'
@@ -358,6 +361,16 @@ const typeConfig = {
     }
   },
   40: {
+    input: {
+      models: ['hunyuan-lite', 'hunyuan-pro', 'hunyuan-standard-256K', 'hunyuan-standard'],
+      test_model: 'hunyuan-lite'
+    },
+    prompt: {
+      key: '按照如下格式输入：SecretId|SecretKey'
+    },
+    modelGroup: 'Hunyuan'
+  },
+  41: {
     input: {
       models: ["meta-llama/Llama-3-70b-chat-hf", "deepseek-ai/deepseek-coder-33b-instruct", "mistralai/Mixtral-8x22B-Instruct-v0.1", "Qwen/Qwen1.5-72B-Chat",],
     },

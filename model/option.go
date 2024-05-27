@@ -32,6 +32,7 @@ func InitOptionMap() {
 	common.OptionMap["EmailVerificationEnabled"] = strconv.FormatBool(common.EmailVerificationEnabled)
 	common.OptionMap["GitHubOAuthEnabled"] = strconv.FormatBool(common.GitHubOAuthEnabled)
 	common.OptionMap["WeChatAuthEnabled"] = strconv.FormatBool(common.WeChatAuthEnabled)
+	common.OptionMap["LarkAuthEnabled"] = strconv.FormatBool(common.LarkAuthEnabled)
 	common.OptionMap["TurnstileCheckEnabled"] = strconv.FormatBool(common.TurnstileCheckEnabled)
 	common.OptionMap["RegisterEnabled"] = strconv.FormatBool(common.RegisterEnabled)
 	common.OptionMap["AutomaticDisableChannelEnabled"] = strconv.FormatBool(common.AutomaticDisableChannelEnabled)
@@ -143,6 +144,7 @@ var optionBoolMap = map[string]*bool{
 	"GitHubOAuthEnabled":             &common.GitHubOAuthEnabled,
 	"LinuxDoOAuthEnabled":            &common.LinuxDoOAuthEnabled,
 	"WeChatAuthEnabled":              &common.WeChatAuthEnabled,
+	"LarkAuthEnabled":                &common.LarkAuthEnabled,
 	"TurnstileCheckEnabled":          &common.TurnstileCheckEnabled,
 	"RegisterEnabled":                &common.RegisterEnabled,
 	"EmailDomainRestrictionEnabled":  &common.EmailDomainRestrictionEnabled,

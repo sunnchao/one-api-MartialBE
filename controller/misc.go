@@ -28,6 +28,7 @@ func GetStatus(c *gin.Context) {
 			"email_verification":  common.EmailVerificationEnabled,
 			"github_oauth":        common.GitHubOAuthEnabled,
 			"github_client_id":    common.GitHubClientId,
+			"lark_login":          common.LarkAuthEnabled,
 			"linuxdo_oauth":       common.LinuxDoOAuthEnabled,
 			"linuxdo_client_id":   common.LinuxDoClientId,
 			"lark_client_id":      common.LarkClientId,
