@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"one-api/common"
+	"one-api/common/config"
+	"one-api/common/utils"
 
 	"gorm.io/gorm"
 )
@@ -41,7 +43,7 @@ func GetRedemptionsList(params *GenericParams) (*DataResult[Redemption], error) 
 	var redemptions []*Redemption
 	db := DB
 	if params.Keyword != "" {
-		db = db.Where("id = ? or name LIKE ?", common.String2Int(params.Keyword), params.Keyword+"%")
+		db = db.Where("id = ? or name LIKE ?", utils.String2Int(params.Keyword), params.Keyword+"%")
 	}
 
 	return PaginateAndOrder[Redemption](db, &params.PaginationParams, &redemptions, allowedRedemptionslOrderFields)
@@ -76,7 +78,7 @@ func Redeem(key string, userId int) (quota int, err error) {
 		if err != nil {
 			return errors.New("无效的兑换码")
 		}
-		if redemption.Status != common.RedemptionCodeStatusEnabled {
+		if redemption.Status != config.RedemptionCodeStatusEnabled {
 			return errors.New("该兑换码已被使用")
 		}
 		// 查看是否有批次限制
@@ -95,8 +97,8 @@ func Redeem(key string, userId int) (quota int, err error) {
 		if err != nil {
 			return err
 		}
-		redemption.RedeemedTime = common.GetTimestamp()
-		redemption.Status = common.RedemptionCodeStatusUsed
+		redemption.RedeemedTime = utils.GetTimestamp()
+		redemption.Status = config.RedemptionCodeStatusUsed
 		redemption.UsedUserId = userId
 		err = tx.Save(redemption).Error
 		return err

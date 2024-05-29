@@ -3,7 +3,8 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
-	"one-api/common"
+	"one-api/common/config"
+	"one-api/common/utils"
 	"one-api/model"
 	"strings"
 
@@ -12,17 +13,17 @@ import (
 
 func GetOptions(c *gin.Context) {
 	var options []*model.Option
-	common.OptionMapRWMutex.Lock()
-	for k, v := range common.OptionMap {
-		if strings.Contains(k, "Token") || strings.Contains(k, "Secret") {
+	config.OptionMapRWMutex.Lock()
+	for k, v := range config.OptionMap {
+		if strings.HasSuffix(k, "Token") || strings.HasSuffix(k, "Secret") {
 			continue
 		}
 		options = append(options, &model.Option{
 			Key:   k,
-			Value: common.Interface2String(v),
+			Value: utils.Interface2String(v),
 		})
 	}
-	common.OptionMapRWMutex.Unlock()
+	config.OptionMapRWMutex.Unlock()
 
 	keys := string(c.Query("keys"))
 	_, ifExist := c.Get("username")
@@ -45,11 +46,11 @@ func GetOptions(c *gin.Context) {
 			if strings.Contains(key, "Token") || strings.Contains(key, "Secret") {
 				val = ""
 			} else {
-				val = common.OptionMap[key]
+				val = config.OptionMap[key]
 			}
 			filteredOptions = append(filteredOptions, &model.Option{
 				Key:   key,
-				Value: common.Interface2String(val),
+				Value: config.Interface2String(val),
 			})
 		}
 		options = filteredOptions
@@ -75,7 +76,7 @@ func UpdateOption(c *gin.Context) {
 	}
 	switch option.Key {
 	case "GitHubOAuthEnabled":
-		if option.Value == "true" && common.GitHubClientId == "" {
+		if option.Value == "true" && config.GitHubClientId == "" {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
 				"message": "无法启用 GitHub OAuth，请先填入 GitHub Client Id 以及 GitHub Client Secret！",
@@ -83,7 +84,7 @@ func UpdateOption(c *gin.Context) {
 			return
 		}
 	case "EmailDomainRestrictionEnabled":
-		if option.Value == "true" && len(common.EmailDomainWhitelist) == 0 {
+		if option.Value == "true" && len(config.EmailDomainWhitelist) == 0 {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
 				"message": "无法启用邮箱域名限制，请先填入限制的邮箱域名！",
@@ -91,7 +92,7 @@ func UpdateOption(c *gin.Context) {
 			return
 		}
 	case "WeChatAuthEnabled":
-		if option.Value == "true" && common.WeChatServerAddress == "" {
+		if option.Value == "true" && config.WeChatServerAddress == "" {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
 				"message": "无法启用微信登录，请先填入微信登录相关配置信息！",
@@ -99,7 +100,7 @@ func UpdateOption(c *gin.Context) {
 			return
 		}
 	case "TurnstileCheckEnabled":
-		if option.Value == "true" && common.TurnstileSiteKey == "" {
+		if option.Value == "true" && config.TurnstileSiteKey == "" {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,
 				"message": "无法启用 Turnstile 校验，请先填入 Turnstile 校验相关配置信息！",

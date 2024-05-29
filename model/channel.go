@@ -1,7 +1,9 @@
 package model
 
 import (
-	"one-api/common"
+	"one-api/common/config"
+	"one-api/common/logger"
+	"one-api/common/utils"
 	"strings"
 
 	"gorm.io/datatypes"
@@ -102,7 +104,7 @@ func GetAllChannels() ([]*Channel, error) {
 	return channels, err
 }
 
-func GetChannelById(id int, selectAll bool) (*Channel, error) {
+func GetChannelById(id int) (*Channel, error) {
 	channel := Channel{Id: id}
 	var err error = nil
 	err = DB.First(&channel, "id = ?", id).Error
@@ -239,21 +241,21 @@ func (channel *Channel) UpdateRaw(overwrite bool) error {
 
 func (channel *Channel) UpdateResponseTime(responseTime int64) {
 	err := DB.Model(channel).Select("response_time", "test_time").Updates(Channel{
-		TestTime:     common.GetTimestamp(),
+		TestTime:     utils.GetTimestamp(),
 		ResponseTime: int(responseTime),
 	}).Error
 	if err != nil {
-		common.SysError("failed to update response time: " + err.Error())
+		logger.SysError("failed to update response time: " + err.Error())
 	}
 }
 
 func (channel *Channel) UpdateBalance(balance float64) {
 	err := DB.Model(channel).Select("balance_updated_time", "balance").Updates(Channel{
-		BalanceUpdatedTime: common.GetTimestamp(),
+		BalanceUpdatedTime: utils.GetTimestamp(),
 		Balance:            balance,
 	}).Error
 	if err != nil {
-		common.SysError("failed to update balance: " + err.Error())
+		logger.SysError("failed to update balance: " + err.Error())
 	}
 }
 
@@ -272,11 +274,11 @@ func (channel *Channel) Delete() error {
 
 func (channel *Channel) StatusToStr() string {
 	switch channel.Status {
-	case common.ChannelStatusEnabled:
+	case config.ChannelStatusEnabled:
 		return "启用"
-	case common.ChannelStatusAutoDisabled:
+	case config.ChannelStatusAutoDisabled:
 		return "自动禁用"
-	case common.ChannelStatusManuallyDisabled:
+	case config.ChannelStatusManuallyDisabled:
 		return "手动禁用"
 	}
 
@@ -284,13 +286,13 @@ func (channel *Channel) StatusToStr() string {
 }
 
 func UpdateChannelStatusById(id int, status int) {
-	err := UpdateAbilityStatus(id, status == common.ChannelStatusEnabled)
+	err := UpdateAbilityStatus(id, status == config.ChannelStatusEnabled)
 	if err != nil {
-		common.SysError("failed to update ability status: " + err.Error())
+		logger.SysError("failed to update ability status: " + err.Error())
 	}
 	err = DB.Model(&Channel{}).Where("id = ?", id).Update("status", status).Error
 	if err != nil {
-		common.SysError("failed to update channel status: " + err.Error())
+		logger.SysError("failed to update channel status: " + err.Error())
 	}
 
 	if err == nil {
@@ -300,7 +302,7 @@ func UpdateChannelStatusById(id int, status int) {
 }
 
 func UpdateChannelUsedQuota(id int, quota int) {
-	if common.BatchUpdateEnabled {
+	if config.BatchUpdateEnabled {
 		addNewRecord(BatchUpdateTypeChannelUsedQuota, id, quota)
 		return
 	}
@@ -310,17 +312,12 @@ func UpdateChannelUsedQuota(id int, quota int) {
 func updateChannelUsedQuota(id int, quota int) {
 	err := DB.Model(&Channel{}).Where("id = ?", id).Update("used_quota", gorm.Expr("used_quota + ?", quota)).Error
 	if err != nil {
-		common.SysError("failed to update channel used quota: " + err.Error())
+		logger.SysError("failed to update channel used quota: " + err.Error())
 	}
 }
 
-func DeleteChannelByStatus(status int64) (int64, error) {
-	result := DB.Where("status = ?", status).Delete(&Channel{})
-	return result.RowsAffected, result.Error
-}
-
 func DeleteDisabledChannel() (int64, error) {
-	result := DB.Where("status = ? or status = ?", common.ChannelStatusAutoDisabled, common.ChannelStatusManuallyDisabled).Delete(&Channel{})
+	result := DB.Where("status = ? or status = ?", config.ChannelStatusAutoDisabled, config.ChannelStatusManuallyDisabled).Delete(&Channel{})
 	// 同时删除Ability
 	DB.Where("enabled = ?", false).Delete(&Ability{})
 	return result.RowsAffected, result.Error

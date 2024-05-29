@@ -26,6 +26,7 @@ const config = {
     lark_login: false,
     lark_client_id: '',
     telegram_bot: '',
+    isLoading: true,  // 添加加载状态
     linuxdo_oauth: false,
     linuxdo_client_id: '',
     linuxdo_client_secret: '',

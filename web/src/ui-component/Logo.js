@@ -18,7 +18,11 @@ import { Button, Typography } from '@mui/material';
 const Logo = () => {
   const siteInfo = useSelector((state) => state.siteInfo);
   const theme = useTheme();
-  const logo = theme.palette.mode === 'light' ? logoLight : logoDark;
+  const defaultLogo = theme.palette.mode === 'light' ? logoLight : logoDark;
+
+  if (siteInfo.isLoading) {
+    return null; // 数据加载未完成时不显示 logo
+  }
 
   return (
     <>

@@ -58,7 +58,8 @@ const typeConfig = {
       other: '替换 API 版本'
     },
     prompt: {
-      other: '输入后，会替换请求地址中的v1，例如：freeapi，则请求chat时会变成https://xxx.com/freeapi/chat/completions'
+      other:
+        '输入后，会替换请求地址中的v1，例如：freeapi，则请求chat时会变成https://xxx.com/freeapi/chat/completions,如果需要禁用版本号，请输入 disable'
     }
   },
   3: {
@@ -68,7 +69,7 @@ const typeConfig = {
     },
     prompt: {
       base_url: '请填写AZURE_OPENAI_ENDPOINT',
-      other: '请输入默认API版本，例如：2023-06-01-preview'
+      other: '请输入默认API版本，例如：2024-05-01-preview'
     }
   },
   11: {

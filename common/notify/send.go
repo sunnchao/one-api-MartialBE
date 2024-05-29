@@ -3,10 +3,10 @@ package notify
 import (
 	"context"
 	"fmt"
-	"one-api/common"
+	"one-api/common/logger"
 )
 
-func (n *Notify) Send(ctx context.Context, title, message string, notifier string) {
+func (n *Notify) Send(ctx context.Context, title, message string) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -15,28 +15,16 @@ func (n *Notify) Send(ctx context.Context, title, message string, notifier strin
 		if channel == nil {
 			continue
 		}
-		if notifier != "" {
-			if channelName != notifier {
-				continue
-			}
-		}
 		err := channel.Send(ctx, title, message)
 		if err != nil {
-			common.LogError(ctx, fmt.Sprintf("%s err: %s", channelName, err.Error()))
+			logger.LogError(ctx, fmt.Sprintf("%s err: %s", channelName, err.Error()))
 		}
 	}
 }
 
-func Send(params ...string) {
+func Send(title, message string) {
 	//lint:ignore SA1029 reason: 需要使用该类型作为错误处理
-	ctx := context.WithValue(context.Background(), common.RequestIdKey, "NotifyTask")
-	title := params[0]
-	message := params[1]
+	ctx := context.WithValue(context.Background(), logger.RequestIdKey, "NotifyTask")
 
-	var notifier string
-	if len(params) > 2 {
-		notifier = params[2]
-
-	}
-	notifyChannels.Send(ctx, title, message, notifier)
+	notifyChannels.Send(ctx, title, message)
 }
