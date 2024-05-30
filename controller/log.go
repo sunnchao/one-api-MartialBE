@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"one-api/common"
+	"one-api/common/config"
 	"one-api/model"
 	"strconv"
 
@@ -46,7 +47,7 @@ func GetUserLogsList(c *gin.Context) {
 		return
 	}
 
-	if role < common.RoleAdminUser {
+	if role < config.RoleAdminUser {
 		//	删除 logs 的 channel id
 		for _, log := range *logs.Data {
 			log.ChannelId = -1

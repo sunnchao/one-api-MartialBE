@@ -3,13 +3,13 @@ package model
 import (
 	"errors"
 	"fmt"
+	"gorm.io/gorm"
 	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/logger"
 	"one-api/common/stmp"
 	"one-api/common/utils"
 	"strings"
-	"gorm.io/gorm"
 )
 
 type Token struct {
@@ -303,10 +303,10 @@ func PostConsumeTokenQuota(tokenId int, quota int) (err error) {
 func CreateInitialToken(userId int, username string) (err error) {
 	var token = &Token{
 		UserId:         userId,
-		Key:            common.GenerateKey(),
+		Key:            utils.GenerateKey(),
 		Name:           username + "的初始令牌",
-		CreatedTime:    common.GetTimestamp(),
-		AccessedTime:   common.GetTimestamp(),
+		CreatedTime:    utils.GetTimestamp(),
+		AccessedTime:   utils.GetTimestamp(),
 		ExpiredTime:    -1,
 		RemainQuota:    0,
 		UnlimitedQuota: true,

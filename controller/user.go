@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"one-api/common"
 	"one-api/common/config"
+	"one-api/common/logger"
 	"one-api/common/utils"
 	"one-api/model"
 	"reflect"
@@ -85,7 +86,7 @@ func setupLogin(user *model.User, c *gin.Context) {
 		Status:      user.Status,
 	}
 
-	model.RecordLogWithRequestIP(user.Id, model.LogLogin, "登录", common.GetRequestIP(c))
+	model.RecordLogWithRequestIP(user.Id, model.LogLogin, "登录", utils.GetRequestIP(c))
 	c.JSON(http.StatusOK, gin.H{
 		"message": "",
 		"success": true,
@@ -347,7 +348,7 @@ func GetSelf(c *gin.Context) {
 	// 查询签到信息
 	checkInTime, _, err := model.IsCheckInToday(id)
 	if err != nil {
-		common.SysLog(err.Error())
+		logger.SysLog(err.Error())
 	}
 
 	// 添加新的键值对到映射中

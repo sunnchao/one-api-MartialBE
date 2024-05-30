@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"one-api/common"
 	"one-api/common/config"
+	"one-api/common/utils"
 	"one-api/model"
 	"one-api/providers/azure"
 	"one-api/providers/openai"
@@ -81,6 +82,6 @@ func RelayOnly(c *gin.Context) {
 			requestTime = int(time.Since(requestStartTime).Milliseconds())
 		}
 	}
-	model.RecordConsumeLog(c.Request.Context(), c.GetInt("id"), c.GetInt("channel_id"), 0, 0, "", c.GetString("token_name"), 0, "中继:"+path, requestTime, common.GetRequestIP(c))
+	model.RecordConsumeLog(c.Request.Context(), c.GetInt("id"), c.GetInt("channel_id"), 0, 0, "", c.GetString("token_name"), 0, "中继:"+path, requestTime, utils.GetRequestIP(c))
 
 }

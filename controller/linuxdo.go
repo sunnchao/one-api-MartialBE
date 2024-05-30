@@ -8,7 +8,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"one-api/common"
+	"one-api/common/config"
+	"one-api/common/logger"
 	"one-api/model"
 	"strconv"
 	"time"
@@ -36,7 +37,7 @@ func getLinuxDoUserInfoByCode(code string) (*LinuxDoUser, error) {
 	if code == "" {
 		return nil, errors.New("无效的参数")
 	}
-	auth := base64.StdEncoding.EncodeToString([]byte(common.LinuxDoClientId + ":" + common.LinuxDoClientSecret))
+	auth := base64.StdEncoding.EncodeToString([]byte(config.LinuxDoClientId + ":" + config.LinuxDoClientSecret))
 	form := url.Values{
 		"grant_type": {"authorization_code"},
 		"code":       {code},
@@ -53,7 +54,7 @@ func getLinuxDoUserInfoByCode(code string) (*LinuxDoUser, error) {
 	}
 	res, err := client.Do(req)
 	if err != nil {
-		common.SysLog(err.Error())
+		logger.SysLog(err.Error())
 		return nil, errors.New("无法连接至 LINUX DO 服务器，请稍后重试！")
 	}
 	defer res.Body.Close()
@@ -69,7 +70,7 @@ func getLinuxDoUserInfoByCode(code string) (*LinuxDoUser, error) {
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", oAuthResponse.AccessToken))
 	res2, err := client.Do(req)
 	if err != nil {
-		common.SysLog(err.Error())
+		logger.SysLog(err.Error())
 		return nil, errors.New("无法连接至 LINUX DO 服务器，请稍后重试！")
 	}
 	defer res2.Body.Close()
@@ -81,7 +82,7 @@ func getLinuxDoUserInfoByCode(code string) (*LinuxDoUser, error) {
 	if linuxdoUser.ID == 0 {
 		return nil, errors.New("返回值非法，用户字段为空，请稍后重试！")
 	}
-	if linuxdoUser.TrustLevel < int(common.LinuxDoMinLevel) {
+	if linuxdoUser.TrustLevel < int(config.LinuxDoMinLevel) {
 		return nil, errors.New("用户 LINUX DO 信任等级不足！")
 	}
 	return &linuxdoUser, nil
@@ -103,7 +104,7 @@ func LinuxDoOAuth(c *gin.Context) {
 		return
 	}
 
-	if !common.LinuxDoOAuthEnabled {
+	if !config.LinuxDoOAuthEnabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": "管理员未开启通过 LINUX DO 登录以及注册",
@@ -143,7 +144,7 @@ func LinuxDoOAuth(c *gin.Context) {
 			return
 		}
 	} else {
-		if common.RegisterEnabled {
+		if config.RegisterEnabled {
 			affCode := c.Query("aff")
 			user.InviterId, _ = model.GetUserIdByAffCode(affCode)
 
@@ -153,8 +154,8 @@ func LinuxDoOAuth(c *gin.Context) {
 			} else {
 				user.DisplayName = linuxdoUser.Username
 			}
-			user.Role = common.RoleCommonUser
-			user.Status = common.UserStatusEnabled
+			user.Role = config.RoleCommonUser
+			user.Status = config.UserStatusEnabled
 			err := user.Insert(user.InviterId)
 
 			if err != nil {
@@ -175,7 +176,7 @@ func LinuxDoOAuth(c *gin.Context) {
 		}
 	}
 
-	if user.Status != common.UserStatusEnabled {
+	if user.Status != config.UserStatusEnabled {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "用户已被封禁",
 			"success": false,
@@ -186,7 +187,7 @@ func LinuxDoOAuth(c *gin.Context) {
 }
 
 func LinuxDoBind(c *gin.Context) {
-	if !common.LinuxDoOAuthEnabled {
+	if !config.LinuxDoOAuthEnabled {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": "管理员未开启通过 LINUX DO 登录以及注册",

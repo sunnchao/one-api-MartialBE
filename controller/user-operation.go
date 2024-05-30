@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"one-api/common"
+	"one-api/common/logger"
+	"one-api/common/utils"
 	"one-api/model"
 
 	"github.com/gin-gonic/gin"
@@ -28,7 +30,7 @@ func UserOperationCheckIn(c *gin.Context) {
 	// 检查是否已经签到
 	checkInTime, lastDayUsed, err := model.IsCheckInToday(user.Id)
 	if err != nil {
-		common.SysLog(fmt.Sprintf("IsCheckInToday: %s", err.Error()))
+		logger.SysLog(fmt.Sprintf("IsCheckInToday: %s", err.Error()))
 	}
 	if len(checkInTime) > 0 {
 		// 已签到
@@ -48,7 +50,7 @@ func UserOperationCheckIn(c *gin.Context) {
 	}
 
 	// 插入一条数据
-	quota, err := model.InsertOperationCheckIn(user.Id, lastDayUsed, common.GetRequestIP(c))
+	quota, err := model.InsertOperationCheckIn(user.Id, lastDayUsed, utils.GetRequestIP(c))
 	if err != nil {
 		// 签到失败
 		c.JSON(http.StatusBadRequest, gin.H{

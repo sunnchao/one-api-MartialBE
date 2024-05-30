@@ -9,6 +9,7 @@ import (
 	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/logger"
+	"one-api/common/utils"
 	"one-api/model"
 	"one-api/types"
 	"time"
@@ -164,7 +165,7 @@ func (q *Quota) Undo(c *gin.Context) {
 
 func (q *Quota) Consume(c *gin.Context, usage *types.Usage) {
 	tokenName := c.GetString("token_name")
-	requestIP := common.GetRequestIP(c)
+	requestIP := utils.GetRequestIP(c)
 	// 如果没有报错，则消费配额
 	go func(ctx context.Context) {
 		err := q.completedQuotaConsumption(usage, tokenName, ctx, requestIP)

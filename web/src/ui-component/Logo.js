@@ -27,7 +27,7 @@ const Logo = () => {
   return (
     <>
       <img
-        src={siteInfo.logo || logo}
+        src={siteInfo.logo || defaultLogo}
         alt={siteInfo.system_name}
         height="40"
         style={{

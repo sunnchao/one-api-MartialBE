@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"one-api/common"
 	"one-api/common/config"
+	"one-api/common/logger"
 	"one-api/common/utils"
 
 	"gorm.io/gorm"
@@ -116,7 +117,7 @@ func Redeem(key string, userId int) (quota int, err error) {
 		otherQuota := redemption.Quota * 25 / 100
 		err = DB.Model(&User{}).Where("id = ?", userId).Update("quota", gorm.Expr("quota + ?", otherQuota)).Error
 		if err != nil {
-			common.SysLog("活动兑换加倍失败，" + err.Error())
+			logger.SysLog("活动兑换加倍失败，" + err.Error())
 		} else {
 			RecordLog(userId, LogTypeTopup, fmt.Sprintf("6.18活动兑换赠送 %s", common.LogQuota(otherQuota)))
 			redeQuota = redemption.Quota + otherQuota

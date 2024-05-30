@@ -6,6 +6,7 @@ import (
 	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/logger"
+	"one-api/common/utils"
 	"one-api/model"
 	"one-api/relay/relay_util"
 	"one-api/types"
@@ -136,5 +137,5 @@ func cacheProcessing(c *gin.Context, cacheProps *relay_util.ChatCacheProps) {
 		}
 	}
 
-	model.RecordConsumeLog(c.Request.Context(), cacheProps.UserId, cacheProps.ChannelID, cacheProps.PromptTokens, cacheProps.CompletionTokens, cacheProps.ModelName, tokenName, 0, "缓存", requestTime, common.GetRequestIP(c))
+	model.RecordConsumeLog(c.Request.Context(), cacheProps.UserId, cacheProps.ChannelID, cacheProps.PromptTokens, cacheProps.CompletionTokens, cacheProps.ModelName, tokenName, 0, "缓存", requestTime, utils.GetRequestIP(c))
 }

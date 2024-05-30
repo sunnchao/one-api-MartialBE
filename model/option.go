@@ -84,12 +84,12 @@ func InitOptionMap() {
 
 	config.OptionMap["ChatImageRequestProxy"] = ""
 
-	config.OptionMap["LinuxDoOAuthEnabled"] = strconv.FormatBool(common.LinuxDoOAuthEnabled)
+	config.OptionMap["LinuxDoOAuthEnabled"] = strconv.FormatBool(config.LinuxDoOAuthEnabled)
 	config.OptionMap["LinuxDoClientId"] = ""
 	config.OptionMap["LinuxDoClientSecret"] = ""
-	config.OptionMap["LinuxDoMinLevel"] = strconv.Itoa(common.LinuxDoMinLevel)
+	config.OptionMap["LinuxDoMinLevel"] = strconv.Itoa(config.LinuxDoMinLevel)
 
-	common.OptionMapRWMutex.Unlock()
+	config.OptionMapRWMutex.Unlock()
 	loadOptionsFromDatabase()
 }
 

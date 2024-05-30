@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 	"one-api/common"
+	"one-api/common/config"
+	"one-api/common/utils"
 	"strings"
 	"time"
 )
@@ -62,7 +64,7 @@ func IsCheckInToday(userId int) (checkInTime string, lastDayUsed int64, err erro
 	userOperation, err = GetOperationCheckInByUserId(userId)
 
 	// 获取当前地区的当天零点时间
-	localZeroTime := common.GetLocalZeroTime()
+	localZeroTime := utils.GetLocalZeroTime()
 
 	if err != nil {
 		// 获取昨日的累计使用额度
@@ -99,8 +101,8 @@ func GetUserQuotaUsedByPeriod(userId int, zeroTime time.Time) (used int64, err e
 	}
 
 	// 保底值
-	if float64(used) < (common.QuotaPerUnit * 0.5) {
-		used = int64(common.QuotaPerUnit * 0.3)
+	if float64(used) < (config.QuotaPerUnit * 0.5) {
+		used = int64(config.QuotaPerUnit * 0.3)
 	}
 	return used, err
 }
