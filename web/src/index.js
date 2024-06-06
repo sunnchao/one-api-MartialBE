@@ -14,7 +14,6 @@ import '@/assets/scss/style.scss';
 import config from './config';
 
 import { ConfigProvider } from 'antd'
-// import { PrimeReactProvider } from 'primereact/api';
 
 // ==============================|| REACT DOM RENDER  ||============================== //
 
