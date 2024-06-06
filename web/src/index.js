@@ -13,20 +13,21 @@ import { store } from './store';
 import '@/assets/scss/style.scss';
 import config from './config';
 
-import { PrimeReactProvider } from 'primereact/api';
+import { ConfigProvider } from 'antd'
+// import { PrimeReactProvider } from 'primereact/api';
 
 // ==============================|| REACT DOM RENDER  ||============================== //
 
 const container = document.getElementById('root');
 const root = createRoot(container); // createRoot(container!) if you use TypeScript
 root.render(
-  <PrimeReactProvider>
+  <ConfigProvider>
     <Provider store={store}>
       <BrowserRouter basename={config.basename}>
         <App />
       </BrowserRouter>
     </Provider>
-  </PrimeReactProvider>
+  </ConfigProvider>
 );
 
 // If you want your app to work offline and load faster, you can change

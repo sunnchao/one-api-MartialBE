@@ -18,9 +18,6 @@ const Dashboard = () => {
   const [tokenChart, setTokenChart] = useState(null);
   const [users, setUsers] = useState([]);
 
-  // 是否显示 51 活动的文案
-  const [show51Panel, setShow51Panel] = useState(true);
-
   const userDashboard = async () => {
     try {
       const res = await API.get('/api/user/dashboard');
@@ -38,7 +35,6 @@ const Dashboard = () => {
       }
       setLoading(false);
     } catch (error) {
-      return;
     }
   };
 
@@ -52,16 +48,12 @@ const Dashboard = () => {
         showError(message);
       }
     } catch (error) {
-      return;
     }
   };
 
   useEffect(() => {
-    userDashboard();
-    loadUser();
-    if (Date.now() > new Date('2024-05-06').getTime()) {
-      setShow51Panel(false);
-    }
+    userDashboard().then();
+    loadUser().then();
   }, []);
 
   return (
@@ -131,18 +123,7 @@ const Dashboard = () => {
                   <Button variant="contained" disabled={!!users?.check_in}>
                     <BaseCheckInButton check_in={!!users?.check_in} loadUser={loadUser}></BaseCheckInButton>
                   </Button>
-                  {/* <LoadingButton disabled={!!users?.check_in} variant="contained">
-                    {users?.check_in ? '已签到' : '立即签到'}
-                  </LoadingButton> */}
                 </Grid>
-                {show51Panel && (
-                  <Grid item xs={12}>
-                    <Typography variant={'h2'}>5️⃣.1️⃣ 加倍快乐！</Typography>
-                    <Typography>
-                      <p>即日起，截止到 5月6号 0 点，在本站充值额度享受加倍赠送，充多少送多少。</p>
-                    </Typography>
-                  </Grid>
-                )}
               </Grid>
             </UserCard>
           </Grid>
