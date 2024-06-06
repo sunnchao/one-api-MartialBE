@@ -1,7 +1,6 @@
 import { Stack, ListItem, ButtonBase } from '@mui/material';
 import { copy } from '@/utils/common';
 import { Card, Table, Space, Tag, Typography, List, Row, Col, Button } from 'antd';
-import { Button as PButton } from 'primereact/button';
 
 const renderModalTable = (data, provider) => {
   function renderReplayTokensColumn(record) {
