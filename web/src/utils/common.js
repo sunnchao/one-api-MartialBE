@@ -6,7 +6,7 @@ import { notification } from 'antd';
 
 export function getSystemName() {
   let system_name = localStorage.getItem('system_name');
-  if (!system_name) return 'One API';
+  if (!system_name) return 'Chirou API';
   return system_name;
 }
 

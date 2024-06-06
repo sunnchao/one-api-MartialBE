@@ -26,7 +26,7 @@ const Footer = () => {
             <Link href="https://github.com/songquanpeng" target="_blank">
               JustSong
             </Link>{' '}
-            One API，源代码遵循
+            Chirou API，源代码遵循
             <Link href="https://opensource.org/licenses/mit-license.php"> MIT 协议</Link>
           </>
         )}

@@ -35,7 +35,7 @@ func main() {
 	cli.InitCli()
 	config.InitConf()
 	logger.SetupLogger()
-	logger.SysLog("One API " + config.Version + " started")
+	logger.SysLog("Chirou API " + config.Version + " started")
 	// Initialize SQL Database
 	model.SetupDB()
 	defer model.CloseDB()
@@ -103,7 +103,7 @@ func initHttpServer() {
 	if err != nil {
 		logger.FatalLog("failed to start HTTP server: " + err.Error())
 	}
-	notify.Send("One API started", "One API started successfully.")
+	notify.Send("Chirou API started", "Chirou API started successfully.")
 }
 
 func SyncChannelCache(frequency int) {
