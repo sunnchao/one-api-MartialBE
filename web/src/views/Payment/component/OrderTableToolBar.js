@@ -4,7 +4,7 @@ import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { StatusType } from './OrderTableRow';
-require('dayjs/locale/zh-cn');
+import 'dayjs/locale/zh-cn';
 // ----------------------------------------------------------------------
 
 export default function OrderTableToolBar({ filterName, handleFilterName }) {

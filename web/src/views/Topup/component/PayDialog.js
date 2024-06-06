@@ -4,9 +4,9 @@ import { Dialog, DialogContent, DialogTitle, IconButton, Stack, Typography } fro
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@mui/material/styles';
 import { QRCode } from 'react-qrcode-logo';
-import successSvg from 'assets/images/success.svg';
-import { API } from 'utils/api';
-import { showError } from 'utils/common';
+import successSvg from '@/assets/images/success.svg';
+import { API } from '@/utils/api';
+import { showError } from '@/utils/common';
 
 const PayDialog = ({ open, onClose, amount, uuid }) => {
   const theme = useTheme();

@@ -19,6 +19,11 @@ import StatusProvider from '@/contexts/StatusContext';
 import { SnackbarProvider } from 'notistack';
 import CopySnackbar from '@/ui-component/Snackbar';
 
+import 'primereact/resources/themes/md-light-indigo/theme.css'; //theme
+import 'primereact/resources/primereact.min.css'; //core css
+import 'primeicons/primeicons.css'; //icons
+import 'primeflex/primeflex.css'; // flex
+
 // ==============================|| APP ||============================== //
 
 const App = () => {

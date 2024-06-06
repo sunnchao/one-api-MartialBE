@@ -17,9 +17,9 @@ import {
 } from '@mui/material';
 
 import { IconDotsVertical, IconEdit, IconTrash } from '@tabler/icons-react';
-import { timestamp2string, showError } from 'utils/common';
+import { timestamp2string, showError } from '@/utils/common';
 import { PaymentType } from '../type/Config';
-import TableSwitch from 'ui-component/Switch';
+import TableSwitch from '@/ui-component/Switch';
 
 export default function PaymentTableRow({ item, managePayment, handleOpenModal, setModalPaymentId }) {
   const [open, setOpen] = useState(null);

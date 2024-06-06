@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Tabs, Tab, Box, Card } from '@mui/material';
 import Gateway from './Gateway';
 import Order from './Order';
-import AdminContainer from 'ui-component/AdminContainer';
+import AdminContainer from '@/ui-component/AdminContainer';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 function CustomTabPanel(props) {

@@ -1,6 +1,7 @@
 import { Stack, ListItem, ButtonBase } from '@mui/material';
 import { copy } from '@/utils/common';
-import { Button, Card, Table, Space, Tag, Typography, List, Row, Col } from 'antd';
+import { Card, Table, Space, Tag, Typography, List, Row, Col, Button } from 'antd';
+import { Button as PButton } from 'primereact/button';
 
 const renderModalTable = (data, provider) => {
   function renderReplayTokensColumn(record) {
@@ -209,7 +210,7 @@ const Index = () => {
             <ListItem>
               <Typography>
                 地址：
-                <Button variant={'contained'} type="primary" onClick={() => window.open('https://shop.wochirou.com/')}>
+                <Button type="primary" onClick={() => window.open('https://shop.wochirou.com/')}>
                   点击购买
                 </Button>
                 【

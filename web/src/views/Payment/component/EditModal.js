@@ -19,8 +19,8 @@ import {
   FormHelperText
 } from '@mui/material';
 
-import { showSuccess, showError, trims } from 'utils/common';
-import { API } from 'utils/api';
+import { showSuccess, showError, trims } from '@/utils/common';
+import { API } from '@/utils/api';
 import { PaymentType, CurrencyType, PaymentConfig } from '../type/Config';
 
 const validationSchema = Yup.object().shape({
