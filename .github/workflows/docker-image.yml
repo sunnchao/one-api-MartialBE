@@ -43,8 +43,7 @@ jobs:
         run: |
           export VERSION=$(cat VERSION)
           cd web
-          npm install pnpm
-          pnpm install
+          npm install
           REACT_APP_VERSION=$VERSION npm run build
           cd ..
       - name: Set up Go
