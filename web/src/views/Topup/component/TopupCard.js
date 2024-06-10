@@ -211,8 +211,8 @@ const TopupCard = (props) => {
                     border: selectedPayment === item ? `1px solid ${theme.palette.primary.main}` : '1px solid transparent'
                   }}
                 >
-                  <Box sx={{ mr: { xs: 1, sm: 2, width: 20 }, display: 'flex', alignItems: 'center' }}>
-                    <img src={item.icon} alt="github" width={25} height={25} style={{ marginRight: matchDownSM ? 8 : 16 }} />
+                  <Box sx={{ mr: { xs: 1, sm: 2, width: 'max-content' }, display: 'flex', alignItems: 'center' }}>
+                    <img src={item.icon} alt="github" width={'100%'} height={25} style={{ marginRight: matchDownSM ? 8 : 16 }} />
                   </Box>
                   {item.name}
                 </Button>
