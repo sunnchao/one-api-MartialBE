@@ -186,7 +186,7 @@ export function renderNumber(num) {
   }
 }
 
-export function renderQuotaWithPrompt(quota, digits) {
+export function renderQuotaWithPrompt(quota = 0, digits) {
   let displayInCurrency = localStorage.getItem('display_in_currency');
   displayInCurrency = displayInCurrency === 'true';
   if (displayInCurrency) {

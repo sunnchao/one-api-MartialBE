@@ -53,7 +53,9 @@ const originInputs = {
   display_name: '',
   password: '',
   group: 'default',
-  quota: 0
+  quota: 0,
+  updateQuota: 0,
+  updateQuotaRemark: ''
 };
 
 const EditModal = ({ open, userId, onCancel, onOk }) => {
@@ -231,7 +233,7 @@ const EditModal = ({ open, userId, onCancel, onOk }) => {
                       onBlur={handleBlur}
                       onChange={handleChange}
                       aria-describedby="helper-text-channel-quota-label"
-                      disabled={values.unlimited_quota}
+                      disabled={true}
                     />
 
                     {touched.quota && errors.quota && (
@@ -239,6 +241,38 @@ const EditModal = ({ open, userId, onCancel, onOk }) => {
                         {errors.quota}
                       </FormHelperText>
                     )}
+                  </FormControl>
+                  <FormControl fullWidth error={Boolean(touched.quota && errors.quota)} sx={{ ...theme.typography.otherInput }}>
+                    <InputLabel htmlFor="channel-quota-label">额度修改</InputLabel>
+                    <OutlinedInput
+                      id="channel-quota-label"
+                      label="额度修改"
+                      type="number"
+                      value={values.updateQuota}
+                      name="updateQuota"
+                      endAdornment={<InputAdornment position="end">{renderQuotaWithPrompt(values.updateQuota)}</InputAdornment>}
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      aria-describedby="helper-text-channel-quota-label"
+                    />
+
+                    {touched.quota && errors.quota && (
+                      <FormHelperText error id="helper-tex-channel-quota-label">
+                        {errors.quota}
+                      </FormHelperText>
+                    )}
+                  </FormControl>
+                  <FormControl fullWidth error={Boolean(touched.quota && errors.quota)} sx={{ ...theme.typography.otherInput }}>
+                    <InputLabel htmlFor="channel-quota-label">额度修改备注</InputLabel>
+                    <OutlinedInput
+                      id="channel-quota-label"
+                      label="额度修改"
+                      value={values.updateQuotaRemark}
+                      name="updateQuotaRemark"
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      aria-describedby="helper-text-channel-quota-label"
+                    />
                   </FormControl>
 
                   <FormControl fullWidth error={Boolean(touched.group && errors.group)} sx={{ ...theme.typography.otherInput }}>

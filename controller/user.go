@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"one-api/common"
 	"one-api/common/config"
@@ -362,7 +363,7 @@ func GetSelf(c *gin.Context) {
 }
 
 func UpdateUser(c *gin.Context) {
-	var updatedUser model.User
+	var updatedUser model.UpdateUsersParams
 	err := json.NewDecoder(c.Request.Body).Decode(&updatedUser)
 	if err != nil || updatedUser.Id == 0 {
 		c.JSON(http.StatusOK, gin.H{
@@ -417,6 +418,26 @@ func UpdateUser(c *gin.Context) {
 	}
 	if originUser.Quota != updatedUser.Quota {
 		model.RecordLog(originUser.Id, model.LogTypeManage, fmt.Sprintf("管理员将用户额度从 %s修改为 %s", common.LogQuota(originUser.Quota), common.LogQuota(updatedUser.Quota)))
+	}
+
+	if updatedUser.UpdateQuota != 0 {
+		if updatedUser.UpdateQuota > 0 {
+			// 增加
+			//	打印
+			err := model.IncreaseUserQuota(updatedUser.Id, updatedUser.UpdateQuota)
+			if err == nil {
+				model.RecordLog(originUser.Id, model.LogTypeManage, fmt.Sprintf("管理员补发用户 %s, 原因 %s", common.LogQuota(updatedUser.UpdateQuota), updatedUser.UpdateQuotaRemark))
+
+			}
+		}
+		if updatedUser.UpdateQuota < 0 {
+			// 减少
+			err := model.DecreaseUserQuota(updatedUser.Id, int(math.Abs(float64(updatedUser.UpdateQuota))))
+			if err == nil {
+				model.RecordLog(originUser.Id, model.LogTypeManage, fmt.Sprintf("管理员扣除用户 %s, 原因 %s", common.LogQuota(int(math.Abs(float64(updatedUser.UpdateQuota)))), updatedUser.UpdateQuotaRemark))
+			}
+		}
+
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

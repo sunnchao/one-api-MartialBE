@@ -40,6 +40,12 @@ type User struct {
 	DeletedAt        gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
+type UpdateUsersParams struct {
+	*User
+	UpdateQuota       int    `form:"update_quota"`
+	UpdateQuotaRemark string `form:"update_quota_remark"`
+}
+
 type UserUpdates func(*User)
 
 func GetMaxUserId() int {
