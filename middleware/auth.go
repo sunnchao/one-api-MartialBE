@@ -118,6 +118,11 @@ func tokenAuth(c *gin.Context, key string) {
 		c.Set("token_model_limit_enabled", false)
 	}
 	if len(parts) > 1 {
+		if token.ModelLimitsEnabled == true {
+			abortWithMessage(c, http.StatusForbidden, "模型限制已启用，无法指定渠道")
+			return
+		}
+
 		if model.IsAdmin(token.UserId) {
 			if strings.HasPrefix(parts[1], "!") {
 				channelId := utils.String2Int(parts[1][1:])
