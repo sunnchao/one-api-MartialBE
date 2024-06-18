@@ -18,7 +18,7 @@ type UserOperation struct {
 	Remark      string    `json:"remark"`
 }
 
-// 获取用户今日的UserOperation
+// GetOperationCheckInByUserId 获取用户今日的UserOperation
 func GetOperationCheckInByUserId(userId int) (userOperation UserOperation, err error) {
 	//  使用Find()获取最近一条记录
 	err = DB.Model(&UserOperation{}).
@@ -33,9 +33,15 @@ func insertOperation(user_operation UserOperation) (err error) {
 	return err
 }
 
-// 插入一条 InsertOperationCheckIn
+// InsertOperationCheckIn 插入一条
 func InsertOperationCheckIn(userId int, lastDayUsed int64, requestIP string) (quota int, err error) {
 	rand.Seed(time.Now().UnixNano())
+
+	if lastDayUsed > 10 {
+		lastDayUsed = lastDayUsed / 2
+	} else if lastDayUsed > 30 {
+		lastDayUsed = lastDayUsed / 3
+	}
 
 	// 随机生成一个额度
 	quota = int(rand.Float64() * float64(lastDayUsed))
