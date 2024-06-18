@@ -43,7 +43,7 @@ const TopupCard = (props) => {
     if (state.siteInfo.RechargeDiscount === '') {
       return {};
     }
-    return JSON.parse(state.siteInfo.RechargeDiscount);
+    return JSON.parse(state.siteInfo.RechargeDiscount || '{}');
   });
   const topUp = async () => {
     if (redemptionCode === '') {
