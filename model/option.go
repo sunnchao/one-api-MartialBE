@@ -86,6 +86,7 @@ func InitOptionMap() {
 
 	config.OptionMap["PaymentUSDRate"] = strconv.FormatFloat(config.PaymentUSDRate, 'f', -1, 64)
 	config.OptionMap["PaymentMinAmount"] = strconv.Itoa(config.PaymentMinAmount)
+	config.OptionMap["RechargeDiscount"] = common.RechargeDiscount2JSONString()
 
 	config.OptionMap["LinuxDoOAuthEnabled"] = strconv.FormatBool(config.LinuxDoOAuthEnabled)
 	config.OptionMap["LinuxDoClientId"] = ""
@@ -220,6 +221,9 @@ func updateOptionMap(key string, value string) (err error) {
 		config.QuotaPerUnit, _ = strconv.ParseFloat(value, 64)
 	case "PaymentUSDRate":
 		config.PaymentUSDRate, _ = strconv.ParseFloat(value, 64)
+	case "RechargeDiscount":
+		err = common.UpdateRechargeDiscountByJSONString(value)
+		config.RechargeDiscount = common.RechargeDiscount2JSONString()
 	}
 	return err
 }
