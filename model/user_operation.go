@@ -37,14 +37,8 @@ func insertOperation(user_operation UserOperation) (err error) {
 func InsertOperationCheckIn(userId int, lastDayUsed int64, requestIP string) (quota int, err error) {
 	rand.Seed(time.Now().UnixNano())
 
-	if lastDayUsed > 10 {
-		lastDayUsed = lastDayUsed / 2
-	} else if lastDayUsed > 30 {
-		lastDayUsed = lastDayUsed / 3
-	}
-
 	// 随机生成一个额度
-	quota = int(rand.Float64() * float64(lastDayUsed))
+	quota = int(rand.Float64() * rand.Float64() * float64(lastDayUsed))
 
 	operationRemark := []string{"签到", ", ", fmt.Sprintf("获得额度 %v", common.LogQuota(quota))}
 
