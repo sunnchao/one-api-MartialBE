@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'; //
-import { showError, trims, showSuccess } from 'utils/common';
+import { showError, trims, showSuccess } from '@/utils/common';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -12,9 +12,9 @@ import Toolbar from '@mui/material/Toolbar';
 import EditeModal from './component/EditModal';
 import { Card, Stack, Typography } from '@mui/material';
 import TagTableRow from './component/TagTableRow';
-import KeywordTableHead from 'ui-component/TableHead';
-import { API } from 'utils/api';
-import { ITEMS_PER_PAGE } from 'constants';
+import KeywordTableHead from '@/ui-component/TableHead';
+import { API } from '@/utils/api';
+import { ITEMS_PER_PAGE } from '@/constants';
 // import TableToolBar from 'ui-component/TableToolBar';
 
 const originalKeyword = {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { showError, showSuccess, showInfo, trims } from 'utils/common';
+import { showError, showSuccess, showInfo, trims } from '@/utils/common';
 
 import { useTheme } from '@mui/material/styles';
 import Table from '@mui/material/Table';
@@ -15,11 +15,11 @@ import Alert from '@mui/material/Alert';
 
 import { Button, IconButton, Card, Box, Stack, Container, Typography, Divider } from '@mui/material';
 import ChannelTableRow from './component/TableRow';
-import KeywordTableHead from 'ui-component/TableHead';
-import { API } from 'utils/api';
+import KeywordTableHead from '@/ui-component/TableHead';
+import { API } from '@/utils/api';
 import { IconRefresh, IconTrash, IconPlus, IconMenu2, IconBrandSpeedtest, IconCoinYuan, IconSearch } from '@tabler/icons-react';
 import EditeModal from './component/EditModal';
-import { ITEMS_PER_PAGE } from 'constants';
+import { ITEMS_PER_PAGE } from '@/constants';
 import TableToolBar from './component/TableToolBar';
 import BatchModal from './component/BatchModal';
 
@@ -33,7 +33,8 @@ const originalKeyword = {
   test_model: '',
   other: '',
   filter_tag: false,
-  tag: ''
+  tag: '',
+  id: ''
 };
 
 export async function fetchChannelData(page, rowsPerPage, keyword, order, orderBy) {

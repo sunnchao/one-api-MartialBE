@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 
-import { CHANNEL_OPTIONS } from 'constants/ChannelConstants';
+import { CHANNEL_OPTIONS } from '@/constants/ChannelConstants';
 
 import {
   Popover,
@@ -20,8 +20,8 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
-import Label from 'ui-component/Label';
-import ModelsPopover from 'ui-component/ModelsPopover';
+import Label from '@/ui-component/Label';
+import ModelsPopover from '@/ui-component/ModelsPopover';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 

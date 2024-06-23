@@ -8,11 +8,11 @@ import PerfectScrollbar from 'react-perfect-scrollbar';
 import TablePagination from '@mui/material/TablePagination';
 import LinearProgress from '@mui/material/LinearProgress';
 import ChannelTableRow from './TableRow';
-import KeywordTableHead from 'ui-component/TableHead';
-import { ITEMS_PER_PAGE } from 'constants';
+import KeywordTableHead from '@/ui-component/TableHead';
+import { ITEMS_PER_PAGE } from '@/constants';
 import { fetchChannelData } from '../ChannelList';
-import { API } from 'utils/api';
-import { showError, showSuccess, trims } from 'utils/common';
+import { API } from '@/utils/api';
+import { showError, showSuccess, trims } from '@/utils/common';
 
 export default function ChannelTable({ tag }) {
   const [page, setPage] = useState(0);

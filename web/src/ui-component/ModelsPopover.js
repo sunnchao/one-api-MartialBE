@@ -3,9 +3,9 @@ import { styled } from '@mui/material/styles';
 import { useState } from 'react';
 // import { forwardRef } from 'react';
 // import { useTheme } from '@mui/material/styles';
-import { copy } from 'utils/common';
+import { copy } from '@/utils/common';
 import { Popover, Stack } from '@mui/material';
-import Label from 'ui-component/Label';
+import Label from '@/ui-component/Label';
 
 export default function ModelsPopover({ model }) {
   const modelList = model.split(',');

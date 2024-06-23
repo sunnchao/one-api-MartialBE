@@ -15,6 +15,7 @@ type modelable interface {
 
 type GenericParams struct {
 	PaginationParams
+	UserId  int    `form:"user_id"`
 	Keyword string `form:"keyword"`
 }
 
