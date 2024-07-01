@@ -43,6 +43,8 @@ const RegisterForm = ({ ...others }) => {
   const siteInfo = useSelector((state) => state.siteInfo);
   const [showPassword, setShowPassword] = useState(false);
   const [searchParams] = useSearchParams();
+  const [countdown, setCountdown] = useState(30);
+  const [disableButton, setDisableButton] = useState(false);
 
   const [showEmailVerification, setShowEmailVerification] = useState(false);
   const [turnstileEnabled, setTurnstileEnabled] = useState(false);
@@ -86,10 +88,11 @@ const RegisterForm = ({ ...others }) => {
         return;
       }
     }
-
+    setDisableButton(true);
     const { success, message } = await sendVerificationCode(email, turnstileToken);
     if (!success) {
       showError(message);
+      setDisableButton(false);
       return;
     }
   };
@@ -123,6 +126,19 @@ const RegisterForm = ({ ...others }) => {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    let countdownInterval = null;
+    if (disableButton && countdown > 0) {
+      countdownInterval = setInterval(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+    } else if (countdown === 0) {
+      setDisableButton(false);
+      setCountdown(30);
+    }
+    return () => clearInterval(countdownInterval); // Clean up on unmount
+  }, [disableButton, countdown]);
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -275,8 +291,13 @@ const RegisterForm = ({ ...others }) => {
                         onChange={handleChange}
                         endAdornment={
                           <InputAdornment position="end">
-                            <Button variant="contained" color="primary" onClick={() => handleSendCode(values.email)}>
-                              发送验证码
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              disabled={disableButton || isSubmitting}
+                              onClick={() => handleSendCode(values.email)}
+                            >
+                              {disableButton ? `重新发送(${countdown})` : '获取验证码'}
                             </Button>
                           </InputAdornment>
                         }
