@@ -38,6 +38,8 @@ type User struct {
 	InviterId        int            `json:"inviter_id" gorm:"type:int;column:inviter_id;index"`
 	CreatedTime      int64          `json:"created_time" gorm:"bigint"`
 	DeletedAt        gorm.DeletedAt `json:"-" gorm:"index"`
+	LinuxDoUserName  string         `json:"linuxdo_username" gorm:"column:linuxdo_username;type:string"`
+	LinuxDoName      string         `json:"linuxdo_name" gorm:"column:linuxdo_name;type:string"`
 }
 
 type UpdateUsersParams struct {

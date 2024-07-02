@@ -121,8 +121,10 @@ func LinuxDoOAuth(c *gin.Context) {
 		return
 	}
 	user := model.User{
-		LinuxDoId:    strconv.Itoa(linuxdoUser.ID),
-		LinuxDoLevel: linuxdoUser.TrustLevel,
+		LinuxDoId:       strconv.Itoa(linuxdoUser.ID),
+		LinuxDoLevel:    linuxdoUser.TrustLevel,
+		LinuxDoUserName: linuxdoUser.Username,
+		LinuxDoName:     linuxdoUser.Name,
 	}
 	if model.IsLinuxDoIdAlreadyTaken(user.LinuxDoId) {
 		err := user.FillUserByLinuxDoId()
@@ -154,6 +156,8 @@ func LinuxDoOAuth(c *gin.Context) {
 			} else {
 				user.DisplayName = linuxdoUser.Username
 			}
+			user.LinuxDoUserName = linuxdoUser.Username
+			user.LinuxDoName = linuxdoUser.Name
 			user.Role = config.RoleCommonUser
 			user.Status = config.UserStatusEnabled
 			err := user.Insert(user.InviterId)
@@ -204,8 +208,10 @@ func LinuxDoBind(c *gin.Context) {
 		return
 	}
 	user := model.User{
-		LinuxDoId:    strconv.Itoa(linuxdoUser.ID),
-		LinuxDoLevel: linuxdoUser.TrustLevel,
+		LinuxDoId:       strconv.Itoa(linuxdoUser.ID),
+		LinuxDoLevel:    linuxdoUser.TrustLevel,
+		LinuxDoName:     linuxdoUser.Name,
+		LinuxDoUserName: linuxdoUser.Username,
 	}
 	if model.IsLinuxDoIdAlreadyTaken(user.LinuxDoId) {
 		c.JSON(http.StatusOK, gin.H{
@@ -228,6 +234,8 @@ func LinuxDoBind(c *gin.Context) {
 	}
 	user.LinuxDoId = strconv.Itoa(linuxdoUser.ID)
 	user.LinuxDoLevel = linuxdoUser.TrustLevel
+	user.LinuxDoName = linuxdoUser.Name
+	user.LinuxDoUserName = linuxdoUser.Username
 	err = user.Update(false)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
