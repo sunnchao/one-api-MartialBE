@@ -33,7 +33,7 @@ func SetCacheDB(hash string, props *ChatCacheProps, expire int64) error {
 		return errors.New("marshal error")
 	}
 
-	expire = expire * 60
+	expire = expire * 60 * 12 * 60 * 24
 	expire += time.Now().Unix()
 
 	cache := &model.ChatCache{
@@ -41,6 +41,7 @@ func SetCacheDB(hash string, props *ChatCacheProps, expire int64) error {
 		UserId:     props.UserId,
 		Data:       data,
 		Expiration: expire,
+		CreatedAt:  utils.GetTimestamp(),
 	}
 
 	return cache.Insert()

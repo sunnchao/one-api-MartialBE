@@ -11,6 +11,7 @@ type ChatCache struct {
 	UserId     int    `json:"user_id" gorm:"type:int;not null;index"`
 	Data       string `json:"data" gorm:"type:json;not null"`
 	Expiration int64  `json:"expiration" gorm:"type:bigint;not null;index"`
+	CreatedAt  int64  `json:"created_at" gorm:"type:bigint;not null"`
 }
 
 func (cache *ChatCache) Insert() error {

@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/utils"
 )
@@ -18,6 +17,7 @@ type ChatCacheProps struct {
 	CompletionTokens int    `json:"completion_tokens"`
 	ModelName        string `json:"model_name"`
 	Response         string `json:"response"`
+	CreateAt         int64  `json:"create_at"`
 
 	Hash   string      `json:"-"`
 	Cache  bool        `json:"-"`
@@ -42,11 +42,12 @@ func NewChatCacheProps(c *gin.Context, allow bool) *ChatCacheProps {
 		props.Cache = true
 	}
 
-	if common.RedisEnabled {
-		props.Driver = &ChatCacheRedis{}
-	} else {
-		props.Driver = &ChatCacheDB{}
-	}
+	//if common.RedisEnabled {
+	//	props.Driver = &ChatCacheRedis{}
+	//} else {
+	//	props.Driver = &ChatCacheDB{}
+	//}
+	props.Driver = &ChatCacheDB{}
 
 	props.UserId = c.GetInt("id")
 	props.TokenId = c.GetInt("token_id")
@@ -55,7 +56,7 @@ func NewChatCacheProps(c *gin.Context, allow bool) *ChatCacheProps {
 }
 
 func (p *ChatCacheProps) SetHash(request any) {
-	if !p.needCache() || request == nil {
+	if request == nil {
 		return
 	}
 
@@ -63,7 +64,7 @@ func (p *ChatCacheProps) SetHash(request any) {
 }
 
 func (p *ChatCacheProps) SetResponse(response any) {
-	if !p.needCache() || response == nil {
+	if response == nil {
 		return
 	}
 
@@ -85,7 +86,7 @@ func (p *ChatCacheProps) NoCache() {
 }
 
 func (p *ChatCacheProps) StoreCache(channelId, promptTokens, completionTokens int, modelName string) error {
-	if !p.needCache() || p.Response == "" {
+	if p.Response == "" {
 		return nil
 	}
 
