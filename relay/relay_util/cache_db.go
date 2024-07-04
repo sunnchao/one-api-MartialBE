@@ -37,11 +37,18 @@ func SetCacheDB(hash string, props *ChatCacheProps, expire int64) error {
 	expire += time.Now().Unix()
 
 	cache := &model.ChatCache{
-		Hash:       hash,
-		UserId:     props.UserId,
-		Data:       data,
-		Expiration: expire,
-		CreatedAt:  utils.GetTimestamp(),
+		Hash:   hash,
+		UserId: props.UserId,
+		// 创建一个空 JSON
+		Data:             "{}",
+		Expiration:       expire,
+		CreatedAt:        utils.GetTimestamp(),
+		ModelName:        props.ModelName,
+		ChannelId:        props.ChannelID,
+		Request:          utils.Marshal(props.Request),
+		Response:         utils.Marshal(props.Response),
+		PromptTokens:     props.PromptTokens,
+		CompletionTokens: props.CompletionTokens,
 	}
 
 	return cache.Insert()

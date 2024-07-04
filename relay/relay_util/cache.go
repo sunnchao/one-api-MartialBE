@@ -17,6 +17,7 @@ type ChatCacheProps struct {
 	CompletionTokens int    `json:"completion_tokens"`
 	ModelName        string `json:"model_name"`
 	Response         string `json:"response"`
+	Request          string `json:"request"`
 	CreateAt         int64  `json:"create_at"`
 
 	Hash   string      `json:"-"`
@@ -85,7 +86,7 @@ func (p *ChatCacheProps) NoCache() {
 	p.Cache = false
 }
 
-func (p *ChatCacheProps) StoreCache(channelId, promptTokens, completionTokens int, modelName string) error {
+func (p *ChatCacheProps) StoreCache(channelId, promptTokens, completionTokens int, modelName string, requesst any) error {
 	if p.Response == "" {
 		return nil
 	}
@@ -94,6 +95,7 @@ func (p *ChatCacheProps) StoreCache(channelId, promptTokens, completionTokens in
 	p.PromptTokens = promptTokens
 	p.CompletionTokens = completionTokens
 	p.ModelName = modelName
+	p.Request = utils.Marshal(requesst)
 
 	return p.Driver.Set(p.getHash(), p, int64(config.ChatCacheExpireMinute))
 }
