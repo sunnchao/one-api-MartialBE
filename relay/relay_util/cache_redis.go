@@ -28,16 +28,16 @@ func (r *ChatCacheRedis) Get(hash string, userId int) *ChatCacheProps {
 
 func (r *ChatCacheRedis) Set(hash string, props *ChatCacheProps, expire int64) error {
 
-	if !props.Cache {
-		return nil
-	}
+	//if !props.Cache {
+	//	return nil
+	//}
 
 	data := utils.Marshal(&props)
 	if data == "" {
 		return errors.New("marshal error")
 	}
 
-	return common.RedisSet(r.getKey(hash, props.UserId), data, time.Duration(expire)*time.Minute)
+	return common.RedisSet(r.getKey(hash, props.UserId), data, time.Duration(expire)*time.Hour*24)
 }
 
 func (r *ChatCacheRedis) getKey(hash string, userId int) string {

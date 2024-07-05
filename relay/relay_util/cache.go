@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/utils"
 )
@@ -43,12 +44,12 @@ func NewChatCacheProps(c *gin.Context, allow bool) *ChatCacheProps {
 		props.Cache = true
 	}
 
-	//if common.RedisEnabled {
-	//	props.Driver = &ChatCacheRedis{}
-	//} else {
-	//	props.Driver = &ChatCacheDB{}
-	//}
-	props.Driver = &ChatCacheDB{}
+	if common.RedisEnabled {
+		props.Driver = &ChatCacheRedis{}
+	} else {
+		props.Driver = &ChatCacheDB{}
+	}
+	//props.Driver = &ChatCacheDB{}
 
 	props.UserId = c.GetInt("id")
 	props.TokenId = c.GetInt("token_id")
