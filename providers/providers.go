@@ -15,6 +15,7 @@ import (
 	"one-api/providers/cohere"
 	"one-api/providers/coze"
 	"one-api/providers/deepseek"
+	"one-api/providers/doubao"
 	"one-api/providers/gemini"
 	"one-api/providers/groq"
 	"one-api/providers/hunyuan"
@@ -70,6 +71,7 @@ func init() {
 	providerFactories[config.ChannelTypeMoonshot] = moonshot.MoonshotProviderFactory{}
 	providerFactories[config.ChannelTypeLingyi] = lingyi.LingyiProviderFactory{}
 	providerFactories[config.ChannelTypeHunyuan] = hunyuan.HunyuanProviderFactory{}
+	providerFactories[config.ChannelTypeDoubao] = doubao.DoubaoProviderFactory{}
 
 }
 

@@ -197,7 +197,7 @@ const typeConfig = {
   },
   27: {
     input: {
-      models: ['abab5.5-chat', 'abab5.5s-chat', 'abab6-chat', 'abab6.5-chat','abab6.5s-chat', 'embo-01'],
+      models: ['abab5.5-chat', 'abab5.5s-chat', 'abab6-chat', 'abab6.5-chat', 'abab6.5s-chat', 'embo-01'],
       test_model: 'abab5.5-chat'
     },
     prompt: {
@@ -376,12 +376,34 @@ const typeConfig = {
   },
   41: {
     input: {
-      models: ["meta-llama/Llama-3-70b-chat-hf", "deepseek-ai/deepseek-coder-33b-instruct", "mistralai/Mixtral-8x22B-Instruct-v0.1", "Qwen/Qwen1.5-72B-Chat",],
+      models: [
+        'meta-llama/Llama-3-70b-chat-hf',
+        'deepseek-ai/deepseek-coder-33b-instruct',
+        'mistralai/Mixtral-8x22B-Instruct-v0.1',
+        'Qwen/Qwen1.5-72B-Chat'
+      ]
     },
     prompt: {
       test_model: ''
     },
     modelGroup: 'Together AI'
+  },
+  42: {
+    input: {
+      models: [
+        'Doubao-pro-128k',
+        'Doubao-pro-32k',
+        'Doubao-pro-4k',
+        'Doubao-lite-128k',
+        'Doubao-lite-32k',
+        'Doubao-lite-4k',
+        'Doubao-embedding'
+      ]
+    },
+    prompt: {
+      test_model: 'Doubao-pro-4k'
+    },
+    modelGroup: 'Doubao AI'
   }
 };
 

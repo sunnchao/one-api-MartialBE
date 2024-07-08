@@ -189,6 +189,7 @@ const (
 	ChannelTypeOllama         = 39
 	ChannelTypeHunyuan        = 40
 	ChanneklTogetherai        = 41
+	ChannelTypeDoubao         = 42
 )
 
 var ChannelBaseURLs = []string{
@@ -234,6 +235,7 @@ var ChannelBaseURLs = []string{
 	"",                                    //39
 	"https://hunyuan.tencentcloudapi.com", //40
 	"https://api.together.xyz",            //41
+	"https://ark.cn-beijing.volces.com",   //42
 }
 
 const (

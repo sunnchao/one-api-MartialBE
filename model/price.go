@@ -264,8 +264,8 @@ func GetDefaultPrice() []*Price {
 		"abab5.5-chat":  {[]float64{1.0714, 1.0714}, config.ChannelTypeMiniMax},   // ¥0.015 / 1k tokens
 		"abab6-chat":    {[]float64{14.2857, 14.2857}, config.ChannelTypeMiniMax}, // ¥0.2 / 1k tokens
 		"embo-01":       {[]float64{0.0357, 0.0357}, config.ChannelTypeMiniMax},   // ¥0.0005 / 1k tokens
-		"abab6.5-chat":  {[]float64{0.7144, 0.7144}, config.ChannelTypeMiniMax}, // ¥0.01 / 1k tokens
-		"abab6.5s-chat": {[]float64{2.1432, 2.1432}, config.ChannelTypeMiniMax}, // ¥0.03 / 1k tokens
+		"abab6.5-chat":  {[]float64{0.7144, 0.7144}, config.ChannelTypeMiniMax},   // ¥0.01 / 1k tokens
+		"abab6.5s-chat": {[]float64{2.1432, 2.1432}, config.ChannelTypeMiniMax},   // ¥0.03 / 1k tokens
 
 		"deepseek-coder": {[]float64{0.75, 0.75}, config.ChannelTypeDeepseek}, // 暂定 $0.0015 / 1K tokens
 		"deepseek-chat":  {[]float64{0.75, 0.75}, config.ChannelTypeDeepseek}, // 暂定 $0.0015 / 1K tokens
@@ -322,6 +322,16 @@ func GetDefaultPrice() []*Price {
 		"hunyuan-standard":      {[]float64{0.3214, 0.3571}, config.ChannelTypeHunyuan},
 		"hunyuan-standard-256k": {[]float64{1.0714, 4.2857}, config.ChannelTypeHunyuan},
 		"hunyuan-pro":           {[]float64{2.1429, 7.1429}, config.ChannelTypeHunyuan},
+
+		// doubao
+
+		"Doubao-pro-128k":  {[]float64{0, 0}, config.ChannelTypeDoubao},
+		"Doubao-pro-32k":   {[]float64{0, 0}, config.ChannelTypeDoubao},
+		"Doubao-pro-4k":    {[]float64{0, 0}, config.ChannelTypeDoubao},
+		"Doubao-lite-128k": {[]float64{0, 0}, config.ChannelTypeDoubao},
+		"Doubao-lite-32k":  {[]float64{0, 0}, config.ChannelTypeDoubao},
+		"Doubao-lite-4k":   {[]float64{0, 0}, config.ChannelTypeDoubao},
+		"Doubao-embedding": {[]float64{0, 0}, config.ChannelTypeDoubao},
 	}
 
 	var prices []*Price

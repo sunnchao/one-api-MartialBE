@@ -45,7 +45,8 @@ func NewChatCacheProps(c *gin.Context, allow bool) *ChatCacheProps {
 	}
 
 	if common.RedisEnabled {
-		props.Driver = &ChatCacheRedis{}
+		props.Driver = &ChatCacheDB{}
+		//props.Driver = &ChatCacheRedis{}
 	} else {
 		props.Driver = &ChatCacheDB{}
 	}

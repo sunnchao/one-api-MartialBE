@@ -194,5 +194,12 @@ export const CHANNEL_OPTIONS = {
     value: 8,
     color: 'primary',
     url: ''
+  },
+  42: {
+    key: 42,
+    text: '字节跳动豆包',
+    value: 42,
+    color: 'primary',
+    url: 'https://ark.cn-beijing.volces.com'
   }
 };
