@@ -137,7 +137,7 @@ const Index = () => {
                 </Tag>{' '}
                 的初始使用额度, 邀请新用户奖励
                 <Tag color={'error'} size="small" variant="outlined">
-                  $1
+                  $0.5
                 </Tag>
                 的额度, 可使用全模型
               </Typography>
@@ -225,10 +225,13 @@ const Index = () => {
           </List>
         </Card>
 
-        <Card bordered={false} title="模型及计费介绍">
+        <Card bordered={false} title="可用模型及计费介绍">
           <Row bordered={false}>
             <Col span={24}>
-              <Typography type={'secondary'}>本页面更新可能存在延迟，实际可用模型及计费请以设置页以及日志页为准</Typography>
+              <Typography type={'secondary'}>本页面更新可能存在延迟，实际可用模型及计费请以设置页以及日志页为准 <Button type="link" onClick={() => window.open('https://wochirou.com/panel/model_price')}>
+                  点击查看最新可用模型及计费列表
+                </Button></Typography>
+              
             </Col>
             {renderModalTable(
               [
