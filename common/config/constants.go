@@ -188,8 +188,9 @@ const (
 	ChannelTypeCoze           = 38
 	ChannelTypeOllama         = 39
 	ChannelTypeHunyuan        = 40
-	ChanneklTogetherai        = 41
-	ChannelTypeDoubao         = 42
+	ChannelTypeSuno           = 41
+	ChanneklTogetherai        = 42
+	ChannelTypeDoubao         = 43
 )
 
 var ChannelBaseURLs = []string{
@@ -234,8 +235,9 @@ var ChannelBaseURLs = []string{
 	"https://api.coze.com/open_api",       //38
 	"",                                    //39
 	"https://hunyuan.tencentcloudapi.com", //40
-	"https://api.together.xyz",            //41
-	"https://ark.cn-beijing.volces.com",   //42
+	"",                                    //41
+	"https://api.together.xyz",            //42
+	"https://ark.cn-beijing.volces.com",   //43
 }
 
 const (
@@ -251,4 +253,7 @@ const (
 	RelayModeAudioSpeech
 	RelayModeAudioTranscription
 	RelayModeAudioTranslation
+	RelayModeSuno
 )
+
+type ContextKey string

@@ -28,6 +28,7 @@ import (
 	"one-api/providers/openai"
 	"one-api/providers/palm"
 	"one-api/providers/stabilityAI"
+	"one-api/providers/suno"
 	"one-api/providers/tencent"
 	"one-api/providers/xunfei"
 	"one-api/providers/zhipu"
@@ -71,6 +72,7 @@ func init() {
 	providerFactories[config.ChannelTypeMoonshot] = moonshot.MoonshotProviderFactory{}
 	providerFactories[config.ChannelTypeLingyi] = lingyi.LingyiProviderFactory{}
 	providerFactories[config.ChannelTypeHunyuan] = hunyuan.HunyuanProviderFactory{}
+	providerFactories[config.ChannelTypeSuno] = suno.SunoProviderFactory{}
 	providerFactories[config.ChannelTypeDoubao] = doubao.DoubaoProviderFactory{}
 
 }
