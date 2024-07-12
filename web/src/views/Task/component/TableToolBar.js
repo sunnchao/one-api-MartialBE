@@ -5,7 +5,6 @@ import { InputAdornment, OutlinedInput, Stack, FormControl, InputLabel } from '@
 import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-require('dayjs/locale/zh-cn');
 // ----------------------------------------------------------------------
 
 export default function TableToolBar({ filterName, handleFilterName, userIsAdmin }) {
