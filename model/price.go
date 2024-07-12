@@ -324,7 +324,6 @@ func GetDefaultPrice() []*Price {
 		"hunyuan-pro":           {[]float64{2.1429, 7.1429}, config.ChannelTypeHunyuan},
 
 		// doubao
-
 		"Doubao-pro-128k":  {[]float64{0, 0}, config.ChannelTypeDoubao},
 		"Doubao-pro-32k":   {[]float64{0, 0}, config.ChannelTypeDoubao},
 		"Doubao-pro-4k":    {[]float64{0, 0}, config.ChannelTypeDoubao},

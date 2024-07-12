@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { TableRow, TableCell, Button, Dialog, DialogActions, DialogContent, Tooltip } from '@mui/material';
 
-import { timestamp2string, copy } from 'utils/common';
-import Label from 'ui-component/Label';
+import { timestamp2string, copy } from '@/utils/common';
+import Label from '@/ui-component/Label';
 import { STATUS_TYPE } from '../type/Type';
-import CodeBlock from 'ui-component/CodeBlock';
+import CodeBlock from '@/ui-component/CodeBlock';
 import SunoMusic from './SunoMusic';
 
 function renderType(types, type) {

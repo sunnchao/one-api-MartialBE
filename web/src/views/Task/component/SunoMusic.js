@@ -5,7 +5,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import CodeBlock from 'ui-component/CodeBlock';
+import CodeBlock from '@/ui-component/CodeBlock';
 
 export default function SunoMusic({ items }) {
   const [selectedItem, setSelectedItem] = useState(items[0]);

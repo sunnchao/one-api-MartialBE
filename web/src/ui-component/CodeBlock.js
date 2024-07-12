@@ -2,9 +2,9 @@ import PropTypes from 'prop-types';
 
 import React, { useEffect, useRef, useState } from 'react';
 import hljs from './highlight';
-import { copy } from 'utils/common';
+import { copy } from '@/utils/common';
 
-import 'assets/css/dracula.css';
+import '@/assets/css/dracula.css';
 
 export default function CodeBlock({ language, code }) {
   const preRef = useRef(null);
