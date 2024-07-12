@@ -33,6 +33,7 @@ export default function Users() {
 
   const [openModal, setOpenModal] = useState(false);
   const [editUserId, setEditUserId] = useState(0);
+  const [editOperation, setEditOperation] = useState('edit');
 
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
@@ -129,9 +130,10 @@ export default function Users() {
     }
   };
 
-  const handleOpenModal = (userId) => {
+  const handleOpenModal = (userId, operationType) => {
     setEditUserId(userId);
     setOpenModal(true);
+    setEditOperation(operationType);
   };
 
   const handleCloseModal = () => {
@@ -151,13 +153,11 @@ export default function Users() {
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
         <Typography variant="h4">用户</Typography>
 
-        <Button variant="contained" color="primary" startIcon={<IconPlus />} onClick={() => handleOpenModal(0)}>
+        <Button variant="contained" color="primary" startIcon={<IconPlus />} onClick={() => handleOpenModal(0, 'add')}>
           新建用户
         </Button>
       </Stack>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 3, sm: 2, md: 4 }} padding={'24px'} paddingBottom={'0px'}>
-        
-      </Stack>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 3, sm: 2, md: 4 }} padding={'24px'} paddingBottom={'0px'}></Stack>
       <Card>
         <Box component="form" onSubmit={searchUsers} noValidate>
           <TableToolBar placeholder={'搜索用户的ID，用户名，分组，显示名称，以及邮箱地址...'} />
@@ -205,7 +205,7 @@ export default function Users() {
                     item={row}
                     manageUser={manageUser}
                     key={row.id}
-                    handleOpenModal={handleOpenModal}
+                    handleOpenModal={(type) => handleOpenModal(type)}
                     setModalUserId={setEditUserId}
                   />
                 ))}

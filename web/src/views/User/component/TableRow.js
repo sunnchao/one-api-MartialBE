@@ -152,15 +152,27 @@ export default function UsersTableRow({ item, manageUser, handleOpenModal, setMo
         }}
       >
         {item.role !== 100 && (
-          <MenuItem
-            onClick={() => {
-              handleCloseMenu();
-              manageUser(item.username, 'role', item.role === 1 ? true : false);
-            }}
-          >
-            <IconUser style={{ marginRight: '16px' }} />
-            {item.role === 1 ? '设为管理员' : '取消管理员'}
-          </MenuItem>
+          <>
+            <MenuItem
+              onClick={() => {
+                handleCloseMenu();
+                manageUser(item.username, 'role', item.role === 1 ? true : false);
+              }}
+            >
+              <IconEdit style={{ marginRight: '16px' }} />
+              {item.role === 1 ? '设为管理员' : '取消管理员'}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                handleCloseMenu();
+                handleOpenModal('Reissue');
+                setModalUserId(item.id);
+              }}
+            >
+              <IconUser style={{ marginRight: '16px' }} />
+              补发额度
+            </MenuItem>
+          </>
         )}
 
         <MenuItem

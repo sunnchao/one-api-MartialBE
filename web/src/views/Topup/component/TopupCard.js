@@ -240,7 +240,7 @@ const TopupCard = (props) => {
               </AnimateButton>
             ))}
             <Grid container spacing={2}>
-              {Object.entries(RechargeDiscount).map(([key, value]) => (
+              {Object.entries({ 1: 0.9 }).map(([key, value]) => (
                 <Grid item key={key}>
                   <Badge badgeContent={value !== 1 ? `${value * 10}折` : null} color="error">
                     <Button
