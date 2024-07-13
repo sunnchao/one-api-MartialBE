@@ -191,6 +191,7 @@ const (
 	ChannelTypeSuno           = 41
 	ChanneklTogetherai        = 42
 	ChannelTypeDoubao         = 43
+	ChannelTypeVertexAI       = 44
 )
 
 var ChannelBaseURLs = []string{
@@ -238,6 +239,7 @@ var ChannelBaseURLs = []string{
 	"",                                    //41
 	"https://api.together.xyz",            //42
 	"https://ark.cn-beijing.volces.com",   //43
+	"",                                    //44
 }
 
 const (

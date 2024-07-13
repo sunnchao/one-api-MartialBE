@@ -7,6 +7,7 @@ import (
 	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/logger"
+	"one-api/common/redis"
 	"one-api/common/stmp"
 	"one-api/common/utils"
 	"strings"
@@ -71,7 +72,7 @@ func ValidateUserToken(key string) (token *Token, err error) {
 		return nil, errors.New("该令牌状态不可用")
 	}
 	if token.ExpiredTime != -1 && token.ExpiredTime < utils.GetTimestamp() {
-		if !common.RedisEnabled {
+		if !config.RedisEnabled {
 			token.Status = config.TokenStatusExpired
 			err := token.SelectUpdate()
 			if err != nil {
@@ -81,7 +82,7 @@ func ValidateUserToken(key string) (token *Token, err error) {
 		return nil, errors.New("该令牌已过期")
 	}
 	if !token.UnlimitedQuota && token.RemainQuota <= 0 {
-		if !common.RedisEnabled {
+		if !config.RedisEnabled {
 			// in this case, we can make sure the token is exhausted
 			token.Status = config.TokenStatusExhausted
 			err := token.SelectUpdate()
@@ -141,8 +142,8 @@ func (token *Token) Update() error {
 
 	err := DB.Model(token).Select("name", "status", "expired_time", "remain_quota", "unlimited_quota", "chat_cache", "model_limits_enabled", "model_limits").Updates(token).Error
 	// 防止Redis缓存不生效，直接删除
-	if err == nil && common.RedisEnabled {
-		common.RedisDel(fmt.Sprintf("token:%s", token.Key))
+	if err == nil && config.RedisEnabled {
+		redis.RedisDel(fmt.Sprintf("token:%s", token.Key))
 	}
 
 	return err
