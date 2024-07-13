@@ -187,13 +187,6 @@ export const CHANNEL_OPTIONS = {
     value: 41,
     color: 'default'
   },
-  42: {
-    key: 42,
-    text: 'VertexAI',
-    value: 42,
-    color: 'orange',
-    url: 'https://console.cloud.google.com/'
-  },
   24: {
     key: 24,
     text: 'Azure Speech',
@@ -208,11 +201,18 @@ export const CHANNEL_OPTIONS = {
     color: 'primary',
     url: ''
   },
-  42: {
-    key: 42,
+  43: {
+    key: 43,
     text: '字节跳动豆包',
-    value: 42,
+    value: 43,
     color: 'primary',
     url: 'https://ark.cn-beijing.volces.com'
+  },
+  44: {
+    key: 44,
+    text: 'VertexAI',
+    value: 44,
+    color: 'orange',
+    url: 'https://console.cloud.google.com/'
   }
 };

@@ -49,6 +49,7 @@ func SetCacheDB(hash string, props *ChatCacheProps, expire int64) error {
 		Response:         utils.Marshal(props.Response),
 		PromptTokens:     props.PromptTokens,
 		CompletionTokens: props.CompletionTokens,
+		RequestId:        props.RequestId,
 	}
 
 	return cache.Insert()

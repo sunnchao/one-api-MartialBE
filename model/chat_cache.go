@@ -11,14 +11,15 @@ type ChatCache struct {
 	UserId           int    `json:"user_id" gorm:"type:int;not null;index"`
 	ChannelId        int    `json:"channel_id" gorm:"type:int;index"`
 	ModelName        string `json:"model_name" gorm:"type:varchar(32)"`
-	Data             string `json:"data" gorm:"type:json;"`
-	Expiration       int64  `json:"expiration" gorm:"type:bigint;index"`
-	CreatedAt        int64  `json:"created_at" gorm:"type:bigint;"`
 	Request          string `json:"request" gorm:"type:json;"`
-	PromptTokens     int    `json:"prompt_tokens" gorm:"type:int;"`
 	Response         string `json:"response" gorm:"type:json;"`
+	RequestId        string `json:"request_id"`
+	Expiration       int64  `json:"expiration" gorm:"type:bigint;"`
+	CreatedAt        int64  `json:"created_at" gorm:"type:bigint;"`
+	PromptTokens     int    `json:"prompt_tokens" gorm:"type:int;"`
 	CompletionTokens int    `json:"completion_tokens" gorm:"type:int;"`
 	TokenId          int    `json:"token_id" gorm:"type:int;"`
+	Data             string `json:"data" gorm:"type:json;"`
 }
 
 func (cache *ChatCache) Insert() error {

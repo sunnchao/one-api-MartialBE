@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
-	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/logger"
 	"one-api/common/redis"
