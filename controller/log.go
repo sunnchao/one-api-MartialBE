@@ -22,6 +22,15 @@ func GetLogsList(c *gin.Context) {
 		common.APIRespondWithError(c, http.StatusOK, err)
 		return
 	}
+
+	//循环 logs
+	for _, log := range *logs.Data {
+		if log.OriginModelName != "" {
+			log.ModelName = log.OriginModelName
+			log.OriginModelName = ""
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",

@@ -63,6 +63,7 @@ func GetProvider(c *gin.Context, modeName string) (provider providersBase.Provid
 		return
 	}
 	c.Set("channel_id", channel.Id)
+	c.Set("origin_channel_model", modeName)
 
 	provider = providers.GetProvider(channel, c)
 	if provider == nil {

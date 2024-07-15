@@ -1,6 +1,7 @@
 package providers
 
 import (
+	"github.com/gin-gonic/gin"
 	"one-api/common/config"
 	"one-api/model"
 	"one-api/providers/ali"
@@ -33,8 +34,6 @@ import (
 	"one-api/providers/vertexai"
 	"one-api/providers/xunfei"
 	"one-api/providers/zhipu"
-
-	"github.com/gin-gonic/gin"
 )
 
 // 定义供应商工厂接口

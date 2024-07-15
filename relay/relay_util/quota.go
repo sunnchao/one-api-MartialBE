@@ -19,6 +19,7 @@ import (
 
 type Quota struct {
 	modelName        string
+	originModelName  string
 	promptTokens     int
 	price            model.Price
 	groupRatio       float64
@@ -147,7 +148,7 @@ func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, 
 	}
 
 	logContent := fmt.Sprintf("模型费率 %s，分组倍率 %.2f", modelRatioStr, q.groupRatio)
-	model.RecordConsumeLog(ctx, q.userId, q.channelId, promptTokens, completionTokens, q.modelName, tokenName, quota, logContent, requestTime, requestIP)
+	model.RecordConsumeLog(ctx, q.userId, q.channelId, promptTokens, completionTokens, q.modelName, tokenName, quota, logContent, requestTime, requestIP, q.originModelName)
 	model.UpdateUserUsedQuotaAndRequestCount(q.userId, quota)
 	model.UpdateChannelUsedQuota(q.channelId, quota)
 
@@ -169,6 +170,8 @@ func (q *Quota) Undo(c *gin.Context) {
 
 func (q *Quota) Consume(c *gin.Context, usage *types.Usage) {
 	tokenName := c.GetString("token_name")
+	originModelName := c.GetString("origin_channel_model")
+	q.originModelName = originModelName
 	requestIP := utils.GetRequestIP(c)
 	// 如果没有报错，则消费配额
 	go func(ctx context.Context) {
