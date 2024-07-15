@@ -23,14 +23,6 @@ func GetLogsList(c *gin.Context) {
 		return
 	}
 
-	//循环 logs
-	for _, log := range *logs.Data {
-		if log.OriginModelName != "" {
-			log.ModelName = log.OriginModelName
-			log.OriginModelName = ""
-		}
-	}
-
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
@@ -62,6 +54,10 @@ func GetUserLogsList(c *gin.Context) {
 			log.ChannelId = -1
 			log.Channel = nil
 			log.RequestIp = ""
+			if log.OriginModelName != "" {
+				log.ModelName = log.OriginModelName;
+				log.OriginModelName = "";
+			}
 		}
 	}
 
