@@ -114,9 +114,9 @@ func fetchChannelByModel(c *gin.Context, modelName string) (*model.Channel, erro
 		filters = append(filters, model.FilterChannelId(skipChannelId))
 	}
 
-	channelIds := c.GetStringSlice("token_channel_limit")
-	if len(channelIds) > 0 {
-		filters = append(filters, model.IncludeChannelId(channelIds))
+	includeChannelIds := c.GetStringSlice("token_channel_limit")
+	if len(includeChannelIds) > 0 {
+		model.ChannelGroup.IncludesChannels = includeChannelIds
 	}
 
 	channel, err := model.ChannelGroup.Next(group, modelName, filters...)

@@ -19,9 +19,10 @@ type ChannelChoice struct {
 
 type ChannelsChooser struct {
 	sync.RWMutex
-	Channels map[int]*ChannelChoice
-	Rule     map[string]map[string][][]int // group -> model -> priority -> channelIds
-	Match    []string
+	Channels         map[int]*ChannelChoice
+	Rule             map[string]map[string][][]int // group -> model -> priority -> channelIds
+	Match            []string
+	IncludesChannels []string
 }
 
 type ChannelsFilterFunc func(channelId int, choice *ChannelChoice) bool
@@ -32,13 +33,6 @@ func isChannelIdInLimits(tokenChannelLimit []string, channelId int) bool {
 
 	// 使用 utils.Contains 检查是否存在
 	return utils.Contains(channelIdStr, tokenChannelLimit)
-}
-
-func IncludeChannelId(tokenChannelLimit []string) ChannelsFilterFunc {
-	return func(channelId int, choice *ChannelChoice) bool {
-		return !isChannelIdInLimits(tokenChannelLimit, channelId)
-
-	}
 }
 
 func FilterChannelId(skipChannelId int) ChannelsFilterFunc {
@@ -137,7 +131,13 @@ func (cc *ChannelsChooser) Next(group, modelName string, filters ...ChannelsFilt
 	for _, priority := range channelsPriority {
 		channel := cc.balancer(priority, filters)
 		if channel != nil {
-			return channel, nil
+			if len(cc.IncludesChannels) > 0 {
+				if isChannelIdInLimits(cc.IncludesChannels, channel.Id) {
+					return channel, nil
+				}
+			} else {
+				return channel, nil
+			}
 		}
 	}
 
