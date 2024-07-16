@@ -3,30 +3,33 @@ package model
 import (
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"one-api/common/config"
 	"one-api/common/logger"
 	"one-api/common/redis"
 	"one-api/common/stmp"
 	"one-api/common/utils"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 type Token struct {
-	Id                 int    `json:"id"`
-	UserId             int    `json:"user_id"`
-	Key                string `json:"key" gorm:"type:char(48);uniqueIndex"`
-	Status             int    `json:"status" gorm:"default:1"`
-	Name               string `json:"name" gorm:"index" `
-	CreatedTime        int64  `json:"created_time" gorm:"bigint"`
-	AccessedTime       int64  `json:"accessed_time" gorm:"bigint"`
-	ExpiredTime        int64  `json:"expired_time" gorm:"bigint;default:-1"` // -1 means never expired
-	RemainQuota        int    `json:"remain_quota" gorm:"default:0"`
-	UnlimitedQuota     bool   `json:"unlimited_quota" gorm:"default:false"`
-	ModelLimitsEnabled bool   `json:"model_limits_enabled" gorm:"default:false"`
-	ModelLimits        string `json:"model_limits" gorm:"type:varchar(1024);default:''"`
-	UsedQuota          int    `json:"used_quota" gorm:"default:0"` // used quota
-	ChatCache          bool   `json:"chat_cache" gorm:"default:false"`
+	Id                   int    `json:"id"`
+	UserId               int    `json:"user_id"`
+	Key                  string `json:"key" gorm:"type:char(48);uniqueIndex"`
+	Status               int    `json:"status" gorm:"default:1"`
+	Name                 string `json:"name" gorm:"index" `
+	CreatedTime          int64  `json:"created_time" gorm:"bigint"`
+	AccessedTime         int64  `json:"accessed_time" gorm:"bigint"`
+	ExpiredTime          int64  `json:"expired_time" gorm:"bigint;default:-1"` // -1 means never expired
+	RemainQuota          int    `json:"remain_quota" gorm:"default:0"`
+	UnlimitedQuota       bool   `json:"unlimited_quota" gorm:"default:false"`
+	ModelLimitsEnabled   bool   `json:"model_limits_enabled" gorm:"default:false"`
+	ModelLimits          string `json:"model_limits" gorm:"type:varchar(1024);default:''"`
+	ChannelLimitsEnabled bool   `json:"channel_limits_enabled" gorm:"default:false"`
+	ChannelLimits        string `json:"channel_limits" gorm:"type:varchar(1024);default:''"`
+	UsedQuota            int    `json:"used_quota" gorm:"default:0"` // used quota
+	ChatCache            bool   `json:"chat_cache" gorm:"default:false"`
 }
 
 var allowedTokenOrderFields = map[string]bool{
@@ -139,7 +142,7 @@ func (token *Token) Update() error {
 		token.ChatCache = false
 	}
 
-	err := DB.Model(token).Select("name", "status", "expired_time", "remain_quota", "unlimited_quota", "chat_cache", "model_limits_enabled", "model_limits").Updates(token).Error
+	err := DB.Model(token).Select("name", "status", "expired_time", "remain_quota", "unlimited_quota", "chat_cache", "model_limits_enabled", "model_limits", "channel_limits_abled", "channel_limits").Updates(token).Error
 	// 防止Redis缓存不生效，直接删除
 	if err == nil && config.RedisEnabled {
 		redis.RedisDel(fmt.Sprintf("token:%s", token.Key))
@@ -331,6 +334,23 @@ func (token *Token) GetModelLimits() []string {
 
 func (token *Token) GetModelLimitsMap() map[string]bool {
 	limits := token.GetModelLimits()
+	limitsMap := make(map[string]bool)
+	for _, limit := range limits {
+		limitsMap[limit] = true
+	}
+	return limitsMap
+}
+
+// 获取令牌限制渠道
+func (token *Token) GetChannelLimits() []string {
+	if token.ChannelLimits == "" {
+		return []string{}
+	}
+	return strings.Split(token.ChannelLimits, ",")
+}
+
+func (token *Token) GetChannelLimitsMap() map[string]bool {
+	limits := token.GetChannelLimits()
 	limitsMap := make(map[string]bool)
 	for _, limit := range limits {
 		limitsMap[limit] = true

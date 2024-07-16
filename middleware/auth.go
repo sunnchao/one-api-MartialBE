@@ -117,8 +117,17 @@ func tokenAuth(c *gin.Context, key string) {
 	} else {
 		c.Set("token_model_limit_enabled", false)
 	}
+
+	if token.ChannelLimitsEnabled {
+		c.Set("token_channel_limit_enabled", true)
+		c.Set("token_channel_limit", token.GetChannelLimits())
+	} else {
+		c.Set("token_channel_limit_enabled", false)
+		c.Set("token_channel_limit", "")
+	}
+
 	if len(parts) > 1 {
-		if token.ModelLimitsEnabled == true {
+		if token.ModelLimitsEnabled {
 			abortWithMessage(c, http.StatusForbidden, "模型限制已启用，无法指定渠道")
 			return
 		}
@@ -143,6 +152,7 @@ func tokenAuth(c *gin.Context, key string) {
 			return
 		}
 	}
+
 	c.Next()
 }
 

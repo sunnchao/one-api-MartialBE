@@ -114,6 +114,11 @@ func fetchChannelByModel(c *gin.Context, modelName string) (*model.Channel, erro
 		filters = append(filters, model.FilterChannelId(skipChannelId))
 	}
 
+	channelIds := c.GetStringSlice("token_channel_limit")
+	if len(channelIds) > 0 {
+		filters = append(filters, model.IncludeChannelId(channelIds))
+	}
+
 	channel, err := model.ChannelGroup.Next(group, modelName, filters...)
 	if err != nil {
 		message := fmt.Sprintf("当前分组 %s 下对于模型 %s 无可用渠道", group, modelName)
@@ -234,21 +239,33 @@ func responseCache(c *gin.Context, response string) {
 func shouldRetry(c *gin.Context, statusCode int) bool {
 	channelId := c.GetInt("specific_channel_id")
 	ignore := c.GetBool("specific_channel_id_ignore")
-	if channelId > 0 && !ignore {
-		return false
-	}
-	if statusCode == http.StatusTooManyRequests {
+
+	channelIds, channelIdsExits := c.Get("token_channel_limit")
+	if channelIdsExits {
+		var tokenChannelLimit map[string]bool
+		tokenChannelLimit = channelIds.(map[string]bool)
+		if _, ok := tokenChannelLimit[string(channelId)]; !ok {
+			return false
+		}
 		return true
+	} else {
+		if channelId > 0 && !ignore {
+			return false
+		}
+		if statusCode == http.StatusTooManyRequests {
+			return true
+		}
+		if statusCode/100 == 5 {
+			return true
+		}
+		if statusCode == http.StatusBadRequest {
+			return false
+		}
+		if statusCode/100 == 2 {
+			return false
+		}
 	}
-	if statusCode/100 == 5 {
-		return true
-	}
-	if statusCode == http.StatusBadRequest {
-		return false
-	}
-	if statusCode/100 == 2 {
-		return false
-	}
+
 	return true
 }
 

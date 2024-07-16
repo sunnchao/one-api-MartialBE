@@ -108,17 +108,19 @@ func AddToken(c *gin.Context) {
 		return
 	}
 	cleanToken := model.Token{
-		UserId:         c.GetInt("id"),
-		Name:           token.Name,
-		Key:            utils.GenerateKey(),
-		CreatedTime:    utils.GetTimestamp(),
-		AccessedTime:   utils.GetTimestamp(),
-		ExpiredTime:    token.ExpiredTime,
-		RemainQuota:    token.RemainQuota,
-		UnlimitedQuota: token.UnlimitedQuota,
-		ChatCache:      token.ChatCache,
-		ModelLimitsEnabled: token.ModelLimitsEnabled,
-		ModelLimits:        token.ModelLimits,
+		UserId:               c.GetInt("id"),
+		Name:                 token.Name,
+		Key:                  utils.GenerateKey(),
+		CreatedTime:          utils.GetTimestamp(),
+		AccessedTime:         utils.GetTimestamp(),
+		ExpiredTime:          token.ExpiredTime,
+		RemainQuota:          token.RemainQuota,
+		UnlimitedQuota:       token.UnlimitedQuota,
+		ChatCache:            token.ChatCache,
+		ModelLimitsEnabled:   token.ModelLimitsEnabled,
+		ModelLimits:          token.ModelLimits,
+		ChannelLimitsEnabled: token.ChannelLimitsEnabled,
+		ChannelLimits:        token.ChannelLimits,
 	}
 	err = cleanToken.Insert()
 	if err != nil {
@@ -205,6 +207,8 @@ func UpdateToken(c *gin.Context) {
 		cleanToken.ChatCache = token.ChatCache
 		cleanToken.ModelLimitsEnabled = token.ModelLimitsEnabled
 		cleanToken.ModelLimits = token.ModelLimits
+		cleanToken.ChannelLimits = token.ChannelLimits
+		cleanToken.ChannelLimitsEnabled = token.ChannelLimitsEnabled
 	}
 	err = cleanToken.Update()
 	if err != nil {

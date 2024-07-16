@@ -6,6 +6,7 @@ import (
 	"one-api/common/config"
 	"one-api/common/logger"
 	"one-api/common/utils"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -24,6 +25,21 @@ type ChannelsChooser struct {
 }
 
 type ChannelsFilterFunc func(channelId int, choice *ChannelChoice) bool
+
+func isChannelIdInLimits(tokenChannelLimit []string, channelId int) bool {
+	// 将 channelId 转换为字符串
+	channelIdStr := strconv.Itoa(channelId)
+
+	// 使用 utils.Contains 检查是否存在
+	return utils.Contains(channelIdStr, tokenChannelLimit)
+}
+
+func IncludeChannelId(tokenChannelLimit []string) ChannelsFilterFunc {
+	return func(channelId int, choice *ChannelChoice) bool {
+		return !isChannelIdInLimits(tokenChannelLimit, channelId)
+
+	}
+}
 
 func FilterChannelId(skipChannelId int) ChannelsFilterFunc {
 	return func(channelId int, choice *ChannelChoice) bool {
