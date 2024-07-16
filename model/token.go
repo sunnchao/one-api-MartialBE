@@ -142,7 +142,7 @@ func (token *Token) Update() error {
 		token.ChatCache = false
 	}
 
-	err := DB.Model(token).Select("name", "status", "expired_time", "remain_quota", "unlimited_quota", "chat_cache", "model_limits_enabled", "model_limits", "channel_limits_abled", "channel_limits").Updates(token).Error
+	err := DB.Model(token).Select("name", "status", "expired_time", "remain_quota", "unlimited_quota", "chat_cache", "model_limits_enabled", "model_limits", "channel_limits_enabled", "channel_limits").Updates(token).Error
 	// 防止Redis缓存不生效，直接删除
 	if err == nil && config.RedisEnabled {
 		redis.RedisDel(fmt.Sprintf("token:%s", token.Key))
