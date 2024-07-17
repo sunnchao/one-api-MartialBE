@@ -241,7 +241,7 @@ func shouldRetry(c *gin.Context, statusCode int) bool {
 	ignore := c.GetBool("specific_channel_id_ignore")
 
 	channelIds, channelIdsExits := c.Get("token_channel_limit")
-	if channelIdsExits {
+	if channelIdsExits && channelIds != nil && channelIds != "" {
 		var tokenChannelLimit map[string]bool
 		tokenChannelLimit = channelIds.(map[string]bool)
 		if _, ok := tokenChannelLimit[string(channelId)]; !ok {
