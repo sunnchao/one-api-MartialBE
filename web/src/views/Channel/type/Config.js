@@ -403,17 +403,17 @@ const typeConfig = {
   43: {
     input: {
       models: [
-        'Doubao-pro-128k',
-        'Doubao-pro-32k',
-        'Doubao-pro-4k',
-        'Doubao-lite-128k',
-        'Doubao-lite-32k',
-        'Doubao-lite-4k',
-        'Doubao-embedding'
+        'doubao-pro-128k',
+        'doubao-pro-32k',
+        'doubao-pro-4k',
+        'doubao-lite-128k',
+        'doubao-lite-32k',
+        'doubao-lite-4k',
+        'doubao-embedding'
       ]
     },
     prompt: {
-      test_model: 'Doubao-pro-4k'
+      test_model: 'doubao-pro-4k'
     },
     modelGroup: 'Doubao AI'
   },

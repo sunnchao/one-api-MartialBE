@@ -53,7 +53,7 @@ func getConfig() base.ProviderConfig {
 //	}
 //	return &types.OpenAIError{
 //		Message: DoubaoError.Msg,
-//		Type:    "Doubao error",
+//		Type:    "doubao error",
 //		Code:    DoubaoError.Code,
 //	}
 //}
