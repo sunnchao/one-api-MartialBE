@@ -20,6 +20,7 @@ import { IconRefresh, IconPlus } from '@tabler/icons-react';
 import EditeModal from './component/EditModal';
 import { useSelector } from 'react-redux';
 import { ITEMS_PER_PAGE } from '@/constants';
+import { isAdmin } from '@/utils/common';
 
 export default function Token() {
   const [page, setPage] = useState(0);
@@ -35,6 +36,7 @@ export default function Token() {
   const [openModal, setOpenModal] = useState(false);
   const [editTokenId, setEditTokenId] = useState(0);
   const siteInfo = useSelector((state) => state.siteInfo);
+  const userIsAdmin = isAdmin();
 
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
@@ -234,7 +236,7 @@ export default function Token() {
           showLastButton
         />
       </Card>
-      <EditeModal open={openModal} onCancel={handleCloseModal} onOk={handleOkModal} tokenId={editTokenId} />
+      <EditeModal open={openModal} onCancel={handleCloseModal} onOk={handleOkModal} tokenId={editTokenId} userIsAdmin={userIsAdmin}/>
     </>
   );
 }

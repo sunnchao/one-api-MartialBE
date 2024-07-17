@@ -50,7 +50,7 @@ const originInputs = {
   channel_limits: ''
 };
 
-const EditModal = ({ open, tokenId, onCancel, onOk }) => {
+const EditModal = ({ open, tokenId, onCancel, onOk, userIsAdmin}) => {
   const theme = useTheme();
   const [inputs, setInputs] = useState(originInputs);
   const siteInfo = useSelector((state) => state.siteInfo);
@@ -284,44 +284,47 @@ const EditModal = ({ open, tokenId, onCancel, onOk }) => {
                 }
                 label="模型限制"
               />
-              <div>
-                {/* 渠道限制 */}
-                <FormControl
-                  fullWidth
-                  error={Boolean(touched.channel_limits && errors.channel_limits)}
-                  sx={{ ...theme.typography.otherInput }}
-                  size={'small'}
-                >
-                  <InputLabel htmlFor="channel-channel_limits-label" size={'small'}>
-                    渠道限制
-                  </InputLabel>
-                  <OutlinedInput
-                    id="channel-channel_limits-label"
-                    label="模型限制"
-                    type="text"
-                    value={values.channel_limits}
-                    name="channel_limits"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    inputProps={{ autoComplete: 'channel_limits' }}
-                    aria-describedby="helper-text-channel-channel_limits-label"
+              {
+                userIsAdmin && 
+                <div>
+                  {/* 渠道限制 */}
+                  <FormControl
+                    fullWidth
+                    error={Boolean(touched.channel_limits && errors.channel_limits)}
+                    sx={{ ...theme.typography.otherInput }}
                     size={'small'}
-                    disabled={!values.channel_limits_enabled}
-                  />
-                </FormControl>
-
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={values.channel_limits_enabled}
-                      onClick={() => {
-                        setFieldValue('channel_limits_enabled', !values.channel_limits_enabled);
-                      }}
+                  >
+                    <InputLabel htmlFor="channel-channel_limits-label" size={'small'}>
+                      渠道限制
+                    </InputLabel>
+                    <OutlinedInput
+                      id="channel-channel_limits-label"
+                      label="模型限制"
+                      type="text"
+                      value={values.channel_limits}
+                      name="channel_limits"
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      inputProps={{ autoComplete: 'channel_limits' }}
+                      aria-describedby="helper-text-channel-channel_limits-label"
+                      size={'small'}
+                      disabled={!values.channel_limits_enabled}
                     />
-                  }
-                  label="渠道限制"
-                />
-              </div>
+                  </FormControl>
+
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={values.channel_limits_enabled}
+                        onClick={() => {
+                          setFieldValue('channel_limits_enabled', !values.channel_limits_enabled);
+                        }}
+                      />
+                    }
+                    label="渠道限制"
+                  />
+                </div>
+              }
 
               <DialogActions>
                 <Button onClick={onCancel}>取消</Button>
