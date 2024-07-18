@@ -38,8 +38,7 @@ jobs:
         run: |
           export VERSION=$(cat VERSION)
           cd web
-          yarn install
-          yarn run build
+          yarn install && yarn run build
           cd ..
       - name: Set up Go
         uses: actions/setup-go@v3
