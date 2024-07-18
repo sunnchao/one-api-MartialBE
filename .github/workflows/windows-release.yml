@@ -41,8 +41,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: one-api.exe
+          files: one-api-m.exe
           draft: true
           generate_release_notes: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GT_Token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
