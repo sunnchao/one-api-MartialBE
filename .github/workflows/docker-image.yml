@@ -50,17 +50,9 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ">=1.18.0"
-      - name: Cache Go modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
       - name: Build Backend (amd64)
         run: |
+          go clean -modcache  # 清除依赖包缓存
           go mod download
           go build -ldflags "-s -w -X 'one-api/common/config.Version=$(cat VERSION)' -extldflags '-static'" -o one-api-amd64
 
