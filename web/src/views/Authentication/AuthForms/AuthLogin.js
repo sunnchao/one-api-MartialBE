@@ -32,7 +32,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import AuthClient from '@/views/Authentication/AuthForms/AuthClient';
 import { showInfo } from '@/utils/common';
 import Turnstile from 'react-turnstile';
-import { onGitHubOAuthClicked, onLarkOAuthClicked } from 'utils/common';
+import { onGitHubOAuthClicked, onLarkOAuthClicked } from '@/utils/common';
 import { useTranslation } from 'react-i18next';
 
 // ============================|| FIREBASE - LOGIN ||============================ //

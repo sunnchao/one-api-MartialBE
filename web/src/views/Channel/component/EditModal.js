@@ -36,7 +36,7 @@ import { createFilterOptions } from '@mui/material/Autocomplete';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { useTranslation } from 'react-i18next';
-import useCustomizeT from 'hooks/useCustomizeT';
+import useCustomizeT from '@/hooks/useCustomizeT';
 
 const pluginList = import.meta.glob('../type/Plugin.json', {
   eager: true
@@ -590,7 +590,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                   }}
                   renderOption={(props, option, { selected }) => (
                     <li {...props}>
-                      <Checkbox size='small' icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
+                      <Checkbox size="small" icon={icon} checkedIcon={checkedIcon} style={{ marginRight: 8 }} checked={selected} />
                       {option.id}
                     </li>
                   )}

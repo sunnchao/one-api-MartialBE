@@ -19,7 +19,7 @@ import { Link } from 'react-router-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import ThemeButton from '@/ui-component/ThemeButton';
-import I18nButton from 'ui-component/i18nButton';
+import I18nButton from '@/ui-component/i18nButton';
 import ContactButton from '@/ui-component/ContactButton';
 import ProfileSection from '@/layout/MainLayout/Header/ProfileSection';
 import { IconMenu2 } from '@tabler/icons-react';

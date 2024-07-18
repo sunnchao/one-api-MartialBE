@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Avatar, Box, ButtonBase, Menu, MenuItem } from '@mui/material';
 import { IconLanguageHiragana } from '@tabler/icons-react';
-import i18nList from 'i18n/i18nList';
-import useI18n from 'hooks/useI18n';
+import i18nList from '@/i18n/i18nList';
+import useI18n from '@/hooks/useI18n';
 
 export default function I18nButton() {
   const theme = useTheme();

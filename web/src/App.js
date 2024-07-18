@@ -21,7 +21,7 @@ import { SnackbarProvider } from 'notistack';
 import CopySnackbar from '@/ui-component/Snackbar';
 
 // locales
-import i18n from 'i18n/i18n';
+import i18n from '@/i18n/i18n';
 
 // ==============================|| APP ||============================== //
 

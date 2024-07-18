@@ -16,7 +16,7 @@ import KeywordTableHead from '@/ui-component/TableHead';
 import { API } from '@/utils/api';
 import { ITEMS_PER_PAGE } from '@/constants';
 import { useTranslation } from 'react-i18next';
-// import TableToolBar from 'ui-component/TableToolBar';
+// import TableToolBar from '@/ui-component/TableToolBar';
 
 const originalKeyword = {
   tag: ''
