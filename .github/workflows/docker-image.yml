@@ -31,7 +31,7 @@ jobs:
           echo "$HASH" > VERSION
       - uses: actions/setup-node@v3
         with:
-          node-version: 22
+          node-version: 18
       - name: Build Frontend
         env:
           CI: ""
