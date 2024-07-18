@@ -4,9 +4,19 @@ permissions:
 
 on:
   push:
+    branches:
+      - sunnchao_main
     tags:
-      - "*"
-      - "!*-alpha*"
+      - "v*"
+    paths-ignore:
+      - "README.md"
+      - "web"
+    workflow_dispatch:
+      inputs:
+        name:
+          description: "reason"
+          required: false
+
 jobs:
   release:
     runs-on: windows-latest
@@ -36,7 +46,7 @@ jobs:
       - name: Build Backend
         run: |
           go mod download
-          go build -ldflags "-s -w -X 'one-api/common.Version=$(git describe --tags)'" -o one-api.exe
+          go build -ldflags "-s -w -X 'one-api/common.Version=$(git describe --tags)'" -o one-api-m.exe
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
