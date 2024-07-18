@@ -36,7 +36,16 @@ jobs:
           git describe --tags > VERSION
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 22
+      - name: Cache Node modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            web/node_modules
+            ~/.cache/yarn
+          key: ${{ runner.os }}-node-${{ hashFiles('**/npm.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       - name: Build Frontend
         env:
           CI: ""
@@ -50,9 +59,17 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ">=1.18.0"
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
       - name: Build Backend (amd64)
         run: |
-          go clean -modcache  # 清除依赖包缓存
           go mod download
           go build -ldflags "-s -w -X 'one-api/common/config.Version=$(cat VERSION)' -extldflags '-static'" -o one-api-amd64
 

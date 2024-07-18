@@ -32,10 +32,13 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import AuthClient from '@/views/Authentication/AuthForms/AuthClient';
 import { showInfo } from '@/utils/common';
 import Turnstile from 'react-turnstile';
+import { onGitHubOAuthClicked, onLarkOAuthClicked } from 'utils/common';
+import { useTranslation } from 'react-i18next';
 
 // ============================|| FIREBASE - LOGIN ||============================ //
 
 const LoginForm = ({ ...others }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const { login } = useLogin();
   const siteInfo = useSelector((state) => state.siteInfo);
@@ -71,8 +74,8 @@ const LoginForm = ({ ...others }) => {
           submit: null
         }}
         validationSchema={Yup.object().shape({
-          username: Yup.string().max(255).required('用户名/邮箱是必填项'),
-          password: Yup.string().max(255).required('密码是必填项')
+          username: Yup.string().max(255).required(t('login.usernameRequired')),
+          password: Yup.string().max(255).required(t('login.passwordRequired'))
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
           if (turnstileEnabled && turnstileToken === '') {
@@ -95,7 +98,7 @@ const LoginForm = ({ ...others }) => {
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
           <form noValidate onSubmit={handleSubmit} {...others}>
             <FormControl fullWidth error={Boolean(touched.username && errors.username)} sx={{ ...theme.typography.customInput }}>
-              <InputLabel htmlFor="outlined-adornment-username-login">用户名/邮箱</InputLabel>
+              <InputLabel htmlFor="outlined-adornment-username-login">{t('login.usernameOrEmail')}</InputLabel>
               <OutlinedInput
                 id="outlined-adornment-username-login"
                 type="text"
@@ -103,7 +106,7 @@ const LoginForm = ({ ...others }) => {
                 name="username"
                 onBlur={handleBlur}
                 onChange={handleChange}
-                label="用户名/邮箱"
+                label={t('login.usernameOrEmail')}
                 inputProps={{ autoComplete: 'username' }}
               />
               {touched.username && errors.username && (
@@ -114,7 +117,7 @@ const LoginForm = ({ ...others }) => {
             </FormControl>
 
             <FormControl fullWidth error={Boolean(touched.password && errors.password)} sx={{ ...theme.typography.customInput }}>
-              <InputLabel htmlFor="outlined-adornment-password-login">密码</InputLabel>
+              <InputLabel htmlFor="outlined-adornment-password-login">{t('login.password')}</InputLabel>
               <OutlinedInput
                 id="outlined-adornment-password-login"
                 type={showPassword ? 'text' : 'password'}
@@ -144,12 +147,6 @@ const LoginForm = ({ ...others }) => {
               )}
             </FormControl>
             <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
-              {/* <FormControlLabel
-                control={
-                  <Checkbox checked={checked} onChange={(event) => setChecked(event.target.checked)} name="checked" color="primary" />
-                }
-                label="记住我"
-              /> */}
               <Typography
                 component={Link}
                 to="/reset"
@@ -157,7 +154,7 @@ const LoginForm = ({ ...others }) => {
                 color="primary"
                 sx={{ textDecoration: 'none', cursor: 'pointer' }}
               >
-                忘记密码?
+                {t('login.forgetPassword')}
               </Typography>
             </Stack>
             {errors.submit && (
@@ -179,7 +176,7 @@ const LoginForm = ({ ...others }) => {
             <Box sx={{ mt: 2 }}>
               <AnimateButton>
                 <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="primary">
-                  登录
+                  {t('menu.login')}
                 </Button>
               </AnimateButton>
             </Box>

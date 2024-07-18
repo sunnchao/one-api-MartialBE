@@ -12,9 +12,11 @@ import PricesTableRow from './component/TableRow';
 import KeywordTableHead from '@/ui-component/TableHead';
 import { API } from '@/utils/api';
 import EditeModal from './component/EditModal';
+import { useTranslation } from 'react-i18next';
 
 // ----------------------------------------------------------------------
 export default function Multiple({ prices, reloadData, handleOpenModal, ownedby }) {
+  const { t } = useTranslation();
   const [rows, setRows] = useState([]);
 
   // 处理刷新
@@ -53,7 +55,7 @@ export default function Multiple({ prices, reloadData, handleOpenModal, ownedby 
       }
       const { success, message } = res.data;
       if (success) {
-        showSuccess('操作成功完成！');
+        showSuccess(t('userPage.operationSuccess'));
         if (action === 'delete') {
           await handleRefresh();
         }
@@ -76,12 +78,12 @@ export default function Multiple({ prices, reloadData, handleOpenModal, ownedby 
               <KeywordTableHead
                 headLabel={[
                   { id: 'collapse', label: '', disableSort: true },
-                  { id: 'type', label: '类型', disableSort: true },
-                  { id: 'channel_type', label: '供应商', disableSort: true },
-                  { id: 'input', label: '输入倍率', disableSort: true },
-                  { id: 'output', label: '输出倍率', disableSort: true },
-                  { id: 'count', label: '模型数量', disableSort: true },
-                  { id: 'action', label: '操作', disableSort: true }
+                  { id: 'type', label: t('pricing_edit.type'), disableSort: true },
+                  { id: 'channel_type', label: t('modelpricePage.channelType'), disableSort: true },
+                  { id: 'input', label: t('modelpricePage.inputMultiplier'), disableSort: true },
+                  { id: 'output', label: t('modelpricePage.outputMultiplier'), disableSort: true },
+                  { id: 'count', label: t('pricingPage.ModelCount'), disableSort: true },
+                  { id: 'action', label: t('paymentGatewayPage.tableHeaders.action'), disableSort: true }
                 ]}
               />
               <TableBody>

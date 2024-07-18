@@ -4,19 +4,9 @@ permissions:
 
 on:
   push:
-    branches:
-      - sunnchao_main
     tags:
-      - "v*"
-    paths-ignore:
-      - "README.md"
-      - "web"
-    workflow_dispatch:
-      inputs:
-        name:
-          description: "reason"
-          required: false
-
+      - "*"
+      - "!*-alpha*"
 jobs:
   release:
     runs-on: windows-latest
@@ -30,7 +20,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 22
       - name: Build Frontend
         env:
           CI: ""
@@ -46,13 +36,13 @@ jobs:
       - name: Build Backend
         run: |
           go mod download
-          go build -ldflags "-s -w -X 'one-api/common.Version=$(git describe --tags)'" -o one-api-m.exe
+          go build -ldflags "-s -w -X 'one-api/common/config.Version=$(git describe --tags)'" -o one-api.exe
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: one-api-m.exe
+          files: one-api.exe
           draft: true
           generate_release_notes: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GT_Token }}

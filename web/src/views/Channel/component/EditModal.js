@@ -35,6 +35,8 @@ import { defaultConfig, typeConfig } from '../type/Config'; //typeConfig
 import { createFilterOptions } from '@mui/material/Autocomplete';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import { useTranslation } from 'react-i18next';
+import useCustomizeT from 'hooks/useCustomizeT';
 
 const pluginList = import.meta.glob('../type/Plugin.json', {
   eager: true
@@ -43,39 +45,42 @@ const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const filter = createFilterOptions();
-const validationSchema = Yup.object().shape({
-  is_edit: Yup.boolean(),
-  // is_tag: Yup.boolean(),
-  name: Yup.string().required('名称 不能为空'),
-  type: Yup.number().required('渠道 不能为空'),
-  key: Yup.string().when('is_edit', { is: false, then: Yup.string().required('密钥 不能为空') }),
-  other: Yup.string(),
-  proxy: Yup.string(),
-  test_model: Yup.string(),
-  models: Yup.array().min(1, '模型 不能为空'),
-  groups: Yup.array().min(1, '用户组 不能为空'),
-  base_url: Yup.string().when('type', {
-    is: (value) => [3, 8].includes(value),
-    then: Yup.string().required('渠道API地址 不能为空'), // base_url 是必需的
-    otherwise: Yup.string() // 在其他情况下，base_url 可以是任意字符串
-  }),
-  model_mapping: Yup.string().test('is-json', '必须是有效的JSON字符串', function (value) {
-    try {
-      if (value === '' || value === null || value === undefined) {
-        return true;
+const getValidationSchema = (t) =>
+  Yup.object().shape({
+    is_edit: Yup.boolean(),
+    // is_tag: Yup.boolean(),
+    name: Yup.string().required(t('channel_edit.requiredName')),
+    type: Yup.number().required(t('channel_edit.requiredChannel')),
+    key: Yup.string().when('is_edit', { is: false, then: Yup.string().required(t('channel_edit.requiredKey')) }),
+    other: Yup.string(),
+    proxy: Yup.string(),
+    test_model: Yup.string(),
+    models: Yup.array().min(1, t('channel_edit.requiredModels')),
+    groups: Yup.array().min(1, t('channel_edit.requiredGroup')),
+    base_url: Yup.string().when('type', {
+      is: (value) => [3, 8].includes(value),
+      then: Yup.string().required(t('channel_edit.requiredBaseUrl')), // base_url 是必需的
+      otherwise: Yup.string() // 在其他情况下，base_url 可以是任意字符串
+    }),
+    model_mapping: Yup.string().test('is-json', t('channel_edit.validJson'), function (value) {
+      try {
+        if (value === '' || value === null || value === undefined) {
+          return true;
+        }
+        const parsedValue = JSON.parse(value);
+        if (typeof parsedValue === 'object') {
+          return true;
+        }
+      } catch (e) {
+        return false;
       }
-      const parsedValue = JSON.parse(value);
-      if (typeof parsedValue === 'object') {
-        return true;
-      }
-    } catch (e) {
       return false;
-    }
-    return false;
-  })
-});
+    })
+  });
 
 const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => {
+  const { t } = useTranslation();
+  const { t: customizeT } = useCustomizeT();
   const theme = useTheme();
   // const [loading, setLoading] = useState(false);
   const [initialInput, setInitialInput] = useState(defaultConfig.input);
@@ -161,13 +166,13 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
         let modelList = uniqueModels.map((model) => {
           return {
             id: model,
-            group: '自定义：点击或回车输入'
+            group: t('channel_edit.customModelTip')
           };
         });
 
         setFieldValue('models', modelList);
       } else {
-        showError(message || '获取模型列表失败');
+        showError(message || t('channel_edit.modelListError'));
       }
     } catch (error) {
       showError(error.message);
@@ -231,9 +236,9 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
       const { success, message } = res.data;
       if (success) {
         if (channelId) {
-          showSuccess('更新成功！');
+          showSuccess(t('channel_edit.editSuccess'));
         } else {
-          showSuccess('创建成功！');
+          showSuccess(t('channel_edit.addSuccess'));
         }
         setSubmitting(false);
         setStatus({ success: true });
@@ -266,7 +271,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
       if (modelOption) {
         return modelOption;
       }
-      return { id: model, group: '自定义：点击或回车输入' };
+      return { id: model, group: t('channel_edit.customModelTip') };
     });
     return modelList;
   }
@@ -334,19 +339,19 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
   return (
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth={'md'}>
       <DialogTitle sx={{ margin: '0px', fontWeight: 700, lineHeight: '1.55556', padding: '24px', fontSize: '1.125rem' }}>
-        {channelId ? '编辑' : '新建'}
+        {channelId ? t('common.edit') : t('common.create')}
       </DialogTitle>
       <Divider />
       <DialogContent>
-        <Formik initialValues={initialInput} enableReinitialize validationSchema={validationSchema} onSubmit={submit}>
+        <Formik initialValues={initialInput} enableReinitialize validationSchema={getValidationSchema(t)} onSubmit={submit}>
           {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values, setFieldValue }) => (
             <form noValidate onSubmit={handleSubmit}>
               {!isTag && (
                 <FormControl fullWidth error={Boolean(touched.type && errors.type)} sx={{ ...theme.typography.otherInput }}>
-                  <InputLabel htmlFor="channel-type-label">{inputLabel.type}</InputLabel>
+                  <InputLabel htmlFor="channel-type-label">{customizeT(inputLabel.type)}</InputLabel>
                   <Select
                     id="channel-type-label"
-                    label={inputLabel.type}
+                    label={customizeT(inputLabel.type)}
                     value={values.type}
                     name="type"
                     onBlur={handleBlur}
@@ -376,16 +381,16 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                       {errors.type}
                     </FormHelperText>
                   ) : (
-                    <FormHelperText id="helper-tex-channel-type-label"> {inputPrompt.type} </FormHelperText>
+                    <FormHelperText id="helper-tex-channel-type-label"> {customizeT(inputPrompt.type)} </FormHelperText>
                   )}
                 </FormControl>
               )}
 
               <FormControl fullWidth error={Boolean(touched.tag && errors.tag)} sx={{ ...theme.typography.otherInput }}>
-                <InputLabel htmlFor="channel-tag-label">{inputLabel.tag}</InputLabel>
+                <InputLabel htmlFor="channel-tag-label">{customizeT(inputLabel.tag)}</InputLabel>
                 <OutlinedInput
                   id="channel-tag-label"
-                  label={inputLabel.tag}
+                  label={customizeT(inputLabel.tag)}
                   type="text"
                   value={values.tag}
                   name="tag"
@@ -393,23 +398,22 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                   onChange={handleChange}
                   inputProps={{}}
                   aria-describedby="helper-text-channel-tag-label"
-                  size={'small'}
                 />
                 {touched.tag && errors.tag ? (
                   <FormHelperText error id="helper-tex-channel-tag-label">
                     {errors.tag}
                   </FormHelperText>
                 ) : (
-                  <FormHelperText id="helper-tex-channel-tag-label"> {inputPrompt.tag} </FormHelperText>
+                  <FormHelperText id="helper-tex-channel-tag-label"> {customizeT(inputPrompt.tag)} </FormHelperText>
                 )}
               </FormControl>
 
               {!isTag && (
                 <FormControl fullWidth error={Boolean(touched.name && errors.name)} sx={{ ...theme.typography.otherInput }}>
-                  <InputLabel htmlFor="channel-name-label">{inputLabel.name}</InputLabel>
+                  <InputLabel htmlFor="channel-name-label">{customizeT(inputLabel.name)}</InputLabel>
                   <OutlinedInput
                     id="channel-name-label"
-                    label={inputLabel.name}
+                    label={customizeT(inputLabel.name)}
                     type="text"
                     value={values.name}
                     name="name"
@@ -417,14 +421,13 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                     onChange={handleChange}
                     inputProps={{ autoComplete: 'name' }}
                     aria-describedby="helper-text-channel-name-label"
-                    size={'small'}
                   />
                   {touched.name && errors.name ? (
                     <FormHelperText error id="helper-tex-channel-name-label">
                       {errors.name}
                     </FormHelperText>
                   ) : (
-                    <FormHelperText id="helper-tex-channel-name-label"> {inputPrompt.name} </FormHelperText>
+                    <FormHelperText id="helper-tex-channel-name-label"> {customizeT(inputPrompt.name)} </FormHelperText>
                   )}
                 </FormControl>
               )}
@@ -435,7 +438,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                   }}
                 >
                   <Switch checked={batchAdd} onChange={(e) => setBatchAdd(e.target.checked)} />
-                  批量添加
+                  {t('channel_edit.batchAdd')}
                 </Container>
               )}
 
@@ -443,10 +446,10 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                 <FormControl fullWidth error={Boolean(touched.base_url && errors.base_url)} sx={{ ...theme.typography.otherInput }}>
                   {!batchAdd ? (
                     <>
-                      <InputLabel htmlFor="channel-base_url-label">{inputLabel.base_url}</InputLabel>
+                      <InputLabel htmlFor="channel-base_url-label">{customizeT(inputLabel.base_url)}</InputLabel>
                       <OutlinedInput
                         id="channel-base_url-label"
-                        label={inputLabel.base_url}
+                        label={customizeT(inputLabel.base_url)}
                         type="text"
                         value={values.base_url}
                         name="base_url"
@@ -454,22 +457,20 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                         onChange={handleChange}
                         inputProps={{}}
                         aria-describedby="helper-text-channel-base_url-label"
-                        size={'small'}
                       />
                     </>
                   ) : (
                     <TextField
                       multiline
                       id="channel-base_url-label"
-                      label={inputLabel.base_url}
+                      label={customizeT(inputLabel.base_url)}
                       value={values.base_url}
                       name="base_url"
                       onBlur={handleBlur}
                       onChange={handleChange}
                       aria-describedby="helper-text-channel-base_url-label"
                       minRows={5}
-                      placeholder={inputPrompt.base_url + '，一行一个,顺序对应下面的key，如果对应不上则默认使用第一个'}
-                      size={'small'}
+                      placeholder={customizeT(inputPrompt.base_url) + t('channel_edit.batchBaseurlTip')}
                     />
                   )}
 
@@ -478,17 +479,17 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                       {errors.base_url}
                     </FormHelperText>
                   ) : (
-                    <FormHelperText id="helper-tex-channel-base_url-label"> {inputPrompt.base_url} </FormHelperText>
+                    <FormHelperText id="helper-tex-channel-base_url-label"> {customizeT(inputPrompt.base_url)} </FormHelperText>
                   )}
                 </FormControl>
               )}
 
               {inputPrompt.other && (
-                <FormControl fullWidth error={Boolean(touched.other && errors.other)} sx={{ ...theme.typography.otherInput }} size={'small'}>
-                  <InputLabel htmlFor="channel-other-label">{inputLabel.other}</InputLabel>
+                <FormControl fullWidth error={Boolean(touched.other && errors.other)} sx={{ ...theme.typography.otherInput }}>
+                  <InputLabel htmlFor="channel-other-label">{customizeT(inputLabel.other)}</InputLabel>
                   <OutlinedInput
                     id="channel-other-label"
-                    label={inputLabel.other}
+                    label={customizeT(inputLabel.other)}
                     type="text"
                     value={values.other}
                     name="other"
@@ -497,14 +498,13 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                     onChange={handleChange}
                     inputProps={{}}
                     aria-describedby="helper-text-channel-other-label"
-                    size={'small'}
                   />
                   {touched.other && errors.other ? (
                     <FormHelperText error id="helper-tex-channel-other-label">
                       {errors.other}
                     </FormHelperText>
                   ) : (
-                    <FormHelperText id="helper-tex-channel-other-label"> {inputPrompt.other} </FormHelperText>
+                    <FormHelperText id="helper-tex-channel-other-label"> {customizeT(inputPrompt.other)} </FormHelperText>
                   )}
                 </FormControl>
               )}
@@ -527,16 +527,17 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                   }}
                   onBlur={handleBlur}
                   filterSelectedOptions
-                  renderInput={(params) => <TextField {...params} name="groups" error={Boolean(errors.groups)} label={inputLabel.groups} />}
+                  renderInput={(params) => (
+                    <TextField {...params} name="groups" error={Boolean(errors.groups)} label={customizeT(inputLabel.groups)} />
+                  )}
                   aria-describedby="helper-text-channel-groups-label"
-                  size={'small'}
                 />
                 {errors.groups ? (
                   <FormHelperText error id="helper-tex-channel-groups-label">
                     {errors.groups}
                   </FormHelperText>
                 ) : (
-                  <FormHelperText id="helper-tex-channel-groups-label"> {inputPrompt.groups} </FormHelperText>
+                  <FormHelperText id="helper-tex-channel-groups-label"> {customizeT(inputPrompt.groups)} </FormHelperText>
                 )}
               </FormControl>
 
@@ -552,7 +553,9 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                     const event = {
                       target: {
                         name: 'models',
-                        value: value.map((item) => (typeof item === 'string' ? { id: item, group: '自定义：点击或回车输入' } : item))
+                        value: value.map((item) =>
+                          typeof item === 'string' ? { id: item, group: t('channel_edit.customModelTip') } : item
+                        )
                       }
                     };
                     handleChange(event);
@@ -560,7 +563,9 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                   onBlur={handleBlur}
                   // filterSelectedOptions
                   disableCloseOnSelect
-                  renderInput={(params) => <TextField {...params} name="models" error={Boolean(errors.models)} label={inputLabel.models} />}
+                  renderInput={(params) => (
+                    <TextField {...params} name="models" error={Boolean(errors.models)} label={customizeT(inputLabel.models)} />
+                  )}
                   groupBy={(option) => option.group}
                   getOptionLabel={(option) => {
                     if (typeof option === 'string') {
@@ -578,7 +583,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                     if (inputValue !== '' && !isExisting) {
                       filtered.push({
                         id: inputValue,
-                        group: '自定义：点击或回车输入'
+                        group: t('channel_edit.customModelTip')
                       });
                     }
                     return filtered;
@@ -596,7 +601,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                     {errors.models}
                   </FormHelperText>
                 ) : (
-                  <FormHelperText id="helper-tex-channel-models-label"> {inputPrompt.models} </FormHelperText>
+                  <FormHelperText id="helper-tex-channel-models-label"> {customizeT(inputPrompt.models)} </FormHelperText>
                 )}
               </FormControl>
               <Container
@@ -610,21 +615,19 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                     onClick={() => {
                       setFieldValue('models', basicModels(values.type));
                     }}
-                    size={'small'}
                   >
-                    填入渠道支持模型
+                    {t('channel_edit.inputChannelModel')}
                   </Button>
                   <Button
                     disabled={hasTag}
                     onClick={() => {
                       setFieldValue('models', modelOptions);
                     }}
-                    size={'small'}
                   >
-                    填入所有模型
+                    {t('channel_edit.inputAllModel')}
                   </Button>
                   {inputLabel.provider_models_list && (
-                    <Tooltip title={inputPrompt.provider_models_list} placement="top">
+                    <Tooltip title={customizeT(inputPrompt.provider_models_list)} placement="top">
                       <LoadingButton
                         loading={providerModelsLoad}
                         disabled={hasTag}
@@ -632,7 +635,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                           getProviderModels(values, setFieldValue);
                         }}
                       >
-                        {inputLabel.provider_models_list}
+                        {customizeT(inputLabel.provider_models_list)}
                       </LoadingButton>
                     </Tooltip>
                   )}
@@ -642,10 +645,10 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                 <FormControl fullWidth error={Boolean(touched.key && errors.key)} sx={{ ...theme.typography.otherInput }}>
                   {!batchAdd ? (
                     <>
-                      <InputLabel htmlFor="channel-key-label">{inputLabel.key}</InputLabel>
+                      <InputLabel htmlFor="channel-key-label">{customizeT(inputLabel.key)}</InputLabel>
                       <OutlinedInput
                         id="channel-key-label"
-                        label={inputLabel.key}
+                        label={customizeT(inputLabel.key)}
                         type="text"
                         value={values.key}
                         name="key"
@@ -653,22 +656,20 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                         onChange={handleChange}
                         inputProps={{}}
                         aria-describedby="helper-text-channel-key-label"
-                        size={'small'}
                       />
                     </>
                   ) : (
                     <TextField
                       multiline
                       id="channel-key-label"
-                      label={inputLabel.key}
+                      label={customizeT(inputLabel.key)}
                       value={values.key}
                       name="key"
                       onBlur={handleBlur}
                       onChange={handleChange}
                       aria-describedby="helper-text-channel-key-label"
                       minRows={5}
-                      placeholder={inputPrompt.key + '，一行一个密钥'}
-                      size={'small'}
+                      placeholder={customizeT(inputPrompt.key) + t('channel_edit.batchKeytip')}
                     />
                   )}
 
@@ -677,7 +678,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                       {errors.key}
                     </FormHelperText>
                   ) : (
-                    <FormHelperText id="helper-tex-channel-key-label"> {inputPrompt.key} </FormHelperText>
+                    <FormHelperText id="helper-tex-channel-key-label"> {customizeT(inputPrompt.key)} </FormHelperText>
                   )}
                 </FormControl>
               )}
@@ -687,13 +688,12 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                   fullWidth
                   error={Boolean(touched.model_mapping && errors.model_mapping)}
                   sx={{ ...theme.typography.otherInput }}
-                  size={'small'}
                 >
                   {/* <InputLabel htmlFor="channel-model_mapping-label">{inputLabel.model_mapping}</InputLabel> */}
                   <TextField
                     multiline
                     id="channel-model_mapping-label"
-                    label={inputLabel.model_mapping}
+                    label={customizeT(inputLabel.model_mapping)}
                     value={values.model_mapping}
                     name="model_mapping"
                     onBlur={handleBlur}
@@ -701,23 +701,22 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                     onChange={handleChange}
                     aria-describedby="helper-text-channel-model_mapping-label"
                     minRows={5}
-                    placeholder={inputPrompt.model_mapping}
-                    size={'small'}
+                    placeholder={customizeT(inputPrompt.model_mapping)}
                   />
                   {touched.model_mapping && errors.model_mapping ? (
                     <FormHelperText error id="helper-tex-channel-model_mapping-label">
                       {errors.model_mapping}
                     </FormHelperText>
                   ) : (
-                    <FormHelperText id="helper-tex-channel-model_mapping-label"> {inputPrompt.model_mapping} </FormHelperText>
+                    <FormHelperText id="helper-tex-channel-model_mapping-label"> {customizeT(inputPrompt.model_mapping)} </FormHelperText>
                   )}
                 </FormControl>
               )}
-              <FormControl fullWidth error={Boolean(touched.proxy && errors.proxy)} sx={{ ...theme.typography.otherInput }} size={'small'}>
-                <InputLabel htmlFor="channel-proxy-label">{inputLabel.proxy}</InputLabel>
+              <FormControl fullWidth error={Boolean(touched.proxy && errors.proxy)} sx={{ ...theme.typography.otherInput }}>
+                <InputLabel htmlFor="channel-proxy-label">{customizeT(inputLabel.proxy)}</InputLabel>
                 <OutlinedInput
                   id="channel-proxy-label"
-                  label={inputLabel.proxy}
+                  label={customizeT(inputLabel.proxy)}
                   disabled={hasTag}
                   type="text"
                   value={values.proxy}
@@ -732,15 +731,15 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                     {errors.proxy}
                   </FormHelperText>
                 ) : (
-                  <FormHelperText id="helper-tex-channel-proxy-label"> {inputPrompt.proxy} </FormHelperText>
+                  <FormHelperText id="helper-tex-channel-proxy-label"> {customizeT(inputPrompt.proxy)} </FormHelperText>
                 )}
               </FormControl>
               {inputPrompt.test_model && (
-                <FormControl fullWidth error={Boolean(touched.test_model && errors.test_model)} sx={{ ...theme.typography.otherInput }} size='small'>
-                  <InputLabel htmlFor="channel-test_model-label">{inputLabel.test_model}</InputLabel>
+                <FormControl fullWidth error={Boolean(touched.test_model && errors.test_model)} sx={{ ...theme.typography.otherInput }}>
+                  <InputLabel htmlFor="channel-test_model-label">{customizeT(inputLabel.test_model)}</InputLabel>
                   <OutlinedInput
                     id="channel-test_model-label"
-                    label={inputLabel.test_model}
+                    label={customizeT(inputLabel.test_model)}
                     type="text"
                     disabled={hasTag}
                     value={values.test_model}
@@ -755,7 +754,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                       {errors.test_model}
                     </FormHelperText>
                   ) : (
-                    <FormHelperText id="helper-tex-channel-test_model-label"> {inputPrompt.test_model} </FormHelperText>
+                    <FormHelperText id="helper-tex-channel-test_model-label"> {customizeT(inputPrompt.test_model)} </FormHelperText>
                   )}
                 </FormControl>
               )}
@@ -771,9 +770,9 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                         }}
                       />
                     }
-                    label={inputLabel.only_chat}
+                    label={customizeT(inputLabel.only_chat)}
                   />
-                  <FormHelperText id="helper-tex-only_chat_model-label"> {inputPrompt.only_chat} </FormHelperText>
+                  <FormHelperText id="helper-tex-only_chat_model-label"> {customizeT(inputPrompt.only_chat)} </FormHelperText>
                 </FormControl>
               )}
               {pluginList[values.type] &&
@@ -782,8 +781,8 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                   return (
                     <>
                       <Divider sx={{ ...theme.typography.otherInput }} />
-                      <Typography variant="h3">{plugin.name}</Typography>
-                      <Typography variant="caption">{plugin.description}</Typography>
+                      <Typography variant="h3">{customizeT(plugin.name)}</Typography>
+                      <Typography variant="caption">{customizeT(plugin.description)}</Typography>
                       {Object.keys(plugin.params).map((paramId) => {
                         const param = plugin.params[paramId];
                         const name = `plugin.${pluginId}.${paramId}`;
@@ -803,9 +802,9 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                                   }}
                                 />
                               }
-                              label="是否启用"
+                              label={t('channel_edit.isEnable')}
                             />
-                            <FormHelperText id="helper-tex-channel-key-label"> {param.description} </FormHelperText>
+                            <FormHelperText id="helper-tex-channel-key-label"> {customizeT(param.description)} </FormHelperText>
                           </FormControl>
                         ) : (
                           <FormControl key={name} fullWidth sx={{ ...theme.typography.otherInput }} size={'small'}>
@@ -815,11 +814,11 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                               name={name}
                               disabled={hasTag}
                               value={values.plugin?.[pluginId]?.[paramId] || ''}
-                              label={param.name}
-                              placeholder={param.description}
+                              label={customizeT(param.name)}
+                              placeholder={customizeT(param.description)}
                               onChange={handleChange}
                             />
-                            <FormHelperText id="helper-tex-channel-key-label"> {param.description} </FormHelperText>
+                            <FormHelperText id="helper-tex-channel-key-label"> {customizeT(param.description)} </FormHelperText>
                           </FormControl>
                         );
                       })}
@@ -827,9 +826,9 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                   );
                 })}
               <DialogActions>
-                <Button onClick={onCancel}>取消</Button>
+                <Button onClick={onCancel}>{t('common.cancel')}</Button>
                 <Button disableElevation disabled={isSubmitting} type="submit" variant="contained" color="primary">
-                  提交
+                  {t('common.submit')}
                 </Button>
               </DialogActions>
             </form>

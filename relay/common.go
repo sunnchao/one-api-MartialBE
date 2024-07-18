@@ -136,14 +136,14 @@ func responseJsonClient(c *gin.Context, data interface{}) *types.OpenAIErrorWith
 	// 将data转换为 JSON
 	responseBody, err := json.Marshal(data)
 	if err != nil {
-		return common.ErrorWrapper(err, "marshal_response_body_failed", http.StatusInternalServerError)
+		return common.ErrorWrapperLocal(err, "marshal_response_body_failed", http.StatusInternalServerError)
 	}
 
 	c.Writer.Header().Set("Content-Type", "application/json")
 	c.Writer.WriteHeader(http.StatusOK)
 	_, err = c.Writer.Write(responseBody)
 	if err != nil {
-		return common.ErrorWrapper(err, "write_response_body_failed", http.StatusInternalServerError)
+		return common.ErrorWrapperLocal(err, "write_response_body_failed", http.StatusInternalServerError)
 	}
 
 	return nil
@@ -236,11 +236,12 @@ func responseCache(c *gin.Context, response string) {
 
 }
 
-func shouldRetry(c *gin.Context, statusCode int) bool {
+func shouldRetry(c *gin.Context, apiErr *types.OpenAIErrorWithStatusCode, channelType int) bool {
 	channelId := c.GetInt("specific_channel_id")
 	ignore := c.GetBool("specific_channel_id_ignore")
 
 	channelIds, channelIdsExits := c.Get("token_channel_limit")
+
 	if channelIdsExits && channelIds != nil && channelIds != "" {
 		var tokenChannelLimit map[string]bool
 		tokenChannelLimit = channelIds.(map[string]bool)
@@ -252,16 +253,42 @@ func shouldRetry(c *gin.Context, statusCode int) bool {
 		if channelId > 0 && !ignore {
 			return false
 		}
-		if statusCode == http.StatusTooManyRequests {
-			return true
-		}
-		if statusCode/100 == 5 {
-			return true
-		}
-		if statusCode == http.StatusBadRequest {
+
+		if apiErr == nil {
 			return false
 		}
-		if statusCode/100 == 2 {
+
+		if apiErr.LocalError {
+			return false
+		}
+
+		if apiErr.StatusCode == http.StatusTooManyRequests {
+			return true
+		}
+
+		if apiErr.StatusCode == 307 {
+			return true
+		}
+
+		if apiErr.StatusCode/100 == 5 {
+			// 超时不重试
+			if apiErr.StatusCode == 504 || apiErr.StatusCode == 524 {
+				return false
+			}
+			return true
+		}
+
+		if apiErr.StatusCode == http.StatusBadRequest {
+			// 如果是culade 400错误，需要重试
+			return channelType == config.ChannelTypeAnthropic
+		}
+
+		if apiErr.StatusCode == 408 {
+			// azure处理超时不重试
+			return false
+		}
+
+		if apiErr.StatusCode/100 == 2 {
 			return false
 		}
 	}
@@ -269,9 +296,9 @@ func shouldRetry(c *gin.Context, statusCode int) bool {
 	return true
 }
 
-func processChannelRelayError(ctx context.Context, channelId int, channelName string, err *types.OpenAIErrorWithStatusCode) {
+func processChannelRelayError(ctx context.Context, channelId int, channelName string, err *types.OpenAIErrorWithStatusCode, channelType int) {
 	logger.LogError(ctx, fmt.Sprintf("relay error (channel #%d(%s)): %s", channelId, channelName, err.Message))
-	if controller.ShouldDisableChannel(&err.OpenAIError, err.StatusCode) {
+	if controller.ShouldDisableChannel(channelType, err) {
 		controller.DisableChannel(channelId, channelName, err.Message, true)
 	}
 }
