@@ -1,4 +1,6 @@
 name: one-api docker image
+permissions:
+  contents: write
 
 on:
   push:
@@ -16,11 +18,8 @@ on:
           required: false
 
 jobs:
-  build-and-push:
+  release:
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -39,7 +38,7 @@ jobs:
         run: |
           export VERSION=$(cat VERSION)
           cd web
-          yarn
+          yarn install
           yarn run build
           cd ..
       - name: Set up Go
@@ -52,12 +51,12 @@ jobs:
           go mod download
           go build -ldflags "-s -w -X 'one-api/common/config.Version=$(cat VERSION)' -extldflags '-static'" -o one-api-amd64
 
-      - name: Build Backend (arm64)
-        run: |
-          sudo rm /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get update
-          sudo apt-get install gcc-aarch64-linux-gnu
-          CC=aarch64-linux-gnu-gcc CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -ldflags "-s -w -X 'one-api/common/config.Version=$(cat VERSION)' -extldflags '-static'" -o one-api-arm64
+      # - name: Build Backend (arm64)
+      #   run: |
+      #     sudo rm /etc/apt/sources.list.d/microsoft-prod.list
+      #     sudo apt-get update
+      #     sudo apt-get install gcc-aarch64-linux-gnu
+      #     CC=aarch64-linux-gnu-gcc CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -ldflags "-s -w -X 'one-api/common/config.Version=$(cat VERSION)' -extldflags '-static'" -o one-api-arm64
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
