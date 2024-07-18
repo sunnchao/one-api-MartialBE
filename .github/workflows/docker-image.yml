@@ -40,7 +40,7 @@ jobs:
           export VERSION=$(cat VERSION)
           cd web
           yarn
-          REACT_APP_VERSION=$VERSION yarn run build
+          yarn run build
           cd ..
       - name: Set up Go
         uses: actions/setup-go@v3
