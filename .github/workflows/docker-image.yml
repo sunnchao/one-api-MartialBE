@@ -1,6 +1,7 @@
 name: one-api docker image amd64
 permissions:
-  contents: write
+  packages: write
+  contents: read
 
 on:
   push:
@@ -10,16 +11,13 @@ on:
       - "v*"
     paths-ignore:
       - "README.md"
-      - "web"
-    workflow_dispatch:
-      inputs:
-        name:
-          description: "reason"
-          required: false
 
 jobs:
-  release:
+  build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
