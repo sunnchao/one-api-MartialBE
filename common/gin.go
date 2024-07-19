@@ -93,6 +93,12 @@ func AbortWithMessage(c *gin.Context, statusCode int, message string) {
 	logger.LogError(c.Request.Context(), message)
 }
 
+func AbortWithErr(c *gin.Context, statusCode int, err error) {
+	c.JSON(statusCode, err)
+	c.Abort()
+	logger.LogError(c.Request.Context(), err.Error())
+}
+
 func APIRespondWithError(c *gin.Context, status int, err error) {
 	c.JSON(status, gin.H{
 		"success": false,
