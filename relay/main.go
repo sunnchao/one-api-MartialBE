@@ -120,7 +120,7 @@ func RelayHandler(relay RelayBaseInterface) (err *types.OpenAIErrorWithStatusCod
 	quota.Consume(relay.getContext(), usage)
 	if usage.CompletionTokens > 0 {
 		cacheProps := relay.GetChatCache()
-		go cacheProps.StoreCache(relay.getContext().GetInt("channel_id"), usage.PromptTokens, usage.CompletionTokens, relay.getModelName(), relay.getRequest(), relay.getContext().Value(logger.RequestIdKey).(string))
+		go cacheProps.StoreCache(relay.getContext().GetInt("channel_id"), usage.PromptTokens, usage.CompletionTokens, relay.getModelName(), relay.getRequest(), relay.getContext().Value(logger.RequestIdKey).(string), relay.getOriginalModel())
 	}
 
 	return
