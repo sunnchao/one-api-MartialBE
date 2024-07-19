@@ -3,14 +3,14 @@ name: one-api docker image amd64
 
 on:
   push:
-    branches:
-      - sunnchao_main
+#    branches:
+#      - sunnchao_main
     tags:
       - "v*"
     paths-ignore:
       - "README.md"
       - "web"
-    workflow_dispatch:
+#    workflow_dispatch:
 
 jobs:
   build-and-push:
