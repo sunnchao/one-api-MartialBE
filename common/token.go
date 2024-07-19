@@ -118,7 +118,7 @@ func CountTokenMessages(messages []types.ChatCompletionMessage, model string) in
 						if imageUrl["detail"] != nil {
 							detail = imageUrl["detail"].(string)
 						}
-						imageTokens, err := countImageTokens(url, detail)
+						imageTokens, err := countImageTokens(url, detail, model)
 						if err != nil {
 							//Due to the excessive length of the error information, only extract and record the most critical part.
 							logger.SysError("error counting image tokens: " + err.Error())
@@ -143,11 +143,15 @@ const (
 	lowDetailCost         = 85
 	highDetailCostPerTile = 170
 	additionalCost        = 85
+
+	lowDetailCost4oMini         = 2833
+	highDetailCostPerTile4oMini = 5667
+	additionalCost4oMini        = 2833
 )
 
 // https://platform.openai.com/docs/guides/vision/calculating-costs
 // https://github.com/openai/openai-cookbook/blob/05e3f9be4c7a2ae7ecf029a7c32065b024730ebe/examples/How_to_count_tokens_with_tiktoken.ipynb
-func countImageTokens(url string, detail string) (_ int, err error) {
+func countImageTokens(url string, detail string, model string) (_ int, err error) {
 	// var fetchSize = true
 	var width, height int
 	// Reference: https://platform.openai.com/docs/guides/vision/low-or-high-fidelity-image-understanding
@@ -179,9 +183,20 @@ func countImageTokens(url string, detail string) (_ int, err error) {
 		// assume by test, not sure if this is correct
 		detail = "high"
 	}
+	var _lowDetailCost, _highDetailCostPerTile, _additionalCost int
+	if strings.Contains(model, "gpt-4o-mini") {
+		_lowDetailCost = lowDetailCost4oMini
+		_highDetailCostPerTile = highDetailCostPerTile4oMini
+		_additionalCost = additionalCost4oMini
+	} else {
+		_lowDetailCost = lowDetailCost
+		_highDetailCostPerTile = highDetailCostPerTile
+		_additionalCost = additionalCost
+	}
+
 	switch detail {
 	case "low":
-		return lowDetailCost, nil
+		return _lowDetailCost, nil
 	case "high":
 		width, height, err = image.GetImageSize(url)
 		if err != nil {
@@ -198,7 +213,7 @@ func countImageTokens(url string, detail string) (_ int, err error) {
 			height = int(float64(height) * ratio)
 		}
 		numSquares := int(math.Ceil(float64(width)/512) * math.Ceil(float64(height)/512))
-		result := numSquares*highDetailCostPerTile + additionalCost
+		result := numSquares*_highDetailCostPerTile + _additionalCost
 		return result, nil
 	default:
 		return 0, errors.New("invalid detail option")
