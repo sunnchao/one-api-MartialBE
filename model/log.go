@@ -20,11 +20,14 @@ type Log struct {
 	Username         string `json:"username" gorm:"index:index_username_model_name,priority:2;default:''"`
 	TokenName        string `json:"token_name" gorm:"index;default:''"`
 	ModelName        string `json:"model_name" gorm:"index;index:index_username_model_name,priority:1;default:''"`
+	OriginModelName  string `json:"origin_model_name,omitempty" gorm:"index;index:index_username_origin_model_name,priority:1;default:''"`
 	Quota            int    `json:"quota" gorm:"default:0"`
 	PromptTokens     int    `json:"prompt_tokens" gorm:"default:0"`
 	CompletionTokens int    `json:"completion_tokens" gorm:"default:0"`
 	ChannelId        int    `json:"channel_id" gorm:"index"`
 	RequestTime      int    `json:"request_time" gorm:"default:0"`
+	RequestIp        string `json:"request_ip,omitempty" gorm:"default:''"`
+	RequestId        string `json:"request_id,omitempty"`
 	IsStream         bool   `json:"is_stream" gorm:"default:false"`
 
 	Metadata datatypes.JSONType[map[string]any] `json:"metadata" gorm:"type:json"`
@@ -38,6 +41,8 @@ const (
 	LogTypeConsume
 	LogTypeManage
 	LogTypeSystem
+	LogTypeUserQuotoIncrease
+	LogLogin
 )
 
 func RecordLog(userId int, logType int, content string) {
@@ -238,4 +243,22 @@ type LogStatisticGroupModel struct {
 type LogStatisticGroupChannel struct {
 	LogStatistic
 	Channel string `gorm:"column:channel"`
+}
+
+func RecordLogWithRequestIP(userId int, logType int, content string, requestIP string) {
+	if logType == LogTypeConsume && !config.LogConsumeEnabled {
+		return
+	}
+	log := &Log{
+		UserId:    userId,
+		Username:  GetUsernameById(userId),
+		CreatedAt: utils.GetTimestamp(),
+		Type:      logType,
+		Content:   content,
+		RequestIp: requestIP,
+	}
+	err := DB.Create(log).Error
+	if err != nil {
+		logger.SysError("failed to record log: " + err.Error())
+	}
 }

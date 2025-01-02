@@ -346,3 +346,15 @@ func GetGinValue[T any](c *gin.Context, key string) (T, bool) {
 func GetPointer[T any](val T) *T {
 	return &val
 }
+
+// 获取当地0 点时间
+func GetLocalZeroTime() time.Time {
+	now := time.Now()
+	toDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	return toDay
+}
+
+func GetRequestIP(c *gin.Context) string {
+	ip := c.ClientIP()
+	return ip
+}

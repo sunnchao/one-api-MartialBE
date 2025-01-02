@@ -39,6 +39,13 @@ type User struct {
 	InviterId        int            `json:"inviter_id" gorm:"type:int;column:inviter_id;index"`
 	CreatedTime      int64          `json:"created_time" gorm:"bigint"`
 	DeletedAt        gorm.DeletedAt `json:"-" gorm:"index"`
+	GitHubUserName   string         `json:"github_username" gorm:"column:github_username;type:string"`
+	GitHubEmail      string         `json:"github_email" gorm:"column:github_email;type:string"`
+	GitHubCreatedAt  string         `json:"github_created_at" gorm:"column:github_created_at;type:string"`
+	LinuxDoId        string         `json:"linuxdo_id" gorm:"column:linuxdo_id;index"`
+	LinuxDoLevel     int            `json:"linuxdo_level" gorm:"column:linuxdo_level;type:int;default:0"`
+	LinuxDoUserName  string         `json:"linuxdo_username" gorm:"column:linuxdo_username;type:string"`
+	LinuxDoName      string         `json:"linuxdo_name" gorm:"column:linuxdo_name;type:string"`
 }
 
 type UserUpdates func(*User)
@@ -283,6 +290,10 @@ func IsGitHubIdAlreadyTaken(githubId string) bool {
 	return DB.Where("github_id = ?", githubId).Find(&User{}).RowsAffected == 1
 }
 
+func IsLinuxDoIdAlreadyTaken(linuxdoId string) bool {
+	return DB.Where("linuxdo_id = ?", linuxdoId).Find(&User{}).RowsAffected == 1
+}
+
 func IsLarkIdAlreadyTaken(githubId string) bool {
 	return DB.Where("lark_id = ?", githubId).Find(&User{}).RowsAffected == 1
 }
@@ -479,4 +490,12 @@ func GetUserStatisticsByPeriod(startTimestamp, endTimestamp int64) (statistics [
 	`, startTimestamp, endTimestamp).Scan(&statistics).Error
 
 	return statistics, err
+}
+
+func (user *User) FillUserByLinuxDoId() error {
+	if user.LinuxDoId == "" {
+		return errors.New("LINUX DO id 为空！")
+	}
+	DB.Where(User{LinuxDoId: user.LinuxDoId}).First(user)
+	return nil
 }

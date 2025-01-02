@@ -78,6 +78,11 @@ var ChatImageRequestProxy = ""
 var GitHubClientId = ""
 var GitHubClientSecret = ""
 
+var LinuxDoOAuthEnabled = false
+var LinuxDoClientId = ""
+var LinuxDoClientSecret = ""
+var LinuxDoMinLevel = 0
+
 var LarkClientId = ""
 var LarkClientSecret = ""
 

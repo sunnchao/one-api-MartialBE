@@ -60,7 +60,11 @@ const SystemSetting = () => {
     TurnstileSecretKey: '',
     RegisterEnabled: '',
     EmailDomainRestrictionEnabled: '',
-    EmailDomainWhitelist: []
+    EmailDomainWhitelist: [],
+    LinuxDoOAuthEnabled: '',
+    LinuxDoClientId: '',
+    LinuxDoClientSecret: '',
+    LinuxDoMinLevel: 0
   });
   const [originInputs, setOriginInputs] = useState({});
   let [loading, setLoading] = useState(false);
@@ -103,6 +107,7 @@ const SystemSetting = () => {
       case 'PasswordRegisterEnabled':
       case 'EmailVerificationEnabled':
       case 'GitHubOAuthEnabled':
+      case 'LinuxDoOAuthEnabled':
       case 'WeChatAuthEnabled':
       case 'LarkAuthEnabled':
       case 'OIDCAuthEnabled':
@@ -168,7 +173,10 @@ const SystemSetting = () => {
       name === 'TurnstileSecretKey' ||
       name === 'EmailDomainWhitelist' ||
       name === 'LarkClientId' ||
-      name === 'LarkClientSecret'
+      name === 'LarkClientSecret' ||
+      name === 'LinuxDoClientId' ||
+      name === 'LinuxDoClientSecret' ||
+      name === 'LinuxDoMinLevel'
     ) {
       setInputs((inputs) => ({ ...inputs, [name]: value }));
     } else {
@@ -330,6 +338,14 @@ const SystemSetting = () => {
               <FormControlLabel
                 label={t('setting_index.systemSettings.configureLoginRegister.gitHubOAuth')}
                 control={<Checkbox checked={inputs.GitHubOAuthEnabled === 'true'} onChange={handleInputChange} name="GitHubOAuthEnabled" />}
+              />
+            </Grid>
+            <Grid xs={12} md={3}>
+              <FormControlLabel
+                label={t('setting_index.systemSettings.configureLoginRegister.linuxDoOAuth')}
+                control={
+                  <Checkbox checked={inputs.LinuxDoOAuthEnabled === 'true'} onChange={handleInputChange} name="LinuxDoOAuthEnabled" />
+                }
               />
             </Grid>
             <Grid xs={12} md={3}>
@@ -750,11 +766,7 @@ const SystemSetting = () => {
 
         <SubCard
           title={t('setting_index.systemSettings.configureOIDCAuthorization.title')}
-          subTitle={
-            <span>
-              {t('setting_index.systemSettings.configureOIDCAuthorization.subTitle')}
-            </span>
-          }
+          subTitle={<span>{t('setting_index.systemSettings.configureOIDCAuthorization.subTitle')}</span>}
         >
           <Grid container spacing={{ xs: 3, sm: 2, md: 4 }}>
             <Grid xs={12}>
@@ -781,7 +793,9 @@ const SystemSetting = () => {
 
             <Grid xs={12} md={6}>
               <FormControl fullWidth>
-                <InputLabel htmlFor="OIDCClientSecret">{t('setting_index.systemSettings.configureOIDCAuthorization.clientSecret')}</InputLabel>
+                <InputLabel htmlFor="OIDCClientSecret">
+                  {t('setting_index.systemSettings.configureOIDCAuthorization.clientSecret')}
+                </InputLabel>
                 <OutlinedInput
                   id="OIDCClientSecret"
                   name="OIDCClientSecret"
@@ -826,7 +840,9 @@ const SystemSetting = () => {
 
             <Grid xs={12} md={6}>
               <FormControl fullWidth>
-                <InputLabel htmlFor="OIDCUsernameClaims">{t('setting_index.systemSettings.configureOIDCAuthorization.usernameClaims')}</InputLabel>
+                <InputLabel htmlFor="OIDCUsernameClaims">
+                  {t('setting_index.systemSettings.configureOIDCAuthorization.usernameClaims')}
+                </InputLabel>
                 <OutlinedInput
                   id="OIDCUsernameClaims"
                   name="OIDCUsernameClaims"
@@ -838,7 +854,6 @@ const SystemSetting = () => {
                 />
               </FormControl>
             </Grid>
-
 
             <Grid xs={12}>
               <Button variant="contained" onClick={submitOIDCOAuth}>

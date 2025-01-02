@@ -24,9 +24,13 @@ type GitHubOAuthResponse struct {
 }
 
 type GitHubUser struct {
-	Login string `json:"login"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	Login     string `json:"login"`
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	Location  string `json:"location"`
+	Type      string `json:"type"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 func getGitHubUserInfoByCode(code string) (*GitHubUser, error) {
@@ -113,7 +117,10 @@ func GitHubOAuth(c *gin.Context) {
 		return
 	}
 	user := model.User{
-		GitHubId: githubUser.Login,
+		GitHubId:        githubUser.Login,
+		GitHubUserName:  githubUser.Name,
+		GitHubEmail:     githubUser.Email,
+		GitHubCreatedAt: githubUser.CreatedAt,
 	}
 	if model.IsGitHubIdAlreadyTaken(user.GitHubId) {
 		err := user.FillUserByGitHubId()
@@ -180,7 +187,10 @@ func GitHubBind(c *gin.Context) {
 		return
 	}
 	user := model.User{
-		GitHubId: githubUser.Login,
+		GitHubId:        githubUser.Login,
+		GitHubUserName:  githubUser.Name,
+		GitHubEmail:     githubUser.Email,
+		GitHubCreatedAt: githubUser.CreatedAt,
 	}
 	if model.IsGitHubIdAlreadyTaken(user.GitHubId) {
 		c.JSON(http.StatusOK, gin.H{

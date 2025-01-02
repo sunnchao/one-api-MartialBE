@@ -95,6 +95,11 @@ func InitOptionMap() {
 	config.OptionMap["CFWorkerImageUrl"] = config.CFWorkerImageUrl
 	config.OptionMap["CFWorkerImageKey"] = config.CFWorkerImageKey
 
+	config.OptionMap["LinuxDoOAuthEnabled"] = strconv.FormatBool(config.LinuxDoOAuthEnabled)
+	config.OptionMap["LinuxDoClientId"] = ""
+	config.OptionMap["LinuxDoClientSecret"] = ""
+	config.OptionMap["LinuxDoMinLevel"] = strconv.Itoa(config.LinuxDoMinLevel)
+
 	config.OptionMapRWMutex.Unlock()
 	loadOptionsFromDatabase()
 }
@@ -164,6 +169,7 @@ var optionBoolMap = map[string]*bool{
 	"DisplayInCurrencyEnabled":       &config.DisplayInCurrencyEnabled,
 	"MjNotifyEnabled":                &config.MjNotifyEnabled,
 	"ChatCacheEnabled":               &config.ChatCacheEnabled,
+	"LinuxDoOAuthEnabled":            &config.LinuxDoOAuthEnabled,
 }
 
 var optionStringMap = map[string]*string{
@@ -195,6 +201,8 @@ var optionStringMap = map[string]*string{
 	"ChatImageRequestProxy":       &config.ChatImageRequestProxy,
 	"CFWorkerImageUrl":            &config.CFWorkerImageUrl,
 	"CFWorkerImageKey":            &config.CFWorkerImageKey,
+	"LinuxDoClientId":             &config.LinuxDoClientId,
+	"LinuxDoClientSecret":         &config.LinuxDoClientSecret,
 }
 
 func updateOptionMap(key string, value string) (err error) {

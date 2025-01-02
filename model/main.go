@@ -177,6 +177,11 @@ func InitDB() (err error) {
 			return err
 		}
 
+		err = db.AutoMigrate(&UserOperation{})
+		if err != nil {
+			return err
+		}
+
 		migrationAfter(DB)
 
 		logger.SysLog("database migrated")
