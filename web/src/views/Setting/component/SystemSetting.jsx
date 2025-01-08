@@ -225,15 +225,6 @@ const SystemSetting = () => {
     }
   };
 
-  const submitGitHubOAuth = async () => {
-    if (originInputs['GitHubClientId'] !== inputs.GitHubClientId) {
-      await updateOption('GitHubClientId', inputs.GitHubClientId);
-    }
-    if (originInputs['GitHubClientSecret'] !== inputs.GitHubClientSecret && inputs.GitHubClientSecret !== '') {
-      await updateOption('GitHubClientSecret', inputs.GitHubClientSecret);
-    }
-  };
-
   const submitOIDCOAuth = async () => {
     // 检查并更新 OIDCClientId
     if (originInputs['OIDCClientId'] !== inputs.OIDCClientId) {
@@ -254,6 +245,27 @@ const SystemSetting = () => {
     // 检查并更新 OIDCUsernameClaims
     if (originInputs['OIDCUsernameClaims'] !== inputs.OIDCUsernameClaims) {
       await updateOption('OIDCUsernameClaims', inputs.OIDCUsernameClaims);
+    }
+  };
+
+  const submitGitHubOAuth = async () => {
+    if (originInputs['GitHubClientId'] !== inputs.GitHubClientId) {
+      await updateOption('GitHubClientId', inputs.GitHubClientId);
+    }
+    if (originInputs['GitHubClientSecret'] !== inputs.GitHubClientSecret && inputs.GitHubClientSecret !== '') {
+      await updateOption('GitHubClientSecret', inputs.GitHubClientSecret);
+    }
+  };
+
+  const submitLinuxDoOAuth = async () => {
+    if (originInputs['LinuxDoClientId'] !== inputs.LinuxDoClientId) {
+      await updateOption('LinuxDoClientId', inputs.LinuxDoClientId);
+    }
+    if (originInputs['LinuxDoMinLevel'] !== inputs.LinuxDoMinLevel) {
+      await updateOption('LinuxDoMinLevel', inputs.LinuxDoMinLevel);
+    }
+    if (originInputs['LinuxDoClientSecret'] !== inputs.LinuxDoClientSecret && inputs.LinuxDoClientSecret !== '') {
+      await updateOption('LinuxDoClientSecret', inputs.LinuxDoClientSecret);
     }
   };
 
@@ -599,6 +611,81 @@ const SystemSetting = () => {
             <Grid xs={12}>
               <Button variant="contained" onClick={submitGitHubOAuth}>
                 {t('setting_index.systemSettings.configureGitHubOAuthApp.saveButton')}
+              </Button>
+            </Grid>
+          </Grid>
+        </SubCard>
+
+        {/* linux do*/}
+        <SubCard
+          title={t('setting_index.systemSettings.configureLinuxDoOAuthApp.title')}
+          subTitle={
+            <span>
+              {' '}
+              {t('setting_index.systemSettings.configureLinuxDoOAuthApp.subTitle')}
+              <a href="https://github.com/settings/developers" target="_blank" rel="noopener noreferrer">
+                {t('setting_index.systemSettings.configureLinuxDoOAuthApp.manageLink')}
+              </a>
+              {t('setting_index.systemSettings.configureLinuxDoOAuthApp.manage')}
+            </span>
+          }
+        >
+          <Grid container spacing={{ xs: 3, sm: 2, md: 4 }}>
+            <Grid xs={12}>
+              <Alert severity="info" sx={{ wordWrap: 'break-word' }}>
+                {t('setting_index.systemSettings.configureLinuxDoOAuthApp.alert1')} <b>{inputs.ServerAddress}</b>
+                {t('setting_index.systemSettings.configureLinuxDoOAuthApp.alert2')} <b>{`${inputs.ServerAddress}/oauth/linuxdo`}</b>
+              </Alert>
+            </Grid>
+            <Grid xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="GitHubClientId">{t('setting_index.systemSettings.configureLinuxDoOAuthApp.clientId')}</InputLabel>
+                <OutlinedInput
+                  id="LinuxDoClientId"
+                  name="LinuxDoClientId"
+                  value={inputs.LinuxDoClientId || ''}
+                  onChange={handleInputChange}
+                  label={t('setting_index.systemSettings.configureLinuxDoOAuthApp.clientId')}
+                  placeholder={t('setting_index.systemSettings.configureLinuxDoOAuthApp.clientIdPlaceholder')}
+                  disabled={loading}
+                />
+              </FormControl>
+            </Grid>
+            <Grid xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="LinuxDoClientSecret">
+                  {t('setting_index.systemSettings.configureLinuxDoOAuthApp.clientSecret')}
+                </InputLabel>
+                <OutlinedInput
+                  id="LinuxDoClientSecret"
+                  name="LinuxDoClientSecret"
+                  value={inputs.LinuxDoClientSecret || ''}
+                  onChange={handleInputChange}
+                  label={t('setting_index.systemSettings.configureLinuxDoOAuthApp.clientSecret')}
+                  placeholder={t('setting_index.systemSettings.configureLinuxDoOAuthApp.clientSecretPlaceholder')}
+                  disabled={loading}
+                />
+              </FormControl>
+            </Grid>
+            <Grid xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="LinuxDoMinLevel">
+                  {t('setting_index.systemSettings.configureLinuxDoOAuthApp.clientLinuxDoMinLevel')}
+                </InputLabel>
+                <OutlinedInput
+                  id="LinuxDoMinLevel"
+                  name="LinuxDoMinLevel"
+                  value={inputs.LinuxDoMinLevel || ''}
+                  onChange={handleInputChange}
+                  label={t('setting_index.systemSettings.configureLinuxDoOAuthApp.clientLinuxDoMinLevel')}
+                  placeholder={t('setting_index.systemSettings.configureLinuxDoOAuthApp.clientLinuxDoMinLevelPlaceholder')}
+                  disabled={loading}
+                />
+              </FormControl>
+            </Grid>
+            <Grid xs={12}>
+              <Button variant="contained" onClick={submitLinuxDoOAuth}>
+                {t('setting_index.systemSettings.configureLinuxDoOAuthApp.saveButton')}
               </Button>
             </Grid>
           </Grid>

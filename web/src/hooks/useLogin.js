@@ -51,6 +51,29 @@ const useLogin = () => {
     }
   };
 
+  const linuxdoLogin = async (code, state) => {
+    try {
+      const affCode = localStorage.getItem('aff');
+      const res = await API.get(`/api/oauth/linuxdo?code=${code}&state=${state}&aff=${affCode}`);
+      const { success, message, data } = res.data;
+      if (success) {
+        if (message === 'bind') {
+          showSuccess(t('common.bindOk'));
+          navigate('/panel');
+        } else {
+          dispatch({ type: LOGIN, payload: data });
+          localStorage.setItem('user', JSON.stringify(data));
+          showSuccess(t('common.loginOk'));
+          navigate('/panel');
+        }
+      }
+      return { success, message };
+    } catch (err) {
+      // 请求失败，设置错误信息
+      return { success: false, message: '' };
+    }
+  };
+
   const oidcLogin = async (code, state) => {
     try {
       const affCode = localStorage.getItem('aff');
@@ -122,7 +145,7 @@ const useLogin = () => {
     navigate('/');
   };
 
-  return { login, logout, githubLogin, wechatLogin, larkLogin, oidcLogin };
+  return { login, logout, githubLogin, linuxdoLogin, wechatLogin, larkLogin, oidcLogin };
 };
 
 export default useLogin;

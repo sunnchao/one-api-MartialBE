@@ -761,6 +761,21 @@
         "subTitle": "GitHub を利用したログインおよび登録をサポートするための設定です。",
         "title": "GitHub OAuth アプリの設定"
       },
+      "configureLinuxDoOAuthApp": {
+        "title": "LinuxDo OAuth アプリの設定",
+        "subTitle": "LinuxDo を介したログインと登録をサポートするために使用されます。",
+        "manageLink": "ここをクリック",
+        "manage": "LinuxDo OAuth アプリを管理",
+        "alert1": "ホームページ URL に",
+        "alert2": "を入力し、認可コールバック URL に",
+        "clientId": "LinuxDo クライアント ID",
+        "clientSecret": "LinuxDo クライアントシークレット",
+        "clientLinuxDoMinLevel": "LinuxDo 最小レベル",
+        "clientIdPlaceholder": "登録した LinuxDo OAuth アプリの ID を入力してください",
+        "clientSecretPlaceholder": "機密情報はフロントエンドに表示されません",
+        "clientLinuxDoMinLevelPlaceholder": "登録した LinuxDo OAuth アプリの最小レベルを入力してください",
+        "saveButton": "LinuxDo OAuth 設定を保存"
+      },
       "configureLoginRegister": {
         "emailVerification": "パスワード登録時にメール認証が必要",
         "gitHubOAuth": "GitHubアカウントでのログイン＆登録を許可",

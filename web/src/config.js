@@ -4,7 +4,7 @@ const config = {
   basename: '/',
   defaultPath: '/panel/dashboard',
   fontFamily: `'Roboto', Helvetica, sans-serif`,
-  borderRadius: 12,
+  borderRadius: 0,
   siteInfo: {
     chat_link: '',
     display_in_currency: true,

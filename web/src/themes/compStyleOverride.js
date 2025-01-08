@@ -1,11 +1,25 @@
 export default function componentStyleOverrides(theme) {
   const bgColor = theme.mode === 'dark' ? theme.paper : theme.colors?.grey50;
   return {
+    MuiButtonBase: {
+      styleOverrides: {
+        root: {
+          borderRadius: 6
+        }
+      }
+    },
+    MuiBox: {
+      styleOverrides: {
+        root: {
+          borderRadius: 6
+        }
+      }
+    },
     MuiButton: {
       styleOverrides: {
         root: {
           fontWeight: 500,
-          borderRadius: '4px',
+          borderRadius: 6,
           '&.Mui-disabled': {
             color: theme.colors?.grey600
           }
@@ -18,7 +32,7 @@ export default function componentStyleOverrides(theme) {
         popper: {
           // 继承 MuiPopover-root
           boxShadow: '0px 5px 5px -3px rgba(0,0,0,0.2),0px 8px 10px 1px rgba(0,0,0,0.14),0px 3px 14px 2px rgba(0,0,0,0.12)',
-          borderRadius: '12px',
+          borderRadius: 6,
           color: '#364152'
         },
         listbox: {
@@ -203,6 +217,7 @@ export default function componentStyleOverrides(theme) {
         root: {
           color: theme.colors?.primaryDark,
           background: theme.colors?.primary200
+          // borderRadius: 0
         }
       }
     },
