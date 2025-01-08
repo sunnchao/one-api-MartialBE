@@ -34,6 +34,7 @@ const SystemSetting = () => {
     GitHubOAuthEnabled: '',
     GitHubClientId: '',
     GitHubClientSecret: '',
+    GitHubOldIdCloseEnabled: '',
     LarkAuthEnabled: '',
     LarkClientId: '',
     LarkClientSecret: '',
@@ -107,6 +108,7 @@ const SystemSetting = () => {
       case 'PasswordRegisterEnabled':
       case 'EmailVerificationEnabled':
       case 'GitHubOAuthEnabled':
+      case 'GitHubOldIdCloseEnabled':
       case 'LinuxDoOAuthEnabled':
       case 'WeChatAuthEnabled':
       case 'LarkAuthEnabled':
@@ -377,6 +379,19 @@ const SystemSetting = () => {
                 label={t('setting_index.systemSettings.configureLoginRegister.turnstileCheck')}
                 control={
                   <Checkbox checked={inputs.TurnstileCheckEnabled === 'true'} onChange={handleInputChange} name="TurnstileCheckEnabled" />
+                }
+              />
+            </Grid>
+
+            <Grid xs={12} md={3}>
+              <FormControlLabel
+                label={t('setting_index.systemSettings.configureLoginRegister.gitHubOldIdClose')}
+                control={
+                  <Checkbox
+                    checked={inputs.GitHubOldIdCloseEnabled === 'true'}
+                    onChange={handleInputChange}
+                    name="GitHubOldIdCloseEnabled"
+                  />
                 }
               />
             </Grid>
