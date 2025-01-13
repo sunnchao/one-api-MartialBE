@@ -139,6 +139,21 @@ export async function onLarkOAuthClicked(lark_client_id) {
   window.open(`https://open.feishu.cn/open-apis/authen/v1/authorize?redirect_uri=${redirect_uri}&app_id=${lark_client_id}&state=${state}`);
 }
 
+export async function onLinuxDoOAuthClicked(linuxdo_client_id, openInNewTab = false, linuxDoLoading, setLinuxDoLoading) {
+  setLinuxDoLoading(true);
+  const state = await getOAuthState();
+  if (!state) {
+    setLinuxDoLoading(false);
+    return;
+  }
+  let url = `https://connect.linux.do/oauth2/authorize?client_id=${linuxdo_client_id}&response_type=code&state=${state}&scope=user:profile`;
+  if (openInNewTab) {
+    window.open(url);
+  } else {
+    window.location.href = url;
+  }
+}
+
 export function isAdmin() {
   let user = localStorage.getItem('user');
   if (!user) return false;
@@ -172,7 +187,7 @@ export function timestamp2string(timestamp) {
   return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second;
 }
 
-export function calculateQuota(quota, digits = 2) {
+export function calculateQuota(quota, digits = 6) {
   let quotaPerUnit = localStorage.getItem('quota_per_unit');
   quotaPerUnit = parseFloat(quotaPerUnit);
 

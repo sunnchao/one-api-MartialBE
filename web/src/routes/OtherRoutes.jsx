@@ -17,7 +17,7 @@ const About = Loadable(lazy(() => import('views/About')));
 const NotFoundView = Loadable(lazy(() => import('views/Error')));
 const Jump = Loadable(lazy(() => import('views/Jump')));
 const Playground = Loadable(lazy(() => import('views/Playground')));
-
+const LinuxDOAuth = Loadable(lazy(() => import('views/Authentication/Auth/LinuxDoOAuth')));
 // ==============================|| AUTHENTICATION ROUTING ||============================== //
 
 const OtherRoutes = {
@@ -59,6 +59,10 @@ const OtherRoutes = {
     {
       path: '/oauth/lark',
       element: <LarkOAuth />
+    },
+    {
+      path: '/oauth/linuxdo',
+      element: <LinuxDOAuth />
     },
     {
       path: '/404',

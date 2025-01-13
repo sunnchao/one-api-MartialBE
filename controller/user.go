@@ -78,6 +78,7 @@ func setupLogin(user *model.User, c *gin.Context) {
 		return
 	}
 	user.LastLoginTime = time.Now().Unix()
+	user.LastLoginIp = utils.GetRequestIP(c)
 
 	user.Update(false)
 
@@ -393,7 +394,7 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 	if originUser.Quota != updatedUser.Quota {
-		model.RecordLog(originUser.Id, model.LogTypeManage, fmt.Sprintf("管理员将用户额度从 %s修改为 %s", common.LogQuota(originUser.Quota), common.LogQuota(updatedUser.Quota)))
+		model.RecordLog(originUser.Id, model.LogTypeManage, fmt.Sprintf("管理员将用户额度从 %s修改为 %s", common.LogQuota(originUser.Quota), common.LogQuota(updatedUser.Quota)), utils.GetRequestIP(c))
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -755,7 +756,7 @@ func ChangeUserQuota(c *gin.Context) {
 		remark = fmt.Sprintf("%s, 备注: %s", remark, req.Remark)
 	}
 
-	model.RecordLog(userId, model.LogTypeManage, remark)
+	model.RecordLog(userId, model.LogTypeManage, remark, utils.GetIp())
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

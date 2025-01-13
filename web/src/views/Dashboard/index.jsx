@@ -11,6 +11,7 @@ import UserCard from 'ui-component/cards/UserCard';
 import { useTranslation } from 'react-i18next';
 import { UserContext } from 'contexts/UserContext';
 import Label from 'ui-component/Label';
+import dayjs from 'dayjs';
 
 const Dashboard = () => {
   const [isLoading, setLoading] = useState(true);
@@ -101,10 +102,10 @@ const Dashboard = () => {
 
       <Grid item xs={12}>
         <Grid container spacing={gridSpacing}>
-          <Grid item lg={8} xs={12}>
+          <Grid item lg={6} xs={12}>
             <ApexCharts isLoading={isLoading} chartDatas={statisticalData} />
           </Grid>
-          <Grid item lg={4} xs={12}>
+          <Grid item lg={6} xs={12}>
             <UserCard>
               <Box
                 sx={{
@@ -143,7 +144,14 @@ const Dashboard = () => {
                       label: t('dashboard_index.used'),
                       value: users?.used_quota ? '$' + calculateQuota(users.used_quota) : t('dashboard_index.unknown')
                     },
-                    { label: t('dashboard_index.calls'), value: users?.request_count || t('dashboard_index.unknown') }
+                    { label: t('dashboard_index.calls'), value: users?.request_count || t('dashboard_index.unknown') },
+                    { label: t('dashboard_index.last_login_ip'), value: users?.last_login_ip || t('dashboard_index.unknown') },
+                    {
+                      label: t('dashboard_index.last_login_time'),
+                      value: users?.last_login_time
+                        ? dayjs(users.last_login_time * 1000).format('YYYY-MM-DD HH:mm:ss')
+                        : t('dashboard_index.unknown')
+                    }
                   ].map((item, index) => (
                     <Box
                       key={index}

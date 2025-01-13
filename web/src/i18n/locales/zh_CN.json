@@ -59,7 +59,9 @@
     "balance": "余额",
     "used": "已使用",
     "calls": "调用次数",
-    "unknown": "未知"
+    "unknown": "未知",
+    "last_login_ip": "最后登录IP",
+    "last_login_time": "最后登录时间"
   },
   "analytics_index": {
     "startTime": "开始时间",
@@ -809,7 +811,7 @@
     "linuxdoError": "操作失败，重定向至登录界面中...",
     "githubCountError": "出现错误，第 {{count}} 次重试中...",
     "githubLogin": "GitHub 登录",
-    "linuxdoLogin": "LinuxDo 登录",
+    "linuxdoLogin": "Linux DO 登录",
 
     "oidcError": "操作失败，重定向至登录界面中...",
     "oidcCountError": "出现错误，第 {{count}} 次重试中...",
@@ -818,7 +820,7 @@
     "larkLogin": "飞书 登录",
     "passwordRest": "密码重置确认",
     "useGithubLogin": "使用 Github 登录",
-    "useLinuxDoLogin": "使用 LinuxDo 登录",
+    "useLinuxDoLogin": "使用 Linux DO 登录",
     "useWechatLogin": "使用 Wechat 登录",
     "useOIDCLogin": "使用 OIDC 登录",
     "useLarkLogin": "使用飞书登录"

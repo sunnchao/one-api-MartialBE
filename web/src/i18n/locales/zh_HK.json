@@ -217,7 +217,9 @@
     "today_requests": "今日請求",
     "today_tokens": "今日Token",
     "unknown": "未知",
-    "used": "已使用"
+    "used": "已使用",
+    "last_login_ip": "最後登錄IP",
+    "last_login_time": "最後登錄時間"
   },
   "description": "一站式的 OpenAI 接口\n整合各種 API 訪問方式\n一鍵部署，開箱即用",
   "echo 映射": "echo 映射",

@@ -170,7 +170,7 @@ var optionBoolMap = map[string]*bool{
 	"DisplayInCurrencyEnabled":       &config.DisplayInCurrencyEnabled,
 	"MjNotifyEnabled":                &config.MjNotifyEnabled,
 	"GitHubOldIdCloseEnabled":        &config.GitHubOldIdCloseEnabled,
-  "LinuxDoOAuthEnabled":            &config.LinuxDoOAuthEnabled,
+	"LinuxDoOAuthEnabled":            &config.LinuxDoOAuthEnabled,
 }
 
 var optionStringMap = map[string]*string{

@@ -216,7 +216,9 @@
     "today_requests": "今日のリクエスト",
     "today_tokens": "今日のトークン",
     "unknown": "不明",
-    "used": "使用済み"
+    "used": "使用済み",
+    "last_login_ip": "最終ログインIP",
+    "last_login_time": "最終ログイン時間"
   },
   "description": "All in one の OpenAI インターフェース\nさまざまな API アクセス方法を統合\nワンクリックで展開、即座に使用可能",
   "echo 映射": "エコーマッピング",

@@ -41,6 +41,7 @@ type User struct {
 	AffHistoryQuota  int            `json:"aff_history_quota" gorm:"type:int;default:0;column:aff_history"`
 	InviterId        int            `json:"inviter_id" gorm:"type:int;column:inviter_id;index"`
 	LastLoginTime    int64          `json:"last_login_time" gorm:"bigint;default:0"`
+	LastLoginIp      string         `json:"last_login_ip" gorm:"type:varchar(32);default:''"`
 	CreatedTime      int64          `json:"created_time" gorm:"bigint"`
 	DeletedAt        gorm.DeletedAt `json:"-" gorm:"index"`
 	GitHubUserName   string         `json:"github_username" gorm:"column:github_username;type:string"`
@@ -140,16 +141,16 @@ func (user *User) Insert(inviterId int) error {
 		return result.Error
 	}
 	if config.QuotaForNewUser > 0 {
-		RecordLog(user.Id, LogTypeSystem, fmt.Sprintf("新用户注册赠送 %s", common.LogQuota(config.QuotaForNewUser)))
+		RecordLog(user.Id, LogTypeSystem, fmt.Sprintf("新用户注册赠送 %s", common.LogQuota(config.QuotaForNewUser)), "")
 	}
 	if inviterId != 0 {
 		if config.QuotaForInvitee > 0 {
 			_ = IncreaseUserQuota(user.Id, config.QuotaForInvitee)
-			RecordLog(user.Id, LogTypeSystem, fmt.Sprintf("使用邀请码赠送 %s", common.LogQuota(config.QuotaForInvitee)))
+			RecordLog(user.Id, LogTypeSystem, fmt.Sprintf("使用邀请码赠送 %s", common.LogQuota(config.QuotaForInvitee)), "")
 		}
 		if config.QuotaForInviter > 0 {
 			_ = IncreaseUserQuota(inviterId, config.QuotaForInviter)
-			RecordLog(inviterId, LogTypeSystem, fmt.Sprintf("邀请用户赠送 %s", common.LogQuota(config.QuotaForInviter)))
+			RecordLog(inviterId, LogTypeSystem, fmt.Sprintf("邀请用户赠送 %s", common.LogQuota(config.QuotaForInviter)), "")
 		}
 	}
 	return nil
@@ -338,7 +339,7 @@ func IsGitHubIdNewAlreadyTaken(githubIdNew int) bool {
 }
 
 func IsLinuxDoIdAlreadyTaken(linuxdoId string) bool {
-  return DB.Where("linuxdo_id = ?", linuxdoId).Find(&User{}).RowsAffected == 1
+	return DB.Where("linuxdo_id = ?", linuxdoId).Find(&User{}).RowsAffected == 1
 }
 
 func IsLarkIdAlreadyTaken(larkId string) bool {
@@ -562,9 +563,9 @@ func ChangeUserQuota(id int, quota int, isRecharge bool) (err error) {
 }
 
 func (user *User) FillUserByLinuxDoId() error {
-  if user.LinuxDoId == "" {
-    return errors.New("LINUX DO id 为空！")
-  }
-  DB.Where(User{LinuxDoId: user.LinuxDoId}).First(user)
-  return nil
+	if user.LinuxDoId == "" {
+		return errors.New("LINUX DO id 为空！")
+	}
+	DB.Where(User{LinuxDoId: user.LinuxDoId}).First(user)
+	return nil
 }

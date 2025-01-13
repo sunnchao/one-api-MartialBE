@@ -30,10 +30,10 @@ type GitHubUser struct {
 	Name      string `json:"name"`
 	Email     string `json:"email"`
 	AvatarUrl string `json:"avatar_url"`
-  Location  string `json:"location"`
-  Type      string `json:"type"`
-  CreatedAt string `json:"created_at"`
-  UpdatedAt string `json:"updated_at"`
+	Location  string `json:"location"`
+	Type      string `json:"type"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type GithubEmail struct {

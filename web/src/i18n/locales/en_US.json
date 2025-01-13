@@ -216,7 +216,9 @@
     "today_requests": "Today's Requests",
     "today_tokens": "Today's Tokens",
     "unknown": "Unknown",
-    "used": "Used"
+    "used": "Used",
+    "last_login_ip": "Last Login IP",
+    "last_login_time": "Last Login Time"
   },
   "description": "All-in-one OpenAI interface\nIntegrates various API access methods\nOne-click deployment, ready to use",
   "echo 映射": "echo mapping",

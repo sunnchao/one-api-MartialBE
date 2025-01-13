@@ -45,7 +45,7 @@ const (
 	LogLogin
 )
 
-func RecordLog(userId int, logType int, content string) {
+func RecordLog(userId int, logType int, content string, requestIp string) {
 	if logType == LogTypeConsume && !config.LogConsumeEnabled {
 		return
 	}
@@ -57,6 +57,7 @@ func RecordLog(userId int, logType int, content string) {
 		CreatedAt: utils.GetTimestamp(),
 		Type:      logType,
 		Content:   content,
+		RequestIp: requestIp,
 	}
 	err := DB.Create(log).Error
 	if err != nil {
