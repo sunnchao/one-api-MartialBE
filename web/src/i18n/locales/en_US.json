@@ -1146,5 +1146,15 @@
     "name": "Name",
     "nameTip": "Channel Name",
     "title": "Model Ownership"
+  },
+  "calendar": {
+    "title": "Check-in Calendar",
+    "sun": "Sun",
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat"
   }
 }

@@ -2,6 +2,7 @@ import { useEffect, useState, useContext } from 'react';
 import { Grid, Typography, Box } from '@mui/material';
 import { gridSpacing } from 'store/constant';
 import StatisticalLineChartCard from './component/StatisticalLineChartCard';
+import Calendar from 'ui-component/calendar/Calendar';
 import ApexCharts from 'ui-component/chart/ApexCharts';
 import SupportModels from './component/SupportModels';
 import { getLastSevenDays, generateBarChartOptions, renderChartNumber } from 'utils/chart';
@@ -102,6 +103,12 @@ const Dashboard = () => {
 
       <Grid item xs={12}>
         <Grid container spacing={gridSpacing}>
+          {/* 日历插件 */}
+          <Grid item lg={6} xs={12}>
+            <Calendar />
+          </Grid>
+
+          {/* 消费统计 */}
           <Grid item lg={6} xs={12}>
             <ApexCharts isLoading={isLoading} chartDatas={statisticalData} />
           </Grid>
