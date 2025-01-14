@@ -14,6 +14,7 @@ type Channel struct {
 	Id                 int     `json:"id"`
 	Type               int     `json:"type" form:"type" gorm:"default:0"`
 	Key                string  `json:"key" form:"key" gorm:"type:text"`
+	OpenAIOrganization *string `json:"openai_organization"`
 	Status             int     `json:"status" form:"status" gorm:"default:1"`
 	Name               string  `json:"name" form:"name" gorm:"index"`
 	Weight             *uint   `json:"weight" gorm:"default:1"`
@@ -30,11 +31,14 @@ type Channel struct {
 	UsedQuota          int64   `json:"used_quota" gorm:"bigint;default:0"`
 	ModelMapping       *string `json:"model_mapping" gorm:"type:varchar(1024);default:''"`
 	ModelHeaders       *string `json:"model_headers" gorm:"type:varchar(1024);default:''"`
+	StatusCodeMapping  *string `json:"status_code_mapping" gorm:"type:varchar(1024);default:''"`
 	Priority           *int64  `json:"priority" gorm:"bigint;default:0"`
 	Proxy              *string `json:"proxy" gorm:"type:varchar(255);default:''"`
 	TestModel          string  `json:"test_model" form:"test_model" gorm:"type:varchar(50);default:''"`
 	OnlyChat           bool    `json:"only_chat" form:"only_chat" gorm:"default:false"`
 	PreCost            int     `json:"pre_cost" form:"pre_cost" gorm:"default:1"`
+	AutoBan            *int    `json:"auto_ban" gorm:"default:1"`
+	OtherInfo          string  `json:"other_info"`
 
 	Plugin    *datatypes.JSONType[PluginType] `json:"plugin" form:"plugin" gorm:"type:json"`
 	DeletedAt gorm.DeletedAt                  `json:"-" gorm:"index"`
