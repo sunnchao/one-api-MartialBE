@@ -29,7 +29,7 @@ export default defineConfig({
     // open: true,
     // this sets a default port to 3000
     host: true,
-    port: 3010,
+    port: 5173,
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:3000', // 设置代理的目标服务器
