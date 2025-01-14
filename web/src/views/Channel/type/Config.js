@@ -13,7 +13,8 @@ const defaultConfig = {
     plugin: {},
     tag: '',
     only_chat: false,
-    pre_cost: 1
+    pre_cost: 1,
+    openai_organization: null
   },
   inputLabel: {
     name: '渠道名称',

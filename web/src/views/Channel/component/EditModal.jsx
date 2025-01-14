@@ -286,6 +286,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
 
     try {
       if (channelId) {
+        delete values.openai_organization;
         res = await API.put(baseApiUrl, { ...values, id: parseInt(channelId), models: modelsStr });
       } else {
         res = await API.post(baseApiUrl, { ...values, models: modelsStr });

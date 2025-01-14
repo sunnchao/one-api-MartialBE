@@ -55,6 +55,7 @@ export default function ChannelTable({ tag }) {
     let data = { id };
     let res;
     try {
+      delete data.openai_organization;
       switch (action) {
         case 'copy': {
           let oldRes = await API.get(`/api/channel/${id}`);
