@@ -323,57 +323,59 @@ export default function ChannelTableRow({ item, manageChannel, handleOpenModal, 
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         PaperProps={{
-          sx: { minWidth: 140 }
+          sx: { minWidth: 100 }
         }}
       >
-        {!hideEdit && (
-          <MenuItem
+        <Stack direction={'column'} spacing={0} style={{ paddingTop: 10, paddingBottom: 10 }}>
+          {!hideEdit && (
+            <Button
+              onClick={() => {
+                handleCloseMenu();
+                handleOpenModal();
+                setModalChannelId(item.id);
+              }}
+            >
+              <Icon icon="solar:pen-bold-duotone" style={{ marginRight: '16px' }} />
+              {t('common.edit')}
+            </Button>
+          )}
+
+          <Button
             onClick={() => {
               handleCloseMenu();
-              handleOpenModal();
-              setModalChannelId(item.id);
+              manageChannel(item.id, 'copy');
             }}
           >
-            <Icon icon="solar:pen-bold-duotone" style={{ marginRight: '16px' }} />
-            {t('common.edit')}
-          </MenuItem>
-        )}
+            <Icon icon="solar:copy-bold-duotone" style={{ marginRight: '16px' }} />
+            {t('token_index.copy')}
+          </Button>
+          <Button onClick={() => setOpenCheck(true)}>
+            <Icon icon="solar:checklist-minimalistic-bold" style={{ marginRight: '16px' }} />
+            {t('channel_row.check')}
+          </Button>
+          {CHANNEL_OPTIONS[item.type]?.url && (
+            <Button
+              onClick={() => {
+                handleCloseMenu();
+                window.open(CHANNEL_OPTIONS[item.type].url);
+              }}
+            >
+              <Icon icon="solar:global-line-duotone" style={{ marginRight: '16px' }} />
+              {t('channel_row.channelWeb')}
+            </Button>
+          )}
 
-        <MenuItem
-          onClick={() => {
-            handleCloseMenu();
-            manageChannel(item.id, 'copy');
-          }}
-        >
-          <Icon icon="solar:copy-bold-duotone" style={{ marginRight: '16px' }} />
-          {t('token_index.copy')}
-        </MenuItem>
-        <MenuItem onClick={() => setOpenCheck(true)}>
-          <Icon icon="solar:checklist-minimalistic-bold" style={{ marginRight: '16px' }} />
-          {t('channel_row.check')}
-        </MenuItem>
-        {CHANNEL_OPTIONS[item.type]?.url && (
-          <MenuItem
-            onClick={() => {
-              handleCloseMenu();
-              window.open(CHANNEL_OPTIONS[item.type].url);
-            }}
-          >
-            <Icon icon="solar:global-line-duotone" style={{ marginRight: '16px' }} />
-            {t('channel_row.channelWeb')}
-          </MenuItem>
-        )}
-
-        {item.tag && (
-          <MenuItem onClick={handleDeleteTag} sx={{ color: 'error.main' }}>
+          {item.tag && (
+            <Button onClick={handleDeleteTag} sx={{ color: 'error.main' }}>
+              <Icon icon="solar:trash-bin-trash-bold-duotone" style={{ marginRight: '16px' }} />
+              {t('channel_row.delTag')}
+            </Button>
+          )}
+          <Button onClick={handleDeleteOpen} sx={{ color: 'error.main' }}>
             <Icon icon="solar:trash-bin-trash-bold-duotone" style={{ marginRight: '16px' }} />
-            {t('channel_row.delTag')}
-          </MenuItem>
-        )}
-        <MenuItem onClick={handleDeleteOpen} sx={{ color: 'error.main' }}>
-          <Icon icon="solar:trash-bin-trash-bold-duotone" style={{ marginRight: '16px' }} />
-          {t('common.delete')}
-        </MenuItem>
+            {t('common.delete')}
+          </Button>
+        </Stack>
       </Popover>
 
       <StyledMenu

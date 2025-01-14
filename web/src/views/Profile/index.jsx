@@ -20,7 +20,7 @@ import SubCard from 'ui-component/cards/SubCard';
 import { IconBrandWechat, IconBrandGithub, IconMail, IconBrandTelegram } from '@tabler/icons-react';
 import Label from 'ui-component/Label';
 import { API } from 'utils/api';
-import { showError, showSuccess, onGitHubOAuthClicked, copy, trims, onLarkOAuthClicked } from 'utils/common';
+import { showError, showSuccess, onGitHubOAuthClicked, copy, trims, onLarkOAuthClicked, onLinuxDoOAuthClicked } from 'utils/common';
 import * as Yup from 'yup';
 import WechatModal from 'views/Authentication/AuthForms/WechatModal';
 import { useSelector } from 'react-redux';
@@ -45,6 +45,7 @@ export default function Profile() {
   const [turnstileToken, setTurnstileToken] = useState('');
   const [openWechat, setOpenWechat] = useState(false);
   const [openEmail, setOpenEmail] = useState(false);
+  const [linuxDoLoading, setLinuxDoLoading] = useState(false);
   const status = useSelector((state) => state.siteInfo);
   const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('md'));
@@ -231,6 +232,18 @@ export default function Profile() {
                     </Button>
                   </Grid>
                 )}
+
+                {status.linux_do_oauth && !inputs.linux_do_client_id && (
+                  <Grid xs={12} md={4}>
+                    <Button
+                      variant="contained"
+                      onClick={() => onLinuxDoOAuthClicked(status.linux_do_client_id, true, linuxDoLoading, setLinuxDoLoading)}
+                    >
+                      {t('profilePage.bindLinuxDoAccount')}
+                    </Button>
+                  </Grid>
+                )}
+
                 {status.github_oauth && !inputs.github_id && (
                   <Grid xs={12} md={4}>
                     <Button variant="contained" onClick={() => onGitHubOAuthClicked(status.github_client_id, true)}>

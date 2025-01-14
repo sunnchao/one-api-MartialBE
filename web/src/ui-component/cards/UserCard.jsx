@@ -13,7 +13,6 @@ export default function UserCard({ children }) {
     <Card
       sx={{
         position: 'relative',
-        borderRadius: '16px',
         overflow: 'hidden'
         // bgcolor: 'rgba(22, 28, 36, 0.94)',
         // color: '#fff'

@@ -488,6 +488,7 @@
     "accountBinding": "帳號綁定",
     "bindEmail": "綁定電郵",
     "bindGitHubAccount": "綁定 GitHub 帳號",
+    "bindLinuxDoAccount": "綁定 LinuxDo 帳號",
     "bindLarkAccount": "綁定飛書帳號",
     "bindWechatAccount": "綁定微信帳號",
     "changeEmail": "更換電郵",

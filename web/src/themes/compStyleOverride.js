@@ -4,14 +4,14 @@ export default function componentStyleOverrides(theme) {
     MuiButtonBase: {
       styleOverrides: {
         root: {
-          borderRadius: 6
+          borderRadius: `${theme?.customization?.borderRadius}px`
         }
       }
     },
     MuiBox: {
       styleOverrides: {
         root: {
-          borderRadius: 6
+          borderRadius: `${theme?.customization?.borderRadius}px`
         }
       }
     },
@@ -19,7 +19,7 @@ export default function componentStyleOverrides(theme) {
       styleOverrides: {
         root: {
           fontWeight: 500,
-          borderRadius: 6,
+          borderRadius: `${theme?.customization?.borderRadius}px`,
           '&.Mui-disabled': {
             color: theme.colors?.grey600
           }
@@ -32,7 +32,7 @@ export default function componentStyleOverrides(theme) {
         popper: {
           // 继承 MuiPopover-root
           boxShadow: '0px 5px 5px -3px rgba(0,0,0,0.2),0px 8px 10px 1px rgba(0,0,0,0.14),0px 3px 14px 2px rgba(0,0,0,0.12)',
-          borderRadius: 6,
+          borderRadius: `${theme?.customization?.borderRadius}px`,
           color: '#364152'
         },
         listbox: {

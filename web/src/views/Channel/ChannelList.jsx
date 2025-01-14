@@ -425,7 +425,7 @@ export default function ChannelList() {
         </Toolbar>
         {searching && <LinearProgress />}
         <TableContainer>
-          <Table sx={{ minWidth: 800 }}>
+          <Table sx={{ minWidth: 1200 }}>
             <KeywordTableHead
               order={order}
               orderBy={orderBy}
@@ -434,16 +434,16 @@ export default function ChannelList() {
                 { id: 'collapse', label: '', disableSort: true, width: '50px' },
                 { id: 'id', label: 'ID', disableSort: false, width: '80px' },
                 { id: 'name', label: t('channel_index.name'), disableSort: false },
-                { id: 'group', label: t('channel_index.group'), disableSort: true },
-                { id: 'tag', label: t('channel_index.tags'), disableSort: true },
+                { id: 'group', label: t('channel_index.group'), disableSort: false, width: '120px' },
+                { id: 'tag', label: t('channel_index.tags'), disableSort: false, width: '120px' },
                 { id: 'type', label: t('channel_index.type'), disableSort: false },
                 { id: 'status', label: t('channel_index.status'), disableSort: false },
-                { id: 'response_time', label: t('channel_index.responseTime'), disableSort: false },
+                { id: 'response_time', label: t('channel_index.responseTime'), disableSort: false, width: '80px' },
                 // { id: 'balance', label: '余额', disableSort: false },
-                { id: 'used', label: t('channel_index.usedBalance'), disableSort: true },
+                { id: 'used', label: t('channel_index.usedBalance'), disableSort: false, width: '80px' },
                 { id: 'priority', label: t('channel_index.priority'), disableSort: false, width: '80px' },
                 { id: 'weight', label: t('channel_index.weight'), disableSort: false, width: '80px' },
-                { id: 'action', label: t('channel_index.actions'), disableSort: true }
+                { id: 'action', label: t('channel_index.actions'), disableSort: false, width: '200px' }
               ]}
             />
             <TableBody>

@@ -105,29 +105,30 @@ const Dashboard = () => {
         <Grid container spacing={gridSpacing}>
           {/* 日历插件 */}
           <Grid item lg={6} xs={12}>
-            <Calendar />
+            <Calendar checkinDates={['2025-01-13']} />
           </Grid>
 
-          {/* 消费统计 */}
-          <Grid item lg={6} xs={12}>
-            <ApexCharts isLoading={isLoading} chartDatas={statisticalData} />
-          </Grid>
           <Grid item lg={6} xs={12}>
             <UserCard>
               <Box
                 sx={{
-                  pt: 4,
-                  pb: 4,
-                  px: 3,
                   textAlign: 'center'
                 }}
               >
-                <Typography variant="h4" sx={{ mb: 0.5 }}>
-                  {users.username}
-                </Typography>
+                {/*<Typography variant="h4" sx={{ mb: 0.5 }}>*/}
+                {/*  {users.username}*/}
+                {/*</Typography>*/}
                 <Typography variant="body2" sx={{ mb: 1 }}>
                   {users.email}
                 </Typography>
+
+                <Label color={'primary'} variant="outlined" sx={{ mb: 3, mr: 1 }}>
+                  {users.id}
+                </Label>
+
+                <Label color={'primary'} variant="outlined" sx={{ mb: 3, mr: 1 }}>
+                  {users.display_name}
+                </Label>
 
                 <Label color={'primary'} variant="outlined" sx={{ mb: 3 }}>
                   {userGroup?.[users.group]?.name || users.group}
@@ -184,6 +185,10 @@ const Dashboard = () => {
                 </Box>
               </Box>
             </UserCard>
+          </Grid>
+          {/* 消费统计 */}
+          <Grid item lg={12} xs={12}>
+            <ApexCharts isLoading={isLoading} chartDatas={statisticalData} />
           </Grid>
         </Grid>
       </Grid>

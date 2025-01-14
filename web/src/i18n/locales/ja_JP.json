@@ -488,6 +488,7 @@
     "accountBinding": "アカウントのバインディング",
     "bindEmail": "メールアドレスのバインド",
     "bindGitHubAccount": "GitHubアカウントのバインド",
+    "bindLinuxDoAccount": "LinuxDoアカウントのバインド",
     "bindLarkAccount": "Larkアカウントのバインド",
     "bindWechatAccount": "WeChatアカウントのバインド",
     "changeEmail": "メールアドレスの変更",

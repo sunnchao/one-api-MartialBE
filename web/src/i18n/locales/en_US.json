@@ -491,6 +491,7 @@
     "accountBinding": "Account Binding",
     "bindEmail": "Bind Email",
     "bindGitHubAccount": "Bind GitHub Account",
+    "bindLinuxDoAccount": "Bind LinuxDo Account",
     "bindLarkAccount": "Bind Lark Account",
     "bindWechatAccount": "Bind WeChat Account",
     "changeEmail": "Change Email",
