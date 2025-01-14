@@ -5,37 +5,46 @@ import (
 	"fmt"
 	"one-api/common"
 	"one-api/common/config"
+	"one-api/common/logger"
 	"one-api/common/utils"
 
 	"gorm.io/gorm"
 )
 
 type Redemption struct {
-	Id           int    `json:"id"`
-	UserId       int    `json:"user_id"`
-	Key          string `json:"key" gorm:"type:char(32);uniqueIndex"`
-	Status       int    `json:"status" gorm:"default:1"`
-	Name         string `json:"name" gorm:"index"`
-	Quota        int    `json:"quota" gorm:"default:100"`
-	CreatedTime  int64  `json:"created_time" gorm:"bigint"`
-	RedeemedTime int64  `json:"redeemed_time" gorm:"bigint"`
-	Count        int    `json:"count" gorm:"-:all"` // only for api request
+	Id                int            `json:"id"`
+	UserId            int            `json:"user_id"`
+	Key               string         `json:"key" gorm:"type:char(32);uniqueIndex"`
+	Status            int            `json:"status" gorm:"default:1"`
+	Name              string         `json:"name" gorm:"index"`
+	Quota             int            `json:"quota" gorm:"default:100"`
+	CreatedTime       int64          `json:"created_time" gorm:"bigint"`
+	RedeemedTime      int64          `json:"redeemed_time" gorm:"bigint"`
+	BatchId           string         `json:"batch_id" gorm:"type:varchar(32);index;default:''"` // 批次唯一标识
+	BatchPerUserLimit int            `json:"batch_per_user_limit" gorm:"default:1"`
+	ExpireTime        int64          `json:"expire_time" gorm:"bigint"`
+	UsedUserId        int            `json:"used_user_id"`
+	DeletedAt         gorm.DeletedAt `json:"-" gorm:"index"`
+	Count             int            `json:"count" gorm:"-:all"` // only for api request
 }
 
 var allowedRedemptionslOrderFields = map[string]bool{
-	"id":            true,
-	"name":          true,
-	"status":        true,
-	"quota":         true,
-	"created_time":  true,
-	"redeemed_time": true,
+	"id":                   true,
+	"name":                 true,
+	"status":               true,
+	"quota":                true,
+	"created_time":         true,
+	"redeemed_time":        true,
+	"batch_id":             true,
+	"batch_per_user_limit": true,
+	"expire_time":          true,
 }
 
 func GetRedemptionsList(params *GenericParams) (*DataResult[Redemption], error) {
 	var redemptions []*Redemption
 	db := DB
 	if params.Keyword != "" {
-		db = db.Where("id = ? or name LIKE ?", utils.String2Int(params.Keyword), params.Keyword+"%")
+		db = db.Where("id = ? or name LIKE ?", utils.String2Int(params.Keyword), "%"+params.Keyword+"%")
 	}
 
 	return PaginateAndOrder[Redemption](db, &params.PaginationParams, &redemptions, allowedRedemptionslOrderFields)
@@ -73,20 +82,50 @@ func Redeem(key string, userId int) (quota int, err error) {
 		if redemption.Status != config.RedemptionCodeStatusEnabled {
 			return errors.New("该兑换码已被使用")
 		}
+		// 查看是否有批次限制
+		if redemption.BatchId != "" {
+			// 有批次限制
+			var count int64
+			err = tx.Model(&Redemption{}).Where("batch_id = ? AND used_user_id = ?", redemption.BatchId, userId).Count(&count).Error
+			if err != nil {
+				return err
+			}
+			if count >= int64(redemption.BatchPerUserLimit) {
+				return errors.New("已达到该批次限领次数")
+			}
+		}
 		err = tx.Model(&User{}).Where("id = ?", userId).Update("quota", gorm.Expr("quota + ?", redemption.Quota)).Error
 		if err != nil {
 			return err
 		}
 		redemption.RedeemedTime = utils.GetTimestamp()
 		redemption.Status = config.RedemptionCodeStatusUsed
+		redemption.UsedUserId = userId
 		err = tx.Save(redemption).Error
 		return err
 	})
 	if err != nil {
 		return 0, errors.New("兑换失败，" + err.Error())
 	}
-	RecordLog(userId, LogTypeTopup, fmt.Sprintf("通过兑换码充值 %s", common.LogQuota(redemption.Quota)), utils.GetIp())
-	return redemption.Quota, nil
+	RecordLog(userId, LogTypeTopup, fmt.Sprintf("通过兑换码充值 %s", common.LogQuota(redemption.Quota)), "")
+
+	// 本次充值的额度
+	var redeQuota = redemption.Quota
+
+	// 截止到2024.6.19 活动兑换 加25%
+	if redemption.RedeemedTime <= 1718726399 {
+		otherQuota := redemption.Quota * 25 / 100
+		err = DB.Model(&User{}).Where("id = ?", userId).Update("quota", gorm.Expr("quota + ?", otherQuota)).Error
+		if err != nil {
+			logger.SysLog("活动兑换加倍失败，" + err.Error())
+		} else {
+			RecordLog(userId, LogTypeTopup, fmt.Sprintf("6.18活动兑换赠送 %s", common.LogQuota(otherQuota)), "")
+			redeQuota = redemption.Quota + otherQuota
+		}
+
+	}
+
+	return redeQuota, nil
 }
 
 func (redemption *Redemption) Insert() error {

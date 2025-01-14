@@ -109,3 +109,9 @@ func GetUserQuotaUsedByPeriod(userId int, zeroTime time.Time) (used int64, err e
 	}
 	return used, err
 }
+
+// 获取签到列表
+func GetOperationCheckInList(userId int) (checkInList []UserOperation, err error) {
+	err = DB.Model(&UserOperation{}).Where("user_id = ?", userId).Order("id desc").Find(&checkInList).Error
+	return checkInList, err
+}

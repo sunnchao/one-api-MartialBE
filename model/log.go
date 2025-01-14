@@ -19,6 +19,7 @@ type Log struct {
 	Content          string `json:"content"`
 	Username         string `json:"username" gorm:"index:index_username_model_name,priority:2;default:''"`
 	TokenName        string `json:"token_name" gorm:"index;default:''"`
+	TokenId          int    `json:"token_id" gorm:"index;"`
 	ModelName        string `json:"model_name" gorm:"index;index:index_username_model_name,priority:1;default:''"`
 	OriginModelName  string `json:"origin_model_name,omitempty" gorm:"index;index:index_username_origin_model_name,priority:1;default:''"`
 	Quota            int    `json:"quota" gorm:"default:0"`
@@ -73,6 +74,7 @@ func RecordConsumeLog(
 	completionTokens int,
 	modelName string,
 	tokenName string,
+	tokenId int,
 	quota int,
 	content string,
 	requestTime int,
@@ -94,6 +96,7 @@ func RecordConsumeLog(
 		PromptTokens:     promptTokens,
 		CompletionTokens: completionTokens,
 		TokenName:        tokenName,
+		TokenId:          tokenId,
 		ModelName:        modelName,
 		Quota:            quota,
 		ChannelId:        channelId,
@@ -127,6 +130,7 @@ var allowedLogsOrderFields = map[string]bool{
 	"channel_id": true,
 	"user_id":    true,
 	"token_name": true,
+	"token_id":   true,
 	"model_name": true,
 	"type":       true,
 }

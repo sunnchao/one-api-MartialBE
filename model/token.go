@@ -35,6 +35,8 @@ type Token struct {
 	UnlimitedQuota bool           `json:"unlimited_quota" gorm:"default:false"`
 	UsedQuota      int            `json:"used_quota" gorm:"default:0"` // used quota
 	Group          string         `json:"group" gorm:"default:''"`
+	ModelLimits    string         `json:"model_limits" gorm:"default:''"`
+	AllowIps       string         `json:"allow_ips" gorm:"default:''"`
 	DeletedAt      gorm.DeletedAt `json:"-" gorm:"index"`
 }
 

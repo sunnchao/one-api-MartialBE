@@ -66,3 +66,29 @@ func UserOperationCheckIn(c *gin.Context) {
 	})
 
 }
+
+// 获取签到列表
+func UserOperationCheckInList(c *gin.Context) {
+	id := c.GetInt("id")
+	user, err := model.GetUserById(id, true)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	// 获取签到列表
+	checkInList, err := model.GetOperationCheckInList(user.Id)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    checkInList,
+	})
+}

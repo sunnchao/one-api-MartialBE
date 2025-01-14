@@ -51,6 +51,7 @@ type User struct {
 	LinuxDoLevel     int            `json:"linuxdo_level" gorm:"column:linuxdo_level;type:int;default:0"`
 	LinuxDoUserName  string         `json:"linuxdo_username" gorm:"column:linuxdo_username;type:string"`
 	LinuxDoName      string         `json:"linuxdo_name" gorm:"column:linuxdo_name;type:string"`
+	Ratio            float64        `json:"ratio" gorm:"column:ratio;type:float;default:1"`
 }
 
 type UserUpdates func(*User)

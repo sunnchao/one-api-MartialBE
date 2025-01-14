@@ -21,6 +21,7 @@ const Dashboard = () => {
   const [quotaChart, setQuotaChart] = useState(null);
   const [tokenChart, setTokenChart] = useState(null);
   const [users, setUsers] = useState([]);
+  const [checkInList, setCheckInList] = useState([]);
   const { t } = useTranslation();
   const { userGroup } = useContext(UserContext);
 
@@ -59,9 +60,18 @@ const Dashboard = () => {
     }
   };
 
+  const loadCheckInList = async () => {
+    let res = await API.get('/api/user/checkin/list');
+    const { success, message, data } = res.data;
+    if (success) {
+      setCheckInList(data);
+    }
+  };
+
   useEffect(() => {
     userDashboard();
     loadUser();
+    loadCheckInList();
   }, []);
 
   return (
@@ -105,7 +115,7 @@ const Dashboard = () => {
         <Grid container spacing={gridSpacing}>
           {/* 日历插件 */}
           <Grid item lg={6} xs={12}>
-            <Calendar checkinDates={['2025-01-13']} />
+            <Calendar checkinDates={checkInList} />
           </Grid>
 
           <Grid item lg={6} xs={12}>
