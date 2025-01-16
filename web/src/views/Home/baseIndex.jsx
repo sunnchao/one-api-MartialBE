@@ -61,7 +61,6 @@ const BaseIndex = () => {
                 <Stack direction="row" spacing={3}>
                   <Button
                     variant="contained"
-                    startIcon={<GitHub />}
                     href="/dashboard"
                     sx={{ 
                       backgroundColor: '#fff',
@@ -78,7 +77,7 @@ const BaseIndex = () => {
                       }
                     }}
                   >
-                    控制台
+                    前往控制台
                   </Button>
                   <Button
                     variant="outlined"
@@ -145,23 +144,22 @@ const BaseIndex = () => {
                   transform: 'translateY(0)',
                   transition: 'all 0.4s ease',
                   '&:hover': {
-                    transform: 'translateY(-10px)'
-                  }
+                      transform: 'translateY(-5px)',
+                      backgroundColor: 'rgba(255,255,255,0.12)',
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
+                    }
                 }}>
                   <Stack spacing={3} alignItems="center" sx={{
                     p: 4,
                     height: '100%',
-                    borderRadius: 3,
                     background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
                     backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
                   }}>
                     <Bolt sx={{ fontSize: 48, color: '#64B5F6' }} />
-                    <Typography variant="h5" align="center" sx={{ fontWeight: 600 }}>
+                    <Typography variant="h5" align="center" sx={{ fontWeight: 600, color: '#fff' }}>
                       企业级性能保障
                     </Typography>
-                    <Typography align="center" sx={{ opacity: 0.9, lineHeight: 1.8 }}>
+                    <Typography align="center" sx={{ opacity: 0.9, lineHeight: 1.8, color: '#fff' }}>
                       • MySQL8.2超高并发架构
                       <br />
                       • 日承接量超100万次调用
@@ -179,20 +177,19 @@ const BaseIndex = () => {
                   transform: 'translateY(0)',
                   transition: 'all 0.4s ease',
                   '&:hover': {
-                    transform: 'translateY(-10px)'
-                  }
+                      transform: 'translateY(-5px)',
+                      backgroundColor: 'rgba(255,255,255,0.12)',
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
+                    }
                 }}>
                   <Stack spacing={3} alignItems="center" sx={{
                     p: 4,
                     height: '100%',
-                    borderRadius: 3,
                     background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
                     backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
                   }}>
                     <Cloud sx={{ fontSize: 48, color: '#64B5F6' }} />
-                    <Typography variant="h5" align="center" sx={{ fontWeight: 600 }}>
+                    <Typography variant="h5" align="center" sx={{ fontWeight: 600, color: '#fff' }}>
                       全球化部署
                     </Typography>
                     <Typography align="center" sx={{ opacity: 0.9, lineHeight: 1.8 }}>
@@ -213,20 +210,19 @@ const BaseIndex = () => {
                   transform: 'translateY(0)',
                   transition: 'all 0.4s ease',
                   '&:hover': {
-                    transform: 'translateY(-10px)'
-                  }
+                      transform: 'translateY(-5px)',
+                      backgroundColor: 'rgba(255,255,255,0.12)',
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
+                    }
                 }}>
                   <Stack spacing={3} alignItems="center" sx={{
                     p: 4,
                     height: '100%',
-                    borderRadius: 3,
                     background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
                     backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
                   }}>
                     <Security sx={{ fontSize: 48, color: '#64B5F6' }} />
-                    <Typography variant="h5" align="center" sx={{ fontWeight: 600 }}>
+                    <Typography variant="h5" align="center" sx={{ fontWeight: 600, color: '#fff' }}>
                       透明计费系统
                     </Typography>
                     <Typography align="center" sx={{ opacity: 0.9, lineHeight: 1.8 }}>
@@ -249,20 +245,19 @@ const BaseIndex = () => {
                   transform: 'translateY(0)',
                   transition: 'all 0.4s ease',
                   '&:hover': {
-                    transform: 'translateY(-10px)'
-                  }
+                      transform: 'translateY(-5px)',
+                      backgroundColor: 'rgba(255,255,255,0.12)',
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
+                    }
                 }}>
                   <Stack spacing={3} alignItems="center" sx={{
                     p: 4,
                     height: '100%',
-                    borderRadius: 3,
                     background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
                     backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
                   }}>
                     <SyncAlt sx={{ fontSize: 48, color: '#64B5F6' }} />
-                    <Typography variant="h5" align="center" sx={{ fontWeight: 600 }}>
+                    <Typography variant="h5" align="center" sx={{ fontWeight: 600, color: '#fff' }}>
                       完美兼容性
                     </Typography>
                     <Typography align="center" sx={{ opacity: 0.9, lineHeight: 1.8 }}>
@@ -283,20 +278,19 @@ const BaseIndex = () => {
                   transform: 'translateY(0)',
                   transition: 'all 0.4s ease',
                   '&:hover': {
-                    transform: 'translateY(-10px)'
-                  }
+                      transform: 'translateY(-5px)',
+                      backgroundColor: 'rgba(255,255,255,0.12)',
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
+                    }
                 }}>
                   <Stack spacing={3} alignItems="center" sx={{
                     p: 4,
                     height: '100%',
-                    borderRadius: 3,
                     background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
                     backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
                   }}>
                     <Shield sx={{ fontSize: 48, color: '#64B5F6' }} />
-                    <Typography variant="h5" align="center" sx={{ fontWeight: 600 }}>
+                    <Typography variant="h5" align="center" sx={{ fontWeight: 600, color: '#fff' }}>
                       服务保障
                     </Typography>
                     <Typography align="center" sx={{ opacity: 0.9, lineHeight: 1.8 }}>
@@ -317,20 +311,19 @@ const BaseIndex = () => {
                   transform: 'translateY(0)',
                   transition: 'all 0.4s ease',
                   '&:hover': {
-                    transform: 'translateY(-10px)'
-                  }
+                      transform: 'translateY(-5px)',
+                      backgroundColor: 'rgba(255,255,255,0.12)',
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
+                    }
                 }}>
                   <Stack spacing={3} alignItems="center" sx={{
                     p: 4,
                     height: '100%',
-                    borderRadius: 3,
                     background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
                     backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
                   }}>
                     <Brush sx={{ fontSize: 48, color: '#64B5F6' }} />
-                    <Typography variant="h5" align="center" sx={{ fontWeight: 600 }}>
+                    <Typography variant="h5" align="center" sx={{ fontWeight: 600, color: '#fff' }}>
                       Midjourney 增强
                     </Typography>
                     <Typography align="center" sx={{ opacity: 0.9, lineHeight: 1.8 }}>
@@ -385,18 +378,17 @@ const BaseIndex = () => {
 
             <Grid container spacing={4} justifyContent="center" sx={{ px: { xs: 2, md: 6 } }}>
               {[
-                { name: 'OpenAI', desc: 'GPT-3.5/4 系列模型', tag: '热门' },
-                { name: 'Claude AI', desc: 'Claude 2/3 系列模型', tag: '推荐' },
-                { name: 'Google Gemini', desc: 'Pro/Ultra 系列模型', tag: '新品' },
-                { name: 'Meta LLaMA', desc: 'LLaMA 2 系列模型', tag: '稳定' },
-                { name: 'Midjourney', desc: 'V5/V6 图像生成', tag: '创意' }
+                { name: 'OpenAI', desc: 'GPT-4o / o1 系列模型', tag: '热门' },
+                { name: 'Claude AI', desc: 'Claude 3.5 系列模型', tag: '热门' },
+                { name: 'Google Gemini', desc: 'Pro/Exp 系列模型', tag: '热门' },
+                { name: 'DeepSeek', desc: 'V3 系列模型', tag: '推荐' },
+                { name: 'Midjourney', desc: '支持最新版Midjourney Proxy Plus', tag: '创意' }
               ].map((platform) => (
                 <Grid item xs={12} sm={6} md={4} key={platform.name}>
                   <Box sx={{ 
                     p: 4,
                     height: '100%',
                     backgroundColor: 'rgba(255,255,255,0.08)',
-                    borderRadius: 3,
                     transition: 'all 0.3s ease',
                     position: 'relative',
                     overflow: 'hidden',
@@ -413,7 +405,6 @@ const BaseIndex = () => {
                       px: 1.5,
                       py: 0.5,
                       backgroundColor: 'rgba(33,150,243,0.2)',
-                      borderRadius: 1,
                       fontSize: '0.75rem',
                       color: '#90CAF9'
                     }}>
@@ -478,7 +469,6 @@ const BaseIndex = () => {
                 <Box sx={{ 
                   p: 5,
                   backgroundColor: 'rgba(255,255,255,0.08)',
-                  borderRadius: 3,
                   textAlign: 'center',
                   transition: 'all 0.3s ease',
                   height: '100%',
@@ -511,7 +501,6 @@ const BaseIndex = () => {
                 <Box sx={{ 
                   p: 5,
                   backgroundColor: 'rgba(255,255,255,0.08)',
-                  borderRadius: 3,
                   textAlign: 'center',
                   transition: 'all 0.3s ease',
                   height: '100%',
