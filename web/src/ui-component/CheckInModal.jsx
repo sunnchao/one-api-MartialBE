@@ -5,6 +5,7 @@ import { API } from 'utils/api';
 import { Typography, Dialog, Button, Stack, CircularProgress, DialogContent, DialogTitle, DialogActions } from '@mui/material';
 
 import { showError, showSuccess, showInfo } from 'utils/common';
+import LoadingButton from "@mui/lab/LoadingButton";
 
 export default function CheckInModal(props) {
   const siteInfo = useSelector((state) => state.siteInfo);
@@ -16,7 +17,6 @@ export default function CheckInModal(props) {
   const [checkinLoading, setCheckinLoading] = useState(false);
 
   useEffect(() => {
-    console.log('siteInfo', siteInfo);
     if (siteInfo.turnstile_check) {
       setTurnstileEnabled(true);
       setTurnstileSiteKey(siteInfo.turnstile_site_key);
@@ -43,7 +43,7 @@ export default function CheckInModal(props) {
     // return;
     setCheckinLoading(true);
     try {
-      let res = await API.post(`/api/operation/checkin?turnstile=${turnstileToken}`);
+      let res = await API.post(`/api/user/checkin?turnstile=${turnstileToken}`);
       const { success, message } = res.data;
       if (success) {
         showSuccess(message);
@@ -73,16 +73,7 @@ export default function CheckInModal(props) {
   return (
     <Dialog
       open={props.visible}
-      maskClosable={false}
-      onCancel={handleClose}
-      footer={[
-        <Button onClick={() => handleClose()}>取消</Button>,
-        <Button disabled={!turnstileToken} loading={checkinLoading} onClick={() => handleUserOperationCheckIn()} type="primary">
-          立即签到
-        </Button>
-      ]}
-      afterClose={afterClose}
-      destroyOnClose
+      onClose={handleClose}
     >
       <DialogTitle>
         <Typography heading={4}>正在检查用户环境</Typography>
@@ -91,7 +82,7 @@ export default function CheckInModal(props) {
         <Stack flexDirection={'column'} size={16}>
           <Typography>温馨提示：每日签到获得的额度以前一日的总消耗额度为基础获得随机返赠🤓</Typography>
 
-          {turnstileEnabled && turnstileLoaded ? (
+          {turnstileEnabled ? (
             <div style={{ width: '100%', height: 65 }}>
               <Turnstile
                 sitekey={turnstileSiteKey}
@@ -111,15 +102,16 @@ export default function CheckInModal(props) {
       </DialogContent>
       <DialogActions>
         <Button onClick={() => handleClose()}>取消</Button>
-        <Button
-          disabled={!turnstileToken}
+        <LoadingButton
           loading={checkinLoading}
+          disabled={!turnstileToken}
           onClick={() => handleUserOperationCheckIn()}
           type="primary"
           variant="contained"
+
         >
           立即签到
-        </Button>
+        </LoadingButton>
       </DialogActions>
     </Dialog>
   );

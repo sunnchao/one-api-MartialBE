@@ -113,13 +113,13 @@ export default function UsersTableRow({ item, manageUser, handleOpenModal, setMo
             <Tooltip title={t('token_index.remainingQuota')} placement="top">
               <Label color={'primary'} variant="outlined">
                 {' '}
-                {renderQuota(item.quota)}{' '}
+                {renderQuota(item.quota,6)}{' '}
               </Label>
             </Tooltip>
             <Tooltip title={t('token_index.usedQuota')} placement="top">
               <Label color={'primary'} variant="outlined">
                 {' '}
-                {renderQuota(item.used_quota)}{' '}
+                {renderQuota(item.used_quota,6)}{' '}
               </Label>
             </Tooltip>
             <Tooltip title={t('userPage.useQuota')} placement="top">

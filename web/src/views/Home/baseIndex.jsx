@@ -14,7 +14,20 @@ const BaseIndex = () => {
           minHeight: '100vh',
           backgroundImage: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
           color: 'white',
-          p: 4
+          p: 4,
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(0, 0, 0, 0.08) 1px, transparent 1px)`,
+            backgroundSize: '150px 150px',
+            pointerEvents: 'none'
+          }
         }}
       >
         <Container maxWidth="lg">

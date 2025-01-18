@@ -8,6 +8,7 @@ import (
 	"one-api/common/utils"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/spf13/viper"
@@ -112,77 +113,63 @@ func InitDB() (err error) {
 
 		migrationBefore(DB)
 
-		err = db.AutoMigrate(&Channel{})
-		if err != nil {
-			return err
-		}
-		err = db.AutoMigrate(&Token{})
-		if err != nil {
-			return err
-		}
-		err = db.AutoMigrate(&User{})
-		if err != nil {
-			return err
-		}
-		err = db.AutoMigrate(&Option{})
-		if err != nil {
-			return err
-		}
-		err = db.AutoMigrate(&Redemption{})
-		if err != nil {
-			return err
-		}
-		err = db.AutoMigrate(&Ability{})
-		if err != nil {
-			return err
-		}
-		err = db.AutoMigrate(&Log{})
-		if err != nil {
-			return err
-		}
-		err = db.AutoMigrate(&TelegramMenu{})
-		if err != nil {
-			return err
-		}
-		err = db.AutoMigrate(&Price{})
-		if err != nil {
-			return err
-		}
-		err = db.AutoMigrate(&Midjourney{})
-		if err != nil {
-			return err
+		// 按依赖关系分组的模型
+		modelGroups := [][]interface{}{
+			// 第一组：基础表，没有外键依赖
+			{
+				&User{},
+				&Channel{},
+				&Option{},
+				&Price{},
+				&UserGroup{},
+			},
+			// 第二组：依赖于第一组的表
+			{
+				&Token{},
+				&Redemption{},
+				&Ability{},
+				&TelegramMenu{},
+				&ModelOwnedBy{},
+			},
+			// 第三组：依赖于前面组的表
+			{
+				&Log{},
+				&Midjourney{},
+				&Payment{},
+				&Order{},
+				&Task{},
+				&Statistics{},
+				&UserOperation{},
+			},
 		}
 
-		err = db.AutoMigrate(&Payment{})
-		if err != nil {
-			return err
-		}
-		err = db.AutoMigrate(&Order{})
-		if err != nil {
-			return err
-		}
-		err = db.AutoMigrate(&Task{})
-		if err != nil {
-			return err
-		}
-		err = db.AutoMigrate(&Statistics{})
-		if err != nil {
-			return err
-		}
+		// 按组进行迁移
+		for groupIndex, group := range modelGroups {
+			var wg sync.WaitGroup
+			var migrateErr error
+			var mu sync.Mutex
 
-		err = db.AutoMigrate(&UserGroup{})
-		if err != nil {
-			return err
-		}
+			logger.SysLog(fmt.Sprintf("Migrating group %d...", groupIndex+1))
 
-		err = db.AutoMigrate(&ModelOwnedBy{})
-		if err != nil {
-			return err
-		}
+			for _, model := range group {
+				wg.Add(1)
+				go func(m interface{}) {
+					defer wg.Done()
+					if err := db.AutoMigrate(m); err != nil {
+						mu.Lock()
+						if migrateErr == nil {
+							migrateErr = err
+						}
+						mu.Unlock()
+					}
+				}(model)
+			}
 
-		err = db.AutoMigrate(&UserOperation{})
-		if err != nil {
-			return err
+			wg.Wait()
+
+			if migrateErr != nil {
+				return migrateErr
+			}
 		}
 
 		migrationAfter(DB)

@@ -62,7 +62,7 @@ func SetApiRouter(router *gin.Engine) {
 				selfRoute.POST("/order", controller.CreateOrder)
 				selfRoute.GET("/order/status", controller.CheckOrderStatus)
 				selfRoute.GET("/checkin/list", controller.UserOperationCheckInList)
-				selfRoute.POST("/checkin", controller.UserOperationCheckIn)
+				selfRoute.POST("/checkin", middleware.TurnstileCheck(), controller.UserOperationCheckIn)
 			}
 
 			adminRoute := userRoute.Group("/")
