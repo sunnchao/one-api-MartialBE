@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -38,8 +38,15 @@ import Wechat from 'assets/images/icons/wechat.svg';
 import Lark from 'assets/images/icons/lark.svg';
 import Oidc from 'assets/images/icons/oidc.svg';
 import LinuxDo from 'assets/images/icons/linux_do.svg';
-import { onGitHubOAuthClicked, onLarkOAuthClicked,onOIDCAuthClicked,onLinuxDoOAuthClicked } from 'utils/common';
+import {
+  onGitHubOAuthClicked,
+  onLarkOAuthClicked,
+  onOIDCAuthClicked,
+  onLinuxDoOAuthClicked,
+  showError
+} from 'utils/common';
 import { useTranslation } from 'react-i18next';
+import Turnstile from "react-turnstile";
 
 // ============================|| FIREBASE - LOGIN ||============================ //
 
@@ -53,6 +60,11 @@ const LoginForm = ({ ...others }) => {
   const siteInfo = useSelector((state) => state.siteInfo);
   const [linuxDoLoading, setLinuxDoLoading] = useState(false);
   // const [checked, setChecked] = useState(true);
+
+  const [turnstileEnabled, setTurnstileEnabled] = useState(false);
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+
 
   let tripartiteLogin = false;
   if (siteInfo.github_oauth || siteInfo.wechat_login || siteInfo.lark_client_id || siteInfo.oidc_auth || siteInfo.linux_do_oauth) {
@@ -75,6 +87,14 @@ const LoginForm = ({ ...others }) => {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
+
+  useEffect(() => {
+    if (siteInfo.turnstile_check) {
+      setTurnstileEnabled(true);
+      setTurnstileSiteKey(siteInfo.turnstile_site_key);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [siteInfo]);
 
   return (
     <>
@@ -231,6 +251,11 @@ const LoginForm = ({ ...others }) => {
           password: Yup.string().max(255).required(t('login.passwordRequired'))
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
+          if (turnstileEnabled && turnstileToken === '') {
+            showError(t('registerForm.turnstileError'));
+            return;
+          }
+
           const { success, message } = await login(values.username, values.password);
           if (success) {
             setStatus({ success: true });
@@ -309,6 +334,16 @@ const LoginForm = ({ ...others }) => {
               <Box sx={{ mt: 3 }}>
                 <FormHelperText error>{errors.submit}</FormHelperText>
               </Box>
+            )}
+            {turnstileEnabled ? (
+              <Turnstile
+                sitekey={turnstileSiteKey}
+                onVerify={(token) => {
+                  setTurnstileToken(token);
+                }}
+              />
+            ) : (
+              <></>
             )}
 
             <Box sx={{ mt: 2 }}>

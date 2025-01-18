@@ -1,88 +1,75 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect, useMemo} from 'react';
 import { Paper, Grid, Typography, Box, useTheme, Chip, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle, Circle, CloseOutlined } from '@mui/icons-material';
 import { showError } from 'utils/common';
 import CheckInModal from 'ui-component/CheckInModal';
+import dayjs from 'dayjs';
 
 const Calendar = ({ checkinDates = [] }) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const [calendar, setCalendar] = useState([]);
   const [checkInModalOpen, setCheckInModalOpen] = useState(false);
-  // 生成日历数据
+
+  // Generate calendar data using dayjs
   useEffect(() => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
-
-    // 获取当月第一天
-    const firstDay = new Date(year, month, 1);
-    // 获取当月最后一天
-    const lastDay = new Date(year, month + 1, 0);
-
-    // 获取当月天数
-    const daysInMonth = lastDay.getDate();
-    // 获取第一天是星期几 (0-6)
-    const startDay = firstDay.getDay();
-
+    const today = dayjs();
+    const firstDayOfMonth = today.startOf('month');
+    const startDay = firstDayOfMonth.day(); // Get day of week (0-6)
+    const daysInMonth = today.daysInMonth();
+    
     const calendarDays = [];
-
-    // 填充前面的空白日期
+    
+    // Fill in empty days at start
     for (let i = 0; i < startDay; i++) {
       calendarDays.push(null);
     }
-
-    // 填充实际日期
+    
+    // Fill in actual days
     for (let day = 1; day <= daysInMonth; day++) {
       calendarDays.push(day);
     }
-
+    
     setCalendar(calendarDays);
   }, []);
 
   const isCheckedIn = (day) => {
     if (!day) return false;
-    const today = new Date();
-    const checkDate = new Date(today.getFullYear(), today.getMonth(), day);
-    return checkinDates.some((date) => new Date(date).toDateString() === checkDate.toDateString());
+    const currentDate = dayjs().set('date', day);
+    return checkinDates.some((date) => 
+      dayjs(date.created_time).isSame(currentDate, 'date')
+    );
   };
 
   const isToday = (day) => {
     if (!day) return false;
-    const today = new Date();
-    const checkDate = new Date(today.getFullYear(), today.getMonth(), day);
-    return checkDate.toDateString() === today.toDateString();
+    return dayjs().date() === day;
+  };
+
+  const isPendingCheck = (day) => {
+    if (!day) return false;
+    const today = dayjs();
+    const checkDate = today.set('date', day);
+    return checkDate.isAfter(today, 'day');
   };
 
   const onCheckIn = (day) => {
-    const today = new Date();
-    const checkDate = new Date(today.getFullYear(), today.getMonth(), day);
-    // 小于今天
-    if (day < today.getDate()) {
+    const today = dayjs();
+    if (day < today.date()) {
       showError('不能签到过去的时间');
       return;
     }
-    // 大于今天
-    if (day > today.getDate()) {
+    if (day > today.date()) {
       showError('未到签到时间');
       return;
     }
-    // 弹框 显示 Cloudflare Turnstile
     setCheckInModalOpen(true);
   };
 
   const showTurnstile = () => {
     // 弹框 显示 Cloudflare Turnstile
     console.log('showTurnstile');
-  };
-
-  const isPendingCheck = (day) => {
-    if (!day) return false;
-    const today = new Date();
-    const checkDate = new Date(today.getFullYear(), today.getMonth(), day + 1);
-    // 待签到
-    return checkDate.getTime() >= today.getTime();
   };
 
   return (
