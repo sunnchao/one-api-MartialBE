@@ -256,7 +256,7 @@ const LoginForm = ({ ...others }) => {
             return;
           }
 
-          const { success, message } = await login(values.username, values.password);
+          const { success, message } = await login(values.username, values.password, turnstileToken);
           if (success) {
             setStatus({ success: true });
           } else {
