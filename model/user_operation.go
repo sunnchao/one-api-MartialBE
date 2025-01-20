@@ -68,8 +68,8 @@ func IsCheckInToday(userId int) (checkInTime int64, lastDayUsed int64, err error
 
 	if err != nil {
 		// 获取昨日的累计使用额度
-		lastDayUsed, err := GetUserQuotaUsedByPeriod(userId, localZeroTime)
-		return -1, lastDayUsed, err
+		// lastDayUsed, err := GetUserQuotaUsedByPeriod(userId, localZeroTime)
+		// return -1, lastDayUsed, err
 	}
 	fmt.Printf("localZeroTime %v", localZeroTime.UnixMilli())
 
