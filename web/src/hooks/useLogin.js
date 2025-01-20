@@ -9,11 +9,11 @@ const useLogin = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const login = async (username, password) => {
+  const login = async (username, password, turnstileToken) => {
     try {
-      const res = await API.post(`/api/user/login`, {
+      const res = await API.post(`/api/user/login?turnstile=${turnstileToken}`, {
         username,
-        password
+        password,
       });
       const { success, message, data } = res.data;
       if (success) {
