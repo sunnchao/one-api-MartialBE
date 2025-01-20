@@ -425,7 +425,7 @@ func relayResponseWithErr(c *gin.Context, err *types.OpenAIErrorWithStatusCode) 
 	newErr.OpenAIError.Message = utils.MessageWithRequestId(newErr.OpenAIError.Message, requestId)
 
 	switch newErr.OpenAIError.Type {
-	case "new_api_error", "one_api_error", "shell_api_error":
+	case "new_api_error", "one_api_error", "shell_api_error", "rix_api_error":
 		newErr.OpenAIError.Type = "system_error"
 		if utils.ContainsString(newErr.Message, quotaKeywords) {
 			newErr.Message = "上游负载已饱和，请稍后再试"

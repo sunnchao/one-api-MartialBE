@@ -42,7 +42,7 @@ func main() {
 	}
 
 	logger.SetupLogger()
-	logger.SysLog("One Hub " + config.Version + " started")
+	logger.SysLog("Chirou API " + config.Version + " started")
 
 	// Initialize user token
 	err := common.InitUserToken()
