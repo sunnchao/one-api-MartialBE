@@ -5,6 +5,7 @@ import (
 	"one-api/common"
 	"one-api/model"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,6 +18,12 @@ func GetLogsList(c *gin.Context) {
 	}
 
 	logs, err := model.GetLogsList(&params)
+
+	// 获取统计数据
+	// 开始时间 结束时间 只统计最近60秒的rpm和tpm
+	oneMinuteAgo := time.Now().Add(-time.Minute).Unix()
+	_, stat := model.SumUsedQuota(oneMinuteAgo, time.Now().Unix(), params.ModelName, params.Username, params.TokenName, params.ChannelId)
+
 	if err != nil {
 		common.APIRespondWithError(c, http.StatusOK, err)
 		return
@@ -25,6 +32,7 @@ func GetLogsList(c *gin.Context) {
 		"success": true,
 		"message": "",
 		"data":    logs,
+		"stat":    stat,
 	})
 }
 
@@ -57,14 +65,16 @@ func GetLogsStat(c *gin.Context) {
 	username := c.Query("username")
 	modelName := c.Query("model_name")
 	channel, _ := strconv.Atoi(c.Query("channel"))
-	quotaNum := model.SumUsedQuota(startTimestamp, endTimestamp, modelName, username, tokenName, channel)
-	//tokenNum := model.SumUsedToken(logType, startTimestamp, endTimestamp, modelName, username, "")
+	quotaNum, stat := model.SumUsedQuota(startTimestamp, endTimestamp, modelName, username, tokenName, channel)
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
 		"data": gin.H{
 			"quota": quotaNum,
 			//"token": tokenNum,
+			"rpm": stat.Rpm,
+			"tpm": stat.Tpm,
 		},
 	})
 }
@@ -77,7 +87,7 @@ func GetLogsSelfStat(c *gin.Context) {
 	tokenName := c.Query("token_name")
 	modelName := c.Query("model_name")
 	channel, _ := strconv.Atoi(c.Query("channel"))
-	quotaNum := model.SumUsedQuota(startTimestamp, endTimestamp, modelName, username, tokenName, channel)
+	quotaNum, stat := model.SumUsedQuota(startTimestamp, endTimestamp, modelName, username, tokenName, channel)
 	//tokenNum := model.SumUsedToken(logType, startTimestamp, endTimestamp, modelName, username, tokenName)
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -85,6 +95,8 @@ func GetLogsSelfStat(c *gin.Context) {
 		"data": gin.H{
 			"quota": quotaNum,
 			//"token": tokenNum,
+			"rpm": stat.Rpm,
+			"tpm": stat.Tpm,
 		},
 	})
 }

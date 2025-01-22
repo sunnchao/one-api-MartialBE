@@ -150,7 +150,7 @@ func GetLogsList(params *LogsListParams) (*DataResult[Log], error) {
 		tx = tx.Where("model_name = ?", params.ModelName)
 	}
 	if params.Username != "" {
-		tx = tx.Where("username = ?", params.Username)
+		tx = tx.Where("username = ? or user_id = ?", params.Username, params.Username)
 	}
 	if params.TokenName != "" {
 		tx = tx.Where("token_name = ?", params.TokenName)
@@ -202,28 +202,44 @@ func SearchUserLogs(userId int, keyword string) (logs []*Log, err error) {
 	return logs, err
 }
 
-func SumUsedQuota(startTimestamp int64, endTimestamp int64, modelName string, username string, tokenName string, channel int) (quota int) {
+type Stat struct {
+	Quota int `json:"quota"`
+	Rpm   int `json:"rpm"`
+	Tpm   int `json:"tpm"`
+}
+
+func SumUsedQuota(startTimestamp int64, endTimestamp int64, modelName string, username string, tokenName string, channel int) (quota int, stat Stat) {
 	tx := DB.Table("logs").Select(assembleSumSelectStr("quota"))
+	rpmTpmQuery := DB.Table("logs").Select("count(*) rpm, sum(prompt_tokens) + sum(completion_tokens) tpm")
+
 	if username != "" {
 		tx = tx.Where("username = ?", username)
+		rpmTpmQuery = rpmTpmQuery.Where("username = ?", username)
 	}
 	if tokenName != "" {
 		tx = tx.Where("token_name = ?", tokenName)
+		rpmTpmQuery = rpmTpmQuery.Where("token_name = ?", tokenName)
 	}
 	if startTimestamp != 0 {
 		tx = tx.Where("created_at >= ?", startTimestamp)
+		rpmTpmQuery = rpmTpmQuery.Where("created_at >= ?", startTimestamp)
 	}
 	if endTimestamp != 0 {
 		tx = tx.Where("created_at <= ?", endTimestamp)
+		rpmTpmQuery = rpmTpmQuery.Where("created_at <= ?", endTimestamp)
 	}
 	if modelName != "" {
 		tx = tx.Where("model_name = ?", modelName)
+		rpmTpmQuery = rpmTpmQuery.Where("model_name = ?", modelName)
 	}
 	if channel != 0 {
 		tx = tx.Where("channel_id = ?", channel)
+		rpmTpmQuery = rpmTpmQuery.Where("channel_id = ?", channel)
 	}
 	tx.Where("type = ?", LogTypeConsume).Scan(&quota)
-	return quota
+	rpmTpmQuery.Scan(&stat)
+
+	return quota, stat
 }
 
 func DeleteOldLog(targetTimestamp int64) (int64, error) {

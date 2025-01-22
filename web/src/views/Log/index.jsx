@@ -29,8 +29,8 @@ export default function Log() {
     username: '',
     token_name: '',
     model_name: '',
-    start_timestamp: 0,
-    end_timestamp: dayjs().unix() + 3600,
+    start_timestamp: dayjs().startOf('day').unix(), // 开始时间 当日 0 点
+    end_timestamp: dayjs().endOf('day').unix(), // 结束时间 当日 23:59:59
     log_type: 0,
     channel_id: ''
   };

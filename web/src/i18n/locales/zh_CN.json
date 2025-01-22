@@ -303,7 +303,7 @@
     "channelIdPlaceholder": "渠道ID",
     "taskId": "任务ID",
     "taskIdPlaceholder": "任务ID",
-    "username": "用户名称"
+    "username": "用户名称或用户ID"
   },
   "midjourneyPage": {
     "midjourney": "Midjourney",

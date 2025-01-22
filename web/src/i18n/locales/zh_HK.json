@@ -875,7 +875,7 @@
     "taskIdPlaceholder": "任務ID",
     "tokenName": "令牌名稱",
     "type": "類型",
-    "username": "用戶名稱"
+    "username": "用戶名稱或用戶ID"
   },
   "task": "非同步任務",
   "taskPage": {

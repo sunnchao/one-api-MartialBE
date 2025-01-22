@@ -878,7 +878,7 @@
     "taskIdPlaceholder": "Task ID",
     "tokenName": "Token Name",
     "type": "Type",
-    "username": "Username"
+    "username": "Username or User ID"
   },
   "task": "Asynchronous tasks",
   "taskPage": {

@@ -875,7 +875,7 @@
     "taskIdPlaceholder": "タスクID",
     "tokenName": "トークン名",
     "type": "タイプ",
-    "username": "ユーザー名"
+    "username": "ユーザー名 または ユーザーID"
   },
   "task": "非同期タスク",
   "taskPage": {
