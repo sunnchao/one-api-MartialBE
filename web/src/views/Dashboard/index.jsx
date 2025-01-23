@@ -277,7 +277,7 @@ function getLineCardOption(lineDataGroup, field) {
     };
     switch (field) {
       case 'Quota':
-        tmp.y = calculateQuota(item.Quota, 3);
+        tmp.y = calculateQuota(item.Quota, 6);
         break;
       case 'PromptTokens':
         tmp.y += item.CompletionTokens;

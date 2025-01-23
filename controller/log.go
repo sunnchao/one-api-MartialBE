@@ -5,7 +5,6 @@ import (
 	"one-api/common"
 	"one-api/model"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,13 +20,14 @@ func GetLogsList(c *gin.Context) {
 
 	// 获取统计数据
 	// 开始时间 结束时间 只统计最近60秒的rpm和tpm
-	oneMinuteAgo := time.Now().Add(-time.Minute).Unix()
-	_, stat := model.SumUsedQuota(oneMinuteAgo, time.Now().Unix(), params.ModelName, params.Username, params.TokenName, params.ChannelId)
+	quota, stat := model.SumUsedQuota(params.StartTimestamp, params.EndTimestamp, params.ModelName, params.Username, params.TokenName, params.ChannelId, 0)
 
 	if err != nil {
 		common.APIRespondWithError(c, http.StatusOK, err)
 		return
 	}
+	// 给 stat 添加 quota
+	stat.Quota = quota
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
@@ -46,14 +46,22 @@ func GetUserLogsList(c *gin.Context) {
 	}
 
 	logs, err := model.GetUserLogsList(userId, &params)
+
+	// 获取统计数据
+	// 开始时间 结束时间 只统计最近60秒的rpm和tpm
+	quota, stat := model.SumUsedQuota(params.StartTimestamp, params.EndTimestamp, params.ModelName, "", params.TokenName, 0, userId)
+
 	if err != nil {
 		common.APIRespondWithError(c, http.StatusOK, err)
 		return
 	}
+	// 给 stat 添加 quota
+	stat.Quota = quota
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
 		"data":    logs,
+		"stat":    stat,
 	})
 }
 
@@ -65,7 +73,7 @@ func GetLogsStat(c *gin.Context) {
 	username := c.Query("username")
 	modelName := c.Query("model_name")
 	channel, _ := strconv.Atoi(c.Query("channel"))
-	quotaNum, stat := model.SumUsedQuota(startTimestamp, endTimestamp, modelName, username, tokenName, channel)
+	quotaNum, stat := model.SumUsedQuota(startTimestamp, endTimestamp, modelName, username, tokenName, channel, 0)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -87,7 +95,7 @@ func GetLogsSelfStat(c *gin.Context) {
 	tokenName := c.Query("token_name")
 	modelName := c.Query("model_name")
 	channel, _ := strconv.Atoi(c.Query("channel"))
-	quotaNum, stat := model.SumUsedQuota(startTimestamp, endTimestamp, modelName, username, tokenName, channel)
+	quotaNum, stat := model.SumUsedQuota(startTimestamp, endTimestamp, modelName, username, tokenName, channel, 0)
 	//tokenNum := model.SumUsedToken(logType, startTimestamp, endTimestamp, modelName, username, tokenName)
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

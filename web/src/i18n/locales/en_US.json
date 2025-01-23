@@ -283,7 +283,10 @@
       "original_times_price": "Original price: ${{ times }} per time",
       "output_price": "Output: ${{ price }} /M",
       "times_price": "${{ times }} / time"
-    }
+    },
+    "rpm": "Requests per minute",
+    "tpm": "Tokens consumed per minute",
+    "quota": "Total quota consumed"
   },
   "login": {
     "codeRequired": "verification code must be filled",

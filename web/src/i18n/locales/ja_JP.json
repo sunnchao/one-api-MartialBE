@@ -283,7 +283,10 @@
       "original_times_price": "元の価格：${{ times }} / 回",
       "output_price": "出力: ${{ price }} /M",
       "times_price": "${{ times }} / 回"
-    }
+    },
+    "rpm": "近1分間のリクエスト数",
+    "tpm": "近1分間のトークン消費数",
+    "quota": "総消費額"
   },
   "login": {
     "codeRequired": "確認コードを入力する必要があります",

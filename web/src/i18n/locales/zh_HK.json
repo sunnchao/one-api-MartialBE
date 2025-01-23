@@ -284,7 +284,10 @@
       "original_times_price": "原價格: ${{ times }} / 次",
       "output_price": "輸出: ${{ price }} /M",
       "times_price": "${{ times }} / 次"
-    }
+    },
+    "rpm": "近1分間的請求次數",
+    "tpm": "近1分間的消耗Token數",
+    "quota": "總消耗額"
   },
   "login": {
     "codeRequired": "驗證碼不能為空",
