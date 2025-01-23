@@ -192,8 +192,10 @@ type GeminiChatSafetySettings struct {
 }
 
 type GeminiChatTools struct {
-	FunctionDeclarations []types.ChatCompletionFunction `json:"functionDeclarations,omitempty"`
-	CodeExecution        *GeminiCodeExecution           `json:"codeExecution,omitempty"`
+	FunctionDeclarations  []types.ChatCompletionFunction `json:"functionDeclarations,omitempty"`
+	CodeExecution         *GeminiCodeExecution           `json:"codeExecution,omitempty"`
+	GoogleSearch          any                            `json:"googleSearch,omitempty"`
+	GoogleSearchRetrieval any                            `json:"googleSearchRetrieval,omitempty"`
 }
 
 type GeminiCodeExecution struct {
@@ -410,22 +412,6 @@ func (e *GeminiErrorWithStatusCode) ToOpenAiError() *types.OpenAIErrorWithStatus
 		},
 		LocalError: e.LocalError,
 	}
-}
-
-type GeminiOpenaiUsage struct {
-	PromptTokens     int `json:"promptTokens"`
-	CompletionTokens int `json:"completionTokens"`
-	TotalTokens      int `json:"totalTokens"`
-}
-
-type GeminiOpenaiChatResponse struct {
-	types.ChatCompletionResponse
-	Usage *GeminiOpenaiUsage `json:"usage,omitempty"`
-}
-
-type GeminiOpenaiChatStreamResponse struct {
-	types.ChatCompletionStreamResponse
-	Usage *GeminiOpenaiUsage `json:"usage,omitempty"`
 }
 
 type GeminiErrors []*GeminiErrorResponse
