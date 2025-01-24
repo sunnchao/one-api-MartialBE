@@ -37,8 +37,22 @@ func insertOperation(user_operation UserOperation) (err error) {
 func InsertOperationCheckIn(userId int, lastDayUsed int64, requestIP string) (quota int, err error) {
 	rand.Seed(time.Now().UnixNano())
 
-	// 随机生成一个额度
-	quota = int(rand.Float64() * rand.Float64() * float64(lastDayUsed))
+	// 生成一个 0-100 的随机数来决定概率区间
+	probability := rand.Float64() * 100
+
+	// 根据概率区间生成不同范围的随机系数
+	var coefficient float64
+	switch {
+	case probability < 75: // 75% 概率生成 0-0.25
+		coefficient = rand.Float64() * 0.25
+	case probability < 95: // 20% 概率生成 0.25-0.5
+		coefficient = 0.25 + rand.Float64()*0.25
+	default: // 5% 概率生成 0.5-0.75
+		coefficient = 0.5 + rand.Float64()*0.25
+	}
+
+	// 计算最终额度
+	quota = int(coefficient * float64(lastDayUsed))
 
 	// 查询用户现有额度
 	userQuota, err := GetUserQuota(userId)
@@ -113,8 +127,8 @@ func GetUserQuotaUsedByPeriod(userId int, zeroTime time.Time) (used int64, err e
 	}
 
 	// 保底值
-	if float64(used) < (config.QuotaPerUnit * 0.5) {
-		used = int64(config.QuotaPerUnit * 0.5)
+	if float64(used) < (config.QuotaPerUnit * 0.25) {
+		used = int64(config.QuotaPerUnit * 0.25)
 	}
 	return used, err
 }
