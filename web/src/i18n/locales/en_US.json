@@ -958,7 +958,9 @@
     "usedQuota": "Used Quota",
     "userGroup": "group",
     "apiRate": "",
-    "apiRateTip": ""
+    "apiRateTip": "",
+    "modelLimitsEnabled": "Enable model limits",
+    "modelLimits": "Model limits"
   },
   "topup": "Top-up",
   "topupCard": {

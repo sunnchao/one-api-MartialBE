@@ -36,7 +36,9 @@ const validationSchema = Yup.object().shape({
   name: Yup.string().required('名称 不能为空'),
   remain_quota: Yup.number().min(0, '必须大于等于0'),
   expired_time: Yup.number(),
-  unlimited_quota: Yup.boolean()
+  unlimited_quota: Yup.boolean(),
+  model_limits: Yup.string(),
+  model_limits_enabled: Yup.boolean()
 });
 
 const originInputs = {
@@ -45,7 +47,9 @@ const originInputs = {
   remain_quota: 0,
   expired_time: -1,
   unlimited_quota: false,
-  group: ''
+  group: '',
+  model_limits: '',
+  model_limits_enabled: false
 };
 
 const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
@@ -238,6 +242,24 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
                   ))}
                 </Select>
               </FormControl>
+              <FormControl fullWidth>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={values.model_limits_enabled}
+                      onClick={() => {
+                        setFieldValue('model_limits_enabled', !values.model_limits_enabled);
+                      }}
+                    />
+                  }
+                  label={t('token_index.modelLimitsEnabled')}
+                />
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel>{t('token_index.modelLimits')}</InputLabel>
+                <OutlinedInput value={values.model_limits} name="model_limits" onChange={handleChange} />
+              </FormControl>
+
               <DialogActions>
                 <Button onClick={onCancel}>{t('token_index.cancel')}</Button>
                 <Button disableElevation disabled={isSubmitting} type="submit" variant="contained" color="primary">

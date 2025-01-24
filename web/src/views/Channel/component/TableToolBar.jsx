@@ -13,7 +13,7 @@ export default function TableToolBar({ filterName, handleFilterName, groupOption
 
   return (
     <>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 3, sm: 2, md: 4 }} padding={'24px'} paddingBottom={'0px'}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 2, sm: 2, md: 2 }} padding={'24px'} paddingBottom={'0px'}>
         <FormControl>
           <InputLabel htmlFor="channel-name-label">{t('channel_index.channelName')}</InputLabel>
           <OutlinedInput

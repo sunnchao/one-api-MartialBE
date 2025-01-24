@@ -286,7 +286,6 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
 
     try {
       if (channelId) {
-        delete values.openai_organization;
         res = await API.put(baseApiUrl, { ...values, id: parseInt(channelId), models: modelsStr });
       } else {
         res = await API.post(baseApiUrl, { ...values, models: modelsStr });
@@ -545,7 +544,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                       />
                     </>
                   ) : (
-                    <TextField
+                    <OutlinedInput
                       multiline
                       id="channel-base_url-label"
                       label={customizeT(inputLabel.base_url)}
@@ -937,7 +936,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag }) => 
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            padding: 2,
+                            padding: 2
                           }}
                         >
                           <Box sx={{ flex: 1 }}>

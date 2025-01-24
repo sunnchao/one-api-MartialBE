@@ -125,6 +125,8 @@ func AddToken(c *gin.Context) {
 		RemainQuota:    token.RemainQuota,
 		UnlimitedQuota: token.UnlimitedQuota,
 		Group:          token.Group,
+		ModelLimits:    token.ModelLimits,
+		ModelLimitsEnabled: token.ModelLimitsEnabled,
 	}
 	err = cleanToken.Insert()
 	if err != nil {
@@ -218,6 +220,8 @@ func UpdateToken(c *gin.Context) {
 		cleanToken.RemainQuota = token.RemainQuota
 		cleanToken.UnlimitedQuota = token.UnlimitedQuota
 		cleanToken.Group = token.Group
+		cleanToken.ModelLimits = token.ModelLimits
+		cleanToken.ModelLimitsEnabled = token.ModelLimitsEnabled
 	}
 	err = cleanToken.Update()
 	if err != nil {

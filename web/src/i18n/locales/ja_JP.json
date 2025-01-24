@@ -955,7 +955,9 @@
     "usedQuota": "使用済みクォータ",
     "userGroup": "グループ",
     "apiRate": "",
-    "apiRateTip": ""
+    "apiRateTip": "",
+    "modelLimitsEnabled": "モデル制限を有効にする",
+    "modelLimits": "モデル制限"
   },
   "topup": "トップアップ",
   "topupCard": {

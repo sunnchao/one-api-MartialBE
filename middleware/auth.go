@@ -112,10 +112,10 @@ func tokenAuth(c *gin.Context, key string) {
 	key = strings.TrimPrefix(key, "Bearer ")
 	key = strings.TrimPrefix(key, "sk-")
 
-	if len(key) < 48 {
-		abortWithMessage(c, http.StatusUnauthorized, "无效的令牌")
-		return
-	}
+	// if len(key) < 48 {
+	// 	abortWithMessage(c, http.StatusUnauthorized, "无效的令牌")
+	// 	return
+	// }
 
 	parts := strings.Split(key, "#")
 	key = parts[0]
@@ -129,8 +129,20 @@ func tokenAuth(c *gin.Context, key string) {
 	c.Set("token_id", token.Id)
 	c.Set("token_name", token.Name)
 	c.Set("token_group", token.Group)
+
+	if token.ModelLimitsEnabled {
+		c.Set("token_model_limit_enabled", true)
+		c.Set("token_model_limit", token.GetModelLimitsMap())
+	} else {
+		c.Set("token_model_limit_enabled", false)
+	}
+
 	if len(parts) > 1 {
 		if model.IsAdmin(token.UserId) {
+			if token.ModelLimitsEnabled {
+				abortWithMessage(c, http.StatusForbidden, "管理员已启用模型限制，无法指定渠道")
+				return
+			}
 			if strings.HasPrefix(parts[1], "!") {
 				channelId := utils.String2Int(parts[1][1:])
 				c.Set("skip_channel_ids", []int{channelId})
