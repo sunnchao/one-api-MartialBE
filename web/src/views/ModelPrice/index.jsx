@@ -207,7 +207,7 @@ export default function ModelPrice() {
   };
 
   return (
-    <Stack spacing={3} sx={{ padding: theme.spacing(3) }}>
+    <Stack spacing={2}>
       <Typography variant="h4" color="textPrimary">
         {t('modelpricePage.availableModels')}
       </Typography>
