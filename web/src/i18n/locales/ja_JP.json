@@ -91,6 +91,7 @@
     "validJson": "有効な JSON 文字列である必要があります"
   },
   "channel_index": {
+    "channelId": "チャネルID",
     "AzureApiVersion": "Azureのバージョン番号",
     "actions": "操作",
     "all": "すべて",

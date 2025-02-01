@@ -113,13 +113,13 @@ export default function UsersTableRow({ item, manageUser, handleOpenModal, setMo
             <Tooltip title={t('token_index.remainingQuota')} placement="top">
               <Label color={'primary'} variant="outlined">
                 {' '}
-                {renderQuota(item.quota,6)}{' '}
+                {renderQuota(item.quota, 6)}{' '}
               </Label>
             </Tooltip>
             <Tooltip title={t('token_index.usedQuota')} placement="top">
               <Label color={'primary'} variant="outlined">
                 {' '}
-                {renderQuota(item.used_quota,6)}{' '}
+                {renderQuota(item.used_quota, 6)}{' '}
               </Label>
             </Tooltip>
             <Tooltip title={t('userPage.useQuota')} placement="top">
@@ -133,15 +133,26 @@ export default function UsersTableRow({ item, manageUser, handleOpenModal, setMo
         <TableCell>{renderRole(t, item.role)}</TableCell>
         <TableCell>
           <Stack direction="row" spacing={0.5} alignItems="center" justifyContent="center">
-            <Tooltip title={item.wechat_id ? item.wechat_id : t('profilePage.notBound')} placement="top">
-              <Icon icon="ri:wechat-fill" color={item.wechat_id ? theme.palette.success.dark : theme.palette.grey[400]} />
-            </Tooltip>
-            <Tooltip title={item.github_id ? item.github_id : t('profilePage.notBound')} placement="top">
-              <Icon icon="ri:github-fill" color={item.github_id ? theme.palette.grey[900] : theme.palette.grey[400]} />
-            </Tooltip>
-            <Tooltip title={item.email ? item.email : t('profilePage.notBound')} placement="top">
-              <Icon icon="ri:mail-fill" color={item.email ? theme.palette.grey[900] : theme.palette.grey[400]} />
-            </Tooltip>
+            {item.wechat_id && (
+              <Tooltip title={item.wechat_id ? item.wechat_id : t('profilePage.notBound')} placement="top">
+                <Icon icon="ri:wechat-fill" color={item.wechat_id ? theme.palette.primary.dark : theme.palette.grey[400]} />
+              </Tooltip>
+            )}
+            {item.github_id && (
+              <Tooltip title={item.github_id ? item.github_id : t('profilePage.notBound')} placement="top">
+                <Icon icon="ri:github-fill" color={item.github_id ? theme.palette.primary.dark : theme.palette.grey[400]} />
+              </Tooltip>
+            )}
+            {item.email && (
+              <Tooltip title={item.email ? item.email : t('profilePage.notBound')} placement="top">
+                <Icon icon="ri:mail-fill" color={item.email ? theme.palette.primary.dark : theme.palette.grey[400]} />
+              </Tooltip>
+            )}
+            {item.linuxdo_id && (
+              <Tooltip title={item.linuxdo_id ? item.linuxdo_id : t('profilePage.notBound')} placement="top">
+                <Icon icon="uil:linux" color={item.linuxdo_id ? theme.palette.primary.dark : theme.palette.grey[400]} />
+              </Tooltip>
+            )}
           </Stack>
         </TableCell>
         <TableCell>{item.created_time === 0 ? t('common.unknown') : timestamp2string(item.created_time)}</TableCell>

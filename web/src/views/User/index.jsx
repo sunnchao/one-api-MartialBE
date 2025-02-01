@@ -155,7 +155,7 @@ export default function Users() {
 
   return (
     <>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Typography variant="h4">{t('userPage.users')}</Typography>
 
         <Button

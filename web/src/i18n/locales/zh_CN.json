@@ -86,6 +86,7 @@
     "unused": "未使用"
   },
   "channel_index": {
+    "channelId": "渠道ID",
     "channelList": "渠道列表",
     "channelTags": "渠道标签",
     "channel": "渠道",

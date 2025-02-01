@@ -107,6 +107,10 @@ func GetChannelsList(params *SearchChannelsParams) (*DataResult[Channel], error)
 		db = db.Where("tag = ''")
 	}
 
+	if params.Id != 0 {
+		db = db.Where("id = ?", params.Id)
+	}
+
 	return PaginateAndOrder(db, &params.PaginationParams, &channels, allowedChannelOrderFields)
 }
 

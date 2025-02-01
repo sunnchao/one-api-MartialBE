@@ -33,6 +33,29 @@ export default function TableToolBar({ filterName, handleFilterName, groupOption
             }
           />
         </FormControl>
+        {/* channel id */}
+        <FormControl>
+          <InputLabel htmlFor="channel-id-label">{t('channel_index.channelId')}</InputLabel>
+          <OutlinedInput
+            id="id"
+            name="id"
+            sx={{
+              minWidth: '100%'
+            }}
+            label={t('channel_index.channelId')}
+            value={filterName.id}
+            onChange={handleFilterName}
+            placeholder={t('channel_index.channelId')}
+            startAdornment={
+              <InputAdornment position="start">
+                <Icon icon="ph:open-ai-logo-duotone" width={20} height={20} color={grey500} />
+              </InputAdornment>
+            }
+          />
+        </FormControl>
+
+        {/*  */}
+
         <FormControl>
           <InputLabel htmlFor="channel-models-label">{t('channel_index.modelName')}</InputLabel>
           <OutlinedInput

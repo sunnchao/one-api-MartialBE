@@ -91,6 +91,7 @@
     "validJson": "Must be a valid JSON string"
   },
   "channel_index": {
+    "channelId": "Channel ID",
     "AzureApiVersion": "Azure version number",
     "actions": "Actions",
     "all": "All",

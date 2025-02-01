@@ -50,7 +50,7 @@ func Relay(c *gin.Context) {
 	for i := retryTimes; i > 0; i-- {
 		// 冻结通道
 		shouldCooldowns(c, channel, apiErr)
-		if err := relay.setProvider(relay.getOriginalModel()); err != nil {
+		if err := relay.setProvider(relay.getModelName()); err != nil {
 			continue
 		}
 

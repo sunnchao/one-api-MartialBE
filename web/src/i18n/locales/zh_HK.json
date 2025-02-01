@@ -92,6 +92,7 @@
     "expand": "展開"
   },
   "channel_index": {
+    "channelId": "渠道ID",
     "AzureApiVersion": "Azure 版本號",
     "actions": "操作",
     "all": "全部",
