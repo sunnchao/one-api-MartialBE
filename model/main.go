@@ -1,14 +1,15 @@
 package model
 
 import (
-  "fmt"
-  "one-api/common"
-  "one-api/common/config"
-  "one-api/common/logger"
-  "one-api/common/utils"
-  "strconv"
-  "strings"
-  "time"
+	"fmt"
+	"net/url"
+	"one-api/common"
+	"one-api/common/config"
+	"one-api/common/logger"
+	"one-api/common/utils"
+	"strconv"
+	"strings"
+	"time"
 
   "github.com/spf13/viper"
   "gorm.io/driver/mysql"
@@ -61,32 +62,39 @@ func createRootAccountIfNeed() error {
 }
 
 func chooseDB() (*gorm.DB, error) {
-  if viper.IsSet("sql_dsn") {
-    dsn := viper.GetString("sql_dsn")
-    if strings.HasPrefix(dsn, "postgres://") {
-      // Use PostgreSQL
-      logger.SysLog("using PostgreSQL as database")
-      common.UsingPostgreSQL = true
-      return gorm.Open(postgres.New(postgres.Config{
-        DSN:                  dsn,
-        PreferSimpleProtocol: true, // disables implicit prepared statement usage
-      }), &gorm.Config{
-        PrepareStmt: true, // precompile SQL
-      })
-    }
-    // Use MySQL
-    logger.SysLog("using MySQL as database")
-    return gorm.Open(mysql.Open(dsn), &gorm.Config{
-      PrepareStmt: true, // precompile SQL
-    })
-  }
-  // Use SQLite
-  logger.SysLog("SQL_DSN not set, using SQLite as database")
-  common.UsingSQLite = true
-  config := fmt.Sprintf("?_busy_timeout=%d", utils.GetOrDefault("sqlite_busy_timeout", 3000))
-  return gorm.Open(sqlite.Open(viper.GetString("sqlite_path")+config), &gorm.Config{
-    PrepareStmt: true, // precompile SQL
-  })
+	if viper.IsSet("sql_dsn") {
+		dsn := viper.GetString("sql_dsn")
+		localTimezone := utils.GetLocalTimezone()
+		if strings.HasPrefix(dsn, "postgres://") {
+			// Use PostgreSQL
+			logger.SysLog("using PostgreSQL as database")
+			common.UsingPostgreSQL = true
+			dsn = dsnAddArg(dsn, "timezone", localTimezone)
+
+			return gorm.Open(postgres.New(postgres.Config{
+				DSN:                  dsn,
+				PreferSimpleProtocol: true, // disables implicit prepared statement usage
+			}), &gorm.Config{
+				PrepareStmt: true, // precompile SQL
+			})
+
+		}
+		// Use MySQL
+		logger.SysLog("using MySQL as database")
+		// mysql 时区设置
+		dsn = dsnAddArg(dsn, "loc", localTimezone)
+		// dsn = dsnAddArg(dsn, "parseTime", "true")
+		return gorm.Open(mysql.Open(dsn), &gorm.Config{
+			PrepareStmt: true, // precompile SQL
+		})
+	}
+	// Use SQLite
+	logger.SysLog("SQL_DSN not set, using SQLite as database")
+	common.UsingSQLite = true
+	config := fmt.Sprintf("?_busy_timeout=%d", utils.GetOrDefault("sqlite_busy_timeout", 3000))
+	return gorm.Open(sqlite.Open(viper.GetString("sqlite_path")+config), &gorm.Config{
+		PrepareStmt: true, // precompile SQL
+	})
 }
 
 func InitDB() (err error) {
@@ -95,12 +103,12 @@ func InitDB() (err error) {
     logger.FatalLog(err)
     return err
   }
-  
+
   if config.Debug {
     db = db.Debug()
   }
   DB = db
-  
+
   // 优化数据库连接配置
   sqlDB, err := DB.DB()
   if err != nil {
@@ -123,7 +131,7 @@ func InitDB() (err error) {
   // 禁用外键检查，提高迁移速度
   disableFK := "SET FOREIGN_KEY_CHECKS=0;"
   enableFK := "SET FOREIGN_KEY_CHECKS=1;"
-  
+
   if common.UsingPostgreSQL {
     disableFK = "SET CONSTRAINTS ALL DEFERRED;"
     enableFK = "SET CONSTRAINTS ALL IMMEDIATE;"
@@ -131,7 +139,7 @@ func InitDB() (err error) {
     disableFK = "PRAGMA foreign_keys=OFF;"
     enableFK = "PRAGMA foreign_keys=ON;"
   }
-  
+
   DB.Exec(disableFK)
   defer DB.Exec(enableFK)
 
@@ -144,7 +152,7 @@ func InitDB() (err error) {
     &Option{},
     &UserGroup{},
   }
-  
+
   for _, model := range baseModels {
     if err := db.AutoMigrate(model); err != nil {
       return fmt.Errorf("failed to migrate base model: %v", err)
@@ -163,7 +171,7 @@ func InitDB() (err error) {
   }
 
   errChan := make(chan error, len(dependentModels))
-  
+
   for _, model := range dependentModels {
     go func(m interface{}) {
       errChan <- db.AutoMigrate(m)
@@ -223,4 +231,20 @@ func CloseDB() error {
   }
   err = sqlDB.Close()
   return err
+}
+
+func dsnAddArg(dsn string, arg string, value string) string {
+	// 如果是MySQL 需要转义
+	if !common.UsingPostgreSQL {
+		value = url.QueryEscape(value)
+	}
+
+	if !strings.Contains(dsn, arg+"=") {
+		if strings.Contains(dsn, "?") {
+			dsn += "&" + arg + "=" + value
+		} else {
+			dsn += "?" + arg + "=" + value
+		}
+	}
+	return dsn
 }

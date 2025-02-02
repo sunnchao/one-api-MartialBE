@@ -285,6 +285,8 @@
       "output_price": "Output: ${{ price }} /M",
       "times_price": "${{ times }} / time"
     },
+    "cachedReadTokens": "Cache read Tokens",
+    "cachedWriteTokens": "Write tokens to cache (* {{ ratio }})",
     "rpm": "Requests per minute",
     "tpm": "Tokens consumed per minute",
     "quota": "Total quota consumed"
@@ -1154,6 +1156,7 @@
     "nameTip": "Channel Name",
     "title": "Model Ownership"
   },
+  "price": "Price",
   "calendar": {
     "title": "Check-in Calendar",
     "sun": "Sun",

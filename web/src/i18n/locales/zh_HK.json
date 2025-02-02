@@ -288,7 +288,9 @@
     },
     "rpm": "近1分間的請求次數",
     "tpm": "近1分間的消耗Token數",
-    "quota": "總消耗額"
+    "quota": "總消耗額",
+    "cachedReadTokens": "緩存讀取Tokens",
+    "cachedWriteTokens": "緩存寫入 Tokens"
   },
   "login": {
     "codeRequired": "驗證碼不能為空",
@@ -1150,5 +1152,6 @@
     "name": "名稱",
     "nameTip": "渠道名稱",
     "title": "模型歸屬"
-  }
+  },
+  "price": "價格"
 }

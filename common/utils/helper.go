@@ -361,6 +361,14 @@ func GetPointer[T any](val T) *T {
 	return &val
 }
 
+func GetLocalTimezone() string {
+	if tz := os.Getenv("TZ"); tz != "" {
+		return tz
+	}
+
+	return "Asia/Shanghai"
+}
+
 // 获取当地0 点时间
 func GetLocalZeroTime() time.Time {
 	now := time.Now()
