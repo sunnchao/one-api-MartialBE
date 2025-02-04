@@ -79,7 +79,15 @@ export default function LogTableRow({ item, userIsAdmin, userGroup }) {
       <TableRow tabIndex={item.id}>
         <TableCell>{timestamp2string(item.created_at)}</TableCell>
 
-        {userIsAdmin && <TableCell>{(item.channel_id || '') + ' ' + (item.channel?.name ? '(' + item.channel.name + ')' : '')}</TableCell>}
+        {userIsAdmin && (
+          <TableCell>
+            <div>
+              {(item.channel_id || '')}
+              <br />
+              {item.channel?.name ? item.channel.name : ''}
+            </div>
+          </TableCell>
+        )}
         {userIsAdmin && (
           <TableCell>
             <Label color="default" variant="outlined" copyText={item.username}>
