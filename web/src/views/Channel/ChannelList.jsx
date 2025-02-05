@@ -425,7 +425,7 @@ export default function ChannelList() {
         </Toolbar>
         {searching && <LinearProgress />}
         <TableContainer>
-          <Table sx={{ minWidth: 1200 }}>
+          <Table sx={{ minWidth: 1366 }}>
             <KeywordTableHead
               order={order}
               orderBy={orderBy}
