@@ -526,7 +526,8 @@
     "usernameMinLength": "Username must be at least 3 characters long",
     "usernameRequired": "Username cannot be empty",
     "wechatBindSuccess": "WeChat account successfully bound!",
-    "yourTokenIs": "Your access token is:"
+    "yourTokenIs": "Your access token is:",
+    "pushNotify": "Subscription Management"
   },
   "redemption": "Redemption",
   "redemptionPage": {

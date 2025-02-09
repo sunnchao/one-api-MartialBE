@@ -406,7 +406,8 @@
     "lark": "飞书",
     "tokenNotice": "注意，此处生成的令牌用于系统管理，而非用于请求 OpenAI 相关的服务，请知悉。",
     "yourTokenIs": "你的访问令牌是:",
-    "keepSafe": "请妥善保管。如有泄漏，请立即重置。"
+    "keepSafe": "请妥善保管。如有泄漏，请立即重置。",
+    "pushNotify": "订阅管理"
   },
   "pricingPage": {
     "currencyInfo1": "美元",

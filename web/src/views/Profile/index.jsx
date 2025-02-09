@@ -226,7 +226,7 @@ export default function Profile() {
             <SubCard title={t('profilePage.accountBinding')}>
               <Grid container spacing={2}>
                 {status.wechat_login && !inputs.wechat_id && (
-                  <Grid xs={12} md={4}>
+                  <Grid xs={12} md={12}>
                     <Button variant="contained" onClick={handleWechatOpen}>
                       {t('profilePage.bindWechatAccount')}
                     </Button>
@@ -234,7 +234,7 @@ export default function Profile() {
                 )}
 
                 {status.linux_do_oauth && !inputs.linux_do_client_id && (
-                  <Grid xs={12} md={4}>
+                  <Grid xs={12} md={12}>
                     <Button
                       variant="contained"
                       onClick={() => onLinuxDoOAuthClicked(status.linux_do_client_id, true, linuxDoLoading, setLinuxDoLoading)}
@@ -245,7 +245,7 @@ export default function Profile() {
                 )}
 
                 {status.github_oauth && !inputs.github_id && (
-                  <Grid xs={12} md={4}>
+                  <Grid xs={12} md={12}>
                     <Button variant="contained" onClick={() => onGitHubOAuthClicked(status.github_client_id, true)}>
                       {t('profilePage.bindGitHubAccount')}
                     </Button>
@@ -253,19 +253,20 @@ export default function Profile() {
                 )}
 
                 {status.lark_client_id && !inputs.lark_id && (
-                  <Grid xs={12} md={4}>
+                  <Grid xs={12} md={12}>
                     <Button variant="contained" onClick={() => onLarkOAuthClicked(status.lark_client_id)}>
                       {t('profilePage.bindLarkAccount')}
                     </Button>
                   </Grid>
                 )}
 
-                <Grid xs={12} md={4}>
+                <Grid xs={12} md={12}>
                   <Button
                     variant="contained"
                     onClick={() => {
                       setOpenEmail(true);
                     }}
+                    disabled={!turnstileToken}
                   >
                     {inputs.email ? t('profilePage.changeEmail') : t('profilePage.bindEmail')}
                   </Button>
@@ -310,6 +311,26 @@ export default function Profile() {
                 )}
               </Grid>
             </SubCard>
+            <SubCard title={t('profilePage.pushNotify')}>
+              <Grid container spacing={2}>
+                <Grid xs={12}>
+                  <Alert severity="info">{t('profilePage.tokenNotice')}</Alert>
+                </Grid>
+                {inputs.access_token && (
+                  <Grid xs={12}>
+                    <Alert severity="error">
+                      {t('profilePage.yourTokenIs')} <b>{inputs.access_token}</b> <br />
+                      {t('profilePage.keepSafe')}
+                    </Alert>
+                  </Grid>
+                )}
+                <Grid xs={12}>
+                  <Button variant="contained" onClick={generateAccessToken}>
+                    {inputs.access_token ? t('profilePage.resetToken') : t('profilePage.generateToken')}
+                  </Button>
+                </Grid>
+              </Grid>
+            </SubCard>
             <SubCard title={t('profilePage.other')}>
               <Grid container spacing={2}>
                 <Grid xs={12}>
@@ -330,6 +351,7 @@ export default function Profile() {
                 </Grid>
               </Grid>
             </SubCard>
+
           </Stack>
         </Card>
       </UserCard>

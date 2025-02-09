@@ -19,7 +19,7 @@ const Jump = Loadable(lazy(() => import('views/Jump')));
 const Playground = Loadable(lazy(() => import('views/Playground')));
 const ModelPrice = Loadable(lazy(() => import('views/ModelPrice')));
 
-const WithMargins = ({ children }) => <div style={{ maxWidth: '1366px', margin: '0 auto', padding: '0 24px' }}>{children}</div>;
+const WithMargins = ({ children }) => <div style={{ maxWidth: '100%', margin: '0 auto', padding: '0 24px' }}>{children}</div>;
 const LinuxDOAuth = Loadable(lazy(() => import('views/Authentication/Auth/LinuxDoOAuth')));
 
 // ==============================|| AUTHENTICATION ROUTING ||============================== //

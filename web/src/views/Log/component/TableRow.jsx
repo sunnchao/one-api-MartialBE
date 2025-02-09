@@ -369,7 +369,7 @@ function viewLogContent(item, t, totalInputTokens, totalOutputTokens) {
 
   return (
     <Tooltip title={tips} placement="top" arrow>
-      <Stack direction="column" spacing={0.3}>
+      <Stack direction="row" spacing={1} justifyContent={'center'}>
         {inputPriceInfo && (
           <Label color="info" variant="soft">
             {inputPriceInfo}

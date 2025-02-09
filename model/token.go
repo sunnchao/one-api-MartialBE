@@ -307,11 +307,28 @@ func PreConsumeTokenQuota(tokenId int, quota int) (err error) {
 	if userQuota < quota {
 		return errors.New("用户额度不足")
 	}
-	quotaTooLow := userQuota >= config.QuotaRemindThreshold && userQuota-quota < config.QuotaRemindThreshold
-	noMoreQuota := userQuota-quota <= 0
-	if quotaTooLow || noMoreQuota {
-		go sendQuotaWarningEmail(token.UserId, userQuota, noMoreQuota)
+
+	if config.QuotaRemindThreshold > 0 {
+		go func() {
+			//
+			userPush := UserPush{UserId: token.UserId}
+			if err := userPush.FillUserPushByUserId(); err != nil {
+				logger.SysError("failed to fetch user push: " + err.Error())
+				return
+			}
+
+			if !strings.Contains(userPush.SubscriptionPlans, "quota_push") {
+				logger.SysError("用户未开启余额推送提醒")
+				return
+			}
+
+		}()
 	}
+	//quotaTooLow := userQuota >= config.QuotaRemindThreshold && userQuota-quota < config.QuotaRemindThreshold
+	//noMoreQuota := userQuota-quota <= 0
+	//if quotaTooLow || noMoreQuota {
+	//	go sendQuotaWarningEmail(token.UserId, userQuota, noMoreQuota)
+	//}
 	if !token.UnlimitedQuota {
 		err = DecreaseTokenQuota(tokenId, quota)
 		if err != nil {

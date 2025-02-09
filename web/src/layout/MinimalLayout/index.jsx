@@ -22,7 +22,7 @@ const MinimalLayout = () => {
           flex: 'none'
         }}
       >
-        <Container>
+        <Container maxWidth={'100%'}>
           <Toolbar>
             <Header />
           </Toolbar>

@@ -523,7 +523,8 @@
     "usernameMinLength": "用戶名不能少於 3 個字符",
     "usernameRequired": "用戶名不能為空",
     "wechatBindSuccess": "微信帳戶綁定成功！",
-    "yourTokenIs": "你的訪問令牌是："
+    "yourTokenIs": "你的訪問令牌是：",
+    "pushNotify": "購読管理"
   },
   "redemption": "兌換",
   "redemptionPage": {
