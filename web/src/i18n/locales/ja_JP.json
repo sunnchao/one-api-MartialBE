@@ -264,6 +264,7 @@
     "outputLabel": "出力",
     "outputTextTokens": "Output text tokens",
     "quotaLabel": "クォータ",
+    "requestIPLabel": "IP",
     "refreshButton": "更新/検索条件をクリア",
     "searchButton": "検索",
     "searchLogsInfo": "チャージ記録および招待記録はログで確認してください。チャージ記録はログでタイプ【チャージ】を選択して確認してください；招待記録はログで【システム】を選択して確認してください",

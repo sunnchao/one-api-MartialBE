@@ -2,21 +2,18 @@ package middleware
 
 import (
 	"context"
-	"one-api/common/logger"
-	"one-api/common/utils"
-	"time"
-
 	"github.com/gin-gonic/gin"
+	"one-api/common/logger"
 )
 
-func RequestId() func(c *gin.Context) {
+func RequestIP() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		id := utils.GetTimeString() + utils.GetRandomString(8)
-		c.Set(logger.RequestIdKey, id)
-		ctx := context.WithValue(c.Request.Context(), logger.RequestIdKey, id)
-		ctx = context.WithValue(ctx, "requestStartTime", time.Now())
+		ip := c.ClientIP()
+		c.Set(logger.RequestIPKey, ip)
+		ctx := context.WithValue(c.Request.Context(), logger.RequestIPKey, ip)
+		ctx = context.WithValue(ctx, "requestIP", ip)
 		c.Request = c.Request.WithContext(ctx)
-		c.Header(logger.RequestIdKey, id)
+		//c.Header(logger.RequestIPKey, ip)
 		c.Next()
 	}
 }

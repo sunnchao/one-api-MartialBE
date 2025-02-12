@@ -264,6 +264,7 @@
     "outputLabel": "Output",
     "outputTextTokens": "Output text tokens",
     "quotaLabel": "Quota",
+    "requestIPLabel": "IP",
     "refreshButton": "Refresh/Clear Search",
     "searchButton": "Search",
     "searchLogsInfo": "Please check the recharge records and invitation records in the logs. For recharge records, select the type [Recharge] in the log; for invitation records, select [System] in the log.",

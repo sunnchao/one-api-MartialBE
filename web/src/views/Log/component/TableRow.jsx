@@ -124,6 +124,7 @@ export default function LogTableRow({ item, userIsAdmin, userGroup }) {
         <TableCell>{viewInput(item, t, totalInputTokens, totalOutputTokens, show, tokenDetails)}</TableCell>
         <TableCell>{item.completion_tokens || ''}</TableCell>
         <TableCell>{item.quota ? renderQuota(item.quota, 6) : '$0'}</TableCell>
+        <TableCell>{item.request_ip}</TableCell>
         <TableCell>{viewLogContent(item, t, totalInputTokens, totalOutputTokens)}</TableCell>
       </TableRow>
     </>
@@ -369,14 +370,14 @@ function viewLogContent(item, t, totalInputTokens, totalOutputTokens) {
 
   return (
     <Tooltip title={tips} placement="top" arrow>
-      <Stack direction="row" spacing={1} justifyContent={'center'}>
+      <Stack direction="column" justifyContent={'center'}>
         {inputPriceInfo && (
-          <Label color="info" variant="soft">
+          <Label variant={"border"}>
             {inputPriceInfo}
           </Label>
         )}
         {outputPriceInfo && (
-          <Label color="info" variant="soft">
+          <Label color="info" variant="border">
             {outputPriceInfo}
           </Label>
         )}

@@ -103,6 +103,8 @@ func RecordConsumeLog(
 		ChannelId:        channelId,
 		RequestTime:      requestTime,
 		IsStream:         isStream,
+		RequestIp:        ctx.Value(logger.RequestIPKey).(string),
+		RequestId:        ctx.Value(logger.RequestIdKey).(string),
 	}
 
 	if metadata != nil {
@@ -124,6 +126,8 @@ type LogsListParams struct {
 	Username       string `form:"username"`
 	TokenName      string `form:"token_name"`
 	ChannelId      int    `form:"channel_id"`
+	RequestId      string `form:"request_id"`
+	RequestIP      string `form:"request_ip"`
 }
 
 var allowedLogsOrderFields = map[string]bool{
@@ -134,6 +138,8 @@ var allowedLogsOrderFields = map[string]bool{
 	"token_id":   true,
 	"model_name": true,
 	"type":       true,
+	"request_id": true,
+	"request_ip": true,
 }
 
 func GetLogsList(params *LogsListParams) (*DataResult[Log], error) {
@@ -164,6 +170,12 @@ func GetLogsList(params *LogsListParams) (*DataResult[Log], error) {
 	}
 	if params.ChannelId != 0 {
 		tx = tx.Where("channel_id = ?", params.ChannelId)
+	}
+	if params.RequestId != "" {
+		tx = tx.Where("request_id = ?", params.RequestId)
+	}
+	if params.RequestIP != "" {
+		tx = tx.Where("request_ip = ?", params.RequestIP)
 	}
 
 	return PaginateAndOrder[Log](tx, &params.PaginationParams, &logs, allowedLogsOrderFields)

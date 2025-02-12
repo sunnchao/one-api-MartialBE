@@ -367,6 +367,12 @@ export default function Log() {
                     disableSort: true
                   },
                   {
+                    id: 'request ip',
+                    label: t('logPage.requestIPLabel'),
+                    disableSort: true,
+                    hide: !userIsAdmin
+                  },
+                  {
                     id: 'detail',
                     label: t('logPage.detailLabel'),
                     disableSort: true

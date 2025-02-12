@@ -23,6 +23,7 @@ const (
 )
 const (
 	RequestIdKey = "X-Oneapi-Request-Id"
+  RequestIPKey = "X-Oneapi-Request-IP"
 )
 
 var Logger *zap.Logger

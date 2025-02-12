@@ -13,6 +13,7 @@ import (
 
 func SetRelayRouter(router *gin.Engine) {
 	router.Use(middleware.CORS())
+	router.Use(middleware.RequestIP())
 	// https://platform.openai.com/docs/api-reference/introduction
 	setOpenAIRouter(router)
 	setMJRouter(router)
