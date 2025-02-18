@@ -1,16 +1,16 @@
 import { styled } from '@mui/material';
 import { ToggleButton, ToggleButtonGroup as MuiToggleButtonGroup } from '@mui/material';
+import { borderRadius } from '@mui/system';
 import PropTypes from 'prop-types';
 
 const StyledToggleButtonGroup = styled(MuiToggleButtonGroup)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   border: `1px solid ${theme.palette.divider}`,
-  borderRadius: '8px',
+  borderRadius: 0,
   padding: '2px',
   '& .MuiToggleButton-root': {
     border: 'none',
-    borderRadius: '6px',
-    padding: '4px 12px',
+    padding: '5px 15px',
     fontSize: '13px',
     fontWeight: 500,
     color: theme.palette.text.secondary,
@@ -23,7 +23,8 @@ const StyledToggleButtonGroup = styled(MuiToggleButtonGroup)(({ theme }) => ({
       '&:hover': {
         backgroundColor: theme.palette.primary.dark
       }
-    }
+    },
+    borderRadius: 0
   }
 }));
 
@@ -31,7 +32,8 @@ const StyledToggleButton = styled(ToggleButton)({
   '&.MuiToggleButton-root': {
     textTransform: 'none',
     minWidth: '36px',
-    transition: 'all 0.2s ease-in-out'
+    transition: 'all 0.2s ease-in-out',
+    borderRadius: 0
   }
 });
 

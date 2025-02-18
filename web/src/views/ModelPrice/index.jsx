@@ -29,9 +29,8 @@ import ToggleButtonGroup from 'ui-component/ToggleButton';
 const GroupChip = styled(Chip)(({ theme, selected }) => ({
   margin: theme.spacing(0.5),
   cursor: 'pointer',
-  height: '28px',
-  borderRadius: '14px',
-  padding: '0 12px',
+  borderRadius: 0,
+  padding: '10px 20px',
   fontSize: '13px',
   fontWeight: 500,
   transition: 'all 0.2s ease-in-out',
@@ -116,9 +115,10 @@ export default function ModelPrice() {
         const price = model.groups.includes(selectedGroup)
           ? {
               input: group.ratio * model.price.input,
-              output: group.ratio * model.price.output
+              output: group.ratio * model.price.output,
+              enable: true
             }
-          : { input: t('modelpricePage.noneGroup'), output: t('modelpricePage.noneGroup') };
+          : { input: t('modelpricePage.noneGroup'), output: t('modelpricePage.noneGroup'), enable: false };
 
         const formatPrice = (value, type) => {
           if (typeof value === 'number') {
@@ -138,7 +138,8 @@ export default function ModelPrice() {
           type: model.price.type,
           input: formatPrice(price.input, model.price.type),
           output: formatPrice(price.output, model.price.type),
-          extraRatios: model.price?.extra_ratios
+          extraRatios: model.price?.extra_ratios,
+          enable: price.enable
         };
       });
 
@@ -177,16 +178,16 @@ export default function ModelPrice() {
   };
 
   return (
-    <Stack spacing={2}>
+    <Stack spacing={2} sx={ {backgroundColor: theme.palette.background.default} }>
       <Typography variant="h4" color="textPrimary">
         {t('modelpricePage.availableModels')}
       </Typography>
 
-      <Card sx={{ p: 2, backgroundColor: theme.palette.background.paper }}>
+      <Card sx={{ paddingTop: 1, paddingBottom: 1, backgroundColor: theme.palette.background.default }}>
         <Stack spacing={2}>
-          <Typography variant="subtitle2" color="textSecondary">
+          {/* <Typography variant="subtitle2" color="textSecondary">
             {t('modelpricePage.group')}
-          </Typography>
+          </Typography> */}
           <Box
             sx={{
               display: 'flex',
@@ -240,7 +241,8 @@ export default function ModelPrice() {
             },
             '& .MuiTabs-indicator': {
               display: 'none'
-            }
+            },
+            borderRadius: 0
           }}
         >
           {uniqueOwnedBy.map((ownedBy, index) => (
@@ -255,8 +257,8 @@ export default function ModelPrice() {
               }
               sx={{
                 minHeight: '48px',
-                padding: '6px 16px',
-                borderRadius: 1,
+                padding: '5px 10px',
+                borderRadius: 0,
                 transition: 'all 0.2s ease-in-out',
                 '& .MuiTab-iconWrapper': {
                   margin: 0
@@ -282,9 +284,9 @@ export default function ModelPrice() {
               <TableRow>
                 <TableCell width="25%">{t('modelpricePage.model')}</TableCell>
                 <TableCell width="10%">{t('modelpricePage.type')}</TableCell>
-                <TableCell width="22.5%">{t('modelpricePage.inputMultiplier')}</TableCell>
-                <TableCell width="22.5%">{t('modelpricePage.outputMultiplier')}</TableCell>
-                <TableCell width="22.5%">{t('modelpricePage.other')}</TableCell>
+                <TableCell width="25%">{t('modelpricePage.inputMultiplier')}</TableCell>
+                <TableCell width="25%">{t('modelpricePage.outputMultiplier')}</TableCell>
+                <TableCell width="17.5%">{t('modelpricePage.other')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -295,18 +297,28 @@ export default function ModelPrice() {
                     {row.type === 'tokens' ? (
                       <Label color="primary">{t('modelpricePage.tokens')}</Label>
                     ) : (
-                      <Label color="secondary">{t('modelpricePage.times')}</Label>
+                      <Label variant="outlined" color="primary">
+                        {t('modelpricePage.times')}
+                      </Label>
                     )}
                   </TableCell>
                   <TableCell>
-                    <Label color="info" variant="outlined">
-                      {row.input}
-                    </Label>
+                    {row.enable ? (
+                      <Label color="primary" variant="outlined">
+                        {row.input}
+                      </Label>
+                    ) : (
+                      <Label>{row.input}</Label>
+                    )}
                   </TableCell>
                   <TableCell>
-                    <Label color="info" variant="outlined">
-                      {row.output}
-                    </Label>
+                    {row.enable ? (
+                      <Label color="primary" variant="outlined">
+                        {row.output}
+                      </Label>
+                    ) : (
+                      <Label>{row.output}</Label>
+                    )}
                   </TableCell>
                   <TableCell>{getOther(t, row.extraRatios)}</TableCell>
                 </TableRow>
@@ -326,10 +338,10 @@ function getOther(t, extraRatios) {
 
   return (
     <Stack direction="column" spacing={1}>
-      <Label color="primary" variant="outlined">
+      <Label color="primary" variant="ghost">
         {t('modelpricePage.inputAudioTokensRatio')}: {inputRatio}
       </Label>
-      <Label color="primary" variant="outlined">
+      <Label color="primary" variant="ghost">
         {t('modelpricePage.outputAudioTokensRatio')}: {outputRatio}
       </Label>
     </Stack>

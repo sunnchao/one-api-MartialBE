@@ -8,6 +8,7 @@ import componentStyleOverrides from './compStyleOverride';
 import themePalette from './palette';
 import themeTypography from './typography';
 import { varAlpha } from './utils';
+import { borderRadius } from '@mui/system';
 
 /**
  * Represent theme style and structure as per Material-UI
@@ -17,6 +18,7 @@ import { varAlpha } from './utils';
 export const theme = (customization) => {
   const color = colors;
   const options = customization.theme === 'light' ? GetLightOption() : GetDarkOption();
+  customization.borderRadius = 0
   const themeOption = {
     colors: color,
     ...options,
@@ -35,7 +37,8 @@ export const theme = (customization) => {
         }
       }
     },
-    typography: themeTypography(themeOption)
+    typography: themeTypography(themeOption),
+    borderRadius: 0
   };
 
   const themes = createTheme(themeOptions);
@@ -66,7 +69,8 @@ function GetDarkOption() {
     menuChip: color.darkLevel1,
     headBackgroundColor: color.darkTableHeader,
     headBackgroundColorHover: varAlpha(color.darkTableHeader, 0.4),
-    tableBorderBottom: color.darkDivider
+    tableBorderBottom: color.darkDivider,
+    borderRadius: 0
   };
 }
 
@@ -90,6 +94,7 @@ function GetLightOption() {
     menuChip: color.primaryLight,
     headBackgroundColor: color.tableBackground,
     headBackgroundColorHover: varAlpha(color.darkTableHeader, 0.08),
-    tableBorderBottom: color.tableBorderBottom
+    tableBorderBottom: color.tableBorderBottom,
+    borderRadius: 0
   };
 }

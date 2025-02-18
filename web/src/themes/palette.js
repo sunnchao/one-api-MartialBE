@@ -3,6 +3,8 @@
  * @param {JsonObject} theme Theme customization object
  */
 
+import { borderRadius } from "@mui/system";
+
 export default function themePalette(theme) {
   return {
     mode: theme.mode,
@@ -68,6 +70,7 @@ export default function themePalette(theme) {
     background: {
       paper: theme.paper,
       default: theme.backgroundDefault
-    }
+    },
+    borderRadius: 0
   };
 }
