@@ -123,17 +123,21 @@ export default function LogTableRow({ item, userIsAdmin, userGroup }) {
 
 
         <TableCell>
-          <Stack direction="column" spacing={0.5}>
+          {
+            item.type === 2 ? <Stack direction="column" spacing={0.5}>
             <Label color={requestTimeLabelOptions(request_time)}>
               {item.request_time == 0 ? '无' : request_time_str} {first_time_str ? ' / ' + first_time_str : ''}
             </Label>
 
             {request_ts_str && <Label color={requestTSLabelOptions(request_ts)}>{request_ts_str}</Label>}
-          </Stack>
+          </Stack>: null
+          }
         </TableCell>
         <TableCell>{viewInput(item, t, totalInputTokens, totalOutputTokens, show, tokenDetails)}</TableCell>
         <TableCell>{item.completion_tokens || ''}</TableCell>
-        <TableCell>{item.quota ? renderQuota(item.quota, 6) : '$0'}</TableCell>
+        <TableCell>{
+          item.type === 2 ? item.quota ? renderQuota(item.quota, 6) : '$0' : ''
+          }</TableCell>
         <TableCell>{item.request_ip}</TableCell>
         <TableCell>{viewLogContent(item, t, totalInputTokens, totalOutputTokens)}</TableCell>
       </TableRow>
