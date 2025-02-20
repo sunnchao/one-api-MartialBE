@@ -22,6 +22,7 @@ import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import { UserContext } from 'contexts/UserContext';
 import { renderQuota } from 'utils/common';
+import { minWidth } from '@mui/system';
 
 export default function Log() {
   const { t } = useTranslation();
@@ -302,7 +303,7 @@ export default function Log() {
         {searching && <LinearProgress />}
         <PerfectScrollbar component="div">
           <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 800 }}>
+            <Table sx={{ minWidth: 1366 }}>
               <KeywordTableHead
                 order={order}
                 orderBy={orderBy}
@@ -311,13 +312,15 @@ export default function Log() {
                   {
                     id: 'created_at',
                     label: t('logPage.timeLabel'),
-                    disableSort: false
+                    disableSort: false,
+                    width: '200px'
                   },
                   {
                     id: 'channel_id',
                     label: t('logPage.channelLabel'),
                     disableSort: false,
-                    hide: !userIsAdmin
+                    hide: !userIsAdmin,
+                    width: '150px'
                   },
                   {
                     id: 'user_id',
@@ -370,12 +373,14 @@ export default function Log() {
                     id: 'request ip',
                     label: t('logPage.requestIPLabel'),
                     disableSort: true,
-                    hide: !userIsAdmin
+                    hide: !userIsAdmin,
+                    width: 100
                   },
                   {
                     id: 'detail',
                     label: t('logPage.detailLabel'),
-                    disableSort: true
+                    disableSort: true,
+                    minWidth: '200px'
                   }
                 ]}
               />

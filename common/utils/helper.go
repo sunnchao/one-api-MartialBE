@@ -209,8 +209,6 @@ func GetOrDefault[T any](env string, defaultValue T) T {
 }
 
 func MessageWithRequestId(message string, id string) string {
-	fmt.Println("message: ", message)
-	fmt.Println("id: ", id)
 	if strings.Contains(message, "request id") {
 		return fmt.Sprintf("%s", message)
 	}

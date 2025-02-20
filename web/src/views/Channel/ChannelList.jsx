@@ -438,10 +438,10 @@ export default function ChannelList() {
                 { id: 'tag', label: t('channel_index.tags'), disableSort: false, width: '120px' },
                 { id: 'type', label: t('channel_index.type'), disableSort: false },
                 { id: 'status', label: t('channel_index.status'), disableSort: false },
-                { id: 'response_time', label: t('channel_index.responseTime'), disableSort: false, width: '80px' },
+                { id: 'response_time', label: t('channel_index.responseTime'), disableSort: false, width: '150px' },
                 // { id: 'balance', label: '余额', disableSort: false },
-                { id: 'used', label: t('channel_index.usedBalance'), disableSort: false, width: '80px' },
-                { id: 'priority', label: t('channel_index.priority'), disableSort: false, width: '80px' },
+                { id: 'used', label: t('channel_index.usedBalance'), disableSort: false, width: '150px' },
+                { id: 'priority', label: t('channel_index.priority'), disableSort: false, width: '120px' },
                 { id: 'weight', label: t('channel_index.weight'), disableSort: false, width: '80px' },
                 { id: 'action', label: t('channel_index.actions'), disableSort: false, width: '200px' }
               ]}

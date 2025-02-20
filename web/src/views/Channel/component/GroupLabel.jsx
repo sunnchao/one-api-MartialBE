@@ -12,7 +12,7 @@ const GroupLabel = ({ group }) => {
     groups.sort();
   }
   return (
-    <Stack divider={<Divider orientation="vertical" flexItem />} spacing={0.5}>
+    <Stack spacing={0.5} direction={'row'} useFlexGap flexWrap={'wrap'}>
       {groups.map((group, index) => {
         return <Label key={index}>{group}</Label>;
       })}

@@ -45,6 +45,7 @@ const (
 	LogTypeSystem
 	LogTypeUserQuotoIncrease
 	LogLogin
+	LogTypeAPIError
 )
 
 func RecordLog(userId int, logType int, content string, requestIp string) {
@@ -298,5 +299,27 @@ func RecordLogWithRequestIP(userId int, logType int, content string, requestIP s
 	err := DB.Create(log).Error
 	if err != nil {
 		logger.SysError("failed to record log: " + err.Error())
+	}
+}
+
+func RecordAPIErrorLog(ctx context.Context, userId int, channelId int, modelName string, tokenName string, tokenId int, content string, requestIP string, requestID string) {
+	logger.LogInfo(ctx, fmt.Sprintf("record API error log: userId=%d, channelId=%d, modelName=%s, tokenName=%s, tokenId=%d, content=%s", userId, channelId, modelName, tokenName, tokenId, content))
+	log := &Log{
+		UserId:    userId,
+		Username:  GetUsernameById(userId),
+		CreatedAt: utils.GetTimestamp(),
+		Type:      LogTypeAPIError,
+		Content:   content,
+		ChannelId: channelId,
+		ModelName: modelName,
+		TokenName: tokenName,
+		TokenId:   tokenId,
+		RequestIp: requestIP,
+		RequestId: requestID,
+	}
+
+	err := DB.Create(log).Error
+	if err != nil {
+		logger.SysError("failed to record API error log: " + err.Error())
 	}
 }
