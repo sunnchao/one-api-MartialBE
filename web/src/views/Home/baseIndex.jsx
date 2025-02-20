@@ -540,81 +540,62 @@ const BaseIndex = () => {
             </Typography>
 
             <Grid container spacing={4} justifyContent="center">
-              <Grid item xs={12} sm={6}>
-                <Box
-                  sx={{
-                    p: 5,
-                    backgroundColor: 'rgba(255,255,255,0.08)',
-                    textAlign: 'center',
-                    transition: 'all 0.3s ease',
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    '&:hover': {
-                      transform: 'translateY(-5px)',
-                      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
-                    }
-                  }}
-                >
-                  <Typography
-                    variant="h5"
+              {[
+                {
+                  type: 'email',
+                  label: '邮件支持',
+                  content: 'chirou.api@outlook.com'
+                },
+                {
+                  type: 'qq',
+                  label: 'QQ 交流群',
+                  content: '924076327'
+                },
+                {
+                  type: 'telegram',
+                  label: 'Telegram',
+                  content: '@chirou_api'
+                }
+              ].map((item) => (
+                <Grid item xs={12} sm={4}>
+                  <Box
                     sx={{
-                      mb: 3,
-                      fontWeight: 600,
-                      color: '#90CAF9'
+                      p: 5,
+                      backgroundColor: 'rgba(255,255,255,0.08)',
+                      textAlign: 'center',
+                      transition: 'all 0.3s ease',
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      '&:hover': {
+                        transform: 'translateY(-5px)',
+                        boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
+                      }
                     }}
                   >
-                    邮件支持
-                  </Typography>
-                  <Typography
-                    sx={{
-                      color: 'rgba(255,255,255,0.9)',
-                      fontSize: '1.1rem',
-                      wordBreak: 'break-all'
-                    }}
-                  >
-                    chirou.api@outlook.com
-                  </Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Box
-                  sx={{
-                    p: 5,
-                    backgroundColor: 'rgba(255,255,255,0.08)',
-                    textAlign: 'center',
-                    transition: 'all 0.3s ease',
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    '&:hover': {
-                      transform: 'translateY(-5px)',
-                      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
-                    }
-                  }}
-                >
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      mb: 3,
-                      fontWeight: 600,
-                      color: '#90CAF9'
-                    }}
-                  >
-                    QQ 交流群
-                  </Typography>
-                  <Typography
-                    sx={{
-                      color: 'rgba(255,255,255,0.9)',
-                      fontSize: '1.1rem'
-                    }}
-                  >
-                    924076327
-                  </Typography>
-                </Box>
-              </Grid>
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        mb: 3,
+                        fontWeight: 600,
+                        color: '#90CAF9'
+                      }}
+                    >
+                      {item.label}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        color: 'rgba(255,255,255,0.9)',
+                        fontSize: '1.1rem',
+                        wordBreak: 'break-all'
+                      }}
+                    >
+                      {item.content}
+                    </Typography>
+                  </Box>
+                </Grid>
+              ))}
             </Grid>
           </Box>
         </Container>

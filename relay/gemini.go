@@ -42,6 +42,7 @@ func (r *relayGeminiOnly) setRequest() error {
 	}
 
 	isStream := false
+	
 	if modelList[1] == "streamGenerateContent" {
 		isStream = true
 	}

@@ -61,7 +61,7 @@ export default function ModelPrice() {
   const [searchQuery, setSearchQuery] = useState('');
   const [availableModels, setAvailableModels] = useState({});
   const [userGroupMap, setUserGroupMap] = useState({});
-  const [selectedGroup, setSelectedGroup] = useState('');
+  const [selectedGroup, setSelectedGroup] = useState('default');
   const [selectedOwnedBy, setSelectedOwnedBy] = useState('');
   const [unit, setUnit] = useState('K');
 
@@ -91,7 +91,7 @@ export default function ModelPrice() {
       const { success, message, data } = res.data;
       if (success) {
         setUserGroupMap(data);
-        setSelectedGroup(Object.keys(data)[0]); // 默认选择第一个分组
+        // setSelectedGroup(Object.keys(data)[0]); // 默认选择第一个分组
       } else {
         showError(message);
       }
@@ -112,13 +112,14 @@ export default function ModelPrice() {
       .filter(([, model]) => model.owned_by === selectedOwnedBy)
       .map(([modelName, model], index) => {
         const group = userGroupMap[selectedGroup];
-        const price = model.groups.includes(selectedGroup)
-          ? {
-              input: group.ratio * model.price.input,
-              output: group.ratio * model.price.output,
-              enable: true
-            }
-          : { input: t('modelpricePage.noneGroup'), output: t('modelpricePage.noneGroup'), enable: false };
+        const price =
+          group && model.groups.includes(selectedGroup)
+            ? {
+                input: group?.ratio * model?.price.input,
+                output: group?.ratio * model?.price.output,
+                enable: true
+              }
+            : { input: t('modelpricePage.noneGroup'), output: t('modelpricePage.noneGroup'), enable: false };
 
         const formatPrice = (value, type) => {
           if (typeof value === 'number') {
@@ -178,7 +179,7 @@ export default function ModelPrice() {
   };
 
   return (
-    <Stack spacing={2} sx={ {backgroundColor: theme.palette.background.default} }>
+    <Stack spacing={2} sx={{ backgroundColor: theme.palette.background.default, p: 2 }}>
       <Typography variant="h4" color="textPrimary">
         {t('modelpricePage.availableModels')}
       </Typography>
@@ -203,6 +204,9 @@ export default function ModelPrice() {
                 onClick={() => handleGroupChange({ target: { value: key } })}
                 selected={selectedGroup === key}
                 variant={selectedGroup === key ? 'filled' : 'outlined'}
+                sx={{
+                  p: 2
+                }}
               />
             ))}
           </Box>
@@ -256,8 +260,7 @@ export default function ModelPrice() {
                 </Stack>
               }
               sx={{
-                minHeight: '48px',
-                padding: '5px 10px',
+                p: 1,
                 borderRadius: 0,
                 transition: 'all 0.2s ease-in-out',
                 '& .MuiTab-iconWrapper': {

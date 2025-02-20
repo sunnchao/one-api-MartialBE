@@ -121,6 +121,7 @@ export default function LogTableRow({ item, userIsAdmin, userGroup }) {
         <TableCell>{renderType(item.type)}</TableCell>
         <TableCell>{viewModelName(item.model_name, item.is_stream)}</TableCell>
 
+
         <TableCell>
           <Stack direction="column" spacing={0.5}>
             <Label color={requestTimeLabelOptions(request_time)}>
