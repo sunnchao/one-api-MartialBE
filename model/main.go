@@ -163,7 +163,6 @@ func InitDB() (err error) {
 	dependentModels := []interface{}{
 		&Log{},
 		&Price{},
-		&Ability{},
 		&Redemption{},
 		&TelegramMenu{},
 		&Midjourney{},
