@@ -38,17 +38,14 @@ func InsertOperationCheckIn(userId int, lastDayUsed int64, requestIP string) (qu
 	rand.Seed(time.Now().UnixNano())
 
 	// 生成一个 0-100 的随机数来决定概率区间
-	probability := rand.Float64() * 100
+	probability := rand.Float64()        // Generate a random number between 0 and 1
+	coefficient := rand.Float64() * 0.18 // Base random value (0 to 0.18)
 
-	// 根据概率区间生成不同范围的随机系数
-	var coefficient float64
 	switch {
-	case probability < 75: // 75% 概率生成 0-0.25
-		coefficient = rand.Float64() * 0.25
-	case probability < 95: // 20% 概率生成 0.25-0.5
-		coefficient = 0.25 + rand.Float64()*0.25
-	default: // 5% 概率生成 0.5-0.75
-		coefficient = 0.5 + rand.Float64()*0.25
+	case probability >= 0.75 && probability < 0.95: // 20% chance
+		coefficient += 0.08 // Shift to 0.18 - 0.26
+	case probability >= 0.95: // 5% chance
+		coefficient += 0.18 // Shift to 0.18 - 0.36
 	}
 
 	// 计算最终额度
