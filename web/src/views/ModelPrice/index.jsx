@@ -91,7 +91,6 @@ export default function ModelPrice() {
       const { success, message, data } = res.data;
       if (success) {
         setUserGroupMap(data);
-        // setSelectedGroup(Object.keys(data)[0]); // 默认选择第一个分组
       } else {
         showError(message);
       }
@@ -333,6 +332,7 @@ export default function ModelPrice() {
     </Stack>
   );
 }
+
 
 function getOther(t, extraRatios) {
   if (!extraRatios) return '';
