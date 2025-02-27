@@ -17,7 +17,7 @@ func RelayPanicRecover() gin.HandlerFunc {
 				errorResponse := gin.H{
 					"error": gin.H{
 						"message": fmt.Sprintf("Panic detected, error: %v. Please submit a issue here: https://github.com/MartialBE/one-hub", err),
-						"type":    "chirou_api_panic",
+						"type":    "one_hub_panic",
 					},
 				}
 				handlePanic(c, err, errorResponse)
@@ -34,9 +34,9 @@ func RelayCluadePanicRecover() gin.HandlerFunc {
 		defer func() {
 			if err := recover(); err != nil {
 				errorResponse := gin.H{
-					"type": "chirou_api_panic",
+					"type": "one_hub_panic",
 					"error": gin.H{
-						"type":    "chirou_api_panic",
+						"type":    "one_hub_panic",
 						"message": fmt.Sprintf("Panic detected, error: %v. Please submit a issue here: https://github.com/MartialBE/one-hub.", err),
 					},
 				}
@@ -55,7 +55,7 @@ func RelayGeminiPanicRecover() gin.HandlerFunc {
 				errorResponse := gin.H{
 					"error": gin.H{
 						"code":    500,
-						"status":  "chirou_api_panic",
+						"status":  "one_hub_panic",
 						"message": fmt.Sprintf("Panic detected, error: %v. Please submit a issue here: https://github.com/MartialBE/one-hub.", err),
 					},
 				}
@@ -74,7 +74,7 @@ func RelayMJPanicRecover() gin.HandlerFunc {
 				errorResponse := gin.H{
 					"error": gin.H{
 						"description": fmt.Sprintf("Panic detected, error: %v. Please submit a issue here: https://github.com/MartialBE/one-hub.", err),
-						"type":        "chirou_api_panic",
+						"type":        "one_hub_panic",
 						"code":        500,
 					},
 				}
@@ -92,7 +92,7 @@ func RelaySunoPanicRecover() gin.HandlerFunc {
 		defer func() {
 			if err := recover(); err != nil {
 				errorResponse := gin.H{
-					"code":    "chirou_api_panic",
+					"code":    "one_hub_panic",
 					"message": fmt.Sprintf("Panic detected, error: %v. Please submit a issue here: https://github.com/MartialBE/one-hub.", err),
 				}
 				handlePanic(c, err, errorResponse)

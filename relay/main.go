@@ -23,13 +23,13 @@ func Relay(c *gin.Context) {
 	}
 
 	if err := relay.setRequest(); err != nil {
-		openaiErr := common.StringErrorWrapperLocal(err.Error(), "one_hub_error", http.StatusBadRequest)
+		openaiErr := common.StringErrorWrapperLocal(err.Error(), "chirou_api_error", http.StatusBadRequest)
 		relay.HandleError(openaiErr)
 		return
 	}
 
 	if err := relay.setProvider(relay.getOriginalModel()); err != nil {
-		openaiErr := common.StringErrorWrapperLocal(err.Error(), "one_hub_error", http.StatusServiceUnavailable)
+		openaiErr := common.StringErrorWrapperLocal(err.Error(), "chirou_api_error", http.StatusServiceUnavailable)
 		relay.HandleError(openaiErr)
 		return
 	}
