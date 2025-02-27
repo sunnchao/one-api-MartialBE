@@ -19,6 +19,7 @@ func GetChannelsList(c *gin.Context) {
 		return
 	}
 
+	// 打印params
 	channels, err := model.GetChannelsList(&params)
 	if err != nil {
 		common.APIRespondWithError(c, http.StatusOK, err)

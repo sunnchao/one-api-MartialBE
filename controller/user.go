@@ -90,6 +90,7 @@ func setupLogin(user *model.User, c *gin.Context) {
 		Role:        user.Role,
 		Status:      user.Status,
 	}
+ 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "",
 		"success": true,

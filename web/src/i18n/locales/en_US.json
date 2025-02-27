@@ -1172,5 +1172,31 @@
     "thu": "Thu",
     "fri": "Fri",
     "sat": "Sat"
+  },
+  "monitoring": {
+    "settings": {
+      "title": "Notification Settings",
+      "subscriptionEvents": "Subscription Events",
+      "balanceWarning": "Balance Warning",
+      "promotionNotice": "Promotion Notice",
+      "failureAlert": "Failure Alert",
+      "systemAnnouncement": "System Announcement",
+      "modelPriceChange": "Model Price Change",
+      "notificationMethod": "Notification Method",
+      "email": "Email",
+      "wechat": "WeChat",
+      "dingTalk": "DingTalk",
+      "feishu": "Feishu",
+      "webhook": "Webhook",
+      "telegram": "Telegram",
+      "emailAddress": "Email Address",
+      "leaveEmptyToUseAccountEmail": "Leave empty to use account email",
+      "warningThreshold": "Warning Threshold",
+      "threshold": "Threshold",
+      "thresholdDescription": "You will receive a notification when your balance is below this threshold (maximum once per 2 hours)",
+      "save": "Save",
+      "notificationSettingsSaved": "Notification settings saved successfully",
+      "failedToSaveNotifications": "Failed to save notification settings"
+    }
   }
 }

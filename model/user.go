@@ -574,3 +574,11 @@ func (user *User) FillUserByLinuxDoId() error {
 	DB.Where(User{LinuxDoId: user.LinuxDoId}).First(user)
 	return nil
 }
+
+// 获取所有用户
+func GetAllUsers() ([]*User, error) {
+	var users []*User
+	err := DB.Find(&users).Error
+	return users, err
+}
+

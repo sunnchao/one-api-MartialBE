@@ -1159,5 +1159,37 @@
   "price": "價格",
   "模型映射关系：例如用户请求A模型，实际转发给渠道的模型为B。在B模型加前缀+，表示使用传入模型计费，例如：+gpt-3": {
     "5-turbo": "模型映射關係：例如用戶請求A模型，實際轉發給渠道的模型為B。在B模型加前綴+，表示使用傳入模型計費，例如：+gpt-3.5-turbo"
+  },
+  "monitoring": {
+    "settings": {
+      "title": "監控設置",
+      "balanceWarning": "餘額警告",
+      "promotionNotice": "促銷通知",
+      "failureAlert": "失敗警告",
+      "modelPriceChange": "模型價格變更",
+      "systemAnnouncement": "系統公告",
+      "subscriptionEvents": "訂閱事件",
+      "notificationMethod": "通知方式",
+      "email": "電子郵件",
+      "wechat": "微信",
+      "dingTalk": "釘釘",
+      "feishu": "飛書",
+      "webhook": "Webhook",
+      "telegram": "Telegram",
+      "emailAddress": "電子郵件地址",
+      "leaveEmptyToUseAccountEmail": "留空使用帳號電子郵件",
+      "warningThreshold": "警告閾值",
+      "threshold": "閾值",
+      "thresholdDescription": "當餘額低於此閾值時，會收到通知",
+      "save": "保存",
+      "notificationSettingsSaved": "通知設置已保存",
+      "failedToSaveNotifications": "保存通知設置失敗",
+      "balanceWarningTip": "當餘額低於警告閾值時，會收到通知",
+      "promotionNoticeTip": "當有促銷活動時，會收到通知",
+      "failureAlertTip": "當請求失敗時，會收到通知",
+      "modelPriceChangeTip": "當模型價格變更時，會收到通知",
+      "systemAnnouncementTip": "當系統公告變更時，會收到通知",
+      "subscriptionEventsTip": "當訂閱事件變更時，會收到通知"
+    }
   }
 }

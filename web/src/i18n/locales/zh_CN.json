@@ -1171,5 +1171,37 @@
     "thu": "周四",
     "fri": "周五",
     "sat": "周六"
+  },
+  "monitoring": {
+    "settings": {
+      "title": "监控设置",
+      "balanceWarning": "余额预警",
+      "promotionNotice": "促销通知",
+      "failureAlert": "失败预警",
+      "systemAnnouncement": "系统公告",
+      "modelPriceChange": "模型价格变更",
+      "subscriptionEvents": "订阅事件",
+      "notificationMethod": "通知方式",
+      "email": "邮箱",
+      "wechat": "微信",
+      "dingTalk": "钉钉",
+      "feishu": "飞书",
+      "webhook": "Webhook",
+      "telegram": "Telegram",
+      "emailAddress": "邮箱地址",
+      "leaveEmptyToUseAccountEmail": "留空使用账号邮箱",
+      "warningThreshold": "预警阈值",
+      "threshold": "阈值",
+      "thresholdDescription": "当余额低于此阈值时，会收到通知",
+      "save": "保存",
+      "notificationSettingsSaved": "通知设置已保存",
+      "failedToSaveNotifications": "保存通知设置失败",
+      "balanceWarningTip": "当余额低于预警阈值时，会收到通知",
+      "promotionNoticeTip": "当有促销活动时，会收到通知",
+      "failureAlertTip": "当请求失败时，会收到通知",
+      "modelPriceChangeTip": "当模型价格变更时，会收到通知",
+      "systemAnnouncementTip": "当系统公告变更时，会收到通知",
+      "subscriptionEventsTip": "当订阅事件变更时，会收到通知"
+    }
   }
 }

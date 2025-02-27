@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"one-api/common"
@@ -308,22 +309,61 @@ func PreConsumeTokenQuota(tokenId int, quota int) (err error) {
 		return errors.New("用户额度不足")
 	}
 
-	if config.QuotaRemindThreshold > 0 {
-		go func() {
-			//
-			userPush := UserPush{UserId: token.UserId}
-			if err := userPush.FillUserPushByUserId(); err != nil {
-				logger.SysError("failed to fetch user push: " + err.Error())
-				return
-			}
+	// if config.QuotaRemindThreshold > 0 {
+	go func() {
+		//
+		userNotification := UserNotification{UserID: token.UserId, NotifyType: Email}
+		userNotifications, err := userNotification.GetUserNotificationsByUserId()
+		if err != nil {
+			logger.SysError("failed to fetch user notification: " + err.Error())
+			return
+		}
 
-			if !strings.Contains(userPush.SubscriptionPlans, "quota_push") {
-				logger.SysError("用户未开启余额推送提醒")
-				return
+		for _, userNotification := range userNotifications {
+			// 余额推送提醒
+			// 如果用户开启了余额推送提醒，则发送邮件 SubscriptionPlans
+			if containsSubscriptionEvent(userNotification.SubscriptionPlans.Data(), BalanceWarning) {
+				// 获取最低额度
+				var options PushPlanOptionJsonType
+				jsonData, jsonErr := userNotification.PushOptions.MarshalJSON()
+				if jsonErr != nil {
+					logger.SysError("failed to marshal push options: " + jsonErr.Error())
+					return
+				}
+				if err := json.Unmarshal(jsonData, &options); err != nil {
+					logger.SysError("failed to unmarshal push options: " + err.Error())
+					return
+				}
+				balanceWarningOptions, exists := options[string(BalanceWarning)]
+				if !exists || balanceWarningOptions["threshold"] == nil {
+					return
+				} else {
+					thresholdValue := balanceWarningOptions["threshold"]
+					var lowestQuota int
+					
+					// Try to convert the interface{} to a numeric type
+					switch v := thresholdValue.(type) {
+					case float64:
+						lowestQuota = int(v)
+					case float32:
+						lowestQuota = int(v)
+					case int:
+						lowestQuota = v
+					case int64:
+						lowestQuota = int(v)
+					default:
+						lowestQuota = 0
+					}
+					// 如果NotifyType为Email，则发送邮件
+					if userNotification.NotifyType == Email {
+						go sendQuotaWarningEmail(token.UserId, userQuota, userQuota-quota <= lowestQuota)
+					}
+				}
 			}
+		}
 
-		}()
-	}
+	}()
+	// }
 	//quotaTooLow := userQuota >= config.QuotaRemindThreshold && userQuota-quota < config.QuotaRemindThreshold
 	//noMoreQuota := userQuota-quota <= 0
 	//if quotaTooLow || noMoreQuota {
@@ -409,4 +449,16 @@ func (token *Token) GetModelLimitsMap() map[string]bool {
 		limitsMap[limit] = true
 	}
 	return limitsMap
+}
+
+func containsSubscriptionEvent(events []SubscriptionEvent, event SubscriptionEvent) bool {
+	if events == nil {
+		return false
+	}
+	for _, e := range events {
+		if e == event {
+			return true
+		}
+	}
+	return false
 }

@@ -191,7 +191,7 @@ func InitDB() (err error) {
 		&Task{},
 		&Statistics{},
 		&UserOperation{},
-		&UserPush{},
+		&UserNotification{},
 	}
 
 	for _, model := range businessModels {

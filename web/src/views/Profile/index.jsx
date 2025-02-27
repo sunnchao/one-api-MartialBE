@@ -28,7 +28,7 @@ import EmailModal from './component/EmailModal';
 import Turnstile from 'react-turnstile';
 import LarkIcon from 'assets/images/icons/lark.svg';
 import { useTheme } from '@mui/material/styles';
-
+import Monitoring from './component/Monitoring';
 const validationSchema = Yup.object().shape({
   username: Yup.string().required('用户名 不能为空').min(3, '用户名 不能小于 3 个字符'),
   display_name: Yup.string(),
@@ -171,6 +171,7 @@ export default function Profile() {
                 </Label>
               )}
             </Stack>
+            {/* 个人信息 */}
             <SubCard title={t('profilePage.personalInfo')}>
               <Grid container spacing={2}>
                 <Grid xs={12}>
@@ -223,6 +224,7 @@ export default function Profile() {
                 </Grid>
               </Grid>
             </SubCard>
+            {/* 账号绑定 */}
             <SubCard title={t('profilePage.accountBinding')}>
               <Grid container spacing={2}>
                 {status.wechat_login && !inputs.wechat_id && (
@@ -311,26 +313,12 @@ export default function Profile() {
                 )}
               </Grid>
             </SubCard>
-            <SubCard title={t('profilePage.pushNotify')}>
-              <Grid container spacing={2}>
-                <Grid xs={12}>
-                  <Alert severity="info">{t('profilePage.tokenNotice')}</Alert>
-                </Grid>
-                {inputs.access_token && (
-                  <Grid xs={12}>
-                    <Alert severity="error">
-                      {t('profilePage.yourTokenIs')} <b>{inputs.access_token}</b> <br />
-                      {t('profilePage.keepSafe')}
-                    </Alert>
-                  </Grid>
-                )}
-                <Grid xs={12}>
-                  <Button variant="contained" onClick={generateAccessToken}>
-                    {inputs.access_token ? t('profilePage.resetToken') : t('profilePage.generateToken')}
-                  </Button>
-                </Grid>
-              </Grid>
+            {/* 推送通知 */}
+            <SubCard title={t('monitoring.settings.title')}>
+              {/* 待插入 */}
+              <Monitoring inputs={inputs} setInputs={setInputs} turnstileToken={turnstileToken} turnstileEnabled={turnstileEnabled} />
             </SubCard>
+            {/* 其他 */}
             <SubCard title={t('profilePage.other')}>
               <Grid container spacing={2}>
                 <Grid xs={12}>
@@ -351,7 +339,6 @@ export default function Profile() {
                 </Grid>
               </Grid>
             </SubCard>
-
           </Stack>
         </Card>
       </UserCard>

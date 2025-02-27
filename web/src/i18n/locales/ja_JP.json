@@ -1156,5 +1156,37 @@
     "nameTip": "チャネル名",
     "title": "モデルの帰属"
   },
-  "price": "価格"
+  "price": "価格",
+  "monitoring": {
+    "settings": {
+      "title": "通知設定",
+      "balanceWarning": "残高警告",
+      "promotionNotice": "プロモーション通知",
+      "failureAlert": "失敗アラート",
+      "modelPriceChange": "モデル価格変更",
+      "systemAnnouncement": "システムアナウンスメント",
+      "subscriptionEvents": "サブスクリプションイベント",
+      "notificationMethod": "通知方法",
+      "email": "メール",
+      "wechat": "WeChat",
+      "dingTalk": "DingTalk",
+      "feishu": "Feishu",
+      "webhook": "Webhook",
+      "telegram": "Telegram",
+      "emailAddress": "メールアドレス",
+      "leaveEmptyToUseAccountEmail": "アカウントのメールアドレスを使用する場合は空欄にしてください",
+      "warningThreshold": "警告閾値",
+      "threshold": "閾値",
+      "thresholdDescription": "残高がこの金額を下回ると通知が送信されます（2時間ごとに最大1回）",
+      "save": "保存",
+      "notificationSettingsSaved": "通知設定が保存されました",
+      "failedToSaveNotifications": "通知設定の保存に失敗しました",
+      "balanceWarningTip": "残高が設定された金額を下回ると通知が送信されます",
+      "promotionNoticeTip": "プロモーション通知が送信されます",
+      "failureAlertTip": "失敗アラートが送信されます",
+      "modelPriceChangeTip": "モデル価格変更が送信されます",
+      "systemAnnouncementTip": "システムアナウンスメントが送信されます",
+      "subscriptionEventsTip": "サブスクリプションイベントが送信されます"
+    }
+  }
 }

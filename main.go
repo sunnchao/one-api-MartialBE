@@ -65,6 +65,7 @@ func main() {
 
 	initMemoryCache()
 	initSync()
+	initAllUserNotification()
 
 	common.InitTokenEncoders()
 	requester.InitHttpClient()
@@ -128,6 +129,7 @@ func initHttpServer() {
 	if err != nil {
 		logger.FatalLog("failed to start HTTP server: " + err.Error())
 	}
+
 }
 
 func SyncChannelCache(frequency int) {
@@ -143,4 +145,8 @@ func SyncChannelCache(frequency int) {
 		model.PricingInstance.Init()
 		model.ModelOwnedBysInstance.Load()
 	}
+}
+
+func initAllUserNotification() {
+	// 初始化所有用户通知
 }
