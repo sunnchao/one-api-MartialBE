@@ -1,21 +1,41 @@
 import { useNavigate } from 'react-router';
-import { Box, Typography, Button, Container, Stack } from '@mui/material';
+import { Box, Typography, Button, Container, Stack, useTheme, useMediaQuery } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
 import { GitHub, Bolt, Cloud, Security, SyncAlt, Shield, Brush } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
+import { keyframes } from '@mui/system';
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const float = keyframes`
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+`;
 
 const BaseIndex = () => {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <>
       <Box
         sx={{
           minHeight: '100vh',
-          backgroundImage: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+          backgroundImage: 'linear-gradient(135deg, #2a5298 0%, #0d47a1 100%)',
           color: 'white',
-          p: 4,
           position: 'relative',
+          overflow: 'hidden',
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -23,516 +43,294 @@ const BaseIndex = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px),
-                            linear-gradient(90deg, rgba(0, 0, 0, 0.08) 1px, transparent 1px)`,
-            backgroundSize: '150px 150px',
+            backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)`,
+            backgroundSize: '100px 100px',
             pointerEvents: 'none'
           }
         }}
       >
-        <Container maxWidth="lg">
-          {/* Hero Section - Updated content */}
+        {/* 背景装饰元素 */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '10%',
+            right: '5%',
+            width: '400px',
+            height: '400px',
+            background: 'radial-gradient(circle, rgba(63,81,181,0.2) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+            animation: `${float} 6s ease-in-out infinite`,
+            zIndex: 0
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: '15%',
+            left: '10%',
+            width: '300px',
+            height: '300px',
+            background: 'radial-gradient(circle, rgba(25,118,210,0.15) 0%, transparent 70%)',
+            filter: 'blur(50px)',
+            animation: `${float} 8s ease-in-out infinite`,
+            animationDelay: '-3s',
+            zIndex: 0
+          }}
+        />
+
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+          {/* Hero Section */}
           <Grid
             container
             columns={12}
-            wrap="nowrap"
             alignItems="center"
             sx={{
-              minHeight: '80vh',
-              position: 'relative'
+              minHeight: '90vh',
+              pt: { xs: 8, md: 0 }
             }}
           >
-            {/* 背景装饰 */}
-            <Box
-              sx={{
-                position: 'absolute',
-                top: 0,
-                right: 0,
-                width: '50%',
-                height: '100%',
-                background: 'radial-gradient(circle at 70% 30%, rgba(100,181,246,0.1) 0%, transparent 70%)',
-                filter: 'blur(60px)',
-                pointerEvents: 'none'
-              }}
-            />
-
-            <Grid md={7} lg={6}>
-              <Stack spacing={4}>
+            <Grid xs={12} md={12} lg={8}>
+              <Stack
+                spacing={4}
+                sx={{
+                  animation: `${fadeIn} 1s ease-out`,
+                  '& > *': {
+                    animation: `${fadeIn} 1s ease-out`,
+                    animationFillMode: 'both'
+                  }
+                }}
+              >
                 <Typography
                   variant="h1"
                   sx={{
-                    fontSize: { xs: '2.5rem', md: '3.5rem' },
-                    fontWeight: 700,
-                    color: '#fff',
-                    lineHeight: 1.2,
+                    fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' },
+                    fontWeight: 800,
+                    background: 'linear-gradient(45deg, #fff 30%, #90caf9 90%)',
+                    backgroundClip: 'text',
+                    textFillColor: 'transparent',
+                    letterSpacing: '-0.02em',
                     position: 'relative',
                     '&::before': {
                       content: '""',
                       position: 'absolute',
                       left: '-20px',
                       top: '15%',
-                      width: '4px',
+                      width: '6px',
                       height: '70%',
-                      background: 'linear-gradient(180deg, #64B5F6, transparent)',
-                      borderRadius: '4px'
+                      background: 'linear-gradient(180deg, #90caf9, transparent)',
+                      borderRadius: '8px'
                     }
                   }}
                 >
-                  企业级AI接口调用平台
+                  提供稳定可靠的AI接口调用平台
                 </Typography>
-                <Typography variant="h4" sx={{ fontSize: '1.25rem', color: '#fff', lineHeight: 1.6, opacity: 0.9 }}>
-                  专业的高性能、高并发、高可用AI服务平台，支持OpenAI、Claude、Gemini等多种模型，为企业提供一站式AI解决方案
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    lineHeight: 1.8,
+                    maxWidth: '800px',
+                    animationDelay: '0.2s'
+                  }}
+                >
+                  专业的高性能、高并发、高可用AI服务平台，支持OpenAI、Claude、Deepseek、Gemini等多种模型，为个人和企业提供一站式AI解决方案
                 </Typography>
-                <Stack direction="row" spacing={3}>
+                <Stack
+                  direction={{ xs: 'column', sm: 'row' }}
+                  spacing={3}
+                  sx={{
+                    animationDelay: '0.4s',
+                    '& > *': { width: { xs: '100%', sm: 'auto' } }
+                  }}
+                >
                   <Button
                     variant="contained"
                     href="/panel"
                     sx={{
                       backgroundColor: '#fff',
-                      color: '#1e3c72',
+                      color: '#1a237e',
                       px: 4,
-                      py: 1.5,
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 15px rgba(255,255,255,0.1)',
-                      transition: 'all 0.3s ease',
+                      py: 1.8,
+                      borderRadius: '12px',
+                      fontSize: '1.1rem',
+                      fontWeight: 600,
+                      boxShadow: '0 8px 25px rgba(255,255,255,0.15)',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                       '&:hover': {
                         backgroundColor: '#f0f0f0',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 6px 20px rgba(255,255,255,0.15)'
+                        transform: 'translateY(-3px)',
+                        boxShadow: '0 12px 30px rgba(255,255,255,0.2)'
                       }
                     }}
                   >
                     前往控制台
                   </Button>
-                  {/* <Button
-                    variant="outlined"
-                    href="/docs"
-                    sx={{ 
-                      borderColor: '#fff',
-                      borderWidth: '2px',
-                      color: '#fff',
-                      px: 4,
-                      py: 1.5,
-                      borderRadius: '8px',
-                      transition: 'all 0.3s ease',
-                      '&:hover': { 
-                        borderColor: '#f0f0f0',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        transform: 'translateY(-2px)'
-                      }
-                    }}
-                  >
-                    API 文档
-                  </Button> */}
                 </Stack>
               </Stack>
             </Grid>
           </Grid>
 
-          {/* Features Section - Expanded content */}
+          {/* Features Section */}
           <Box
             sx={{
-              py: 12,
-              position: 'relative',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '100vw',
-                height: '100%',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.05) 100%)',
-                zIndex: -1
-              }
+              py: { xs: 8, md: 12 },
+              position: 'relative'
             }}
           >
             <Typography
               variant="h3"
               align="center"
               sx={{
-                fontWeight: 700,
+                fontWeight: 800,
                 mb: 8,
+                fontSize: { xs: '2rem', md: '2.5rem' },
+                background: 'linear-gradient(45deg, #fff 30%, #90caf9 90%)',
+                backgroundClip: 'text',
+                textFillColor: 'transparent',
                 position: 'relative',
-                color: '#fff',
                 '&::after': {
                   content: '""',
                   display: 'block',
-                  width: '60px',
+                  width: '80px',
                   height: '4px',
-                  background: 'linear-gradient(90deg, #64B5F6, #2196F3)',
+                  background: 'linear-gradient(90deg, #90caf9, #2196F3)',
                   margin: '20px auto 0',
-                  borderRadius: '2px'
+                  borderRadius: '4px'
                 }
               }}
             >
               核心优势
             </Typography>
-            <Grid container spacing={6}>
-              <Grid item xs={12} md={4}>
-                <Box
-                  sx={{
-                    height: '100%',
-                    transform: 'translateY(0)',
-                    transition: 'all 0.4s ease',
-                    '&:hover': {
-                      transform: 'translateY(-5px)',
-                      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
-                    }
-                  }}
-                >
-                  <Stack
-                    spacing={3}
-                    alignItems="center"
-                    sx={{
-                      p: 4,
-                      height: '100%',
-                      background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
-                      backdropFilter: 'blur(10px)'
-                    }}
-                  >
-                    <Bolt sx={{ fontSize: 48, color: '#64B5F6' }} />
-                    <Typography variant="h5" align="center" sx={{ fontWeight: 600, color: '#fff' }}>
-                      企业级性能保障
-                    </Typography>
-                    <Typography align="center" sx={{ opacity: 0.9, lineHeight: 1.8, color: '#fff' }}>
-                      • MySQL8.2超高并发架构
-                      <br />
-                      • 日承接量超100万次调用
-                      <br />
-                      • 智能负载均衡确保稳定
-                      <br />• 已稳定运行超过1年
-                    </Typography>
-                  </Stack>
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Box
-                  sx={{
-                    height: '100%',
-                    transform: 'translateY(0)',
-                    transition: 'all 0.4s ease',
-                    '&:hover': {
-                      transform: 'translateY(-5px)',
-                      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
-                    }
-                  }}
-                >
-                  <Stack
-                    spacing={3}
-                    alignItems="center"
-                    sx={{
-                      p: 4,
-                      height: '100%',
-                      background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
-                      backdropFilter: 'blur(10px)'
-                    }}
-                  >
-                    <Cloud sx={{ fontSize: 48, color: '#64B5F6' }} />
-                    <Typography variant="h5" align="center" sx={{ fontWeight: 600, color: '#fff' }}>
-                      全球化部署
-                    </Typography>
-                    <Typography align="center" sx={{ opacity: 0.9, lineHeight: 1.8 }}>
-                      • 多区域服务器部署
-                      <br />
-                      • CN2专线高速接入
-                      <br />
-                      • 70+全球中转节点
-                      <br />• 智能路由就近接入
-                    </Typography>
-                  </Stack>
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Box
-                  sx={{
-                    height: '100%',
-                    transform: 'translateY(0)',
-                    transition: 'all 0.4s ease',
-                    '&:hover': {
-                      transform: 'translateY(-5px)',
-                      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
-                    }
-                  }}
-                >
-                  <Stack
-                    spacing={3}
-                    alignItems="center"
-                    sx={{
-                      p: 4,
-                      height: '100%',
-                      background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
-                      backdropFilter: 'blur(10px)'
-                    }}
-                  >
-                    <Security sx={{ fontSize: 48, color: '#64B5F6' }} />
-                    <Typography variant="h5" align="center" sx={{ fontWeight: 600, color: '#fff' }}>
-                      透明计费系统
-                    </Typography>
-                    <Typography align="center" sx={{ opacity: 0.9, lineHeight: 1.8 }}>
-                      • 对标官方计费标准
-                      <br />
-                      • 无隐藏费用设计
-                      <br />
-                      • 按量计费更经济
-                      <br />• 余额永不过期
-                    </Typography>
-                  </Stack>
-                </Box>
-              </Grid>
-
-              {/* Additional Features */}
-              <Grid item xs={12} md={4}>
-                <Box
-                  sx={{
-                    height: '100%',
-                    transform: 'translateY(0)',
-                    transition: 'all 0.4s ease',
-                    '&:hover': {
-                      transform: 'translateY(-5px)',
-                      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
-                    }
-                  }}
-                >
-                  <Stack
-                    spacing={3}
-                    alignItems="center"
-                    sx={{
-                      p: 4,
-                      height: '100%',
-                      background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
-                      backdropFilter: 'blur(10px)'
-                    }}
-                  >
-                    <SyncAlt sx={{ fontSize: 48, color: '#64B5F6' }} />
-                    <Typography variant="h5" align="center" sx={{ fontWeight: 600, color: '#fff' }}>
-                      完美兼容性
-                    </Typography>
-                    <Typography align="center" sx={{ opacity: 0.9, lineHeight: 1.8 }}>
-                      • 兼容OpenAI官方接口
-                      <br />
-                      • 支持所有主流模型
-                      <br />
-                      • 无缝对接第三方应用
-                      <br />• 持续更新新功能
-                    </Typography>
-                  </Stack>
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Box
-                  sx={{
-                    height: '100%',
-                    transform: 'translateY(0)',
-                    transition: 'all 0.4s ease',
-                    '&:hover': {
-                      transform: 'translateY(-5px)',
-                      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
-                    }
-                  }}
-                >
-                  <Stack
-                    spacing={3}
-                    alignItems="center"
-                    sx={{
-                      p: 4,
-                      height: '100%',
-                      background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
-                      backdropFilter: 'blur(10px)'
-                    }}
-                  >
-                    <Shield sx={{ fontSize: 48, color: '#64B5F6' }} />
-                    <Typography variant="h5" align="center" sx={{ fontWeight: 600, color: '#fff' }}>
-                      服务保障
-                    </Typography>
-                    <Typography align="center" sx={{ opacity: 0.9, lineHeight: 1.8 }}>
-                      • 7*24小时持续服务
-                      <br />
-                      • 自助充值系统
-                      <br />
-                      • 实时余额查询
-                      <br />• 专业技术支持
-                    </Typography>
-                  </Stack>
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Box
-                  sx={{
-                    height: '100%',
-                    transform: 'translateY(0)',
-                    transition: 'all 0.4s ease',
-                    '&:hover': {
-                      transform: 'translateY(-5px)',
-                      boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
-                    }
-                  }}
-                >
-                  <Stack
-                    spacing={3}
-                    alignItems="center"
-                    sx={{
-                      p: 4,
-                      height: '100%',
-                      background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
-                      backdropFilter: 'blur(10px)'
-                    }}
-                  >
-                    <Brush sx={{ fontSize: 48, color: '#64B5F6' }} />
-                    <Typography variant="h5" align="center" sx={{ fontWeight: 600, color: '#fff' }}>
-                      Midjourney 增强
-                    </Typography>
-                    <Typography align="center" sx={{ opacity: 0.9, lineHeight: 1.8 }}>
-                      • 内置中文翻译接口
-                      <br />
-                      • 高性能反代服务
-                      <br />
-                      • 支持最新版本
-                      <br />• 快速并发响应
-                    </Typography>
-                  </Stack>
-                </Box>
-              </Grid>
-            </Grid>
-          </Box>
-
-          {/* Supported Models Section - Further enhanced */}
-          {/* <Box
-            sx={{
-              py: 12,
-              position: 'relative',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                top: '20%',
-                left: 0,
-                width: '100%',
-                height: '60%',
-                background: 'linear-gradient(90deg, rgba(100,181,246,0.1) 0%, transparent 100%)',
-                filter: 'blur(100px)',
-                transform: 'rotate(-5deg)',
-                zIndex: -1
-              }
-            }}
-          >
-            <Typography
-              variant="h3"
-              align="center"
-              sx={{
-                fontWeight: 700,
-                mb: 8,
-                position: 'relative',
-                color: '#fff',
-                '&::after': {
-                  content: '""',
-                  display: 'block',
-                  width: '60px',
-                  height: '4px',
-                  background: 'linear-gradient(90deg, #64B5F6, #2196F3)',
-                  margin: '20px auto 0',
-                  borderRadius: '2px'
-                }
-              }}
-            >
-              支持模型
-            </Typography>
-
-            <Grid container spacing={4} justifyContent="center">
+            <Grid container spacing={{ xs: 4, md: 6 }}>
               {[
-                { name: 'OpenAI', desc: 'GPT-4o / o1 系列模型', tag: '热门' },
-                { name: 'Claude AI', desc: 'Claude 3.5 系列模型', tag: '热门' },
-                { name: 'Google Gemini', desc: 'Pro/Exp 系列模型', tag: '热门' },
-                { name: 'DeepSeek', desc: 'V3 系列模型', tag: '推荐' },
-                { name: 'Midjourney', desc: '支持最新版Midjourney Proxy Plus', tag: '创意' }
-              ].map((platform) => (
-                <Grid item xs={12} sm={6} md={4} key={platform.name}>
+                {
+                  icon: <Bolt sx={{ fontSize: 48, color: '#90caf9' }} />,
+                  title: '企业级性能保障',
+                  features: ['MySQL8.2超高并发架构', '日承接量超100万次调用', '智能负载均衡确保稳定', '已稳定运行超过1年']
+                },
+                {
+                  icon: <Cloud sx={{ fontSize: 48, color: '#90caf9' }} />,
+                  title: '全球化部署',
+                  features: ['多区域服务器部署', 'CN2专线高速接入', '70+全球中转节点', '智能路由就近接入']
+                },
+                {
+                  icon: <Security sx={{ fontSize: 48, color: '#90caf9' }} />,
+                  title: '透明计费系统',
+                  features: ['对标官方计费标准', '无隐藏费用设计', '按量计费更经济', '余额永不过期']
+                },
+                {
+                  icon: <SyncAlt sx={{ fontSize: 48, color: '#90caf9' }} />,
+                  title: '完美兼容性',
+                  features: ['兼容OpenAI、Claude、Gemini官方接口', '支持所有主流模型', '无缝对接第三方应用', '持续更新新功能']
+                },
+                {
+                  icon: <Shield sx={{ fontSize: 48, color: '#90caf9' }} />,
+                  title: '服务保障',
+                  features: ['7*24小时持续服务', '自助充值系统', '实时余额查询', '专业技术支持']
+                },
+                {
+                  icon: <Brush sx={{ fontSize: 48, color: '#90caf9' }} />,
+                  title: 'Midjourney 增强',
+                  features: ['内置中文翻译接口', '高性能反代服务', '支持最新版本', '快速并发响应']
+                }
+              ].map((feature, index) => (
+                <Grid item xs={12} md={4} key={index}>
                   <Box
                     sx={{
-                      p: 4,
                       height: '100%',
-                      backgroundColor: 'rgba(255,255,255,0.08)',
-                      transition: 'all 0.3s ease',
-                      position: 'relative',
-                      overflow: 'hidden',
+                      transform: 'translateY(0)',
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                       '&:hover': {
-                        transform: 'translateY(-5px)',
-                        boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
+                        transform: 'translateY(-8px)',
+                        '& .feature-icon': {
+                          transform: 'scale(1.1)'
+                        }
                       }
                     }}
                   >
-                    <Box
+                    <Stack
+                      spacing={3}
                       sx={{
-                        position: 'absolute',
-                        top: 12,
-                        right: 12,
-                        px: 1.5,
-                        py: 0.5,
-                        backgroundColor: 'rgba(33,150,243,0.2)',
-                        fontSize: '0.75rem',
-                        color: '#90CAF9'
+                        p: 4,
+                        height: '100%',
+                        background: 'linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                        backdropFilter: 'blur(10px)',
+                        borderRadius: '16px',
+                        border: '1px solid rgba(255,255,255,0.1)'
                       }}
                     >
-                      {platform.tag}
-                    </Box>
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        mb: 2,
-                        fontWeight: 600,
-                        color: '#fff'
-                      }}
-                    >
-                      {platform.name}
-                    </Typography>
-                    <Typography
-                      sx={{
-                        color: 'rgba(255,255,255,0.7)',
-                        fontSize: '1rem',
-                        lineHeight: 1.6
-                      }}
-                    >
-                      {platform.desc}
-                    </Typography>
+                      <Box
+                        className="feature-icon"
+                        sx={{
+                          transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        {feature.icon}
+                      </Box>
+                      <Typography
+                        variant="h5"
+                        align="center"
+                        sx={{
+                          fontWeight: 700,
+                          color: '#fff',
+                          fontSize: { xs: '1.25rem', md: '1.5rem' }
+                        }}
+                      >
+                        {feature.title}
+                      </Typography>
+                      <Stack spacing={1.5}>
+                        {feature.features.map((item, i) => (
+                          <Typography
+                            key={i}
+                            align="center"
+                            sx={{
+                              color: 'rgba(255,255,255,0.8)',
+                              fontSize: '1rem',
+                              lineHeight: 1.6
+                            }}
+                          >
+                            {item}
+                          </Typography>
+                        ))}
+                      </Stack>
+                    </Stack>
                   </Box>
                 </Grid>
               ))}
             </Grid>
-          </Box> */}
+          </Box>
 
-          {/* Contact Section - Further enhanced */}
+          {/* Contact Section */}
           <Box
             sx={{
-              py: 12,
-              position: 'relative',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                bottom: 0,
-                right: 0,
-                width: '50%',
-                height: '70%',
-                background: 'radial-gradient(circle at 70% 80%, rgba(100,181,246,0.1) 0%, transparent 70%)',
-                filter: 'blur(60px)',
-                zIndex: -1
-              }
+              py: { xs: 8, md: 12 },
+              position: 'relative'
             }}
           >
             <Typography
               variant="h3"
               align="center"
               sx={{
-                fontWeight: 700,
+                fontWeight: 800,
                 mb: 8,
+                fontSize: { xs: '2rem', md: '2.5rem' },
+                background: 'linear-gradient(45deg, #fff 30%, #90caf9 90%)',
+                backgroundClip: 'text',
+                textFillColor: 'transparent',
                 position: 'relative',
-                color: '#fff',
                 '&::after': {
                   content: '""',
                   display: 'block',
-                  width: '60px',
+                  width: '80px',
                   height: '4px',
-                  background: 'linear-gradient(90deg, #64B5F6, #2196F3)',
+                  background: 'linear-gradient(90deg, #90caf9, #2196F3)',
                   margin: '20px auto 0',
-                  borderRadius: '2px'
+                  borderRadius: '4px'
                 }
               }}
             >
@@ -556,21 +354,24 @@ const BaseIndex = () => {
                   label: 'Telegram',
                   content: '@chirou_api'
                 }
-              ].map((item) => (
-                <Grid item xs={12} sm={4}>
+              ].map((item, index) => (
+                <Grid item xs={12} sm={4} key={index}>
                   <Box
                     sx={{
                       p: 5,
-                      backgroundColor: 'rgba(255,255,255,0.08)',
+                      background: 'linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                      backdropFilter: 'blur(10px)',
+                      borderRadius: '16px',
+                      border: '1px solid rgba(255,255,255,0.1)',
                       textAlign: 'center',
-                      transition: 'all 0.3s ease',
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                       height: '100%',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'center',
                       '&:hover': {
-                        transform: 'translateY(-5px)',
-                        boxShadow: '0 8px 30px rgba(0,0,0,0.12)'
+                        transform: 'translateY(-8px)',
+                        boxShadow: '0 12px 30px rgba(0,0,0,0.2)'
                       }
                     }}
                   >
@@ -578,8 +379,9 @@ const BaseIndex = () => {
                       variant="h5"
                       sx={{
                         mb: 3,
-                        fontWeight: 600,
-                        color: '#90CAF9'
+                        fontWeight: 700,
+                        color: '#90caf9',
+                        fontSize: { xs: '1.25rem', md: '1.5rem' }
                       }}
                     >
                       {item.label}

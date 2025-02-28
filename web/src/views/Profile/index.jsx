@@ -314,10 +314,9 @@ export default function Profile() {
               </Grid>
             </SubCard>
             {/* 推送通知 */}
-            <SubCard title={t('monitoring.settings.title')}>
-              {/* 待插入 */}
+            {/* <SubCard title={t('monitoring.settings.title')}>
               <Monitoring inputs={inputs} setInputs={setInputs} turnstileToken={turnstileToken} turnstileEnabled={turnstileEnabled} />
-            </SubCard>
+            </SubCard> */}
             {/* 其他 */}
             <SubCard title={t('profilePage.other')}>
               <Grid container spacing={2}>
