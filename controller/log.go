@@ -118,7 +118,7 @@ func DeleteHistoryLogs(c *gin.Context) {
 		})
 		return
 	}
-	count, err := model.DeleteOldLog(targetTimestamp)
+	count, err := model.DeleteOldLogByGroup(targetTimestamp)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,

@@ -120,17 +120,19 @@ func AddToken(c *gin.Context) {
 	}
 
 	cleanToken := model.Token{
-		UserId: userId,
-		Name:   token.Name,
-		// Key:            utils.GenerateKey(),
-		CreatedTime:    utils.GetTimestamp(),
-		AccessedTime:   utils.GetTimestamp(),
-		ExpiredTime:    token.ExpiredTime,
-		RemainQuota:    token.RemainQuota,
-		UnlimitedQuota: token.UnlimitedQuota,
-		Group:          token.Group,
-		ModelLimits:    token.ModelLimits,
+		UserId:             userId,
+		Name:               token.Name,
+		CreatedTime:        utils.GetTimestamp(),
+		AccessedTime:       utils.GetTimestamp(),
+		ExpiredTime:        token.ExpiredTime,
+		RemainQuota:        token.RemainQuota,
+		UnlimitedQuota:     token.UnlimitedQuota,
+		Group:              token.Group,
+		ModelLimits:        token.ModelLimits,
 		ModelLimitsEnabled: token.ModelLimitsEnabled,
+		AllowIps:           token.AllowIps,
+		AllowIpsEnabled:    token.AllowIpsEnabled,
+		BillingType:        token.BillingType,
 	}
 	err = cleanToken.Insert()
 	if err != nil {
@@ -229,6 +231,9 @@ func UpdateToken(c *gin.Context) {
 		cleanToken.Group = token.Group
 		cleanToken.ModelLimits = token.ModelLimits
 		cleanToken.ModelLimitsEnabled = token.ModelLimitsEnabled
+		cleanToken.AllowIps = token.AllowIps
+		cleanToken.AllowIpsEnabled = token.AllowIpsEnabled
+		cleanToken.BillingType = token.BillingType
 	}
 	err = cleanToken.Update()
 	if err != nil {
