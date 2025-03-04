@@ -183,7 +183,7 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
   // 如果是3-7 默认开启thinking
   if strings.Contains(request.Model, "-thinking") {
     if claudeRequest.MaxTokens == 0 {
-      claudeRequest.MaxTokens = 8096
+      claudeRequest.MaxTokens = 8192
     }
     // BudgetTokens 为 max_tokens 的 80%
     claudeRequest.Thinking = &Thinking{
@@ -254,30 +254,35 @@ func convertMessageContent(msg *types.ChatCompletionMessage) (*Message, error) {
     return &message, nil
   }
 
-  openaiContent := msg.ParseContent()
-  for _, part := range openaiContent {
-    if part.Type == types.ContentTypeText {
-      content = append(content, MessageContent{
-        Type: "text",
-        Text: part.Text,
-      })
-      continue
-    }
-    if part.Type == types.ContentTypeImageURL {
-      mimeType, data, err := image.GetImageFromUrl(part.ImageURL.URL)
-      if err != nil {
-        return nil, common.ErrorWrapper(err, "image_url_invalid", http.StatusBadRequest)
-      }
-      content = append(content, MessageContent{
-        Type: "image",
-        Source: &ContentSource{
-          Type:      "base64",
-          MediaType: mimeType,
-          Data:      data,
-        },
-      })
-    }
-  }
+	openaiContent := msg.ParseContent()
+	for _, part := range openaiContent {
+		if part.Type == types.ContentTypeText {
+			content = append(content, MessageContent{
+				Type: "text",
+				Text: part.Text,
+			})
+			continue
+		}
+		if part.Type == types.ContentTypeImageURL {
+			mimeType, data, err := image.GetImageFromUrl(part.ImageURL.URL)
+			if err != nil {
+				return nil, common.ErrorWrapper(err, "image_url_invalid", http.StatusBadRequest)
+			}
+			claudeType := "image"
+
+			if mimeType == "application/pdf" {
+				claudeType = "document"
+			}
+			content = append(content, MessageContent{
+				Type: claudeType,
+				Source: &ContentSource{
+					Type:      "base64",
+					MediaType: mimeType,
+					Data:      data,
+				},
+			})
+		}
+	}
 
   message.Content = content
 
