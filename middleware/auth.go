@@ -129,6 +129,7 @@ func tokenAuth(c *gin.Context, key string) {
 	c.Set("token_id", token.Id)
 	c.Set("token_name", token.Name)
 	c.Set("token_group", token.Group)
+	c.Set("token_billing_type", token.BillingType)
 
 	if token.ModelLimitsEnabled {
 		c.Set("token_model_limit_enabled", true)

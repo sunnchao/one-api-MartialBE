@@ -24,23 +24,35 @@ var (
 	ErrTokenQuotaGet          = errors.New("获取令牌额度失败")
 )
 
+// 计费类型
+type TokenBillingType string
+
+const (
+	// 按量计费
+	TokenBillingTypeTokens TokenBillingType = "tokens"
+	// 按次数计费
+	TokenBillingTypeTimes TokenBillingType = "times"
+)
+
 type Token struct {
-	Id                 int            `json:"id"`
-	UserId             int            `json:"user_id"`
-	Key                string         `json:"key" gorm:"type:varchar(59);uniqueIndex"`
-	Status             int            `json:"status" gorm:"default:1"`
-	Name               string         `json:"name" gorm:"index" `
-	CreatedTime        int64          `json:"created_time" gorm:"bigint"`
-	AccessedTime       int64          `json:"accessed_time" gorm:"bigint"`
-	ExpiredTime        int64          `json:"expired_time" gorm:"bigint;default:-1"` // -1 means never expired
-	RemainQuota        int            `json:"remain_quota" gorm:"default:0"`
-	UnlimitedQuota     bool           `json:"unlimited_quota" gorm:"default:false"`
-	UsedQuota          int            `json:"used_quota" gorm:"default:0"` // used quota
-	Group              string         `json:"group" gorm:"default:''"`
-	ModelLimits        string         `json:"model_limits" gorm:"default:''"`
-	ModelLimitsEnabled bool           `json:"model_limits_enabled" gorm:"default:false"`
-	AllowIps           string         `json:"allow_ips" gorm:"default:''"`
-	DeletedAt          gorm.DeletedAt `json:"-" gorm:"index"`
+	Id                 int              `json:"id"`
+	UserId             int              `json:"user_id"`
+	Key                string           `json:"key" gorm:"type:varchar(59);uniqueIndex"`
+	Status             int              `json:"status" gorm:"default:1"`
+	Name               string           `json:"name" gorm:"index" `
+	CreatedTime        int64            `json:"created_time" gorm:"bigint"`
+	AccessedTime       int64            `json:"accessed_time" gorm:"bigint"`
+	ExpiredTime        int64            `json:"expired_time" gorm:"bigint;default:-1"` // -1 means never expired
+	RemainQuota        int              `json:"remain_quota" gorm:"default:0"`
+	UnlimitedQuota     bool             `json:"unlimited_quota" gorm:"default:false"`
+	UsedQuota          int              `json:"used_quota" gorm:"default:0"` // used quota
+	Group              string           `json:"group" gorm:"default:''"`
+	ModelLimits        string           `json:"model_limits" gorm:"default:''"`
+	ModelLimitsEnabled bool             `json:"model_limits_enabled" gorm:"default:false"`
+	AllowIps           string           `json:"allow_ips" gorm:"default:''"`
+	AllowIpsEnabled    bool             `json:"allow_ips_enabled" gorm:"default:false"`
+	BillingType        TokenBillingType `json:"billing_type" gorm:"default:'tokens'"` // 计费类型
+	DeletedAt          gorm.DeletedAt   `json:"-" gorm:"index"`
 }
 
 var allowedTokenOrderFields = map[string]bool{
@@ -51,6 +63,7 @@ var allowedTokenOrderFields = map[string]bool{
 	"created_time": true,
 	"remain_quota": true,
 	"used_quota":   true,
+	"billing_type": true,
 }
 
 // 添加 AfterCreate 钩子方法
@@ -207,7 +220,7 @@ func (token *Token) Insert() error {
 
 // Update Make sure your token's fields is completed, because this will update non-zero values
 func (token *Token) Update() error {
-	err := DB.Model(token).Select("name", "status", "expired_time", "remain_quota", "unlimited_quota", "group", "model_limits", "model_limits_enabled").Updates(token).Error
+	err := DB.Model(token).Select("name", "status", "expired_time", "remain_quota", "unlimited_quota", "group", "model_limits", "model_limits_enabled", "allow_ips", "allow_ips_enabled", "billing_type").Updates(token).Error
 	// 防止Redis缓存不生效，直接删除
 	if err == nil && config.RedisEnabled {
 		redis.RedisDel(fmt.Sprintf(UserTokensKey, token.Key))
@@ -340,7 +353,7 @@ func PreConsumeTokenQuota(tokenId int, quota int) (err error) {
 				} else {
 					thresholdValue := balanceWarningOptions["threshold"]
 					var lowestQuota int
-					
+
 					// Try to convert the interface{} to a numeric type
 					switch v := thresholdValue.(type) {
 					case float64:

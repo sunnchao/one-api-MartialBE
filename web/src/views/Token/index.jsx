@@ -218,13 +218,14 @@ export default function Token() {
                 orderBy={orderBy}
                 onRequestSort={handleSort}
                 headLabel={[
-                  { id: 'name', label: t('token_index.name'), disableSort: false },
-                  { id: 'group', label: t('token_index.userGroup'), disableSort: false },
-                  { id: 'status', label: t('token_index.status'), disableSort: false },
-                  { id: 'used_quota', label: t('token_index.usedQuota'), disableSort: false },
-                  { id: 'remain_quota', label: t('token_index.remainingQuota'), disableSort: false },
-                  { id: 'created_time', label: t('token_index.createdTime'), disableSort: false },
-                  { id: 'expired_time', label: t('token_index.expiryTime'), disableSort: false },
+                  { id: 'name', label: t('token_index.name'), disableSort: false, width: 150 },
+                  { id: 'group', label: t('token_index.userGroup'), disableSort: false, width: 150 },
+                  { id: 'status', label: t('token_index.status'), disableSort: false, width: 100, minWidth: 100 },
+                  { id: 'billing_type', label: t('token_index.billingType.header'), disableSort: false, width: 100, minWidth: 100 },
+                  { id: 'used_quota', label: t('token_index.usedQuota'), disableSort: false, width: 100, minWidth: 100 },
+                  { id: 'remain_quota', label: t('token_index.remainingQuota'), disableSort: false, width: 150, minWidth: 100 },
+                  { id: 'created_time', label: t('token_index.createdTime'), disableSort: false, width: 150, minWidth: 100 },
+                  { id: 'expired_time', label: t('token_index.expiryTime'), disableSort: false, width: 150, minWidth: 100 },
                   { id: 'action', label: t('token_index.actions'), disableSort: true }
                 ]}
               />

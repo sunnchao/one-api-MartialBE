@@ -10,7 +10,16 @@ const KeywordTableHead = ({ order, orderBy, headLabel, onRequestSort }) => {
   const label = (cell) => {
     if (cell.tooltip) {
       return (
-        <Box display="flex" alignItems="center">
+        <Box
+          display="flex"
+          alignItems="center"
+          sx={Object.assign(
+            {},
+            cell.width && { width: cell.width },
+            cell.minWidth && { minWidth: cell.minWidth },
+            cell.maxWidth && { maxWidth: cell.maxWidth }
+          )}
+        >
           <Typography variant="body1">{cell.label}</Typography>
           <Tooltip title={cell.tooltip} placement="bottom-start" enterDelay={300}>
             <IconButton size="small">

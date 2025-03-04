@@ -5,7 +5,8 @@ const LOG_TYPE = {
   3: { value: '3', text: '管理', color: 'default' },
   4: { value: '4', text: '系统', color: 'secondary' },
   5: { value: '5', text: '签到', color: 'primary' },
-  6: { value: '6', text: '登录', color: 'primary' }
+  6: { value: '6', text: '登录', color: 'primary' },
+  7: { value: '7', text: '日志归档', color: 'default' }
 };
 
 export default LOG_TYPE;

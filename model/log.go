@@ -46,6 +46,7 @@ const (
 	LogTypeUserQuotoIncrease
 	LogLogin
 	LogTypeAPIError
+	LogTypeArchive
 )
 
 func RecordLog(userId int, logType int, content string, requestIp string) {
@@ -263,6 +264,67 @@ func SumUsedQuota(startTimestamp int64, endTimestamp int64, modelName string, us
 func DeleteOldLog(targetTimestamp int64) (int64, error) {
 	result := DB.Where("type = ? AND created_at < ?", LogTypeConsume, targetTimestamp).Delete(&Log{})
 	return result.RowsAffected, result.Error
+}
+
+// 删除日志
+// 1. 按照用户分组查询日志
+// 2. 记录归档日志
+// 3. 按照用户分组删除日志
+func DeleteOldLogByGroup(targetTimestamp int64) (int64, error) {
+	// 1. 按照用户分组查询日志
+	type UserLogSummary struct {
+		UserId           int    `gorm:"column:user_id"`
+		Username         string `gorm:"column:username"`
+		LogCount         int64  `gorm:"column:log_count"`
+		TotalQuota       int64  `gorm:"column:total_quota"`
+	}
+	
+	var userLogSummaries []UserLogSummary
+	err := DB.Model(&Log{}).
+		Select("user_id, username, COUNT(*) as log_count, SUM(quota) as total_quota").
+		Where("type = ? AND created_at < ?", LogTypeConsume, targetTimestamp).
+		Group("user_id, username").
+		Find(&userLogSummaries).Error
+	
+	if err != nil {
+		return 0, err
+	}
+	
+	// 2. 记录归档日志
+	var totalRowsAffected int64 = 0
+	for _, summary := range userLogSummaries {
+		// Convert Unix timestamp to time.Time
+		formattedTime := time.Unix(targetTimestamp, 0).Format("2006-01-02 15:04:05")
+		
+		archiveContent := fmt.Sprintf("归档截止到 %s 的 %d 条日志，共计 %d 额度",
+			formattedTime, summary.LogCount, summary.TotalQuota)
+		
+		archiveLog := &Log{
+			UserId:    summary.UserId,
+			Username:  summary.Username,
+			CreatedAt: utils.GetTimestamp(),
+			Type:      LogTypeArchive,
+			Content:   archiveContent,
+		}
+		
+		if err := DB.Create(archiveLog).Error; err != nil {
+			logger.SysError("failed to record archive log: " + err.Error())
+		}
+	}
+	
+	// 3. 按照用户分组删除日志
+	for _, summary := range userLogSummaries {
+		result := DB.Where("user_id = ? AND type = ? AND created_at < ?", 
+			summary.UserId, LogTypeConsume, targetTimestamp).Delete(&Log{})
+		
+		if result.Error != nil {
+			return totalRowsAffected, result.Error
+		}
+		
+		totalRowsAffected += result.RowsAffected
+	}
+	
+	return totalRowsAffected, nil
 }
 
 type LogStatistic struct {

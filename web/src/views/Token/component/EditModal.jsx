@@ -31,6 +31,11 @@ import { API } from 'utils/api';
 import { useTranslation } from 'react-i18next';
 import 'dayjs/locale/zh-cn';
 
+const billingTypeOptions = [
+  { value: 'tokens', label: 'Tokens' }
+  // { value: 'times', label: 'Times' }
+];
+
 const validationSchema = Yup.object().shape({
   is_edit: Yup.boolean(),
   name: Yup.string().required('名称 不能为空'),
@@ -38,7 +43,8 @@ const validationSchema = Yup.object().shape({
   expired_time: Yup.number(),
   unlimited_quota: Yup.boolean(),
   model_limits: Yup.string(),
-  model_limits_enabled: Yup.boolean()
+  model_limits_enabled: Yup.boolean(),
+  billing_type: Yup.string().required('计费类型 不能为空')
 });
 
 const originInputs = {
@@ -49,7 +55,8 @@ const originInputs = {
   unlimited_quota: false,
   group: '',
   model_limits: '',
-  model_limits_enabled: false
+  model_limits_enabled: false,
+  billing_type: 'tokens'
 };
 
 const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
@@ -259,8 +266,17 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
                 <InputLabel>{t('token_index.modelLimits')}</InputLabel>
                 <OutlinedInput value={values.model_limits} name="model_limits" onChange={handleChange} />
               </FormControl>
-
-              <DialogActions>
+              <FormControl fullWidth sx={{ marginTop: 2 }}>
+                <InputLabel>{t('token_index.billingType.header')}</InputLabel>
+                <Select label={t('token_index.billingType.header')} name="billing_type" value={values.billing_type} onChange={handleChange}>
+                  {billingTypeOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {t(`token_index.billingType.${option.value}`)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <DialogActions sx={{ marginTop: 2 }}>
                 <Button onClick={onCancel}>{t('token_index.cancel')}</Button>
                 <Button disableElevation disabled={isSubmitting} type="submit" variant="contained" color="primary">
                   {t('token_index.submit')}

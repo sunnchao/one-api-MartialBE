@@ -964,7 +964,12 @@
     "apiRate": "",
     "apiRateTip": "",
     "modelLimitsEnabled": "モデル制限を有効にする",
-    "modelLimits": "モデル制限"
+    "modelLimits": "モデル制限",
+    "billingType": {
+      "header": "計費タイプ",
+      "tokens": "トークン計費",
+      "times": "回数計費"
+    }
   },
   "topup": "トップアップ",
   "topupCard": {

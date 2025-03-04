@@ -967,7 +967,12 @@
     "apiRate": "",
     "apiRateTip": "",
     "modelLimitsEnabled": "Enable model limits",
-    "modelLimits": "Model limits"
+    "modelLimits": "Model limits",
+    "billingType": {
+      "header": "Billing type",
+      "tokens": "Tokens",
+      "times": "Times"
+    }
   },
   "topup": "Top-up",
   "topupCard": {

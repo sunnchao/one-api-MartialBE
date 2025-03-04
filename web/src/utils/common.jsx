@@ -203,6 +203,13 @@ export function renderQuota(quota, digits = 2) {
   return renderNumber(quota);
 }
 
+export function renderBillingType(billingType) {
+  if (billingType === 'tokens') {
+    return 'Tokens';
+  }
+  return 'Times';
+}
+
 export function renderQuotaByMoney(money) {
   money = Number(money);
   let quotaPerUnit = localStorage.getItem('quota_per_unit');

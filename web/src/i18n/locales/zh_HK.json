@@ -964,7 +964,12 @@
     "apiRate": "API速率",
     "apiRateTip": "每分鐘允許的請求數,當速率小於60時，使用計數器限制器，當速率大於等於60時，使用令牌桶限制器，僅在啟用Redis時有效",
     "modelLimitsEnabled": "是否啟用模型限制",
-    "modelLimits": "模型限制"
+    "modelLimits": "模型限制",
+    "billingType": {
+      "header": "計費類型",
+      "tokens": "按量計費",
+      "times": "按次計費"
+    }
   },
   "topup": "儲值",
   "topupCard": {

@@ -190,9 +190,11 @@ export default function TokensTableRow({ item, manageToken, handleOpenModal, set
           </Tooltip>
         </TableCell>
 
-        <TableCell>{renderQuota(item.used_quota)}</TableCell>
+        <TableCell>{t(`token_index.billingType.${item.billing_type}`)}</TableCell>
 
-        <TableCell>{item.unlimited_quota ? t('token_index.unlimited') : renderQuota(item.remain_quota, 2)}</TableCell>
+        <TableCell>{renderQuota(item.used_quota, 6)}</TableCell>
+
+        <TableCell>{item.unlimited_quota ? t('token_index.unlimited') : renderQuota(item.remain_quota, 6)}</TableCell>
 
         <TableCell>{timestamp2string(item.created_time)}</TableCell>
 

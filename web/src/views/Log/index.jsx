@@ -313,68 +313,89 @@ export default function Log() {
                     id: 'created_at',
                     label: t('logPage.timeLabel'),
                     disableSort: false,
-                    width: '200px'
+                    width: 100,
+                    minWidth: 100
                   },
                   {
                     id: 'channel_id',
                     label: t('logPage.channelLabel'),
                     disableSort: false,
                     hide: !userIsAdmin,
-                    width: '150px'
+                    width: 100,
+                    minWidth: 100
                   },
                   {
                     id: 'user_id',
                     label: t('logPage.userLabel'),
                     disableSort: false,
-                    hide: !userIsAdmin
+                    hide: !userIsAdmin,
+                    width: 100,
+                    minWidth: 100
                   },
                   {
                     id: 'group',
                     label: t('logPage.groupLabel'),
-                    disableSort: false
+                    disableSort: false,
+                    width: 100,
+                    minWidth: 100
                   },
                   {
                     id: 'token_name',
                     label: t('logPage.tokenLabel'),
-                    disableSort: false
+                    disableSort: false,
+                    width: 100,
+                    minWidth: 100
                   },
                   {
                     id: 'type',
                     label: t('logPage.typeLabel'),
-                    disableSort: false
+                    disableSort: false,
+                    width: 100,
+                    minWidth: 100
                   },
                   {
                     id: 'model_name',
                     label: t('logPage.modelLabel'),
-                    disableSort: false
+                    disableSort: false,
+                    width: 100,
+                    minWidth: 100
                   },
                   {
                     id: 'duration',
                     label: t('logPage.durationLabel'),
                     tooltip: t('logPage.durationTooltip'),
-                    disableSort: true
+                    disableSort: true,
+                    width: 100,
+                    minWidth: 100
                   },
                   {
                     id: 'message',
                     label: t('logPage.inputLabel'),
-                    disableSort: true
+                    disableSort: true,
+                    width: 100,
+                    minWidth: 100
                   },
                   {
                     id: 'completion',
                     label: t('logPage.outputLabel'),
-                    disableSort: true
+                    disableSort: true,
+                    width: 100,
+                    minWidth: 100
                   },
                   {
                     id: 'quota',
                     label: t('logPage.quotaLabel'),
-                    disableSort: true
+                    disableSort: true,
+                    width: 100,
+                    minWidth: 100
                   },
                   {
                     id: 'request ip',
                     label: t('logPage.requestIPLabel'),
                     disableSort: false,
                     hide: !userIsAdmin,
-                    width: 100
+                    width: 100,
+                    maxWidth: 100
                   },
                   {
                     id: 'detail',

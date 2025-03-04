@@ -200,7 +200,12 @@
     "cancel": "取消",
     "submit": "提交",
     "modelLimitsEnabled": "是否启用模型限制",
-    "modelLimits": "模型限制"
+    "modelLimits": "模型限制",
+    "billingType": {
+      "header": "计费类型",
+      "tokens": "按量计费",
+      "times": "按次计费"
+    }
   },
   "logPage": {
     "title": "日志",
