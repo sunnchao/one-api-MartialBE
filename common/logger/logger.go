@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"one-api/common/utils"
@@ -62,23 +63,71 @@ func getEncoder() zapcore.Encoder {
 }
 
 func getLogWriter(logDir string) zapcore.WriteSyncer {
-	filename := utils.GetOrDefault("logs.filename", "one-hub.log")
-	logPath := filepath.Join(logDir, filename)
-
+	filename := utils.GetOrDefault("logs.filename", "one-hub")
 	maxsize := utils.GetOrDefault("logs.max_size", 100)
 	maxAge := utils.GetOrDefault("logs.max_age", 7)
 	maxBackup := utils.GetOrDefault("logs.max_backup", 10)
 	compress := utils.GetOrDefault("logs.compress", false)
 
-	lumberJackLogger := &lumberjack.Logger{
-		Filename:   logPath,   // 文件位置
-		MaxSize:    maxsize,   // 进行切割之前,日志文件的最大大小(MB为单位)
-		MaxAge:     maxAge,    // 保留旧文件的最大天数
-		MaxBackups: maxBackup, // 保留旧文件的最大个数
-		Compress:   compress,  // 是否压缩/归档旧文件
-	}
+	// 创建带时间戳的写入器
+	return newHourlyRotateWriter(logDir, filename, maxsize, maxAge, maxBackup, compress)
+}
 
-	return zapcore.NewMultiWriteSyncer(zapcore.AddSync(lumberJackLogger), zapcore.AddSync(os.Stderr))
+// 新增hourlyRotateWriter结构体
+type hourlyRotateWriter struct {
+	mu          sync.Mutex
+	currentHour int
+	logDir      string
+	baseName    string
+	writer      *lumberjack.Logger
+	maxSize     int
+	maxAge      int
+	maxBackup   int
+	compress    bool
+}
+
+func newHourlyRotateWriter(logDir, baseName string, maxSize, maxAge, maxBackup int, compress bool) *hourlyRotateWriter {
+	w := &hourlyRotateWriter{
+		logDir:    logDir,
+		baseName:  baseName,
+		maxSize:   maxSize,
+		maxAge:    maxAge,
+		maxBackup: maxBackup,
+		compress:  compress,
+	}
+	w.writer = w.createWriter()
+	return w
+}
+
+func (w *hourlyRotateWriter) createWriter() *lumberjack.Logger {
+	now := time.Now()
+	w.currentHour = now.Hour()
+	timestamp := now.Format("2006010215") // 格式化为年月日小时
+	
+	return &lumberjack.Logger{
+		Filename:   filepath.Join(w.logDir, fmt.Sprintf("%s-%s.log", w.baseName, timestamp)),
+		MaxSize:    w.maxSize,
+		MaxAge:     w.maxAge,
+		MaxBackups: w.maxBackup,
+		Compress:   w.compress,
+	}
+}
+
+func (w *hourlyRotateWriter) Write(p []byte) (n int, err error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	// 每小时检查一次是否需要轮转
+	if time.Now().Hour() != w.currentHour {
+		w.writer.Close()
+		w.writer = w.createWriter()
+	}
+	
+	return w.writer.Write(p)
+}
+
+func (w *hourlyRotateWriter) Sync() error {
+	return nil
 }
 
 func getLogLevel() zapcore.Level {
