@@ -96,12 +96,17 @@ func InitOptionMap() {
 
 	config.OptionMap["AudioTokenJson"] = GetDefaultAudioRatio()
 
-	config.OptionMap["LinuxDoOAuthEnabled"] = strconv.FormatBool(config.LinuxDoOAuthEnabled)
-	config.OptionMap["LinuxDoClientId"] = ""
-	config.OptionMap["LinuxDoClientSecret"] = ""
-	config.OptionMap["LinuxDoMinLevel"] = strconv.Itoa(config.LinuxDoMinLevel)
+	config.OptionMap["GeminiAPIEnabled"] = strconv.FormatBool(config.GeminiAPIEnabled)
+	config.OptionMap["ClaudeAPIEnabled"] = strconv.FormatBool(config.ClaudeAPIEnabled)
 
-	config.OptionMapRWMutex.Unlock()
+	config.OptionMap["DisableChannelKeywords"] = common.GetDefaultDisableChannelKeywords()
+
+  config.OptionMap["LinuxDoOAuthEnabled"] = strconv.FormatBool(config.LinuxDoOAuthEnabled)
+  config.OptionMap["LinuxDoClientId"] = ""
+  config.OptionMap["LinuxDoClientSecret"] = ""
+  config.OptionMap["LinuxDoMinLevel"] = strconv.Itoa(config.LinuxDoMinLevel)
+
+  config.OptionMapRWMutex.Unlock()
 	loadOptionsFromDatabase()
 }
 
@@ -170,6 +175,8 @@ var optionBoolMap = map[string]*bool{
 	"DisplayInCurrencyEnabled":       &config.DisplayInCurrencyEnabled,
 	"MjNotifyEnabled":                &config.MjNotifyEnabled,
 	"GitHubOldIdCloseEnabled":        &config.GitHubOldIdCloseEnabled,
+	"GeminiAPIEnabled":               &config.GeminiAPIEnabled,
+	"ClaudeAPIEnabled":               &config.ClaudeAPIEnabled,
 	"LinuxDoOAuthEnabled":            &config.LinuxDoOAuthEnabled,
 }
 
@@ -242,6 +249,8 @@ func updateOptionMap(key string, value string) (err error) {
 		if PricingInstance != nil {
 			PricingInstance.Init()
 		}
+	case "DisableChannelKeywords":
+		common.DisableChannelKeywordsInstance.Load(value)
 	}
 	return err
 }
