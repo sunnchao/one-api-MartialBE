@@ -1,19 +1,21 @@
 package logger
 
 import (
-  "context"
-  "fmt"
-  "log"
-  "os"
-  "path/filepath"
-  "time"
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
+	"time"
 
-  "one-api/common/utils"
+	"one-api/common/utils"
 
-  "github.com/spf13/viper"
-  "go.uber.org/zap"
-  "go.uber.org/zap/zapcore"
-  "gopkg.in/natefinch/lumberjack.v2"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 const (
@@ -29,6 +31,84 @@ const (
 var Logger *zap.Logger
 
 var defaultLogDir = "./logs"
+
+// HourlyRotateWriter is a custom writer that rotates logs on hour change
+type HourlyRotateWriter struct {
+  logDir      string
+  baseFilename string
+  currentHour int
+  lumberjackLogger *lumberjack.Logger
+  mu sync.Mutex
+}
+
+// NewHourlyRotateWriter creates a new writer that rotates logs hourly
+func NewHourlyRotateWriter(logDir string, baseFilename string, maxSize, maxAge, maxBackups int, compress bool) *HourlyRotateWriter {
+  now := time.Now()
+  writer := &HourlyRotateWriter{
+    logDir:      logDir,
+    baseFilename: baseFilename,
+    currentHour: now.Hour(),
+  }
+  
+  // Initialize the lumberjack logger
+  writer.lumberjackLogger = &lumberjack.Logger{
+    Filename:   filepath.Join(logDir, baseFilename),
+    MaxSize:    maxSize,
+    MaxAge:     maxAge,
+    MaxBackups: maxBackups,
+    Compress:   compress,
+  }
+  
+  return writer
+}
+
+// Write implements io.Writer interface
+func (w *HourlyRotateWriter) Write(p []byte) (n int, err error) {
+  w.mu.Lock()
+  defer w.mu.Unlock()
+  
+  now := time.Now()
+  currentHour := now.Hour()
+  
+  // Check if hour has changed
+  if currentHour != w.currentHour {
+    // Rename the current log file with timestamp
+    oldFilePath := w.lumberjackLogger.Filename
+    if utils.IsFileExist(oldFilePath) {
+      // Format: one-hub.YYYYMMDDHH.log
+      timestamp := time.Date(now.Year(), now.Month(), now.Day(), w.currentHour, 0, 0, 0, now.Location())
+      newFileName := fmt.Sprintf("%s.%s.log", 
+        strings.TrimSuffix(w.baseFilename, filepath.Ext(w.baseFilename)),
+        timestamp.Format("20060102150405")[0:10])
+      newFilePath := filepath.Join(w.logDir, newFileName)
+      
+      // Close current file
+      w.lumberjackLogger.Close()
+      
+      // Rename the file
+      os.Rename(oldFilePath, newFilePath)
+      
+      // Update current hour
+      w.currentHour = currentHour
+      
+      // Create a new lumberjack logger with the same settings
+      w.lumberjackLogger = &lumberjack.Logger{
+        Filename:   oldFilePath,
+        MaxSize:    w.lumberjackLogger.MaxSize,
+        MaxAge:     w.lumberjackLogger.MaxAge,
+        MaxBackups: w.lumberjackLogger.MaxBackups,
+        Compress:   w.lumberjackLogger.Compress,
+      }
+    }
+  }
+  
+  return w.lumberjackLogger.Write(p)
+}
+
+// Sync implements zapcore.WriteSyncer
+func (w *HourlyRotateWriter) Sync() error {
+  return w.lumberjackLogger.Close()
+}
 
 func SetupLogger() {
   logDir := getLogDir()
@@ -63,22 +143,23 @@ func getEncoder() zapcore.Encoder {
 
 func getLogWriter(logDir string) zapcore.WriteSyncer {
   filename := utils.GetOrDefault("logs.filename", "one-hub.log")
-  logPath := filepath.Join(logDir, filename)
-
+  
   maxsize := utils.GetOrDefault("logs.max_size", 100)
   maxAge := utils.GetOrDefault("logs.max_age", 7)
   maxBackup := utils.GetOrDefault("logs.max_backup", 10)
-  compress := utils.GetOrDefault("logs.compress", false)
+  compress := utils.GetOrDefault("logs.compress", true)
 
-  lumberJackLogger := &lumberjack.Logger{
-    Filename:   logPath,   // 文件位置
-    MaxSize:    maxsize,   // 进行切割之前,日志文件的最大大小(MB为单位)
-    MaxAge:     maxAge,    // 保留旧文件的最大天数
-    MaxBackups: maxBackup, // 保留旧文件的最大个数
-    Compress:   compress,  // 是否压缩/归档旧文件
-  }
+  // Create hourly rotate writer
+  hourlyWriter := NewHourlyRotateWriter(
+    logDir,
+    filename,
+    maxsize,
+    maxAge,
+    maxBackup,
+    compress,
+  )
 
-  return zapcore.NewMultiWriteSyncer(zapcore.AddSync(lumberJackLogger), zapcore.AddSync(os.Stderr))
+  return zapcore.NewMultiWriteSyncer(zapcore.AddSync(hourlyWriter), zapcore.AddSync(os.Stderr))
 }
 
 func getLogLevel() zapcore.Level {
