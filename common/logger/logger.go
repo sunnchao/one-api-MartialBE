@@ -1,29 +1,28 @@
 package logger
 
 import (
-	"context"
-	"fmt"
-	"log"
-	"os"
-	"path/filepath"
-	"sync"
-	"time"
+  "context"
+  "fmt"
+  "log"
+  "os"
+  "path/filepath"
+  "time"
 
-	"one-api/common/utils"
+  "one-api/common/utils"
 
-	"github.com/spf13/viper"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-	"gopkg.in/natefinch/lumberjack.v2"
+  "github.com/spf13/viper"
+  "go.uber.org/zap"
+  "go.uber.org/zap/zapcore"
+  "gopkg.in/natefinch/lumberjack.v2"
 )
 
 const (
-	loggerINFO  = "INFO"
-	loggerWarn  = "WARN"
-	loggerError = "ERR"
+  loggerINFO  = "INFO"
+  loggerWarn  = "WARN"
+  loggerError = "ERR"
 )
 const (
-	RequestIdKey = "X-Oneapi-Request-Id"
+  RequestIdKey = "X-Oneapi-Request-Id"
   RequestIPKey = "X-Oneapi-Request-IP"
 )
 
@@ -32,204 +31,156 @@ var Logger *zap.Logger
 var defaultLogDir = "./logs"
 
 func SetupLogger() {
-	logDir := getLogDir()
-	if logDir == "" {
-		return
-	}
+  logDir := getLogDir()
+  if logDir == "" {
+    return
+  }
 
-	writeSyncer := getLogWriter(logDir)
+  writeSyncer := getLogWriter(logDir)
 
-	encoder := getEncoder()
+  encoder := getEncoder()
 
-	core := zapcore.NewCore(
-		encoder,
-		writeSyncer,
-		zap.NewAtomicLevelAt(getLogLevel()),
-	)
-	Logger = zap.New(core, zap.AddCaller())
+  core := zapcore.NewCore(
+    encoder,
+    writeSyncer,
+    zap.NewAtomicLevelAt(getLogLevel()),
+  )
+  Logger = zap.New(core, zap.AddCaller())
 }
 
 func getEncoder() zapcore.Encoder {
-	encodeConfig := zap.NewProductionEncoderConfig()
+  encodeConfig := zap.NewProductionEncoderConfig()
 
-	encodeConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006/01/02 - 15:04:05")
-	encodeConfig.TimeKey = "time"
-	encodeConfig.EncodeLevel = zapcore.CapitalLevelEncoder
-	encodeConfig.EncodeCaller = zapcore.ShortCallerEncoder
+  encodeConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006/01/02 - 15:04:05")
+  encodeConfig.TimeKey = "time"
+  encodeConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+  encodeConfig.EncodeCaller = zapcore.ShortCallerEncoder
 
-	encodeConfig.EncodeDuration = zapcore.StringDurationEncoder
+  encodeConfig.EncodeDuration = zapcore.StringDurationEncoder
 
-	return zapcore.NewConsoleEncoder(encodeConfig)
+  return zapcore.NewConsoleEncoder(encodeConfig)
 }
 
 func getLogWriter(logDir string) zapcore.WriteSyncer {
-	filename := utils.GetOrDefault("logs.filename", "one-hub")
-	maxsize := utils.GetOrDefault("logs.max_size", 100)
-	maxAge := utils.GetOrDefault("logs.max_age", 7)
-	maxBackup := utils.GetOrDefault("logs.max_backup", 10)
-	compress := utils.GetOrDefault("logs.compress", false)
+  filename := utils.GetOrDefault("logs.filename", "one-hub.log")
+  logPath := filepath.Join(logDir, filename)
 
-	// 创建带时间戳的写入器
-	return newHourlyRotateWriter(logDir, filename, maxsize, maxAge, maxBackup, compress)
-}
+  maxsize := utils.GetOrDefault("logs.max_size", 100)
+  maxAge := utils.GetOrDefault("logs.max_age", 7)
+  maxBackup := utils.GetOrDefault("logs.max_backup", 10)
+  compress := utils.GetOrDefault("logs.compress", false)
 
-// 新增hourlyRotateWriter结构体
-type hourlyRotateWriter struct {
-	mu          sync.Mutex
-	currentHour int
-	logDir      string
-	baseName    string
-	writer      *lumberjack.Logger
-	maxSize     int
-	maxAge      int
-	maxBackup   int
-	compress    bool
-}
+  lumberJackLogger := &lumberjack.Logger{
+    Filename:   logPath,   // 文件位置
+    MaxSize:    maxsize,   // 进行切割之前,日志文件的最大大小(MB为单位)
+    MaxAge:     maxAge,    // 保留旧文件的最大天数
+    MaxBackups: maxBackup, // 保留旧文件的最大个数
+    Compress:   compress,  // 是否压缩/归档旧文件
+  }
 
-func newHourlyRotateWriter(logDir, baseName string, maxSize, maxAge, maxBackup int, compress bool) *hourlyRotateWriter {
-	w := &hourlyRotateWriter{
-		logDir:    logDir,
-		baseName:  baseName,
-		maxSize:   maxSize,
-		maxAge:    maxAge,
-		maxBackup: maxBackup,
-		compress:  compress,
-	}
-	w.writer = w.createWriter()
-	return w
-}
-
-func (w *hourlyRotateWriter) createWriter() *lumberjack.Logger {
-	now := time.Now()
-	w.currentHour = now.Hour()
-	timestamp := now.Format("2006010215") // 格式化为年月日小时
-	
-	return &lumberjack.Logger{
-		Filename:   filepath.Join(w.logDir, fmt.Sprintf("%s-%s.log", w.baseName, timestamp)),
-		MaxSize:    w.maxSize,
-		MaxAge:     w.maxAge,
-		MaxBackups: w.maxBackup,
-		Compress:   w.compress,
-	}
-}
-
-func (w *hourlyRotateWriter) Write(p []byte) (n int, err error) {
-	w.mu.Lock()
-	defer w.mu.Unlock()
-
-	// 每小时检查一次是否需要轮转
-	if time.Now().Hour() != w.currentHour {
-		w.writer.Close()
-		w.writer = w.createWriter()
-	}
-	
-	return w.writer.Write(p)
-}
-
-func (w *hourlyRotateWriter) Sync() error {
-	return nil
+  return zapcore.NewMultiWriteSyncer(zapcore.AddSync(lumberJackLogger), zapcore.AddSync(os.Stderr))
 }
 
 func getLogLevel() zapcore.Level {
-	logLevel := viper.GetString("log_level")
-	switch logLevel {
-	case "debug":
-		return zap.DebugLevel
-	case "info":
-		return zap.InfoLevel
-	case "warn":
-		return zap.WarnLevel
-	case "error":
-		return zap.ErrorLevel
-	case "panic":
-		return zap.PanicLevel
-	case "fatal":
-		return zap.FatalLevel
-	default:
-		return zap.InfoLevel
-	}
+  logLevel := viper.GetString("log_level")
+  switch logLevel {
+  case "debug":
+    return zap.DebugLevel
+  case "info":
+    return zap.InfoLevel
+  case "warn":
+    return zap.WarnLevel
+  case "error":
+    return zap.ErrorLevel
+  case "panic":
+    return zap.PanicLevel
+  case "fatal":
+    return zap.FatalLevel
+  default:
+    return zap.InfoLevel
+  }
 
 }
 
 func getLogDir() string {
-	logDir := viper.GetString("log_dir")
-	if logDir == "" {
-		logDir = defaultLogDir
-	}
+  logDir := viper.GetString("log_dir")
+  if logDir == "" {
+    logDir = defaultLogDir
+  }
 
-	var err error
-	logDir, err = filepath.Abs(logDir)
-	if err != nil {
-		log.Fatal(err)
-		return ""
-	}
+  var err error
+  logDir, err = filepath.Abs(logDir)
+  if err != nil {
+    log.Fatal(err)
+    return ""
+  }
 
-	if !utils.IsFileExist(logDir) {
-		err = os.Mkdir(logDir, 0777)
-		if err != nil {
-			log.Fatal(err)
-			return ""
-		}
-	}
+  if !utils.IsFileExist(logDir) {
+    err = os.Mkdir(logDir, 0777)
+    if err != nil {
+      log.Fatal(err)
+      return ""
+    }
+  }
 
-	return logDir
+  return logDir
 }
 
 func SysLog(s string) {
-	entry := zapcore.Entry{
-		Level:   zapcore.InfoLevel,
-		Time:    time.Now(),
-		Message: "[SYS] | " + s,
-	}
+  entry := zapcore.Entry{
+    Level:   zapcore.InfoLevel,
+    Time:    time.Now(),
+    Message: "[SYS] | " + s,
+  }
 
-	// 使用 Logger 的核心来直接写入日志，绕过等级检查
-	if ce := Logger.Core().With([]zapcore.Field{}); ce != nil {
-		ce.Write(entry, nil)
-	}
+  // 使用 Logger 的核心来直接写入日志，绕过等级检查
+  if ce := Logger.Core().With([]zapcore.Field{}); ce != nil {
+    ce.Write(entry, nil)
+  }
 }
 
 func SysError(s string) {
-	Logger.Error("[SYS] | " + s)
+  Logger.Error("[SYS] | " + s)
 }
 
 func LogInfo(ctx context.Context, msg string) {
-	logHelper(ctx, loggerINFO, msg)
+  logHelper(ctx, loggerINFO, msg)
 }
 
 func LogWarn(ctx context.Context, msg string) {
-	logHelper(ctx, loggerWarn, msg)
+  logHelper(ctx, loggerWarn, msg)
 }
 
 func LogError(ctx context.Context, msg string) {
-	logHelper(ctx, loggerError, msg)
+  logHelper(ctx, loggerError, msg)
 }
 
 func logHelper(ctx context.Context, level string, msg string) {
 
-	id, ok := ctx.Value(RequestIdKey).(string)
-	if !ok {
-		id = "unknown"
-	}
+  id, ok := ctx.Value(RequestIdKey).(string)
+  if !ok {
+    id = "unknown"
+  }
 
-	logMsg := fmt.Sprintf("%s | %s \n", id, msg)
+  logMsg := fmt.Sprintf("%s | %s \n", id, msg)
 
-	switch level {
-	case loggerINFO:
-		Logger.Info(logMsg)
-	case loggerWarn:
-		Logger.Warn(logMsg)
-	case loggerError:
-		Logger.Error(logMsg)
-	default:
-		Logger.Info(logMsg)
-	}
+  switch level {
+  case loggerINFO:
+    Logger.Info(logMsg)
+  case loggerWarn:
+    Logger.Warn(logMsg)
+  case loggerError:
+    Logger.Error(logMsg)
+  default:
+    Logger.Info(logMsg)
+  }
 
 }
 
 func FatalLog(v ...any) {
 
-	Logger.Fatal(fmt.Sprintf("[FATAL] %v | %v \n", time.Now().Format("2006/01/02 - 15:04:05"), v))
-	// t := time.Now()
-	// _, _ = fmt.Fprintf(gin.DefaultErrorWriter, "[FATAL] %v | %v \n", t.Format("2006/01/02 - 15:04:05"), v)
-	os.Exit(1)
+  Logger.Fatal(fmt.Sprintf("[FATAL] %v | %v \n", time.Now().Format("2006/01/02 - 15:04:05"), v))
+  // t := time.Now()
+  // _, _ = fmt.Fprintf(gin.DefaultErrorWriter, "[FATAL] %v | %v \n", t.Format("2006/01/02 - 15:04:05"), v)
+  os.Exit(1)
 }
