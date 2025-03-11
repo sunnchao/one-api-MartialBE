@@ -101,6 +101,9 @@ func InitOptionMap() {
 
 	config.OptionMap["DisableChannelKeywords"] = common.GetDefaultDisableChannelKeywords()
 
+	config.OptionMap["RetryTimeOut"] = strconv.Itoa(config.RetryTimeOut)
+
+	config.OptionMapRWMutex.Unlock()
   config.OptionMap["LinuxDoOAuthEnabled"] = strconv.FormatBool(config.LinuxDoOAuthEnabled)
   config.OptionMap["LinuxDoClientId"] = ""
   config.OptionMap["LinuxDoClientSecret"] = ""
@@ -155,6 +158,7 @@ var optionIntMap = map[string]*int{
 	"RetryCooldownSeconds": &config.RetryCooldownSeconds,
 	"PaymentMinAmount":     &config.PaymentMinAmount,
 	"OldTokenMaxId":        &config.OldTokenMaxId,
+	"RetryTimeOut":         &config.RetryTimeOut,
 }
 
 var optionBoolMap = map[string]*bool{

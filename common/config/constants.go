@@ -112,6 +112,8 @@ var PreConsumedQuota = 500
 var ApproximateTokenEnabled = false
 var DisableTokenEncoders = false
 var RetryTimes = 0
+var RetryTimeOut = 10
+
 var DefaultChannelWeight = uint(1)
 var RetryCooldownSeconds = 5
 
