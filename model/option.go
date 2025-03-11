@@ -103,13 +103,12 @@ func InitOptionMap() {
 
 	config.OptionMap["RetryTimeOut"] = strconv.Itoa(config.RetryTimeOut)
 
-	config.OptionMapRWMutex.Unlock()
-  config.OptionMap["LinuxDoOAuthEnabled"] = strconv.FormatBool(config.LinuxDoOAuthEnabled)
-  config.OptionMap["LinuxDoClientId"] = ""
-  config.OptionMap["LinuxDoClientSecret"] = ""
-  config.OptionMap["LinuxDoMinLevel"] = strconv.Itoa(config.LinuxDoMinLevel)
+	config.OptionMap["LinuxDoOAuthEnabled"] = strconv.FormatBool(config.LinuxDoOAuthEnabled)
+	config.OptionMap["LinuxDoClientId"] = ""
+	config.OptionMap["LinuxDoClientSecret"] = ""
+	config.OptionMap["LinuxDoMinLevel"] = strconv.Itoa(config.LinuxDoMinLevel)
 
-  config.OptionMapRWMutex.Unlock()
+	config.OptionMapRWMutex.Unlock()
 	loadOptionsFromDatabase()
 }
 
