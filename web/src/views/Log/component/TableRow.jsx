@@ -88,7 +88,7 @@ export default function LogTableRow({ item, userIsAdmin, userGroup }) {
         {userIsAdmin && (
           <TableCell>
             <div>
-              {(item.channel_id || '')}
+              {item.channel_id || ''}
               <br />
               {item.channel?.name ? item.channel.name : ''}
             </div>
@@ -121,23 +121,20 @@ export default function LogTableRow({ item, userIsAdmin, userGroup }) {
         <TableCell>{renderType(item.type)}</TableCell>
         <TableCell>{viewModelName(item.model_name, item.is_stream)}</TableCell>
 
-
         <TableCell>
-          {
-            item.type === 2 ? <Stack direction="column" spacing={0.5}>
-            <Label color={requestTimeLabelOptions(request_time)}>
-              {item.request_time == 0 ? '无' : request_time_str} {first_time_str ? ' / ' + first_time_str : ''}
-            </Label>
+          {item.type === 2 ? (
+            <Stack direction="column" spacing={0.5}>
+              <Label color={requestTimeLabelOptions(request_time)}>
+                {item.request_time == 0 ? '无' : request_time_str} {first_time_str ? ' / ' + first_time_str : ''}
+              </Label>
 
-            {request_ts_str && <Label color={requestTSLabelOptions(request_ts)}>{request_ts_str}</Label>}
-          </Stack>: null
-          }
+              {request_ts_str && <Label color={requestTSLabelOptions(request_ts)}>{request_ts_str}</Label>}
+            </Stack>
+          ) : null}
         </TableCell>
         <TableCell>{viewInput(item, t, totalInputTokens, totalOutputTokens, show, tokenDetails)}</TableCell>
         <TableCell>{item.completion_tokens || ''}</TableCell>
-        <TableCell>{
-          item.type === 2 ? item.quota ? renderQuota(item.quota, 6) : '$0' : ''
-          }</TableCell>
+        <TableCell>{item.type === 2 ? (item.quota ? renderQuota(item.quota, 6) : '$0') : ''}</TableCell>
         <TableCell>{item.request_ip}</TableCell>
         <TableCell>{viewLogContent(item, t, totalInputTokens, totalOutputTokens)}</TableCell>
       </TableRow>
@@ -304,7 +301,7 @@ function calculateTokens(item) {
 function viewLogContent(item, t, totalInputTokens, totalOutputTokens) {
   if (!item?.metadata?.input_ratio) {
     let free = false;
-    if (item.quota === 0) {
+    if (item.quota === 0 && ['2'].includes(item.type)) {
       free = true;
     }
     const tips = (
@@ -403,11 +400,7 @@ function viewLogContent(item, t, totalInputTokens, totalOutputTokens) {
   return (
     <Tooltip title={tips} placement="top" arrow>
       <Stack direction="column" justifyContent={'center'}>
-        {inputPriceInfo && (
-          <Label variant={"border"}>
-            {inputPriceInfo}
-          </Label>
-        )}
+        {inputPriceInfo && <Label variant={'border'}>{inputPriceInfo}</Label>}
         {outputPriceInfo && (
           <Label color="info" variant="border">
             {outputPriceInfo}
