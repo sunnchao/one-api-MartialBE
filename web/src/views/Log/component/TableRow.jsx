@@ -314,9 +314,7 @@ function viewLogContent(item, t, totalInputTokens, totalOutputTokens) {
     return (
       <Tooltip title={tips} placement="top" arrow>
         <Stack direction="column" spacing={0.3}>
-          <Label color={free ? 'success' : 'secondary'} variant="soft">
-            {free ? t('logPage.content.free') : t('logPage.content.old_log')}
-          </Label>
+          <Label color={free ? 'success' : 'info'}>{free ? t('logPage.content.free') : item.content}</Label>
         </Stack>
       </Tooltip>
     );
