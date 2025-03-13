@@ -18,7 +18,7 @@ func InitHttpClient() {
 		Transport: trans,
 	}
 
-	relayTimeout := utils.GetOrDefault("relay_timeout", 600)
+	relayTimeout := utils.GetOrDefault("relay_timeout", 600*3)
 	if relayTimeout != 0 {
 		HTTPClient.Timeout = time.Duration(relayTimeout) * time.Second
 	}
