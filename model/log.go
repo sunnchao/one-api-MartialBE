@@ -31,6 +31,7 @@ type Log struct {
 	RequestIp        string `json:"request_ip,omitempty" gorm:"default:''"`
 	RequestId        string `json:"request_id,omitempty"`
 	IsStream         bool   `json:"is_stream" gorm:"default:false"`
+	IsError          bool   `json:"is_error" gorm:"default:false"`
 
 	Metadata datatypes.JSONType[map[string]any] `json:"metadata" gorm:"type:json"`
 
@@ -43,7 +44,7 @@ const (
 	LogTypeConsume
 	LogTypeManage
 	LogTypeSystem
-	LogTypeUserQuotoIncrease
+	LogTypeUserQuoteIncrease
 	LogLogin
 	LogTypeAPIError
 	LogTypeArchive
@@ -82,6 +83,7 @@ func RecordConsumeLog(
 	content string,
 	requestTime int,
 	isStream bool,
+	isError bool,
 	metadata map[string]any) {
 	logger.LogInfo(ctx, fmt.Sprintf("record consume log: userId=%d, channelId=%d, promptTokens=%d, completionTokens=%d, modelName=%s, tokenName=%s, quota=%d, content=%s", userId, channelId, promptTokens, completionTokens, modelName, tokenName, quota, content))
 	if !config.LogConsumeEnabled {
@@ -105,6 +107,7 @@ func RecordConsumeLog(
 		ChannelId:        channelId,
 		RequestTime:      requestTime,
 		IsStream:         isStream,
+		IsError:          isError,
 		RequestIp:        ctx.Value(logger.RequestIPKey).(string),
 		RequestId:        ctx.Value(logger.RequestIdKey).(string),
 	}
@@ -117,6 +120,36 @@ func RecordConsumeLog(
 	if err != nil {
 		logger.LogError(ctx, "failed to record log: "+err.Error())
 	}
+}
+
+func RecordConsumeErrorLog(ctx context.Context, userId int, channelId int, modelName string, tokenName string, tokenId int, content string, requestIP string, requestID string) {
+	logger.LogInfo(ctx, fmt.Sprintf("record consume error log: userId=%d, channelId=%d, modelName=%s, tokenName=%s, tokenId=%d, content=%s", userId, channelId, modelName, tokenName, tokenId, content))
+	if !config.LogConsumeEnabled {
+		return
+	}
+	
+	username, _ := CacheGetUsername(userId)
+
+	log := &Log{
+		UserId:    userId,
+		Username:  username,
+		CreatedAt: utils.GetTimestamp(),
+		Type:      LogTypeAPIError,
+		Content:   content,
+		ChannelId: channelId,
+		ModelName: modelName,
+		TokenName: tokenName,
+		TokenId:   tokenId,
+		RequestIp: requestIP,
+		RequestId: requestID,
+		IsError:   true,
+	}
+
+	err := DB.Create(log).Error
+	if err != nil {
+		logger.LogError(ctx, "failed to record log: "+err.Error())
+	}
+	
 }
 
 type LogsListParams struct {
@@ -186,7 +219,7 @@ func GetLogsList(params *LogsListParams) (*DataResult[Log], error) {
 func GetUserLogsList(userId int, params *LogsListParams) (*DataResult[Log], error) {
 	var logs []*Log
 
-	tx := DB.Where("user_id = ?", userId).Omit("id")
+	tx := DB.Where("user_id = ? and is_error = ?", userId, false).Omit("id")
 
 	if params.LogType != LogTypeUnknown {
 		tx = tx.Where("type = ?", params.LogType)
@@ -273,32 +306,32 @@ func DeleteOldLog(targetTimestamp int64) (int64, error) {
 func DeleteOldLogByGroup(targetTimestamp int64) (int64, error) {
 	// 1. 按照用户分组查询日志
 	type UserLogSummary struct {
-		UserId           int    `gorm:"column:user_id"`
-		Username         string `gorm:"column:username"`
-		LogCount         int64  `gorm:"column:log_count"`
-		TotalQuota       int64  `gorm:"column:total_quota"`
+		UserId     int    `gorm:"column:user_id"`
+		Username   string `gorm:"column:username"`
+		LogCount   int64  `gorm:"column:log_count"`
+		TotalQuota int64  `gorm:"column:total_quota"`
 	}
-	
+
 	var userLogSummaries []UserLogSummary
 	err := DB.Model(&Log{}).
 		Select("user_id, username, COUNT(*) as log_count, SUM(quota) as total_quota").
 		Where("type = ? AND created_at < ?", LogTypeConsume, targetTimestamp).
 		Group("user_id, username").
 		Find(&userLogSummaries).Error
-	
+
 	if err != nil {
 		return 0, err
 	}
-	
+
 	// 2. 记录归档日志
 	var totalRowsAffected int64 = 0
 	for _, summary := range userLogSummaries {
 		// Convert Unix timestamp to time.Time
 		formattedTime := time.Unix(targetTimestamp, 0).Format("2006-01-02 15:04:05")
-		
+
 		archiveContent := fmt.Sprintf("归档截止到 %s 的 %d 条日志，共计 %d 额度",
 			formattedTime, summary.LogCount, summary.TotalQuota)
-		
+
 		archiveLog := &Log{
 			UserId:    summary.UserId,
 			Username:  summary.Username,
@@ -306,24 +339,24 @@ func DeleteOldLogByGroup(targetTimestamp int64) (int64, error) {
 			Type:      LogTypeArchive,
 			Content:   archiveContent,
 		}
-		
+
 		if err := DB.Create(archiveLog).Error; err != nil {
 			logger.SysError("failed to record archive log: " + err.Error())
 		}
 	}
-	
+
 	// 3. 按照用户分组删除日志
 	for _, summary := range userLogSummaries {
-		result := DB.Where("user_id = ? AND type = ? AND created_at < ?", 
+		result := DB.Where("user_id = ? AND type = ? AND created_at < ?",
 			summary.UserId, LogTypeConsume, targetTimestamp).Delete(&Log{})
-		
+
 		if result.Error != nil {
 			return totalRowsAffected, result.Error
 		}
-		
+
 		totalRowsAffected += result.RowsAffected
 	}
-	
+
 	return totalRowsAffected, nil
 }
 

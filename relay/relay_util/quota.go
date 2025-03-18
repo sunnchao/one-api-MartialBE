@@ -162,6 +162,7 @@ func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, 
 		q.getLogContent(),
 		q.getRequestTime(),
 		isStream,
+		false,
 		q.GetLogMeta(usage),
 	)
 	model.UpdateUserUsedQuotaAndRequestCount(q.userId, quota)
@@ -191,6 +192,19 @@ func (q *Quota) Consume(c *gin.Context, usage *types.Usage, isStream bool) {
 		err := q.completedQuotaConsumption(usage, tokenName, tokenId, isStream, ctx)
 		if err != nil {
 			logger.LogError(ctx, err.Error())
+			go func() {
+				model.RecordConsumeErrorLog(
+					ctx,
+					q.userId,
+					q.channelId,
+					q.modelName,
+					tokenName,
+					tokenId,
+					err.Error(),
+					c.ClientIP(),
+					c.GetString(logger.RequestIdKey),
+				)
+			}()
 		}
 	}(c.Request.Context())
 }

@@ -65,7 +65,7 @@ func GetProvider(c *gin.Context, modelName string) (provider providersBase.Provi
 	}
 	c.Set("channel_id", channel.Id)
 	c.Set("channel_type", channel.Type)
-
+	c.Set("channel_name", channel.Name)
 	provider = providers.GetProvider(channel, c)
 	if provider == nil {
 		fail = errors.New("channel not found")

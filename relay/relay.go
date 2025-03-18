@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"one-api/common"
 	"one-api/common/config"
+	"one-api/common/logger"
 	"one-api/model"
 	"one-api/providers/azure"
 	"one-api/providers/openai"
@@ -54,6 +55,19 @@ func RelayOnly(c *gin.Context) {
 	requester := provider.GetRequester()
 	req, err := requester.NewRequest(c.Request.Method, url, requester.WithBody(c.Request.Body), requester.WithHeader(mapHeaders))
 	if err != nil {
+		go func() {
+			model.RecordConsumeErrorLog(
+				c.Request.Context(),
+				c.GetInt("id"),
+				c.GetInt("channel_id"),
+				c.GetString("original_model"),
+				c.GetString("token_name"),
+				c.GetInt("token_id"),
+				err.Error(),
+				c.ClientIP(),
+				c.GetString(logger.RequestIdKey),
+			)
+		}()
 		common.AbortWithMessage(c, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -64,6 +78,19 @@ func RelayOnly(c *gin.Context) {
 	if errWithCode != nil {
 		newErrWithCode := FilterOpenAIErr(c, errWithCode)
 		relayResponseWithOpenAIErr(c, &newErrWithCode)
+		go func() {
+			model.RecordConsumeErrorLog(
+				c.Request.Context(),
+				c.GetInt("id"),
+				c.GetInt("channel_id"),
+				c.GetString("original_model"),
+				c.GetString("token_name"),
+				c.GetInt("token_id"),
+				errWithCode.Error(),
+				c.ClientIP(),
+				c.GetString(logger.RequestIdKey),
+			)
+		}()
 		return
 	}
 
@@ -72,6 +99,19 @@ func RelayOnly(c *gin.Context) {
 	if errWithCode != nil {
 		newErrWithCode := FilterOpenAIErr(c, errWithCode)
 		relayResponseWithOpenAIErr(c, &newErrWithCode)
+		go func() {
+			model.RecordConsumeErrorLog(
+				c.Request.Context(),
+				c.GetInt("id"),
+				c.GetInt("channel_id"),
+				c.GetString("original_model"),
+				c.GetString("token_name"),
+				c.GetInt("token_id"),
+				errWithCode.Error(),
+				c.ClientIP(),
+				c.GetString(logger.RequestIdKey),
+			)
+		}()
 		return
 	}
 
@@ -83,6 +123,6 @@ func RelayOnly(c *gin.Context) {
 			requestTime = int(time.Since(requestStartTime).Milliseconds())
 		}
 	}
-	model.RecordConsumeLog(c.Request.Context(), c.GetInt("id"), c.GetInt("channel_id"), 0, 0, "", c.GetString("token_name"), c.GetInt("token_id"), 0, "中继:"+path, requestTime, false, nil)
+	model.RecordConsumeLog(c.Request.Context(), c.GetInt("id"), c.GetInt("channel_id"), 0, 0, "", c.GetString("token_name"), c.GetInt("token_id"), 0, "中继:"+path, requestTime, false, false, nil)
 
 }

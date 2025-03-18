@@ -26,12 +26,38 @@ func Relay(c *gin.Context) {
 	if err := relay.setRequest(); err != nil {
 		openaiErr := common.StringErrorWrapperLocal(err.Error(), "chirou_api_error", http.StatusBadRequest)
 		relay.HandleError(openaiErr)
+		go func() {
+			model.RecordConsumeErrorLog(
+				c.Request.Context(),
+				c.GetInt("id"),
+				c.GetInt("channel_id"),
+				c.GetString("original_model"),
+				c.GetString("token_name"),
+				c.GetInt("token_id"),
+				err.Error(),
+				c.ClientIP(),
+				c.GetString(logger.RequestIdKey),
+			)
+		}()
 		return
 	}
 
 	if err := relay.setProvider(relay.getOriginalModel()); err != nil {
 		openaiErr := common.StringErrorWrapperLocal(err.Error(), "chirou_api_error", http.StatusServiceUnavailable)
 		relay.HandleError(openaiErr)
+		go func() {
+			model.RecordConsumeErrorLog(
+				c.Request.Context(),
+				c.GetInt("id"),
+				c.GetInt("channel_id"),
+				c.GetString("original_model"),
+				c.GetString("token_name"),
+				c.GetInt("token_id"),
+				err.Error(),
+				c.ClientIP(),
+				c.GetString(logger.RequestIdKey),
+			)
+		}()
 		return
 	}
 
@@ -39,6 +65,20 @@ func Relay(c *gin.Context) {
 	if apiErr == nil {
 		metrics.RecordProvider(c, 200)
 		return
+	} else {
+		go func() {
+			model.RecordConsumeErrorLog(
+				c.Request.Context(),
+				c.GetInt("id"),
+				c.GetInt("channel_id"),
+				c.GetString("original_model"),
+				c.GetString("token_name"),
+				c.GetInt("token_id"),
+				apiErr.Error(),
+				c.ClientIP(),
+				c.GetString(logger.RequestIdKey),
+			)
+		}()
 	}
 
 	channel := relay.getProvider().GetChannel()
@@ -80,6 +120,19 @@ func Relay(c *gin.Context) {
 	}
 
 	if apiErr != nil {
+		go func() {
+			model.RecordConsumeErrorLog(
+				c.Request.Context(),
+				c.GetInt("id"),
+				c.GetInt("channel_id"),
+				c.GetString("original_model"),
+				c.GetString("token_name"),
+				c.GetInt("token_id"),
+				apiErr.Error(),
+				c.ClientIP(),
+				c.GetString(logger.RequestIdKey),
+			)
+		}()
 		relay.HandleError(apiErr)
 	}
 }

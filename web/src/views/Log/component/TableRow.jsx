@@ -12,7 +12,14 @@ import Label from 'ui-component/Label';
 import LogType from '../type/LogType';
 import { useTranslation } from 'react-i18next';
 
-function renderType(type) {
+function renderType(type, isError) {
+  if (isError) {
+    return (
+      <Label color="error" variant="outlined">
+        错误
+      </Label>
+    );
+  }
   const typeOption = LogType[type];
   if (typeOption) {
     return (
@@ -118,7 +125,7 @@ export default function LogTableRow({ item, userIsAdmin, userGroup }) {
             </Label>
           )}
         </TableCell>
-        <TableCell>{renderType(item.type)}</TableCell>
+        <TableCell>{renderType(item.type, item.is_error)}</TableCell>
         <TableCell>{viewModelName(item.model_name, item.is_stream)}</TableCell>
 
         <TableCell>
@@ -299,6 +306,14 @@ function calculateTokens(item) {
 }
 
 function viewLogContent(item, t, totalInputTokens, totalOutputTokens) {
+  if (item.is_error) {
+    return (
+      <Stack sx={{ fontSize: 12 }} color="error" variant="outlined">
+        {item.content}
+      </Stack>
+    );
+  }
+
   if (!item?.metadata?.input_ratio) {
     let free = false;
     if (item.quota === 0 && ['2'].includes(item.type)) {
@@ -313,8 +328,10 @@ function viewLogContent(item, t, totalInputTokens, totalOutputTokens) {
     );
     return (
       <Tooltip title={tips} placement="top" arrow>
-        <Stack direction="column" spacing={0.3}>
-          <Label color={free ? 'success' : 'info'}>{free ? t('logPage.content.free') : item.content}</Label>
+        <Stack justifyContent={'center'} spacing={1}>
+          <Stack sx={{ fontSize: 12 }} color={free ? 'success' : 'info'}>
+            {free ? t('logPage.content.free') : item.content}
+          </Stack>
         </Stack>
       </Tooltip>
     );
@@ -397,12 +414,16 @@ function viewLogContent(item, t, totalInputTokens, totalOutputTokens) {
 
   return (
     <Tooltip title={tips} placement="top" arrow>
-      <Stack direction="column" justifyContent={'center'}>
-        {inputPriceInfo && <Label variant={'border'}>{inputPriceInfo}</Label>}
+      <Stack justifyContent={'center'} direction="row" spacing={1}>
+        {inputPriceInfo && (
+          <Stack sx={{ fontSize: 12 }} variant={'border'}>
+            {inputPriceInfo}
+          </Stack>
+        )}
         {outputPriceInfo && (
-          <Label color="info" variant="border">
+          <Stack sx={{ fontSize: 12 }} variant="border">
             {outputPriceInfo}
-          </Label>
+          </Stack>
         )}
       </Stack>
     </Tooltip>
