@@ -46,8 +46,14 @@ func NewQuota(c *gin.Context, modelName string, promptTokens int) *Quota {
 	}
 
 	quota.price = *model.PricingInstance.GetPrice(quota.modelName)
-	quota.groupRatio = c.GetFloat64("group_ratio")
+	// 获取分组倍率 map[string]float64
+	groupRatioList, exists := c.Get("group_ratio")
+	if !exists {
+		groupRatioList = make(map[string]float64)
+	}
 	quota.groupName = c.GetString("token_group")
+
+	quota.groupRatio = groupRatioList.(map[string]float64)[quota.groupName]
 	quota.inputRatio = quota.price.GetInput() * quota.groupRatio
 	quota.outputRatio = quota.price.GetOutput() * quota.groupRatio
 

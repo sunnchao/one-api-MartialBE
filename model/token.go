@@ -52,6 +52,7 @@ type Token struct {
 	AllowIps           string           `json:"allow_ips" gorm:"default:''"`
 	AllowIpsEnabled    bool             `json:"allow_ips_enabled" gorm:"default:false"`
 	BillingType        TokenBillingType `json:"billing_type" gorm:"default:'tokens'"` // 计费类型
+	
 	DeletedAt          gorm.DeletedAt   `json:"-" gorm:"index"`
 }
 
