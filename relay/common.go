@@ -432,7 +432,10 @@ func processChannelRelayError(ctx context.Context, channelId int, channelName st
 
 var (
 	requestIdRegex = regexp.MustCompile(`\(request id: [^\)]+\)`)
-	quotaKeywords  = []string{"余额", "额度", "quota", "无可用渠道", "令牌"}
+	// 当前分组 default 下对于模型 claude-3-5-haiku-20241022 无可用渠道 提取分组和 模型的关键字
+	groupAndModelKeywords = regexp.MustCompile(`当前分组 (\w+) 下对于模型 (\w+) 无可用渠道`)
+
+	quotaKeywords = []string{"余额", "额度", "quota", "令牌"}
 )
 
 func FilterOpenAIErr(c *gin.Context, err *types.OpenAIErrorWithStatusCode) (errWithStatusCode types.OpenAIErrorWithStatusCode) {
@@ -455,9 +458,13 @@ func FilterOpenAIErr(c *gin.Context, err *types.OpenAIErrorWithStatusCode) (errW
 
 	if !newErr.LocalError && newErr.OpenAIError.Type == "one_hub_error" || strings.HasSuffix(newErr.OpenAIError.Type, "_api_error") {
 		newErr.OpenAIError.Type = "system_error"
-		if utils.ContainsString(newErr.Message, quotaKeywords) {
-			newErr.Message = "上游负载已饱和，请稍后再试"
-			newErr.StatusCode = http.StatusTooManyRequests
+		// 如果是 无可用渠道 则不显示具体的分组 只显示模型
+		if groupAndModelKeywords.MatchString(newErr.Message) {
+			newErr.Message = groupAndModelKeywords.ReplaceAllString(newErr.Message, "当前分组下对于模型 $2 无可用渠道")
+			newErr.StatusCode = http.StatusServiceUnavailable
+		} else if utils.ContainsString(newErr.Message, quotaKeywords) {
+			newErr.Message = "当前分组上游负载已饱和，请稍后再试"
+			newErr.StatusCode = http.StatusServiceUnavailable
 		}
 	}
 
