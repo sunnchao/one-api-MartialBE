@@ -260,7 +260,7 @@ func SumUsedQuota(startTimestamp int64, endTimestamp int64, modelName string, us
 	tx := DB.Table("logs").Select(assembleSumSelectStr("quota"))
 	rpmTpmQuery := DB.Table("logs").Select("count(*) rpm, sum(prompt_tokens) + sum(completion_tokens) tpm")
 	// rpmTpmQuery 的 created_at 为最近60秒
-	rpmTpmQuery = rpmTpmQuery.Where("created_at >= ?", time.Now().Add(-time.Minute).Unix())
+	rpmTpmQuery = rpmTpmQuery.Where("created_at >= ? and is_error = ?", time.Now().Add(-time.Minute).Unix(), false)
 
 	if username != "" {
 		tx = tx.Where("username = ?", username)
