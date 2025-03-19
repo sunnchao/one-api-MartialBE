@@ -393,7 +393,6 @@ export default function Log() {
                     id: 'request ip',
                     label: t('logPage.requestIPLabel'),
                     disableSort: false,
-                    hide: !userIsAdmin,
                     width: 100,
                     maxWidth: 100
                   },
