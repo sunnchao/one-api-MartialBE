@@ -133,7 +133,7 @@ func (q *Quota) UpdateUserRealtimeQuota(usage *types.UsageEvent, nowUsage *types
 	return nil
 }
 
-func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, tokenId int, isStream bool, ctx context.Context) error {
+func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, tokenId int, isStream bool, sourceIp string, ctx context.Context) error {
 	defer func() {
 		if q.cacheQuota > 0 {
 			model.CacheDecreaseUserRealtimeQuota(q.userId, q.cacheQuota)
@@ -170,6 +170,7 @@ func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, 
 		isStream,
 		false,
 		q.GetLogMeta(usage),
+		sourceIp,
 	)
 	model.UpdateUserUsedQuotaAndRequestCount(q.userId, quota)
 
@@ -195,7 +196,7 @@ func (q *Quota) Consume(c *gin.Context, usage *types.Usage, isStream bool) {
 	tokenId := c.GetInt("token_id")
 	// 如果没有报错，则消费配额
 	go func(ctx context.Context) {
-		err := q.completedQuotaConsumption(usage, tokenName, tokenId, isStream, ctx)
+		err := q.completedQuotaConsumption(usage, tokenName, tokenId, isStream, c.ClientIP(), ctx)
 		if err != nil {
 			logger.LogError(ctx, err.Error())
 			go func() {

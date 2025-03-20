@@ -30,7 +30,8 @@ type Log struct {
 	RequestTime      int    `json:"request_time" gorm:"default:0"`
 	RequestIp        string `json:"request_ip,omitempty" gorm:"default:''"`
 	RequestId        string `json:"request_id,omitempty"`
-	IsStream         bool   `json:"is_stream" gorm:"default:false"`
+  SourceIp         string                             `json:"source_ip" gorm:"default:''"`
+  IsStream         bool   `json:"is_stream" gorm:"default:false"`
 	IsError          bool   `json:"is_error" gorm:"default:false"`
 
 	Metadata datatypes.JSONType[map[string]any] `json:"metadata" gorm:"type:json"`
@@ -84,8 +85,9 @@ func RecordConsumeLog(
 	requestTime int,
 	isStream bool,
 	isError bool,
-	metadata map[string]any) {
-	logger.LogInfo(ctx, fmt.Sprintf("record consume log: userId=%d, channelId=%d, promptTokens=%d, completionTokens=%d, modelName=%s, tokenName=%s, quota=%d, content=%s", userId, channelId, promptTokens, completionTokens, modelName, tokenName, quota, content))
+	metadata map[string]any,
+	sourceIp string) {
+	logger.LogInfo(ctx, fmt.Sprintf("record consume log: userId=%d, channelId=%d, promptTokens=%d, completionTokens=%d, modelName=%s, tokenName=%s, quota=%d, content=%s ,sourceIp=%s", userId, channelId, promptTokens, completionTokens, modelName, tokenName, quota, content, sourceIp))
 	if !config.LogConsumeEnabled {
 		return
 	}
@@ -107,6 +109,7 @@ func RecordConsumeLog(
 		ChannelId:        channelId,
 		RequestTime:      requestTime,
 		IsStream:         isStream,
+		SourceIp:         sourceIp,
 		IsError:          isError,
 		RequestIp:        ctx.Value(logger.RequestIPKey).(string),
 		RequestId:        ctx.Value(logger.RequestIdKey).(string),
@@ -127,7 +130,7 @@ func RecordConsumeErrorLog(ctx context.Context, userId int, channelId int, model
 	if !config.LogConsumeEnabled {
 		return
 	}
-	
+
 	username, _ := CacheGetUsername(userId)
 
 	log := &Log{
@@ -149,7 +152,7 @@ func RecordConsumeErrorLog(ctx context.Context, userId int, channelId int, model
 	if err != nil {
 		logger.LogError(ctx, "failed to record log: "+err.Error())
 	}
-	
+
 }
 
 type LogsListParams struct {
@@ -163,6 +166,7 @@ type LogsListParams struct {
 	ChannelId      int    `form:"channel_id"`
 	RequestId      string `form:"request_id"`
 	RequestIP      string `form:"request_ip"`
+	SourceIp       string `form:"source_ip"`
 }
 
 var allowedLogsOrderFields = map[string]bool{
@@ -173,6 +177,7 @@ var allowedLogsOrderFields = map[string]bool{
 	"token_id":   true,
 	"model_name": true,
 	"type":       true,
+	"source_ip":  true,
 	"request_id": true,
 	"request_ip": true,
 }
@@ -211,6 +216,9 @@ func GetLogsList(params *LogsListParams) (*DataResult[Log], error) {
 	}
 	if params.RequestIP != "" {
 		tx = tx.Where("request_ip = ?", params.RequestIP)
+	}
+	if params.SourceIp != "" {
+		tx = tx.Where("source_ip = ?", params.SourceIp)
 	}
 
 	return PaginateAndOrder[Log](tx, &params.PaginationParams, &logs, allowedLogsOrderFields)

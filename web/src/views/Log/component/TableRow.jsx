@@ -143,6 +143,7 @@ export default function LogTableRow({ item, userIsAdmin, userGroup }) {
         <TableCell>{item.completion_tokens || ''}</TableCell>
         <TableCell>{item.type === 2 ? (item.quota ? renderQuota(item.quota, 6) : '$0') : ''}</TableCell>
         <TableCell>{item.request_ip}</TableCell>
+        {/*<TableCell>{item.source_ip || ''}</TableCell>*/}
         <TableCell>{viewLogContent(item, t, totalInputTokens, totalOutputTokens)}</TableCell>
       </TableRow>
     </>

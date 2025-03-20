@@ -34,7 +34,8 @@ export default function Log() {
     start_timestamp: dayjs().startOf('day').unix(), // 开始时间 当日 0 点
     end_timestamp: dayjs().endOf('day').unix(), // 结束时间 当日 23:59:59
     log_type: 0,
-    channel_id: ''
+    channel_id: '',
+    source_ip: ''
   };
 
   const [page, setPage] = useState(0);
@@ -395,6 +396,11 @@ export default function Log() {
                     disableSort: false,
                     width: 100,
                     maxWidth: 100
+                  },
+                  {
+                    id: 'source_ip',
+                    label: t('logPage.sourceIp'),
+                    disableSort: true
                   },
                   {
                     id: 'detail',
