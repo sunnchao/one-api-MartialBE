@@ -30,8 +30,8 @@ type Log struct {
 	RequestTime      int    `json:"request_time" gorm:"default:0"`
 	RequestIp        string `json:"request_ip,omitempty" gorm:"default:''"`
 	RequestId        string `json:"request_id,omitempty"`
-  SourceIp         string                             `json:"source_ip" gorm:"default:''"`
-  IsStream         bool   `json:"is_stream" gorm:"default:false"`
+	SourceIp         string `json:"source_ip" gorm:"default:''"`
+	IsStream         bool   `json:"is_stream" gorm:"default:false"`
 	IsError          bool   `json:"is_error" gorm:"default:false"`
 
 	Metadata datatypes.JSONType[map[string]any] `json:"metadata" gorm:"type:json"`
