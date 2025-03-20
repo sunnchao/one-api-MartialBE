@@ -227,7 +227,7 @@ func GetLogsList(params *LogsListParams) (*DataResult[Log], error) {
 func GetUserLogsList(userId int, params *LogsListParams) (*DataResult[Log], error) {
 	var logs []*Log
 
-	tx := DB.Where("user_id = ? and is_error = ?", userId, false).Omit("id")
+	tx := DB.Where("user_id = ?", userId).Omit("id")
 
 	if params.LogType != LogTypeUnknown {
 		tx = tx.Where("type = ?", params.LogType)
@@ -245,7 +245,20 @@ func GetUserLogsList(userId int, params *LogsListParams) (*DataResult[Log], erro
 		tx = tx.Where("created_at <= ?", params.EndTimestamp)
 	}
 
-	return PaginateAndOrder[Log](tx, &params.PaginationParams, &logs, allowedLogsOrderFields)
+	// 接收 PaginateAndOrder[Log](tx, &params.PaginationParams, &logs, allowedLogsOrderFields)
+	dataResult, err := PaginateAndOrder[Log](tx, &params.PaginationParams, &logs, allowedLogsOrderFields)
+	if err != nil {
+		return nil, err
+	}
+
+	// 处理 dataResult 的 Data 的 is_error 字段
+	for _, log := range *dataResult.Data {
+		if log.IsError {
+			log.Content = "请求失败如果多次出现，请联系客服"
+		}
+	}
+
+	return dataResult, nil
 }
 
 func SearchAllLogs(keyword string) (logs []*Log, err error) {
