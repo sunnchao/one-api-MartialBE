@@ -178,13 +178,13 @@ export default function TableToolBar({ filterName, handleFilterName, userIsAdmin
           <FormControl>
             <InputLabel htmlFor="channel-source_ip-label">{t('tableToolBar.sourceIp')}</InputLabel>
             <OutlinedInput
-              id="source_ip"
-              name="source_ip"
+              id="request_ip"
+              name="request_ip"
               sx={{
                 minWidth: '100%'
               }}
               label={t('tableToolBar.sourceIp')}
-              value={filterName.source_ip}
+              value={filterName.request_ip}
               onChange={handleFilterName}
               placeholder={t('tableToolBar.sourceIp')}
               startAdornment={

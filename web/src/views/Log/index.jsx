@@ -397,11 +397,11 @@ export default function Log() {
                     width: 100,
                     maxWidth: 100
                   },
-                  {
-                    id: 'source_ip',
-                    label: t('logPage.sourceIp'),
-                    disableSort: true
-                  },
+                  // {
+                  //   id: 'source_ip',
+                  //   label: t('logPage.sourceIp'),
+                  //   disableSort: true
+                  // },
                   {
                     id: 'detail',
                     label: t('logPage.detailLabel'),
