@@ -227,7 +227,7 @@ func GetLogsList(params *LogsListParams) (*DataResult[Log], error) {
 func GetUserLogsList(userId int, params *LogsListParams) (*DataResult[Log], error) {
 	var logs []*Log
 
-	tx := DB.Where("user_id = ?", userId).Omit("id")
+	tx := DB.Where("user_id = ? and is_error = ?", userId, false).Omit("id")
 
 	if params.LogType != LogTypeUnknown {
 		tx = tx.Where("type = ?", params.LogType)

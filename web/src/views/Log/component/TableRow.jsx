@@ -344,7 +344,9 @@ function viewLogContent(item, t, totalInputTokens, totalOutputTokens) {
   const originalInputRatio = item?.metadata?.input_ratio;
 
   let inputPriceInfo = '';
+  let inputRatioInfo = '';
   let outputPriceInfo = '';
+  let outputRatioInfo = '';
   let calculateSteps = '';
   let originalInputPriceInfo = '';
   let originalOutputPriceInfo = '';
@@ -368,8 +370,14 @@ function viewLogContent(item, t, totalInputTokens, totalOutputTokens) {
     inputPriceInfo = t('logPage.content.input_price', {
       price: inputPrice
     });
+    inputRatioInfo = t('logPage.content.input_ratio', {
+      ratio: originalInputRatio
+    });
     outputPriceInfo = t('logPage.content.output_price', {
       price: outputPrice
+    });
+    outputRatioInfo = t('logPage.content.output_ratio', {
+      ratio: originalCompletionRatio
     });
 
     const originalInputPrice = calculatePrice(originalInputRatio, 1, false);
@@ -416,14 +424,22 @@ function viewLogContent(item, t, totalInputTokens, totalOutputTokens) {
   return (
     <Tooltip title={tips} placement="top" arrow>
       <Stack justifyContent={'center'} direction="row" spacing={1}>
-        {inputPriceInfo && (
+        {inputRatioInfo && (
           <Stack sx={{ fontSize: 12 }} variant={'border'}>
-            {inputPriceInfo}
+            {inputRatioInfo}
           </Stack>
         )}
-        {outputPriceInfo && (
+        {outputRatioInfo && (
           <Stack sx={{ fontSize: 12 }} variant="border">
-            {outputPriceInfo}
+            {outputRatioInfo}
+          </Stack>
+        )}
+        {/* 分组 */}
+        {groupDiscount > 0 && (
+          <Stack sx={{ fontSize: 12 }} variant="border">
+            {t('logPage.content.group_discount', {
+              discount: groupDiscount
+            })}
           </Stack>
         )}
       </Stack>
