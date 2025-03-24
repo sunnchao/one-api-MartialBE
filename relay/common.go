@@ -461,10 +461,10 @@ func FilterOpenAIErr(c *gin.Context, err *types.OpenAIErrorWithStatusCode) (errW
 		// 如果是 无可用渠道 则不显示具体的分组 只显示模型
 		if groupAndModelKeywords.MatchString(newErr.Message) {
 			newErr.Message = groupAndModelKeywords.ReplaceAllString(newErr.Message, "当前分组下对于模型 $2 无可用渠道")
-			newErr.StatusCode = http.StatusServiceUnavailable
+			newErr.StatusCode = http.StatusTooManyRequests
 		} else if utils.ContainsString(newErr.Message, quotaKeywords) {
 			newErr.Message = "当前分组上游负载已饱和，请稍后再试"
-			newErr.StatusCode = http.StatusServiceUnavailable
+			newErr.StatusCode = http.StatusTooManyRequests
 		}
 	}
 
