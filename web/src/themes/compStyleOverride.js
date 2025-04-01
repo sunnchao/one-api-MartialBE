@@ -571,7 +571,7 @@ export default function componentStyleOverrides(theme) {
           color: theme.textDark,
           borderTop: `1px dashed ${theme.tableBorderBottom}`,
           overflow: 'auto',
-          backgroundColor: theme.backgroundDefault,
+          backgroundColor: '#ffffff',
           minHeight: '56px',
           width: '100%',
           margin: 0,

@@ -82,7 +82,7 @@ const Calendar = ({ checkinDates = [] }) => {
           {/* 星期标题 */}
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
             <Grid container item xs={12 / 7} key={day} alignItems={'center'} justifyContent={'center'}>
-              <Typography align="center" color="ButtonText">
+              <Typography align="center" color={theme.palette.text.dark}>
                 {t(`calendar.${day.toLowerCase()}`)}
               </Typography>
             </Grid>
@@ -114,7 +114,6 @@ const Calendar = ({ checkinDates = [] }) => {
                     width: '100%',
                     border: `1px solid ${isToday(day) ? theme.palette.primary.dark : 'transparent'}`,
                     color: isPendingCheck(day) ? theme.palette.text.dark : theme.palette.text.disabled,
-                    backgroundColor: isToday(day) ? theme.palette.primary.light : 'transparent',
                     fontSize: 16
                   }}
                 >
@@ -160,8 +159,8 @@ const UnChecked = () => {
     <Chip
       label={
         <Stack direction="row" alignItems="center" justifyContent={'center'} gap={0.5}>
-          <CloseOutlined sx={{ color: theme.palette.error.light, fontSize: 14 }} />
-          <Typography sx={{ color: theme.palette.error.light, fontSize: 12 }}>未签到</Typography>
+          <CloseOutlined sx={{ color: theme.palette.error.dark, fontSize: 14 }} />
+          <Typography sx={{ color: theme.palette.error.dark, fontSize: 12 }}>未签到</Typography>
         </Stack>
       }
       sx={{

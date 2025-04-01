@@ -50,7 +50,7 @@ const BaseIndex = () => {
       <Box
         sx={{
           minHeight: '100vh',
-          background: 'linear-gradient(135deg, #0a1929 0%, #0d47a1 60%, #1565c0 100%)',
+          background: 'linear-gradient(135deg, #1677ff 0%, #0d47a1 60%, #0d47a1 100%)',
           color: 'white',
           position: 'relative',
           overflow: 'hidden',

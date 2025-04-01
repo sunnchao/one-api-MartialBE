@@ -38,7 +38,7 @@ export const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open
   overflowY: 'auto',
   overflowX: 'hidden',
   height: 'calc(100vh - 64px)',
-  paddingBottom: '30px',
+  // paddingBottom: '30px',
   marginTop: '64px',
   position: 'relative',
   scrollbarWidth: 'thin',
