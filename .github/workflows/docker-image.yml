@@ -1,13 +1,19 @@
-name: one-api docker image
+name: Docker Image
+permissions:
+  contents: write
 
 on:
   push:
-    branches:
-      - main
     tags:
-      - "v*"
-    paths-ignore:
-      - "README.md"
+      - "*"
+      - "!*-alpha*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release'
+        required: true
+        type: string
+        default: 'v1.0.0'
 
 jobs:
   build-and-push:
@@ -32,15 +38,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 22.4.1
-      - name: Cache Node modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            web/node_modules
-            ~/.cache/yarn
-          key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
       - name: Build Frontend
         env:
           CI: ""
@@ -54,15 +51,6 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ">=1.18.0"
-      - name: Cache Go modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
       - name: Build Backend (amd64)
         run: |
           go mod download
@@ -118,6 +106,4 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           file: Dockerfile-action
