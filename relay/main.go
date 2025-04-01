@@ -27,9 +27,11 @@ func Relay(c *gin.Context) {
 		openaiErr := common.StringErrorWrapperLocal(err.Error(), "chirou_api_error", http.StatusBadRequest)
 		relay.HandleError(openaiErr)
 		go func() {
+
 			model.RecordConsumeErrorLog(
 				c.Request.Context(),
 				c.GetInt("id"),
+
 				c.GetInt("channel_id"),
 				c.GetString("original_model"),
 				c.GetString("token_name"),
