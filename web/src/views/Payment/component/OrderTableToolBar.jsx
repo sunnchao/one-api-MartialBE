@@ -93,7 +93,6 @@ export default function OrderTableToolBar({ filterName, handleFilterName }) {
                       actions: ['clear', 'today', 'accept']
                     },
                     textField: {
-                      size: 'small',
                       fullWidth: true
                     }
                   }}
@@ -122,7 +121,6 @@ export default function OrderTableToolBar({ filterName, handleFilterName }) {
                       actions: ['clear', 'today', 'accept']
                     },
                     textField: {
-                      size: 'small',
                       fullWidth: true
                     }
                   }}

@@ -90,15 +90,16 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
   return (
     <>
       <TableRow tabIndex={item.id}>
-        {columnVisibility.created_at && <TableCell sx={{ p: '10px 8px' }}>{timestamp2string(item.created_at)}</TableCell>}
+        {columnVisibility.created_at && <TableCell sx={{ p: '12px 12px' }}>{timestamp2string(item.created_at)}</TableCell>}
 
         {userIsAdmin && columnVisibility.channel_id && (
-          <TableCell sx={{ p: '10px 8px' }}>
-            {(item.channel_id || '') + ' ' + (item.channel?.name ? '(' + item.channel.name + ')' : '')}
+          <TableCell sx={{ p: '12px 12px' }}>
+            {item.channel_id || ''}
+            {item.channel?.name ? <div style={{ fontSize: '12px', color: '#6C7A92' }}>({item.channel.name})</div> : ''}
           </TableCell>
         )}
         {userIsAdmin && columnVisibility.user_id && (
-          <TableCell sx={{ p: '10px 8px' }}>
+          <TableCell sx={{ p: '12px 12px' }}>
             <Label color="default" variant="outlined" copyText={item.username}>
               {item.username}
             </Label>
@@ -106,10 +107,10 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
         )}
 
         {columnVisibility.group && (
-          <TableCell sx={{ p: '10px 8px' }}>
+          <TableCell sx={{ p: '12px 12px' }}>
             {item?.metadata?.group_name ? (
               <Label color="default" variant="soft">
-                {userGroup[item.metadata.group_name]?.name || '跟随用户'}
+                {userGroup[item.metadata.group_name]?.name || '默认分组'}
               </Label>
             ) : (
               ''
@@ -117,7 +118,7 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
           </TableCell>
         )}
         {columnVisibility.token_name && (
-          <TableCell sx={{ p: '10px 8px' }}>
+          <TableCell sx={{ p: '12px 12px' }}>
             {item.token_name && (
               <Label color="default" variant="soft" copyText={item.token_name}>
                 {item.token_name}
@@ -125,30 +126,34 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
             )}
           </TableCell>
         )}
-        {columnVisibility.type && <TableCell sx={{ p: '10px 8px' }}>{renderType(item.type)}</TableCell>}
-        {columnVisibility.model_name && <TableCell sx={{ p: '10px 8px' }}>{viewModelName(item.model_name, item.is_stream)}</TableCell>}
+        {columnVisibility.type && <TableCell sx={{ p: '12px 12px' }}>{renderType(item.type, item.is_error)}</TableCell>}
+        {columnVisibility.model_name && <TableCell sx={{ p: '12px 12px' }}>{viewModelName(item.model_name, item.is_stream)}</TableCell>}
 
         {columnVisibility.duration && (
-          <TableCell sx={{ p: '10px 8px' }}>
+          <TableCell sx={{ p: '12px 12px' }}>
             {item.type === 2 ? (
-              <Stack direction="column" spacing={0.5}>
-                <Label color={requestTimeLabelOptions(request_time)}>
+              <Stack direction="column" spacing={1}>
+                <Label sx={{ fontSize: '12px' }} variant="outlined" color={requestTimeLabelOptions(request_time)}>
                   {item.request_time == 0 ? '无' : request_time_str} {first_time_str ? ' / ' + first_time_str : ''}
                 </Label>
 
-                {request_ts_str && <Label color={requestTSLabelOptions(request_ts)}>{request_ts_str}</Label>}
+                {request_ts_str && (
+                  <Label sx={{ fontSize: '12px' }} variant="outlined" color={requestTSLabelOptions(request_ts)}>
+                    {request_ts_str}
+                  </Label>
+                )}
               </Stack>
-            ) : null }
+            ) : null}
           </TableCell>
         )}
         {columnVisibility.message && (
-          <TableCell sx={{ p: '10px 8px' }}>{viewInput(item, t, totalInputTokens, totalOutputTokens, show, tokenDetails)}</TableCell>
+          <TableCell sx={{ p: '12px 12px' }}>{viewInput(item, t, totalInputTokens, totalOutputTokens, show, tokenDetails)}</TableCell>
         )}
-        {columnVisibility.completion && <TableCell sx={{ p: '10px 8px' }}>{item.completion_tokens || ''}</TableCell>}
-        {columnVisibility.quota && <TableCell sx={{ p: '10px 8px' }}>{item.quota ? renderQuota(item.quota, 6) : '$0'}</TableCell>}
-        {columnVisibility.request_ip && <TableCell sx={{ p: '10px 8px' }}>{item.request_ip || ''}</TableCell>}
+        {columnVisibility.completion && <TableCell sx={{ p: '12px 12px' }}>{item.completion_tokens || ''}</TableCell>}
+        {columnVisibility.quota && <TableCell sx={{ p: '12px 12px' }}>{item.type === 2 ? renderQuota(item.quota, 6) : ''}</TableCell>}
+        {columnVisibility.request_ip && <TableCell sx={{ p: '12px 12px' }}>{item.request_ip || ''}</TableCell>}
         {columnVisibility.detail && (
-          <TableCell sx={{ p: '10px 8px' }}>{viewLogContent(item, t, totalInputTokens, totalOutputTokens)}</TableCell>
+          <TableCell sx={{ p: '12px 12px' }}>{viewLogContent(item, t, totalInputTokens, totalOutputTokens)}</TableCell>
         )}
       </TableRow>
     </>
@@ -429,24 +434,31 @@ function viewLogContent(item, t, totalInputTokens, totalOutputTokens) {
 
   return (
     <Tooltip title={tips} placement="top" arrow>
-      <Stack justifyContent={'center'} direction="row" spacing={1}>
-        {inputRatioInfo && (
-          <Stack sx={{ fontSize: 12 }} variant={'border'}>
-            {inputRatioInfo}
-          </Stack>
-        )}
-        {outputRatioInfo && (
-          <Stack sx={{ fontSize: 12 }} variant="border">
-            {outputRatioInfo}
-          </Stack>
-        )}
-        {/* 分组 */}
-        {groupDiscount > 0 && (
-          <Stack sx={{ fontSize: 12 }} variant="border">
-            {t('logPage.content.group_discount', {
-              discount: groupDiscount
-            })}
-          </Stack>
+      <Stack sx={{ fontSize: 12 }}>
+        {/* 如果是按次数 */}
+        {priceType === 'times' ? (
+          <>
+            {[
+              inputPriceInfo,
+              t('logPage.content.group_discount', {
+                discount: groupDiscount
+              })
+            ]
+              .filter(Boolean)
+              .join(', ')}
+          </>
+        ) : (
+          <>
+            {[
+              inputRatioInfo,
+              outputRatioInfo,
+              t('logPage.content.group_discount', {
+                discount: groupDiscount
+              })
+            ]
+              .filter(Boolean)
+              .join(', ')}
+          </>
         )}
       </Stack>
     </Tooltip>

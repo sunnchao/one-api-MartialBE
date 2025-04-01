@@ -317,7 +317,7 @@
       "calculate_steps": "Calculation steps:",
       "calculate_steps_tip": "PS: This system calculates based on points, and all amounts are converted from points. 1 point = $0.000002, with a minimum spending of 1 point. This calculation is for reference only; actual charges may vary.",
       "channel_group": "Group: {{ channel_group }}",
-      "group_discount": "Group discount: {{ discount }}",
+      "group_discount": "Group Ratio: {{ discount }}",
       "input_price": "Input: ${{ price }} /M",
       "input_ratio": "Input ratio: {{ ratio }}",
       "original_input_price": "Original input price: ${{ price }} /M",

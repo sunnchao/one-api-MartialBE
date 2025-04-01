@@ -3,7 +3,7 @@ $paper: #ffffff;
 
 // primary
 $primaryLight: #F0F7FF;
-$primaryMain: #0884DD;
+$primaryMain: #1677ff;
 $primaryDark: #0062A3;
 $primary200: #60B8FF;
 $primary800: #004D85;
@@ -67,7 +67,7 @@ $darkTableHeader: #253545;
 
 // primary dark
 $darkPrimaryLight: #60B8FF;
-$darkPrimaryMain: #0884DD;
+$darkPrimaryMain: #1677ff;
 $darkPrimaryDark: #0062A3;
 $darkPrimary200: #91CAFF;
 $darkPrimary800: #004D85;
@@ -171,4 +171,5 @@ $darkTextDark: #E6E8EC;
   darkSelectedBack: $darkSelectedBack;
   tableBackground: $tableBackground;
   tableBorderBottom: $tableBorderBottom;
+  borderRadius: 0;
 }

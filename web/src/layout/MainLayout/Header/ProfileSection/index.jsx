@@ -123,7 +123,7 @@ const ProfileSection = () => {
     >
       {({ TransitionProps }) => (
         <Transitions type="grow" position="top-right" in={open} {...TransitionProps}>
-          <Paper sx={{ width: 'auto', maxWidth: 350, overflow: 'hidden', borderRadius: '10px' }}>
+          <Paper sx={{ width: 'auto', maxWidth: 350, overflow: 'hidden', borderRadius: '0' }}>
             <ClickAwayListener onClickAway={handleClose}>
               <MainCard border={false} elevation={16} content={false} boxShadow shadow={theme.shadows[16]}>
                 <List

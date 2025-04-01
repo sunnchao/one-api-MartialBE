@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useContext } from 'react';
-import { showError, trims } from 'utils/common';
+import { renderQuota, showError, trims } from 'utils/common';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -12,7 +12,7 @@ import Button from '@mui/material/Button';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Divider from '@mui/material/Divider';
-import { Grid, Button, Card, Stack, Container, Typography, Box, Menu, MenuItem, Checkbox, ListItemText } from '@mui/material';
+import { Grid, Card, Stack, Container, Typography, Box, Menu, MenuItem, Checkbox, ListItemText } from '@mui/material';
 import LogTableRow from './component/TableRow';
 import KeywordTableHead from 'ui-component/TableHead';
 import TableToolBar from './component/TableToolBar';
@@ -37,7 +37,8 @@ export default function Log() {
     end_timestamp: dayjs().endOf('day').unix(), // 结束时间 当日 23:59:59
     log_type: 0,
     channel_id: '',
-    source_ip: ''
+    source_ip: '',
+    request_ip: ''
   };
 
   const [page, setPage] = useState(0);
@@ -230,7 +231,7 @@ export default function Log() {
             <Stack direction="row" alignItems="center" spacing={1}>
               <Box
                 sx={{
-                  p: 1.5,
+                  p: 1,
                   borderRadius: 1,
                   bgcolor: 'rgba(0, 167, 111, 0.2)',
                   display: 'flex'
@@ -266,7 +267,7 @@ export default function Log() {
             <Stack direction="row" alignItems="center" spacing={1}>
               <Box
                 sx={{
-                  p: 1.5,
+                  p: 1,
                   borderRadius: 1,
                   bgcolor: 'rgba(0, 108, 156, 0.2)',
                   display: 'flex'
@@ -305,7 +306,7 @@ export default function Log() {
             <Stack direction="row" alignItems="center" spacing={1}>
               <Box
                 sx={{
-                  p: 1.5,
+                  p: 1,
                   borderRadius: 1,
                   bgcolor: 'rgba(255, 139, 0, 0.2)',
                   display: 'flex'
@@ -414,7 +415,8 @@ export default function Log() {
                 { id: 'message', label: t('logPage.inputLabel') },
                 { id: 'completion', label: t('logPage.outputLabel') },
                 { id: 'quota', label: t('logPage.quotaLabel') },
-                { id: 'source_ip', label: t('logPage.sourceIp') },
+                // { id: 'source_ip', label: t('logPage.sourceIp') },
+                { id: 'request_ip', label: t('logPage.requestIPLabel') },
                 { id: 'detail', label: t('logPage.detailLabel') }
               ].map(
                 (column) =>
@@ -431,7 +433,7 @@ export default function Log() {
         {searching && <LinearProgress />}
         <PerfectScrollbar component="div">
           <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 1366 }}>
+            <Table sx={{ minWidth: 1024 }}>
               <KeywordTableHead
                 order={order}
                 orderBy={orderBy}
@@ -440,43 +442,49 @@ export default function Log() {
                   {
                     id: 'created_at',
                     label: t('logPage.timeLabel'),
-                    disableSort: false,
-                    hide: !columnVisibility.created_at
+                    disableSort: true,
+                    hide: !columnVisibility.created_at,
+                    width: 150,
+                    minWidth: 150,
+                    maxWidth: 150
                   },
                   {
                     id: 'channel_id',
                     label: t('logPage.channelLabel'),
-                    disableSort: false,
-                    hide: !columnVisibility.channel_id || !userIsAdmin
+                    disableSort: true,
+                    hide: !columnVisibility.channel_id || !userIsAdmin,
+                    width: 150,
+                    minWidth: 150,
+                    maxWidth: 150
                   },
                   {
                     id: 'user_id',
                     label: t('logPage.userLabel'),
-                    disableSort: false,
+                    disableSort: true,
                     hide: !columnVisibility.user_id || !userIsAdmin
                   },
                   {
                     id: 'group',
                     label: t('logPage.groupLabel'),
-                    disableSort: false,
+                    disableSort: true,
                     hide: !columnVisibility.group
                   },
                   {
                     id: 'token_name',
                     label: t('logPage.tokenLabel'),
-                    disableSort: false,
+                    disableSort: true,
                     hide: !columnVisibility.token_name
                   },
                   {
                     id: 'type',
                     label: t('logPage.typeLabel'),
-                    disableSort: false,
+                    disableSort: true,
                     hide: !columnVisibility.type
                   },
                   {
                     id: 'model_name',
                     label: t('logPage.modelLabel'),
-                    disableSort: false,
+                    disableSort: true,
                     hide: !columnVisibility.model_name
                   },
                   {
@@ -507,8 +515,11 @@ export default function Log() {
                   {
                     id: 'request_ip',
                     label: t('logPage.requestIPLabel'),
-                    disableSort: false,
-                    hide: !columnVisibility.request_ip
+                    disableSort: true,
+                    hide: !columnVisibility.request_ip,
+                    width: 150,
+                    minWidth: 150,
+                    maxWidth: 150
                   },
                   // {
                   //   id: 'source_ip',
@@ -520,7 +531,10 @@ export default function Log() {
                     id: 'detail',
                     label: t('logPage.detailLabel'),
                     disableSort: true,
-                    hide: !columnVisibility.detail
+                    hide: !columnVisibility.detail,
+                    width: 150,
+                    minWidth: 150,
+                    maxWidth: 150
                   }
                 ]}
               />

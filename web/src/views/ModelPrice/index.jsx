@@ -40,9 +40,9 @@ const GroupChip = styled(Chip)(({ theme, selected }) => ({
   boxShadow: selected ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
 
   '&:hover': {
-    backgroundColor: selected ? theme.palette.primary.dark : theme.palette.action.hover,
-    transform: 'translateY(-1px)',
-    boxShadow: '0 3px 6px rgba(0,0,0,0.12)'
+    // backgroundColor: selected ? theme.palette.primary.dark : theme.palette.action.hover,
+    // transform: 'translateY(-1px)',
+    // boxShadow: '0 3px 6px rgba(0,0,0,0.12)'
   },
 
   '& .MuiChip-label': {
@@ -62,7 +62,7 @@ export default function ModelPrice() {
   const [availableModels, setAvailableModels] = useState({});
   const [userGroupMap, setUserGroupMap] = useState({});
   const [selectedGroup, setSelectedGroup] = useState('default');
-  const [selectedOwnedBy, setSelectedOwnedBy] = useState('');
+  const [selectedOwnedBy, setSelectedOwnedBy] = useState(1);
   const [unit, setUnit] = useState('K');
 
   const unitOptions = [
@@ -76,7 +76,7 @@ export default function ModelPrice() {
       const { success, message, data } = res.data;
       if (success) {
         setAvailableModels(data);
-        setSelectedOwnedBy(Object.values(data)[0]?.owned_by || '');
+        setSelectedOwnedBy(1);
       } else {
         showError(message);
       }
@@ -108,7 +108,7 @@ export default function ModelPrice() {
     if (!availableModels || !userGroupMap || !selectedGroup) return;
 
     const newRows = Object.entries(availableModels)
-      .filter(([, model]) => model.owned_by === selectedOwnedBy)
+      .filter(([, model]) => model.owned_by_id === selectedOwnedBy)
       .map(([modelName, model], index) => {
         const group = userGroupMap[selectedGroup];
         const price =
@@ -170,7 +170,17 @@ export default function ModelPrice() {
     }
   };
 
-  const uniqueOwnedBy = [...new Set(Object.values(availableModels).map((model) => model.owned_by))];
+  const uniqueOwnedBy = [
+    ...new Set(Object.values(availableModels).map((model) => JSON.stringify({ id: model.owned_by_id, name: model.owned_by })))
+  ].map((item) => JSON.parse(item));
+  // 根据id排序 升序
+  uniqueOwnedBy.sort((a, b) => a.id - b.id);
+  // uniqueOwnedBy id 为 0 的放在最后
+  const zeroId = uniqueOwnedBy.find((item) => item.id === 0);
+  if (zeroId) {
+    uniqueOwnedBy.splice(uniqueOwnedBy.indexOf(zeroId), 1);
+    uniqueOwnedBy.push(zeroId);
+  }
 
   const getIconByName = (name) => {
     const owner = ownedby.find((item) => item.name === name);
@@ -178,12 +188,12 @@ export default function ModelPrice() {
   };
 
   return (
-    <Stack spacing={2} sx={{ backgroundColor: theme.palette.background.default, p: 2 }}>
+    <Stack spacing={2} sx={{ backgroundColor: theme.palette.background.default, p: 1 }}>
       <Typography variant="h4" color="textPrimary">
         {t('modelpricePage.availableModels')}
       </Typography>
 
-      <Card sx={{ paddingTop: 1, paddingBottom: 1, backgroundColor: theme.palette.background.default }}>
+      <Card sx={{ paddingTop: 1, paddingBottom: 1 }}>
         <Stack spacing={2}>
           {/* <Typography variant="subtitle2" color="textSecondary">
             {t('modelpricePage.group')}
@@ -251,11 +261,11 @@ export default function ModelPrice() {
           {uniqueOwnedBy.map((ownedBy, index) => (
             <Tab
               key={index}
-              value={ownedBy}
+              value={ownedBy.id}
               icon={
                 <Stack direction="row" alignItems="center" spacing={1}>
-                  <IconWrapper url={getIconByName(ownedBy)} />
-                  <span>{ownedBy}</span>
+                  <IconWrapper url={getIconByName(ownedBy.name)} />
+                  <span>{ownedBy.name}</span>
                 </Stack>
               }
               sx={{
@@ -270,8 +280,7 @@ export default function ModelPrice() {
                   transform: 'translateY(-1px)'
                 },
                 '&.Mui-selected': {
-                  backgroundColor: (theme) => theme.palette.action.selected,
-                  boxShadow: (theme) => (theme.palette.mode === 'dark' ? '0 2px 4px rgba(0,0,0,0.2)' : '0 2px 4px rgba(0,0,0,0.1)')
+                  backgroundColor: (theme) => theme.palette.action.selected
                 }
               }}
             />
@@ -279,7 +288,7 @@ export default function ModelPrice() {
         </Tabs>
       </Box>
 
-      <Card sx={{ backgroundColor: theme.palette.background.default }}>
+      <Card>
         <TableContainer>
           <Table>
             <TableHead>

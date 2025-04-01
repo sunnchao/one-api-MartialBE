@@ -14,15 +14,15 @@ const StyledToggleButtonGroup = styled(MuiToggleButtonGroup)(({ theme }) => ({
     fontSize: '13px',
     fontWeight: 500,
     color: theme.palette.text.secondary,
-    '&:hover': {
-      backgroundColor: theme.palette.action.hover
-    },
+    // '&:hover': {
+    //   backgroundColor: theme.palette.action.hover
+    // },
     '&.Mui-selected': {
       backgroundColor: theme.palette.primary.main,
-      color: theme.palette.common.white,
-      '&:hover': {
-        backgroundColor: theme.palette.primary.dark
-      }
+      color: theme.palette.common.white
+      // '&:hover': {
+      //   backgroundColor: theme.palette.primary.dark
+      // }
     },
     borderRadius: 0
   }
@@ -37,15 +37,7 @@ const StyledToggleButton = styled(ToggleButton)({
   }
 });
 
-export default function ToggleButtonGroup({
-  value,
-  onChange,
-  options = [],
-  size = 'small',
-  exclusive = true,
-  'aria-label': ariaLabel,
-  ...other
-}) {
+export default function ToggleButtonGroup({ value, onChange, options = [], exclusive = true, 'aria-label': ariaLabel, ...other }) {
   const handleChange = (event, newValue) => {
     if (newValue !== null) {
       onChange(event, newValue);
@@ -53,7 +45,7 @@ export default function ToggleButtonGroup({
   };
 
   return (
-    <StyledToggleButtonGroup value={value} exclusive={exclusive} onChange={handleChange} size={size} aria-label={ariaLabel} {...other}>
+    <StyledToggleButtonGroup value={value} exclusive={exclusive} onChange={handleChange} aria-label={ariaLabel} {...other}>
       {options.map((option) => (
         <StyledToggleButton key={option.value} value={option.value} disabled={option.disabled}>
           {option.label}

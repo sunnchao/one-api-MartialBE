@@ -144,9 +144,10 @@ type ModelPrice struct {
 }
 
 type AvailableModelResponse struct {
-	Groups  []string     `json:"groups"`
-	OwnedBy string       `json:"owned_by"`
-	Price   *model.Price `json:"price"`
+	Groups    []string     `json:"groups"`
+	OwnedBy   string       `json:"owned_by"`
+	Price     *model.Price `json:"price"`
+	OwnedById int          `json:"owned_by_id"`
 }
 
 func AvailableModel(c *gin.Context) {
@@ -185,6 +186,7 @@ func getAvailableModels(groupName string) map[string]*AvailableModelResponse {
 			availableModels[modelName] = &AvailableModelResponse{
 				Groups:  groups,
 				OwnedBy: *getModelOwnedBy(price.ChannelType),
+				OwnedById: price.ChannelType,
 				Price:   price,
 			}
 		}

@@ -172,7 +172,6 @@ const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
               <Box
                 sx={{
                   pt: 2,
-                  pb: 2,
                   mt: 2,
                   borderTop: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'}`
                 }}

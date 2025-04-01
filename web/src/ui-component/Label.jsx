@@ -150,7 +150,7 @@ const StyledLabel = styled(Box)(({ theme, ownerState }) => {
     // textTransform: 'capitalize',
     padding: theme.spacing(0, 0.75),
     fontSize: theme.typography.pxToRem(12),
-    fontWeight: theme.typography.fontWeightBold,
+    fontWeight: theme.typography.fontWeightMedium,
     transition: theme.transitions.create('all', {
       duration: theme.transitions.duration.shorter
     }),

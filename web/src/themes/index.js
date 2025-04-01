@@ -8,6 +8,7 @@ import componentStyleOverrides from './compStyleOverride';
 import themePalette from './palette';
 import themeTypography from './typography';
 import { varAlpha, createGradient } from './utils';
+import { borderRadius } from '@mui/system';
 
 // 创建自定义渐变背景色
 const customGradients = {
@@ -59,7 +60,8 @@ export const theme = (customization) => {
       modal: 1300,
       snackbar: 1400,
       tooltip: 1500
-    }
+    },
+    borderRadius: 0
   };
 
   const themes = createTheme(themeOptions);
@@ -90,7 +92,8 @@ function GetDarkOption() {
     menuChip: '#292D36',
     headBackgroundColor: '#25282F',
     headBackgroundColorHover: varAlpha('#25282F', 0.08),
-    tableBorderBottom: 'rgba(255, 255, 255, 0.08)'
+    tableBorderBottom: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 0
   };
 }
 
@@ -100,7 +103,7 @@ function GetLightOption() {
     mode: 'light',
     heading: '#202939',
     paper: '#FFFFFF',
-    backgroundDefault: '#F5F7FA',
+    backgroundDefault: '#f5f5f5',
     background: '#F8FAFD',
     darkTextPrimary: '#3E4555',
     darkTextSecondary: '#6C7A92',
@@ -112,8 +115,9 @@ function GetLightOption() {
     menuButton: varAlpha(color.primary200, 0.12),
     menuButtonColor: color.primaryMain,
     menuChip: '#EEF2F6',
-    headBackgroundColor: '#F5F7FA',
-    headBackgroundColorHover: varAlpha('#F5F7FA', 0.12),
-    tableBorderBottom: '#E9EDF5'
+    headBackgroundColor: '#f5f5f5',
+    headBackgroundColorHover: '#ffffff',
+    tableBorderBottom: '#E9EDF5',
+    borderRadius: 0
   };
 }

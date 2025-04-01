@@ -40,13 +40,12 @@ const Header = ({ handleLeftDrawerToggle }) => {
         </Box>
         <IconButton
           size="medium"
-          edge="start"
           color="inherit"
           aria-label="menu"
           sx={{
             width: '38px',
             height: '38px',
-            borderRadius: '8px',
+            borderRadius: '0',
             backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
             '&:hover': {
               backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.06)'

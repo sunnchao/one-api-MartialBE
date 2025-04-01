@@ -241,7 +241,7 @@
     "sourceIp": "来源IP",
     "content": {
       "channel_group": "分组: {{ channel_group }}",
-      "group_discount": "分组折扣: {{ discount }}",
+      "group_discount": "分组倍率: {{ discount }}",
       "input_price": "输入: ${{ price }} /M",
       "input_ratio": "输入倍率: {{ ratio }}",
       "output_price": "输出: ${{ price }} /M",
