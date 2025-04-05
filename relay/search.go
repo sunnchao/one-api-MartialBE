@@ -7,6 +7,7 @@ import (
 	providersBase "one-api/providers/base"
 	"one-api/relay/relay_util"
 	"one-api/types"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -53,7 +54,8 @@ func handleSearch(c *gin.Context, request *types.ChatCompletionRequest) {
 	}
 
 	// 创建查询请求
-	queryModel := "gpt-4o-mini"
+	// 获取 request.Model 除去 #search 的部分
+	queryModel := strings.TrimSuffix(request.Model, "#search")
 	queryRequest := createSearchQueryRequest(userMsg, queryModel)
 
 	// 获取提供者并执行查询
@@ -114,8 +116,9 @@ func createSearchQueryRequest(userMsg, model string) *types.ChatCompletionReques
 		Model: model,
 		Messages: []types.ChatCompletionMessage{
 			{
-				Role:    "system",
-				Content: fmt.Sprintf("当前时间:%v，你是一个联网搜索机器人，你需要判断下面的对话是否需要使用搜索引擎。 如果需要，请使用工具进行搜索，你检索的语言需要和用户对话的语言保持一致，如果不需要，请直接返回数字0", time.Now().Format("2006-01-02 15:04:05")),
+				Role: "system",
+				//Content: fmt.Sprintf("当前时间:%v，你是一个联网搜索机器人，你需要判断下面的对话是否需要使用搜索引擎。 如果需要，请使用工具进行搜索，你检索的语言需要和用户对话的语言保持一致，如果不需要，请直接返回数字0", time.Now().Format("2006-01-02 15:04:05")),
+				Content: fmt.Sprintf("当前时间:%v，你是一个联网搜索机器人，请根据用户提供的内容，使用工具进行搜索，你检索的语言需要和用户对话的语言保持一致", time.Now().Format("2006-01-02 15:04:05")),
 			},
 			{
 				Role:    "user",
@@ -146,19 +149,27 @@ func createSearchQueryRequest(userMsg, model string) *types.ChatCompletionReques
 // 执行查询
 func executeQuery(c *gin.Context, chatProvider providersBase.ChatInterface, queryRequest *types.ChatCompletionRequest, model string) (string, error) {
 	usage := &types.Usage{}
-	chatProvider.SetUsage(usage)
+	searchUsage := &types.Usage{}
 
+	chatProvider.SetUsage(usage)
 	response, opErr := chatProvider.CreateChatCompletion(queryRequest)
 	if opErr != nil {
 		return "", opErr
 	}
-
 	// 处理配额
 	quota := relay_util.NewQuota(c, model, 0)
+	// 再处理调用搜索的配额
+	searchQuota := relay_util.NewQuota(c, "search", 1000)
 	if opErr = quota.PreQuotaConsumption(); opErr != nil {
 		return "", opErr
 	}
+	if opErr = searchQuota.PreQuotaConsumption(); opErr != nil {
+		return "", opErr
+	}
 	quota.Consume(c, usage, false)
+	searchUsage.PromptTokens = 1000
+	searchUsage.CompletionTokens = 0
+	searchQuota.Consume(c, searchUsage, false)
 
 	if len(response.Choices) == 0 {
 		return "", fmt.Errorf("no choices in response")
@@ -187,5 +198,6 @@ func performSearch(queryKeyword string) (string, error) {
 		return "", err
 	}
 
-	return s.ToString(), nil
+	// 多加一个换行，这样看起来更符合人类的阅读习惯
+	return s.ToString() + "\n\n", nil
 }

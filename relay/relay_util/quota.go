@@ -24,6 +24,9 @@ type Quota struct {
 	groupRatio       float64
 	inputRatio       float64
 	outputRatio      float64
+	isSearch         bool
+	searchRatio      float64
+	searchPrice      model.Price
 	preConsumedQuota int
 	cacheQuota       int
 	userId           int
@@ -42,6 +45,7 @@ func NewQuota(c *gin.Context, modelName string, promptTokens int) *Quota {
 		userId:       c.GetInt("id"),
 		channelId:    c.GetInt("channel_id"),
 		tokenId:      c.GetInt("token_id"),
+		isSearch:     modelName == "search",
 		HandelStatus: false,
 	}
 
@@ -54,6 +58,12 @@ func NewQuota(c *gin.Context, modelName string, promptTokens int) *Quota {
 	quota.groupName = c.GetString("token_group")
 
 	quota.groupRatio = groupRatioList.(map[string]float64)[quota.groupName]
+
+	if quota.isSearch {
+		quota.channelId = 0
+		quota.groupRatio = 1
+		quota.groupName = ""
+	}
 	quota.inputRatio = quota.price.GetInput() * quota.groupRatio
 	quota.outputRatio = quota.price.GetOutput() * quota.groupRatio
 
@@ -142,6 +152,10 @@ func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, 
 
 	quota := q.GetTotalQuotaByUsage(usage)
 
+	if q.isSearch {
+		logger.LogInfo(ctx, "search quota consumption: "+fmt.Sprintf("%d", quota))
+	}
+
 	if quota > 0 {
 		quotaDelta := quota - q.preConsumedQuota
 		err := model.PostConsumeTokenQuota(q.tokenId, quotaDelta)
@@ -227,6 +241,7 @@ func (q *Quota) GetLogMeta(usage *types.Usage) map[string]any {
 		"group_ratio":  q.groupRatio,
 		"input_ratio":  q.price.GetInput(),
 		"output_ratio": q.price.GetOutput(),
+		"is_search":    q.isSearch,
 	}
 
 	firstResponseTime := q.GetFirstResponseTime()

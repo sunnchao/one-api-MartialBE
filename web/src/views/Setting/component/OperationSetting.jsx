@@ -717,6 +717,7 @@ const OperationSetting = () => {
         </Stack>
       </SubCard>
 
+      {/* 禁用通道关键词设置 */}
       <SubCard title={t('setting_index.operationSettings.disableChannelKeywordsSettings.title')}>
         <Stack spacing={2}>
           <Stack justifyContent="flex-start" alignItems="flex-start" spacing={2}>

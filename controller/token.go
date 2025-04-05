@@ -109,14 +109,15 @@ func AddToken(c *gin.Context) {
 		return
 	}
 
-	if token.Group != "" {
-		err = validateTokenGroup(token.Group, userId)
-		if err != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": err.Error(),
-			})
-		}
+	if token.Group == "" {
+		token.Group = "default"
+	}
+	err = validateTokenGroup(token.Group, userId)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
 	}
 
 	cleanToken := model.Token{
@@ -209,7 +210,10 @@ func UpdateToken(c *gin.Context) {
 		}
 	}
 
-	if cleanToken.Group != token.Group && token.Group != "" {
+	if cleanToken.Group != token.Group {
+		if token.Group == "" {
+			token.Group = "default"
+		}
 		err = validateTokenGroup(token.Group, userId)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{

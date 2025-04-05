@@ -16,6 +16,7 @@ type Searcher interface {
 func InitSearcher() {
 	InitSearxng()
 	InitTavily()
+	InitGoogle()
 }
 
 func InitSearxng() {
@@ -27,6 +28,18 @@ func InitSearxng() {
 
 	searxng := channel.NewSearxng(searxngUrl)
 	AddSearchers(searxng)
+}
+
+func InitGoogle() {
+	googleKey := viper.GetString("search.google.key")
+	googleCx := viper.GetString("search.google.cx")
+	if googleKey == "" || googleCx == "" {
+		logger.SysLog("google key or cx is empty")
+		return
+	}
+
+	google := channel.NewGoogle(googleKey, googleCx)
+	AddSearchers(google)
 }
 
 func InitTavily() {
