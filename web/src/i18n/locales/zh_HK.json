@@ -1114,7 +1114,17 @@
     "changeQuotaHelperText": "呢度係增減，唔係直接更改用戶餘額，輸入美元，你最多可以扣除 {{quota}}",
     "changeQuotaNotEmpty": "請填寫更改額度",
     "changeQuotaNotEnough": "唔可以扣除超過用戶餘額嘅金額",
-    "quotaRemark": "備註"
+    "quotaRemark": "備註",
+    "tokenInfo": "查看令牌信息",
+    "tokenTable": {
+      "name": "名稱",
+      "group": "分組",
+      "status": "狀態",
+      "billingType": "計費類型",
+      "usedQuota": "已用額度",
+      "remainingQuota": "剩餘額度",
+      "createdTime": "創建時間"
+    }
   },
   "user_group": "用戶分組",
   "validation": {

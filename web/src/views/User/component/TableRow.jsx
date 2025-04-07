@@ -16,7 +16,10 @@ import {
   Tooltip,
   Stack,
   TextField,
-  InputAdornment
+  InputAdornment,
+  Table,
+  TableHead,
+  TableRow as TableRowMui,
 } from '@mui/material';
 
 import Label from 'ui-component/Label';
@@ -26,6 +29,7 @@ import { Icon } from '@iconify/react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import ConfirmDialog from 'ui-component/confirm-dialog';
+import { API } from 'utils/api';
 
 function renderRole(t, role) {
   switch (role) {
@@ -49,7 +53,9 @@ export default function UsersTableRow({ item, manageUser, handleOpenModal, setMo
   const [statusSwitch, setStatusSwitch] = useState(item.status);
   const [money, setMoney] = useState(0);
   const [remark, setRemark] = useState('');
-
+  const [openTokenInfo, setOpenTokenInfo] = useState(false);
+  const [tokenList, setTokenList] = useState([]);
+  const [tokenListLoading, setTokenListLoading] = useState(false);
   const handleDeleteOpen = () => {
     handleCloseMenu();
     setOpenDelete(true);
@@ -95,6 +101,28 @@ export default function UsersTableRow({ item, manageUser, handleOpenModal, setMo
   const handleDelete = async () => {
     handleCloseMenu();
     await manageUser(item.username, 'delete', '');
+  };
+
+  const handleTokenInfoOpen = () => {
+    setTokenListLoading(true);
+    API.get(`/api/user/token/${item.id}`).then((res) => {
+      const { success, message, data } = res.data;
+      if (success) {
+        setTokenList(data);
+      } else {
+        showError(message);
+      }
+      setOpenTokenInfo(true);
+
+    }).catch((err) => {
+      showError(err.response.data.message);
+    }).finally(() => {
+      setTokenListLoading(false);
+    });
+  };
+
+  const handleTokenInfoClose = () => {
+    setOpenTokenInfo(false);
   };
 
   return (
@@ -208,6 +236,12 @@ export default function UsersTableRow({ item, manageUser, handleOpenModal, setMo
           <Icon icon="solar:wallet-money-bold-duotone" style={{ marginRight: '16px' }} />
           {t('userPage.changeQuota')}
         </MenuItem>
+        
+        {/*  查看令牌信息 */}
+        <MenuItem onClick={handleTokenInfoOpen} sx={{ color: 'primary.main' }}>
+          <Icon icon="solar:key-bold-duotone" style={{ marginRight: '16px' }} />
+          {t('userPage.tokenInfo')}
+        </MenuItem>
         <MenuItem onClick={handleDeleteOpen} sx={{ color: 'error.main' }}>
           <Icon icon="solar:trash-bin-trash-bold-duotone" style={{ marginRight: '16px' }} />
           {t('common.delete')}
@@ -266,6 +300,55 @@ export default function UsersTableRow({ item, manageUser, handleOpenModal, setMo
           </Button>
         }
       />
+
+      <Dialog open={openTokenInfo} onClose={handleTokenInfoClose}>
+        <DialogTitle>{t('userPage.tokenInfo')}</DialogTitle>
+        <DialogContent>
+          {/* 令牌列表 */}
+          {/* 名称 分组 状态 计费类型 已用额度 剩余额度 创建时间 操作 */}
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>{t('userPage.tokenTable.name')}</TableCell>
+                <TableCell>{t('userPage.tokenTable.group')}</TableCell>
+                <TableCell>{t('userPage.tokenTable.status')}</TableCell>
+                <TableCell>{t('userPage.tokenTable.billingType')}</TableCell>
+                <TableCell>{t('userPage.tokenTable.usedQuota')}</TableCell>
+                <TableCell>{t('userPage.tokenTable.remainingQuota')}</TableCell>
+                <TableCell>{t('userPage.tokenTable.createdTime')}</TableCell>
+                <TableCell>{t('key')}</TableCell>
+              </TableRow>
+            </TableHead>
+            {tokenList.map((token) => (
+              <TableRow key={token.id}>
+                <TableCell>{token.name}</TableCell>
+                <TableCell>{token.group}</TableCell>
+                <TableCell>{token.status === 1 ? t('common.enable') : t('common.disable')}</TableCell>
+                <TableCell>{token.billing_type === 'tokens' ?  
+                  // 按量计费
+                  t('token_index.billingType.tokens')
+                  : 
+                  // 按次数计费
+                  t('token_index.billingType.times')
+                }</TableCell>
+                <TableCell>{renderQuota(token.used_quota, 6)}</TableCell>
+                <TableCell>{renderQuota(token.remain_quota, 6)}</TableCell>
+                <TableCell>{timestamp2string(token.created_time)}</TableCell>
+                <TableCell>
+                  {
+                    token.key
+                  }
+                </TableCell>
+                
+              </TableRow>
+            ))}
+          </Table>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleTokenInfoClose}>{t('common.close')}</Button>
+        </DialogActions>
+        
+      </Dialog>
     </>
   );
 }

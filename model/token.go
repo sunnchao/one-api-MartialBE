@@ -52,8 +52,8 @@ type Token struct {
 	AllowIps           string           `json:"allow_ips" gorm:"default:''"`
 	AllowIpsEnabled    bool             `json:"allow_ips_enabled" gorm:"default:false"`
 	BillingType        TokenBillingType `json:"billing_type" gorm:"default:'tokens'"` // 计费类型
-	
-	DeletedAt          gorm.DeletedAt   `json:"-" gorm:"index"`
+
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 var allowedTokenOrderFields = map[string]bool{
@@ -475,4 +475,11 @@ func containsSubscriptionEvent(events []SubscriptionEvent, event SubscriptionEve
 		}
 	}
 	return false
+}
+
+// 根据 userid 获取令牌列表
+func GetTokensListByUserId(userId int) ([]*Token, error) {
+	var tokens []*Token
+	err := DB.Where("user_id = ?", userId).Find(&tokens).Error
+	return tokens, err
 }

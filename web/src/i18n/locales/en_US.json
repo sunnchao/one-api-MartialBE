@@ -1117,7 +1117,17 @@
     "changeQuotaHelperText": "Here is an increase or decrease, not a direct change to the user's balance. Enter dollars, you can deduct up to {{quota}} at most.",
     "changeQuotaNotEmpty": "Please fill in the change amount.",
     "changeQuotaNotEnough": "Cannot deduct an amount exceeding the user's balance.",
-    "quotaRemark": "Remark"
+    "quotaRemark": "Remark",
+    "tokenInfo": "View token information",
+    "tokenTable": {
+      "name": "Name",
+      "group": "Group",
+      "status": "Status",
+      "billingType": "Billing type",
+      "usedQuota": "Used quota",
+      "remainingQuota": "Remaining quota",
+      "createdTime": "Created time"
+    }
   },
   "user_group": "User grouping",
   "validation": {

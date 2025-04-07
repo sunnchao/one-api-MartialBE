@@ -271,3 +271,22 @@ func validateTokenGroup(tokenGroup string, userId int) error {
 
 	return nil
 }
+
+func GetUserTokensListByUserId(c *gin.Context) {
+	userId, err := strconv.Atoi(c.Param("userId"))
+	if err != nil {
+		common.APIRespondWithError(c, http.StatusOK, err)
+		return
+	}
+
+	tokens, err := model.GetTokensListByUserId(userId)
+	if err != nil {
+		common.APIRespondWithError(c, http.StatusOK, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data":    tokens,
+	})
+}

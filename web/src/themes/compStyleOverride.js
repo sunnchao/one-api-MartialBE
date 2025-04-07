@@ -740,16 +740,17 @@ export default function componentStyleOverrides(theme) {
           overflow: 'visible',
           '&.MuiPaper-rounded': {
             borderRadius: 0
-          }
+          },
+          
         },
         paperWidthXs: {
-          maxWidth: '360px'
+          // maxWidth: '360px',
         },
         paperWidthSm: {
-          maxWidth: '480px'
+          // maxWidth: '480px',
         },
         paperWidthMd: {
-          maxWidth: '640px'
+          // maxWidth: '640px'
         }
       }
     },
@@ -757,7 +758,7 @@ export default function componentStyleOverrides(theme) {
       styleOverrides: {
         root: {
           fontSize: '1.25rem',
-          fontWeight: 600,
+          // fontWeight: 500,
           padding: '24px 24px 12px',
           color: theme.textDark
         }
@@ -768,7 +769,7 @@ export default function componentStyleOverrides(theme) {
         root: {
           padding: '12px 24px 24px',
           fontSize: '0.9375rem',
-          color: theme.darkTextPrimary
+          color: theme.darkTextPrimary,
         }
       }
     },
