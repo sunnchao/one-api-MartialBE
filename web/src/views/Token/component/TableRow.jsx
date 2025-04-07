@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 
 import TableSwitch from 'ui-component/Switch';
-import { renderQuota, timestamp2string, copy, getChatLinks, replaceChatPlaceholders } from 'utils/common';
+import { renderQuota, timestamp2string, copy, getChatLinks, replaceChatPlaceholders, renderGroup } from 'utils/common';
 import Label from 'ui-component/Label';
 
 import { Icon } from '@iconify/react';
@@ -57,7 +57,7 @@ function statusInfo(t, status) {
   }
 }
 
-export default function TokensTableRow({ item, manageToken, handleOpenModal, setModalTokenId, userGroup }) {
+export default function TokensTableRow({ item, manageToken, handleOpenModal, setModalTokenId, userGroup, userGroupOptions }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(null);
   const [menuItems, setMenuItems] = useState(null);
@@ -176,7 +176,7 @@ export default function TokensTableRow({ item, manageToken, handleOpenModal, set
       <TableRow tabIndex={item.id}>
         <TableCell>{item.name}</TableCell>
         <TableCell>
-          <Label color={userGroup[item.group]?.color}>{userGroup[item.group]?.name || '跟随用户'}</Label>
+          <Label color={userGroup[item.group]?.color}>{renderGroup(userGroupOptions, item.group)}</Label>
         </TableCell>
 
         <TableCell>

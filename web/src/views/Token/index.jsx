@@ -238,6 +238,7 @@ export default function Token() {
                     handleOpenModal={handleOpenModal}
                     setModalTokenId={setEditTokenId}
                     userGroup={userGroup}
+                    userGroupOptions={userGroupOptions}
                   />
                 ))}
               </TableBody>

@@ -352,3 +352,11 @@ export function ValueFormatter(value, onlyUsd = false, unitMillion = false) {
 
   return `$${usd} / ￥${rmb}`;
 }
+
+// 
+export function renderGroup(groups, group) {
+  if (group === '') {
+    return '跟随用户分组';
+  }
+  return groups.find((g) => g.value === group)?.label || '未知';
+}
