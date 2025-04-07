@@ -135,6 +135,9 @@ func AddToken(c *gin.Context) {
 		AllowIpsEnabled:    token.AllowIpsEnabled,
 		BillingType:        token.BillingType,
 	}
+	if token.Group == "" {
+		token.Group = "default"
+	}
 	err = cleanToken.Insert()
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{

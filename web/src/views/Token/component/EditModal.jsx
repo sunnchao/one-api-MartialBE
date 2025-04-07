@@ -53,7 +53,7 @@ const originInputs = {
   remain_quota: 0,
   expired_time: -1,
   unlimited_quota: false,
-  group: '',
+  group: 'default',
   model_limits: '',
   model_limits_enabled: false,
   billing_type: 'tokens'
@@ -241,7 +241,7 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
                     setFieldValue('group', value);
                   }}
                 >
-                  <MenuItem value="-1">跟随用户分组</MenuItem>
+                  {/* <MenuItem value="-1">跟随用户分组</MenuItem> */}
                   {userGroupOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
                       {option.label}
