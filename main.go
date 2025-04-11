@@ -137,10 +137,10 @@ func initHttpServer() {
 
 func SyncChannelCache(frequency int) {
   // 只有 从 服务器端获取数据的时候才会用到
-  if config.IsMasterNode {
-    logger.SysLog("master node does't synchronize the channel")
-    return
-  }
+  // if config.IsMasterNode {
+  //   logger.SysLog("master node does't synchronize the channel")
+  //   return
+  // }
   for {
     time.Sleep(time.Duration(frequency) * time.Second)
     logger.SysLog("syncing channels from database")
