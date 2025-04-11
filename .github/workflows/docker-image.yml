@@ -1,12 +1,13 @@
-name: Docker Image
-permissions:
-  contents: write
+name: one-api docker image
 
 on:
   push:
     tags:
-      - "*"
-      - "!*-alpha*"
+      - "v*"
+    paths-ignore:
+      - "README.md"
+      - "README.en.md"
+      - "docs/**"
   workflow_dispatch:
     inputs:
       version:
