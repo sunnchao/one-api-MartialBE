@@ -1,8 +1,11 @@
 package model
 
 import (
+	"one-api/common/config"
 	"one-api/common/limit"
+	"one-api/common/logger"
 	"sync"
+	"time"
 )
 
 type UserGroup struct {
@@ -188,4 +191,18 @@ func (cgrm *UserGroupRatio) GetAPILimiter(symbol string) limit.RateLimiter {
 	}
 
 	return limiter
+}
+
+// 创建 定时任务
+func SyncUserGroupRatioCache(frequency int) {
+	// 只有 从 服务器端获取数据的时候才会用到
+  if config.IsMasterNode {
+    logger.SysLog("master node does't synchronize the channel")
+    return
+  }
+	for {
+		time.Sleep(time.Duration(frequency) * time.Second)
+		logger.SysLog("sync user group ratio cache")
+		GlobalUserGroupRatio.Load()
+	}
 }

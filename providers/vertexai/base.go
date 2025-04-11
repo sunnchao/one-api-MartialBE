@@ -171,7 +171,7 @@ func errorHandle(vertexaiError *VertexaiError) *types.OpenAIError {
 	logger.SysError(fmt.Sprintf("VertexAI error: %s", vertexaiError.Error.Message))
 
 	return &types.OpenAIError{
-		Message: "VertexAI错误",
+		Message: fmt.Sprintf("VertexAI error: %s", vertexaiError.Error.Message),
 		Type:    "gemini_error",
 		Param:   vertexaiError.Error.Status,
 		Code:    vertexaiError.Error.Code,
