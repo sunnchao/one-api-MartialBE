@@ -456,15 +456,21 @@ func FilterOpenAIErr(c *gin.Context, err *types.OpenAIErrorWithStatusCode) (errW
 	requestId := c.GetString(logger.RequestIdKey)
 	newErr.OpenAIError.Message = utils.MessageWithRequestId(newErr.OpenAIError.Message, requestId)
 
-	if !newErr.LocalError && newErr.OpenAIError.Type == "one_hub_error" || strings.HasSuffix(newErr.OpenAIError.Type, "_api_error") {
+	if !newErr.LocalError && newErr.OpenAIError.Type != "chirou_api_error" && (newErr.OpenAIError.Type == "one_hub_error" || strings.HasSuffix(newErr.OpenAIError.Type, "_api_error")) {
 		newErr.OpenAIError.Type = "system_error"
 		// 如果是 无可用渠道 则不显示具体的分组 只显示模型
 		if groupAndModelKeywords.MatchString(newErr.Message) {
 			newErr.Message = groupAndModelKeywords.ReplaceAllString(newErr.Message, "当前分组下对于模型 $2 无可用渠道")
 			newErr.StatusCode = http.StatusTooManyRequests
 		} else if utils.ContainsString(newErr.Message, quotaKeywords) {
-			newErr.Message = "当前分组上游负载已饱和，请稍后再试"
-			newErr.StatusCode = http.StatusTooManyRequests
+			// 额度
+			if strings.Contains(newErr.Message, "额度") {
+				newErr.Message = "user quota is not enough"
+				newErr.StatusCode = http.StatusPaymentRequired
+			} else {
+				newErr.Message = "当前分组上游负载已饱和，请稍后再试"
+				newErr.StatusCode = http.StatusTooManyRequests
+			}
 		}
 	}
 
