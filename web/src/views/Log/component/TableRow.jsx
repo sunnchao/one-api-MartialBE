@@ -297,7 +297,7 @@ function calculateTokens(item) {
 
       if (key === 'input_audio_tokens' || key === 'cached_tokens') {
         totalInputTokens += tokens - metadata[key];
-        show = true;
+        show = false;
       } else if (key === 'output_audio_tokens') {
         totalOutputTokens += tokens - metadata[key];
         show = true;
