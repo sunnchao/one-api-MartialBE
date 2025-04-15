@@ -245,7 +245,7 @@ function viewInput(item, t, totalInputTokens, totalOutputTokens, show, tokenDeta
 const TOKEN_RATIOS = {
   INPUT_AUDIO: 20,
   OUTPUT_AUDIO: 10,
-  CACHED: 0.5,
+  CACHED: 0,
   TEXT: 1
 };
 
