@@ -118,6 +118,7 @@ export default function ModelPrice() {
       });
 
     setRows(newRows);
+    console.log('newRows', newRows);
     setFilteredRows(newRows);
   }, [availableModels, userGroupMap, selectedGroup, selectedOwnedBy, t, unit]);
 
@@ -170,7 +171,7 @@ export default function ModelPrice() {
         </Typography>
       </Typography>
 
-      <Card sx={{ paddingTop: 1, paddingBottom: 1 }}>
+      <Card sx={{ p: 2 }}>
         <Stack spacing={2}>
           {/* <Typography variant="subtitle2" color="textSecondary">
             {t('modelpricePage.group')}
@@ -243,7 +244,8 @@ export default function ModelPrice() {
         </Stack>
       </Card>
 
-      <Box sx={{ width: '100%' }}>
+      {/* 模型所属 */}
+      <Box sx={{ width: '100%', backgroundColor: theme.palette.background.paper, p: 2 }}>
         <Tabs
           value={selectedOwnedBy}
           onChange={handleTabChange}
@@ -298,9 +300,9 @@ export default function ModelPrice() {
               <TableRow>
                 <TableCell width="25%">{t('modelpricePage.model')}</TableCell>
                 <TableCell width="10%">{t('modelpricePage.type')}</TableCell>
-                <TableCell width="25%">{t('modelpricePage.inputMultiplier')}</TableCell>
-                <TableCell width="25%">{t('modelpricePage.outputMultiplier')}</TableCell>
-                <TableCell width="17.5%">{t('modelpricePage.other')}</TableCell>
+                <TableCell width="25%">{t('modelpricePage.pricing')}</TableCell>
+                <TableCell width="25%">{t('modelpricePage.availableGroups')}</TableCell>
+                <TableCell width="15%">{t('modelpricePage.other')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -317,22 +319,50 @@ export default function ModelPrice() {
                     )}
                   </TableCell>
                   <TableCell>
-                    {row.enable ? (
-                      <Label color="primary" variant="outlined">
-                        {row.input}
-                      </Label>
-                    ) : (
-                      <Label>{row.input}</Label>
-                    )}
+                    <Stack spacing={1}>
+                      {row.enable ? (
+                        <>
+                          <Box>
+                            <Label color="primary" variant="outlined">
+                              {t('modelpricePage.inputMultiplier')}: {row.input}
+                            </Label>
+                          </Box>
+                          <Box>
+                            <Label color="primary" variant="outlined">
+                              {t('modelpricePage.outputMultiplier')}: {row.output}
+                            </Label>
+                          </Box>
+                        </>
+                      ) : (
+                        <Box>
+                          <Label color="warning">{t('modelpricePage.noneGroup')}</Label>
+                        </Box>
+                      )}
+                    </Stack>
                   </TableCell>
+                  {/* 可用分组 */}
                   <TableCell>
-                    {row.enable ? (
-                      <Label color="primary" variant="outlined">
-                        {row.output}
-                      </Label>
-                    ) : (
-                      <Label>{row.output}</Label>
-                    )}
+                    <Stack direction="row" spacing={1} flexWrap="wrap">
+                      {row.userGroup.map((groupId) => {
+                        const group = userGroupMap[groupId];
+                        return group ? (
+                          <Label
+                            key={groupId}
+                            color={groupId === selectedGroup ? 'primary' : 'info'}
+                            variant={groupId === selectedGroup ? 'filled' : 'ghost'}
+                            onClick={() => handleGroupChange({ target: { value: groupId } })}
+                            sx={{
+                              cursor: 'pointer',
+                              '&:hover': {
+                                opacity: 0.8
+                              }
+                            }}
+                          >
+                            {group.name}
+                          </Label>
+                        ) : null;
+                      })}
+                    </Stack>
                   </TableCell>
                   <TableCell>{getOther(t, row.extraRatios)}</TableCell>
                 </TableRow>

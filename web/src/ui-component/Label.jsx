@@ -102,7 +102,7 @@ const StyledLabel = styled(Box)(({ theme, ownerState }) => {
       // OUTLINED
       ...(outlinedVariant && {
         color: theme.palette.grey[500],
-        border: `2px solid ${theme.palette.grey[500]}`
+        border: `1px solid ${theme.palette.grey[500]}`
       }),
       // SOFT
       ...(softVariant && {
@@ -123,7 +123,7 @@ const StyledLabel = styled(Box)(({ theme, ownerState }) => {
       ...(outlinedVariant && {
         backgroundColor: 'transparent',
         color: theme.palette[ownerState.color].main,
-        border: `2px solid ${theme.palette[ownerState.color].main}`
+        border: `1px solid ${theme.palette[ownerState.color].main}`
       }),
       // SOFT
       ...(softVariant && {

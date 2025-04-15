@@ -125,13 +125,13 @@ export default function Task() {
 
   return (
     <>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-        <Typography variant="h2">
+      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
+        <Typography variant="h4">
           任务
           <Typography variant="subtitle1" sx={{ mt: 1 }} color="text.secondary">
             Task
           </Typography>
-        </ Typography>
+        </Typography>
       </Stack>
       <Card>
         <Box component="form" noValidate>

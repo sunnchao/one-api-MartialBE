@@ -379,8 +379,8 @@ export default function ChannelList() {
 
   return (
     <AdminContainer>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-        <Typography variant="h2">
+      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
+        <Typography variant="h4">
           {t('channel_index.channel')}
           <Typography variant="subtitle1" sx={{ mt: 1 }} color="text.secondary">
             Channel

@@ -28,7 +28,7 @@ const ApexCharts = ({ isLoading, chartDatas, title = 'dashboard_index.statistics
             <Grid item xs={12}>
               <Grid container alignItems="center" justifyContent="space-between">
                 <Grid item>
-                  <Typography variant="h3">{t(title)}</Typography>
+                  <Typography variant="h4">{t(title)}</Typography>
                 </Grid>
               </Grid>
             </Grid>
@@ -44,7 +44,7 @@ const ApexCharts = ({ isLoading, chartDatas, title = 'dashboard_index.statistics
                     justifyContent: 'center'
                   }}
                 >
-                  <Typography variant="h3" color={'#697586'}>
+                  <Typography variant="h4" color={'#697586'}>
                     {t('dashboard_index.no_data_available')}
                   </Typography>
                 </Box>

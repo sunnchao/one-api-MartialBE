@@ -427,7 +427,9 @@
     "inputAudioTokensRatio": "Audio input ratio",
     "other": "Other",
     "outputAudioTokensRatio": "Audio output ratio",
-    "rate": "Rate"
+    "rate": "Rate",
+    "pricing": "Pricing",
+    "availableGroups": "Available Groups"
   },
   "nova 映射": "nova mapping",
   "onyx 映射": "onyx mapping",

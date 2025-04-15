@@ -118,21 +118,16 @@ const Dashboard = () => {
           </Grid>
         </Grid>
       </Grid>
-
+      <Grid item xs={12}>
+        <Box>
+          <QuickStartCard />
+        </Box>
+      </Grid>
       <Grid item xs={12}>
         <Grid container spacing={gridSpacing}>
           {/* 日历插件 */}
           <Grid item lg={6} xs={12}>
             <Calendar checkinDates={checkInList} />
-          </Grid>
-
-          <Grid item lg={6} xs={12}>
-            {/* 7日模型消费统计 */}
-            <ApexCharts isLoading={isLoading} chartDatas={statisticalData} title={t('dashboard_index.week_model_statistics')} />
-            <Box mt={2}>
-              {/* 7日消费统计 */}
-              <QuotaLogWeek />
-            </Box>
           </Grid>
 
           <Grid item lg={6} xs={12}>
@@ -213,14 +208,22 @@ const Dashboard = () => {
                 </Box>
               </Box>
             </UserCard>
-            <Box mt={2}>
-              <QuickStartCard />
-            </Box>
+          </Grid>
+          <Grid item lg={12} xs={12}>
             {/* 邀请 */}
-            <Box mt={2}>
+            <Box>
               <InviteCard />
             </Box>
           </Grid>
+          <Grid item lg={12} xs={12}>
+            {/* 7日模型消费统计 */}
+            <ApexCharts isLoading={isLoading} chartDatas={statisticalData} title={t('dashboard_index.week_model_statistics')} />
+            <Box mt={2}>
+              {/* 7日消费统计 */}
+              <QuotaLogWeek />
+            </Box>
+          </Grid>
+
           {/* 消费统计 */}
           <Grid item lg={12} xs={12}>
             <ApexCharts isLoading={isLoading} chartDatas={statisticalData} />

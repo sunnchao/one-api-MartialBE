@@ -179,8 +179,8 @@ export default function Telegram() {
 
   return (
     <>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
-        <Typography variant="h2">
+      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
+        <Typography variant="h4">
           {t('telegramPage.title')}
           <Typography variant="subtitle1" sx={{ mt: 1 }} color="text.secondary">
             Telegram

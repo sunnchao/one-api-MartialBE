@@ -58,7 +58,7 @@ const QuotaLogWeek = () => {
   }, []);
 
   return (
-    <SubCard title={t('dashboard_index.week_consumption_log')} contentSX={{ p: 0 }}>
+    <SubCard title={t('dashboard_index.week_consumption_log')} contentSX={{ p: 1 }}>
       <TableContainer component={Paper} sx={{ boxShadow: 'none', p: 2 }}>
         <Table sx={{ minWidth: 650 }} aria-label="consumption log table">
           <TableHead>

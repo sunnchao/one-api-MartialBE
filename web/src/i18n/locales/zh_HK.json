@@ -422,7 +422,9 @@
     "inputAudioTokensRatio": "音頻輸入倍率",
     "other": "其他",
     "outputAudioTokensRatio": "音頻輸出倍率",
-    "rate": "倍率"
+    "rate": "倍率",
+    "pricing": "計費價格",
+    "availableGroups": "可用分組"
   },
   "nova 映射": "nova 映射",
   "onyx 映射": "onyx 映射",

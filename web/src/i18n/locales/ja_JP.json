@@ -422,7 +422,9 @@
     "inputAudioTokensRatio": "オーディオ入力倍率",
     "other": "その他",
     "outputAudioTokensRatio": "オーディオ出力倍率",
-    "rate": "倍率"
+    "rate": "倍率",
+    "pricing": "計費価格",
+    "availableGroups": "利用可能なグループ"
   },
   "nova 映射": "新星マッピング",
   "onyx 映射": "オニキスマッピング",
