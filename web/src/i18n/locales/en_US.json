@@ -1,4 +1,6 @@
 {
+  "invite_count": "Invite Count",
+  "invite_reward": "Invite Reward",
   "AZURE_OPENAI_ENDPOINT": "AZURE_OPENAI_ENDPOINT",
   "CheckUpdatesTable": {
     "addNewOnly": "Add New Only",
@@ -18,7 +20,11 @@
     "pleaseFetchData": "Please fetch data first",
     "priceChangeModels": "Price Change Models (for reference only, ignore if you have modified the prices yourself)",
     "to": "to",
-    "url": "URL"
+    "url": "URL",
+    "priceServerTotal": "Price Server Total",
+    "updateModeAdd": "Add Only",
+    "updateModeUpdate": "Update Only",
+    "updateModeOverwrite": "Overwrite All"
   },
   "Header 配置": "Header configuration",
   "about": {
@@ -147,6 +153,8 @@
     "auto": "automatic",
     "canModels": "Available models:",
     "channelWeb": "Official website",
+    "key": "Key",
+    "keyRequired": "Key is required",
     "clickUpdateQuota": "Click to update balance",
     "delChannel": "Delete channel",
     "delChannelCount": "Removed all disabled channels, {{count}} in total",
@@ -253,6 +261,18 @@
     "today_tokens": "Today's Tokens",
     "unknown": "Unknown",
     "used": "Used",
+    "week_model_statistics": "Week Model Statistics",
+    "week_consumption_log": "Week Consumption Log",
+    "date": "Date",
+    "request_count": "Request Count",
+    "amount": "Amount",
+    "tokens": "Tokens(input/output)",
+    "cache_tokens": "CacheTokens",
+    "request_time": "Request Time(s)",
+    "loading": "Loading...",
+    "quickStart": "Quick Start",
+    "quickStartTip": "When you click the button below, the system will automatically create a sys_playground token",
+    "ComparedWithYesterday": "Compared with yesterday",
     "last_login_ip": "Last Login IP",
     "last_login_time": "Last Login Time"
   },
@@ -536,7 +556,11 @@
     "saveOk": "Saved successfully",
     "type": "type",
     "typeCheck": "The type can only be tokens or times",
-    "typeErr": "type error"
+    "typeErr": "type error",
+    "locked_title": "Lock price",
+    "locked": "Locked price",
+    "unlocked": "Unlocked price",
+    "lockedTip": "Price locked cannot be overridden by price updates on the server or program"
   },
   "profile": "Profile",
   "profilePage": {
