@@ -14,7 +14,7 @@ const (
 	DefaultPrice       = 30.0
 	DollarRate         = 0.002
 	RMBRate            = 0.014
-	DefaultCacheRatios = 0.5
+	DefaultCacheRatios = 0
 	DefaultAudioRatio  = 40
 
 	DefaultCachedWriteRatio = 1.25
@@ -27,7 +27,7 @@ type Price struct {
 	ChannelType int     `json:"channel_type" gorm:"default:0" binding:"gte=0"`
 	Input       float64 `json:"input" gorm:"default:0" binding:"gte=0"`
 	Output      float64 `json:"output" gorm:"default:0" binding:"gte=0"`
-	CacheInput  float64 `json:"cache_input" gorm:"default:0.5" binding:"gte=0"`
+	CacheInput  float64 `json:"cache_input" gorm:"default:1" binding:"gte=0"`
 	Locked      bool    `json:"locked" gorm:"default:false"` // 如果模型为locked 则覆盖模式不会更新locked的模型价格
 
 	ExtraRatios map[string]float64 `json:"extra_ratios,omitempty" gorm:"-"`
@@ -96,7 +96,7 @@ func (price *Price) GetExtraRatio(key string) float64 {
 
 	switch key {
 	case "cached_tokens_ratio":
-		return price.CacheInput
+		return DefaultCacheRatios
 	case "cached_write_ratio":
 		return DefaultCachedWriteRatio
 	case "cached_read_ratio":

@@ -254,9 +254,8 @@ func (q *Quota) GetLogMeta(usage *types.Usage) map[string]any {
 		completionDetails := usage.CompletionTokensDetails
 
 		if promptDetails.CachedTokens != 0 {
-			// meta["cached_tokens"] = promptDetails.CachedTokens
-			// meta["cached_tokens_ratio"] = q.price.GetExtraRatio("cached_tokens_ratio")
-			promptDetails.CachedTokens = 0
+			meta["cached_tokens"] = promptDetails.CachedTokens
+			meta["cached_tokens_ratio"] = q.price.GetExtraRatio("cached_tokens_ratio")
 		}
 		if promptDetails.AudioTokens != 0 {
 			meta["input_audio_tokens"] = promptDetails.AudioTokens
@@ -338,9 +337,8 @@ func (q *Quota) getComputeTokensByUsage(usage *types.Usage) (promptTokens, compl
 	promptDetails := usage.PromptTokensDetails
 
 	if promptDetails.CachedTokens > 0 {
-		// cachedTokensRatio := q.price.GetExtraRatio("cached_tokens_ratio")
-		// promptTokens -= int(float64(promptDetails.CachedTokens) * cachedTokensRatio)
-		promptDetails.CachedTokens = 0
+		cachedTokensRatio := q.price.GetExtraRatio("cached_tokens_ratio")
+		promptTokens -= int(float64(promptDetails.CachedTokens) * cachedTokensRatio)
 	}
 
 	if promptDetails.AudioTokens > 0 {
@@ -372,9 +370,8 @@ func (q *Quota) getComputeTokensByUsageEvent(usage *types.UsageEvent) (promptTok
 	inputDetails := usage.InputTokenDetails
 
 	if inputDetails.CachedTokens > 0 {
-		// cachedTokensRatio := q.price.GetExtraRatio("cached_tokens_ratio")
-		// promptTokens -= int(float64(inputDetails.CachedTokens) * cachedTokensRatio)
-		inputDetails.CachedTokens = 0
+		cachedTokensRatio := q.price.GetExtraRatio("cached_tokens_ratio")
+		promptTokens -= int(float64(inputDetails.CachedTokens) * cachedTokensRatio)
 	}
 	if inputDetails.AudioTokens > 0 {
 		inputAudioTokensRatio := q.price.GetExtraRatio("input_audio_tokens_ratio") - 1
