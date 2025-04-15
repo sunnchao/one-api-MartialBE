@@ -30,7 +30,6 @@ export default function ModelPrice() {
   const theme = useTheme();
   const ownedby = useSelector((state) => state.siteInfo?.ownedby);
 
-  const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [availableModels, setAvailableModels] = useState({});
@@ -81,7 +80,7 @@ export default function ModelPrice() {
   useEffect(() => {
     if (!availableModels || !userGroupMap || !selectedGroup) return;
 
-    const newRows = Object.entries(availableModels)
+    const calculatedRows = Object.entries(availableModels)
       .filter(([, model]) => model.owned_by_id === selectedOwnedBy)
       .map(([modelName, model], index) => {
         const group = userGroupMap[selectedGroup];
@@ -117,15 +116,9 @@ export default function ModelPrice() {
         };
       });
 
-    setRows(newRows);
-    console.log('newRows', newRows);
-    setFilteredRows(newRows);
-  }, [availableModels, userGroupMap, selectedGroup, selectedOwnedBy, t, unit]);
-
-  useEffect(() => {
-    const filtered = rows.filter((row) => row.model.toLowerCase().includes(searchQuery.toLowerCase()));
+    const filtered = calculatedRows.filter((row) => row.model.toLowerCase().includes(searchQuery.toLowerCase()));
     setFilteredRows(filtered);
-  }, [searchQuery, rows]);
+  }, [availableModels, userGroupMap, selectedGroup, selectedOwnedBy, t, unit, searchQuery]);
 
   const handleTabChange = (event, newValue) => {
     setSelectedOwnedBy(newValue);
