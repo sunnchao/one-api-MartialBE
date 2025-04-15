@@ -40,6 +40,7 @@ type Channel struct {
 	PreCost            int     `json:"pre_cost" form:"pre_cost" gorm:"default:1"`
 	AutoBan            *int    `json:"auto_ban" gorm:"default:1"`
 	OtherInfo          string  `json:"other_info"`
+	InputCacheStatus   *int    `json:"input_cache_status" gorm:"default:1"`
 
 	Plugin    *datatypes.JSONType[PluginType] `json:"plugin" form:"plugin" gorm:"type:json"`
 	DeletedAt gorm.DeletedAt                  `json:"-" gorm:"index"`

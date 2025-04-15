@@ -128,10 +128,10 @@ func InitOptionMap() {
 
 	config.GlobalOption.RegisterInt("RetryTimeOut", &config.RetryTimeOut)
 
-  config.GlobalOption.RegisterBool("LinuxDoOAuthEnabled", &config.LinuxDoOAuthEnabled)
-  config.GlobalOption.RegisterString("LinuxDoClientId", &config.LinuxDoClientId)
-  config.GlobalOption.RegisterString("LinuxDoClientSecret", &config.LinuxDoClientSecret)
-  config.GlobalOption.RegisterInt("LinuxDoMinLevel", &config.LinuxDoMinLevel)
+	config.GlobalOption.RegisterBool("LinuxDoOAuthEnabled", &config.LinuxDoOAuthEnabled)
+	config.GlobalOption.RegisterString("LinuxDoClientId", &config.LinuxDoClientId)
+	config.GlobalOption.RegisterString("LinuxDoClientSecret", &config.LinuxDoClientSecret)
+	config.GlobalOption.RegisterInt("LinuxDoMinLevel", &config.LinuxDoMinLevel)
 
 	loadOptionsFromDatabase()
 }

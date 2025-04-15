@@ -44,6 +44,7 @@ const getValidationSchema = (t) =>
     type: Yup.string().oneOf(['tokens', 'times'], t('pricing_edit.typeErr')).required(t('pricing_edit.requiredType')),
     channel_type: Yup.number().min(1, t('pricing_edit.channelTypeErr')).required(t('pricing_edit.requiredChannelType')),
     input: Yup.number().required(t('pricing_edit.requiredInput')),
+    cache_input: Yup.number().required(t('pricing_edit.requiredCacheInput')),
     output: Yup.number().required(t('pricing_edit.requiredOutput')),
     models: Yup.array().min(1, t('pricing_edit.requiredModels'))
   });
@@ -53,6 +54,7 @@ const originInputs = {
   type: 'tokens',
   channel_type: 1,
   input: 0,
+  cache_input: 0.5,
   output: 0,
   locked: false,
   models: []
@@ -317,6 +319,28 @@ const EditModal = ({ open, pricesItem, onCancel, onOk, ownedby, noPriceModel }) 
                 {touched.input && errors.input && (
                   <FormHelperText error id="helper-tex-channel-input-label">
                     {errors.input}
+                  </FormHelperText>
+                )}
+              </FormControl>
+
+              <FormControl fullWidth error={Boolean(touched.cache_input && errors.cache_input)} sx={{ ...theme.typography.otherInput }}>
+                <InputLabel htmlFor="channel-cache_input-label">{t('modelpricePage.cacheInputMultiplier')}</InputLabel>
+                <OutlinedInput
+                  id="channel-cache_input-label"
+                  label={t('modelpricePage.cacheInputMultiplier')}
+                  type="number"
+                  value={values.cache_input}
+                  name="cache_input"
+                  startAdornment={handleStartAdornment()}
+                  endAdornment={<InputAdornment position="end">{handleEndAdornment(values.cache_input)}</InputAdornment>}
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  aria-describedby="helper-text-channel-cache_input-label"
+                />
+
+                {touched.cache_input && errors.cache_input && (
+                  <FormHelperText error id="helper-tex-channel-cache_input-label">
+                    {errors.cache_input}
                   </FormHelperText>
                 )}
               </FormControl>

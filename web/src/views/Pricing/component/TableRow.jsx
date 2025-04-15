@@ -69,6 +69,7 @@ export default function PricesTableRow({ item, managePrices, handleOpenModal, ow
 
         <TableCell>{channel_label?.label}</TableCell>
         <TableCell>{ValueFormatter(item.input)}</TableCell>
+        <TableCell>{ValueFormatter(item.cache_input)}</TableCell>
         <TableCell>{ValueFormatter(item.output)}</TableCell>
         <TableCell>{item.models.length}</TableCell>
         <TableCell>

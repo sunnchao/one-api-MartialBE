@@ -45,6 +45,9 @@ function validation(t, row, rows) {
   if (row.input === '' || row.input < 0) {
     return t('pricing_edit.inputVal');
   }
+  if (row.cache_input === '' || row.cache_input < 0) {
+    return t('pricing_edit.cacheInputVal');
+  }
   if (row.output === '' || row.output < 0) {
     return t('pricing_edit.outputVal');
   }
@@ -154,6 +157,7 @@ const Single = ({ ownedby, prices, reloadData }) => {
           newRow.model === oldRows.model &&
           newRow.input === oldRows.input &&
           newRow.output === oldRows.output &&
+          newRow.cache_input === oldRows.cache_input &&
           newRow.type === oldRows.type &&
           newRow.channel_type === oldRows.channel_type &&
           newRow.locked === oldRows.locked
@@ -219,6 +223,14 @@ const Single = ({ ownedby, prices, reloadData }) => {
         type: 'number',
         editable: true,
         valueFormatter: (params) => ValueFormatter(params.value)
+      },
+      {
+        field: 'cache_input',
+        sortable: false,
+        headerName: t('modelpricePage.cacheInputMultiplier'),
+        flex: 0.8,
+        minWidth: 150,
+        type: 'number',
       },
       {
         field: 'output',

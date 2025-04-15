@@ -27,6 +27,7 @@ type Price struct {
 	ChannelType int     `json:"channel_type" gorm:"default:0" binding:"gte=0"`
 	Input       float64 `json:"input" gorm:"default:0" binding:"gte=0"`
 	Output      float64 `json:"output" gorm:"default:0" binding:"gte=0"`
+	CacheInput  float64 `json:"cache_input" gorm:"default:0.5" binding:"gte=0"`
 	Locked      bool    `json:"locked" gorm:"default:false"` // 如果模型为locked 则覆盖模式不会更新locked的模型价格
 
 	ExtraRatios map[string]float64 `json:"extra_ratios,omitempty" gorm:"-"`
@@ -95,7 +96,7 @@ func (price *Price) GetExtraRatio(key string) float64 {
 
 	switch key {
 	case "cached_tokens_ratio":
-		return DefaultCacheRatios
+		return price.CacheInput
 	case "cached_write_ratio":
 		return DefaultCachedWriteRatio
 	case "cached_read_ratio":
@@ -124,6 +125,7 @@ func UpdatePrices(tx *gorm.DB, models []string, prices *Price) error {
 			Input:       prices.Input,
 			Output:      prices.Output,
 			Locked:      prices.Locked,
+			CacheInput:  prices.CacheInput,
 		}).Error
 
 	return err
@@ -388,6 +390,7 @@ func GetDefaultPrice() []*Price {
 			ChannelType: modelType.Type,
 			Input:       modelType.Ratio[0],
 			Output:      modelType.Ratio[1],
+			CacheInput:  0,
 		})
 	}
 
@@ -451,6 +454,7 @@ func GetDefaultPrice() []*Price {
 			ChannelType: config.ChannelTypeMidjourney,
 			Input:       mjPrice,
 			Output:      mjPrice,
+			CacheInput:  0,
 		})
 	}
 
@@ -466,6 +470,7 @@ func GetDefaultPrice() []*Price {
 			ChannelType: config.ChannelTypeSuno,
 			Input:       sunoPrice,
 			Output:      sunoPrice,
+			CacheInput:  0,
 		})
 	}
 

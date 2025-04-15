@@ -70,7 +70,8 @@ const getValidationSchema = (t) =>
       otherwise: Yup.string() // 在其他情况下，base_url 可以是任意字符串
     }),
     model_mapping: Yup.array(),
-    model_headers: Yup.array()
+    model_headers: Yup.array(),
+    cache_input_status: Yup.number().required(t('channel_edit.requiredCacheInputStatus'))
   });
 
 const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, modelOptions }) => {
@@ -906,6 +907,22 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
                   <FormHelperText id="helper-tex-only_chat_model-label"> {customizeT(inputPrompt.only_chat)} </FormHelperText>
                 </FormControl>
               )}
+              {/* 是否开启 Input 命中缓存计费 */}
+              <FormControl fullWidth error={Boolean(touched.cache_input_status && errors.cache_input_status)} sx={{ ...theme.typography.otherInput }}>  
+                <FormControlLabel
+                  control={
+                    <Switch
+                      disabled={hasTag}
+                      checked={values.cache_input_status === 1}
+                      onChange={(event) => {
+                        setFieldValue('cache_input_status', event.target.checked ? 1 : 0);
+                      }}
+                    />
+                  }
+                  label={customizeT(inputLabel.cache_input_status)}
+                />
+                <FormHelperText id="helper-tex-channel-cache_input_status-label"> {customizeT(inputPrompt.cache_input_status)} </FormHelperText>
+              </FormControl>
               {pluginList[values.type] &&
                 Object.keys(pluginList[values.type]).map((pluginId) => {
                   const plugin = pluginList[values.type][pluginId];
