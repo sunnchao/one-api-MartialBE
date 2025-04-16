@@ -273,6 +273,9 @@
     "quickStart": "Quick Start",
     "quickStartTip": "When you click the button below, the system will automatically create a sys_playground token",
     "ComparedWithYesterday": "Compared with yesterday",
+    "usage": "Usage",
+    "RPM": "Current RPM",
+    "TPM": "Current TPM",
     "last_login_ip": "Last Login IP",
     "last_login_time": "Last Login Time"
   },
@@ -786,13 +789,25 @@
         "info": "Disable channel keywords, one keyword per line.",
         "save": "Save disabled channel keyword settings",
         "title": "Disable channel keyword settings"
+      },
+      "safetySettings": {
+        "title": "System Safety Settings",
+        "enableSafe": "Enable Prompt Safety Check",
+        "safeToolName": {
+          "label": "Safe Check Tool"
+        },
+        "safeKeyWords": {
+          "label": "Keyword List",
+          "placeholder": "Enter keywords, one per line"
+        },
+        "save": "Save Settings"
       }
     },
     "otherSettings": {
       "customSettings": {
         "aboutLabel": "About",
         "aboutPlaceholder": "Enter new about content here, supports Markdown & HTML code. If a link is entered, it will be used as the src attribute of the iframe, allowing you to set any web page as the about page.",
-        "copyrightWarning": "Removing the Chirou API copyright must be authorized first. Maintaining the project requires a lot of effort. If this project is meaningful to you, please support it.",
+        "copyrightWarning": "Removing the One Hub copyright must be authorized first. Maintaining the project requires a lot of effort. If this project is meaningful to you, please support it.",
         "footerLabel": "Footer Settings",
         "footerPlaceholder": "Enter new footer here, leave blank to use the default footer, supports HTML code",
         "homePageContentLabel": "Home Page Content",

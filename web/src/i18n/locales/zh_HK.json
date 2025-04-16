@@ -271,6 +271,9 @@
     "quickStart": "快速開始",
     "quickStartTip": "當您點擊下面按鈕時，系統會自動創建一個sys_playground的令牌",
     "ComparedWithYesterday": "相比昨日",
+    "usage": "使用率",
+    "RPM": "當前RPM",
+    "TPM": "當前TPM",
     "last_login_ip": "最後登錄IP",
     "last_login_time": "最後登錄時間"
   },
@@ -780,13 +783,25 @@
         "info": "配置停用通道關鍵字，每行一個關鍵字。",
         "save": "保留停用通道關鍵字設置",
         "title": "停用通道關鍵詞設置"
+      },
+      "safetySettings": {
+        "title": "系統安全設置",
+        "enableSafe": "開啟 Prompt 安全檢查",
+        "safeToolName": {
+          "label": "安全檢查工具"
+        },
+        "safeKeyWords": {
+          "label": "關鍵詞列表",
+          "placeholder": "請輸入關鍵詞，每行一個"
+        },
+        "save": "保存設置"
       }
     },
     "otherSettings": {
       "customSettings": {
         "aboutLabel": "關於",
         "aboutPlaceholder": "在此輸入新的關於內容，支持 Markdown & HTML 代碼。如果輸入的是一個鏈接，則會使用該鏈接作為 iframe 的 src 屬性，這允許你設置任意網頁作為關於頁面。",
-        "copyrightWarning": "移除 Chirou API 的版權標識必須首先獲得授權，項目維護需要花費大量精力，如果本項目對你有意義，請主動支持本項目。",
+        "copyrightWarning": "移除 One Hub 的版權標識必須首先獲得授權，項目維護需要花費大量精力，如果本項目對你有意義，請主動支持本項目。",
         "footerLabel": "頁腳設置",
         "footerPlaceholder": "在此輸入新的頁腳，留空則使用默認頁腳，支持 HTML 代碼",
         "homePageContentLabel": "首頁內容",

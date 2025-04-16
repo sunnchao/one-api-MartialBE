@@ -21,6 +21,7 @@ import (
 	"one-api/model"
 	"one-api/relay/task"
 	"one-api/router"
+	"one-api/safty"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -73,14 +74,15 @@ func main() {
   // Initialize Telegram bot
   telegram.InitTelegramBot()
 
-  controller.InitMidjourneyTask()
-  task.InitTask()
-  notify.InitNotifier()
-  cron.InitCron()
-  storage.InitStorage()
-  search.InitSearcher()
-
-  initHttpServer()
+	controller.InitMidjourneyTask()
+	task.InitTask()
+	notify.InitNotifier()
+	cron.InitCron()
+	storage.InitStorage()
+	search.InitSearcher()
+	// 初始化安全检查器
+	safty.InitSaftyTools()
+	initHttpServer()
 }
 
 func initMemoryCache() {

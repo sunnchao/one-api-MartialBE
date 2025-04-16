@@ -75,6 +75,9 @@
     "quickStart": "快速开始",
     "quickStartTip": "当您点击下面按钮时，系统会自动创建一个sys_playground的令牌",
     "ComparedWithYesterday": "相比昨日",
+    "usage": "使用率",
+    "RPM": "当前RPM",
+    "TPM": "当前TPM",
     "last_login_ip": "最后登录IP",
     "last_login_time": "最后登录时间"
   },
@@ -680,6 +683,18 @@
         "title": "禁用通道关键词设置",
         "info": "配置禁用通道关键词，每行一个关键词。",
         "save": "保存禁用通道关键词设置"
+      },
+      "safetySettings": {
+        "title": "系统安全设置",
+        "enableSafe": "开启 Prompt 安全检查",
+        "safeToolName": {
+          "label": "安全检查工具"
+        },
+        "safeKeyWords": {
+          "label": "关键词列表",
+          "placeholder": "请输入关键词，每行一个"
+        },
+        "save": "保存设置"
       }
     },
     "systemSettings": {
@@ -835,7 +850,7 @@
         "aboutLabel": "关于",
         "aboutPlaceholder": "在此输入新的关于内容，支持 Markdown & HTML 代码。如果输入的是一个链接，则会使用该链接作为 iframe 的 src 属性，这允许你设置任意网页作为关于页面。",
         "saveAbout": "保存关于",
-        "copyrightWarning": "移除 Chirou API 的版权标识必须首先获得授权，项目维护需要花费大量精力，如果本项目对你有意义，请主动支持本项目。",
+        "copyrightWarning": "移除 One Hub 的版权标识必须首先获得授权，项目维护需要花费大量精力，如果本项目对你有意义，请主动支持本项目。",
         "footerLabel": "页脚设置",
         "footerPlaceholder": "在此输入新的页脚，留空则使用默认页脚，支持 HTML 代码",
         "setFooter": "设置页脚"

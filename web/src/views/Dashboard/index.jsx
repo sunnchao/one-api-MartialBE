@@ -15,6 +15,7 @@ import Label from 'ui-component/Label';
 import InviteCard from './component/InviteCard';
 import QuotaLogWeek from './component/QuotaLogWeek';
 import QuickStartCard from './component/QuickStartCard';
+import RPM from './component/RPM';
 import dayjs from 'dayjs';
 
 const Dashboard = () => {
@@ -86,7 +87,7 @@ const Dashboard = () => {
       {/* 今日请求、消费、token */}
       <Grid item xs={12}>
         <Grid container spacing={gridSpacing}>
-          <Grid item lg={4} xs={12} sx={{ height: '160' }}>
+          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
             <StatisticalLineChartCard
               isLoading={isLoading}
               title={t('dashboard_index.today_requests')}
@@ -96,7 +97,7 @@ const Dashboard = () => {
               lastDayValue={requestChart?.lastDayValue}
             />
           </Grid>
-          <Grid item lg={4} xs={12} sx={{ height: '160' }}>
+          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
             <StatisticalLineChartCard
               isLoading={isLoading}
               title={t('dashboard_index.today_consumption')}
@@ -106,7 +107,7 @@ const Dashboard = () => {
               lastDayValue={quotaChart?.lastDayValue}
             />
           </Grid>
-          <Grid item lg={4} xs={12} sx={{ height: '160' }}>
+          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
             <StatisticalLineChartCard
               isLoading={isLoading}
               title={t('dashboard_index.today_tokens')}
@@ -115,6 +116,9 @@ const Dashboard = () => {
               todayValue={tokenChart?.todayValue}
               lastDayValue={tokenChart?.lastDayValue}
             />
+          </Grid>
+          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
+            <RPM />
           </Grid>
         </Grid>
       </Grid>
