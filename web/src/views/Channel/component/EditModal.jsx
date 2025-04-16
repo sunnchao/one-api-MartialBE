@@ -908,7 +908,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
                 </FormControl>
               )}
               {/* 是否开启 Input 命中缓存计费 */}
-              <FormControl fullWidth error={Boolean(touched.cache_input_status && errors.cache_input_status)} sx={{ ...theme.typography.otherInput }}>  
+              {/* <FormControl fullWidth error={Boolean(touched.cache_input_status && errors.cache_input_status)} sx={{ ...theme.typography.otherInput }}>  
                 <FormControlLabel
                   control={
                     <Switch
@@ -922,7 +922,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
                   label={customizeT(inputLabel.cache_input_status)}
                 />
                 <FormHelperText id="helper-tex-channel-cache_input_status-label"> {customizeT(inputPrompt.cache_input_status)} </FormHelperText>
-              </FormControl>
+              </FormControl> */}
               {pluginList[values.type] &&
                 Object.keys(pluginList[values.type]).map((pluginId) => {
                   const plugin = pluginList[values.type][pluginId];

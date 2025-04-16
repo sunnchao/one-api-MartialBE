@@ -18,7 +18,7 @@ import ChannelTableRow from './component/TableRow';
 import KeywordTableHead from 'ui-component/TableHead';
 import { API } from 'utils/api';
 import EditeModal from './component/EditModal';
-import { PAGE_SIZE_OPTIONS, getPageSize, savePageSize } from 'constants';
+import { PAGE_SIZE_OPTIONS, getPageSize, savePageSize } from './constants';
 import TableToolBar from './component/TableToolBar';
 import BatchModal from './component/BatchModal';
 import { useTranslation } from 'react-i18next';
