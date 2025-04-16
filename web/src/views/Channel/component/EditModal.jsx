@@ -70,8 +70,8 @@ const getValidationSchema = (t) =>
       otherwise: Yup.string() // 在其他情况下，base_url 可以是任意字符串
     }),
     model_mapping: Yup.array(),
-    model_headers: Yup.array(),
-    cache_input_status: Yup.number().required(t('channel_edit.requiredCacheInputStatus'))
+    model_headers: Yup.array()
+    // cache_input_status: Yup.number().required(t('channel_edit.requiredCacheInputStatus'))
   });
 
 const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, modelOptions }) => {
