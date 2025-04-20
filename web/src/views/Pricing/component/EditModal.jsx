@@ -54,7 +54,7 @@ const originInputs = {
   type: 'tokens',
   channel_type: 1,
   input: 0,
-  cache_input: 0.5,
+  cache_input: 0,
   output: 0,
   locked: false,
   models: []

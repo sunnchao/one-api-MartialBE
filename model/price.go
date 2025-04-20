@@ -14,7 +14,7 @@ const (
 	DefaultPrice       = 30.0
 	DollarRate         = 0.002
 	RMBRate            = 0.014
-	DefaultCacheRatios = 0
+	// DefaultCacheRatios = 0
 	DefaultAudioRatio  = 40
 
 	DefaultCachedWriteRatio = 1.25
@@ -96,7 +96,7 @@ func (price *Price) GetExtraRatio(key string) float64 {
 
 	switch key {
 	case "cached_tokens_ratio":
-		return DefaultCacheRatios
+		return price.CacheInput
 	case "cached_write_ratio":
 		return DefaultCachedWriteRatio
 	case "cached_read_ratio":

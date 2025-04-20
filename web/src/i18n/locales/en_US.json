@@ -426,6 +426,7 @@
     "channelType": "Supplier",
     "group": "grouping",
     "inputMultiplier": "Input price",
+    "cacheInputMultiplier": "Cache input price",
     "model": "Model Name",
     "noneGroup": "The current group is not available.",
     "outputMultiplier": "Output price",
@@ -1344,7 +1345,7 @@
       }
     }
   },
-  "这里填写禁用流式的模型，注意：如果填写了禁用流式的模型，那么这些模型在流式请求时会跳过该渠道": "Fill in here to disable the streaming model. Note: If you fill in to disable the streaming model, these models will be skipped for streaming requests on that channel."
+  "这里填写禁用流式的模型，注意：如果填写了禁用流式的模型，那么这些模型在流式请求时会跳过该渠道": "Fill in here to disable the streaming model. Note: If you fill in to disable the streaming model, these models will be skipped for streaming requests on that channel.",
   "calendar": {
     "title": "Check-in Calendar",
     "sun": "Sun",

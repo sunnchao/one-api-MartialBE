@@ -231,6 +231,8 @@ const Single = ({ ownedby, prices, reloadData }) => {
         flex: 0.8,
         minWidth: 150,
         type: 'number',
+        editable: true,
+        valueFormatter: (params) => ValueFormatter(params.value)
       },
       {
         field: 'output',
