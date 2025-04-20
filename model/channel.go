@@ -6,6 +6,7 @@ import (
 	"one-api/common/config"
 	"one-api/common/logger"
 	"one-api/common/utils"
+	"slices"
 	"strings"
 
 	"gorm.io/datatypes"
@@ -42,8 +43,18 @@ type Channel struct {
 	OtherInfo          string  `json:"other_info"`
 	InputCacheStatus   *int    `json:"input_cache_status" gorm:"default:1"`
 
+	DisabledStream *datatypes.JSONSlice[string] `json:"disabled_stream,omitempty" gorm:"type:json"`
+
 	Plugin    *datatypes.JSONType[PluginType] `json:"plugin" form:"plugin" gorm:"type:json"`
 	DeletedAt gorm.DeletedAt                  `json:"-" gorm:"index"`
+}
+
+func (c *Channel) AllowStream(modelName string) bool {
+	if c.DisabledStream == nil {
+		return true
+	}
+
+	return !slices.Contains(*c.DisabledStream, modelName)
 }
 
 type PluginType map[string]map[string]interface{}

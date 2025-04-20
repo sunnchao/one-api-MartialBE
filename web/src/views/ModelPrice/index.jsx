@@ -96,10 +96,14 @@ export default function ModelPrice() {
         const formatPrice = (value, type) => {
           if (typeof value === 'number') {
             let nowUnit = '';
+            let isM = unit === 'M';
+            if (type === 'times') {
+              isM = false;
+            }
             if (type === 'tokens') {
               nowUnit = `/ 1${unit}`;
             }
-            return ValueFormatter(value, true, unit === 'M') + nowUnit;
+            return ValueFormatter(value, true, isM) + nowUnit;
           }
           return value;
         };
@@ -157,12 +161,12 @@ export default function ModelPrice() {
 
   return (
     <Stack spacing={2} sx={{ backgroundColor: theme.palette.background.default, p: 1 }}>
-      <Typography variant="h4">
-        {t('modelpricePage.availableModels')}
-        <Typography variant="subtitle1" sx={{ mt: 1 }} color="text.secondary">
+      <Stack direction="column" spacing={1}>
+        <Typography variant="h2">{t('modelpricePage.availableModels')}</Typography>
+        <Typography variant="subtitle1" color="text.secondary">
           Available Models
         </Typography>
-      </Typography>
+      </Stack>
 
       <Card sx={{ p: 2 }}>
         <Stack spacing={2}>
@@ -207,9 +211,6 @@ export default function ModelPrice() {
                       ) : (
                         <Label color="success">{t('modelpricePage.free')}</Label>
                       )}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {t('modelpricePage.RPM')}：<Label color="info">{group.api_rate} RPM</Label>
                     </Typography>
                   </Stack>
                 </Stack>
@@ -385,4 +386,3 @@ function getOther(t, extraRatios) {
     </Stack>
   );
 }
-

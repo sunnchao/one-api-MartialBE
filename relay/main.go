@@ -44,6 +44,8 @@ func Relay(c *gin.Context) {
 		return
 	}
 
+	c.Set("is_stream", relay.IsStream())
+
 	if err := relay.setProvider(relay.getOriginalModel()); err != nil {
 		openaiErr := common.StringErrorWrapperLocal(err.Error(), "chirou_api_error", http.StatusServiceUnavailable)
 		relay.HandleError(openaiErr)
