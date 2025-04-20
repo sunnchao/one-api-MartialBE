@@ -45,3 +45,17 @@ func GetUserGroupRatio(c *gin.Context) {
 		"data":    UserGroup,
 	})
 }
+
+func GetUserGroupRatioByAdmin(c *gin.Context) {
+	groupRatio := model.GlobalUserGroupRatio.GetAll()
+	UserGroup := make(map[string]*model.UserGroup)
+	for k, v := range groupRatio {
+			UserGroup[k] = v
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data":    UserGroup,
+	})
+}

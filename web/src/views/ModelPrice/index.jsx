@@ -24,6 +24,7 @@ import { useTheme } from '@mui/material/styles';
 import IconWrapper from 'ui-component/IconWrapper';
 import Label from 'ui-component/Label';
 import ToggleButtonGroup from 'ui-component/ToggleButton';
+import { isAdmin } from 'utils/common';
 // ----------------------------------------------------------------------
 export default function ModelPrice() {
   const { t } = useTranslation();
@@ -37,6 +38,7 @@ export default function ModelPrice() {
   const [selectedGroup, setSelectedGroup] = useState('default');
   const [selectedOwnedBy, setSelectedOwnedBy] = useState(1);
   const [unit, setUnit] = useState('K');
+  const userIsAdmin = isAdmin();
 
   const unitOptions = [
     { value: 'K', label: 'K' },
@@ -60,7 +62,7 @@ export default function ModelPrice() {
 
   const fetchUserGroupMap = useCallback(async () => {
     try {
-      const res = await API.get('/api/user_group_map');
+      const res = await API.get(userIsAdmin ? '/api/user_group_map_by_admin' : '/api/user_group_map');
       const { success, message, data } = res.data;
       if (success) {
         setUserGroupMap(data);

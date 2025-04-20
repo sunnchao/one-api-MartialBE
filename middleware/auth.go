@@ -129,6 +129,19 @@ func tokenAuth(c *gin.Context, key string) {
 	c.Set("token_id", token.Id)
 	c.Set("token_name", token.Name)
 	c.Set("token_group", token.Group)
+
+	if token.Group != "" {	
+		if len(strings.Split(token.Group, ",")) > 1 {
+			c.Set("token_group_list", strings.Split(token.Group, ","))
+			c.Set("token_group", strings.Split(token.Group, ",")[0])
+		} else {
+			c.Set("token_group", token.Group)
+			c.Set("token_group_list", []string{token.Group})
+		}
+	} else {
+		c.Set("token_group", "default")
+		c.Set("token_group_list", []string{"default"})
+	}
 	c.Set("token_billing_type", token.BillingType)
 
 	if token.ModelLimitsEnabled {

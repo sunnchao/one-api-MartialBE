@@ -378,3 +378,16 @@ func GetRequestIP(c *gin.Context) string {
 	ip := c.ClientIP()
 	return ip
 }
+
+
+func RemoveDuplicate(strSlice []string) []string {
+	keys := make(map[string]bool)
+	list := []string{}
+	for _, entry := range strSlice {
+		if _, exists := keys[entry]; !exists {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
+}

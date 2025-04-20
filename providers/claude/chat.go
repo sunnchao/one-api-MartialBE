@@ -1,20 +1,20 @@
 package claude
 
 import (
-  "encoding/json"
-  "fmt"
-  "io"
-  "net/http"
-  "one-api/common"
-  "one-api/common/config"
-  "one-api/common/image"
-  "one-api/common/requester"
-  "one-api/common/utils"
-  "one-api/providers/base"
-  "one-api/types"
-  "strings"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"one-api/common"
+	"one-api/common/config"
+	"one-api/common/image"
+	"one-api/common/requester"
+	"one-api/common/utils"
+	"one-api/providers/base"
+	"one-api/types"
+	"strings"
 
-  "github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream"
+	"github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream"
 )
 
 const (
@@ -185,7 +185,7 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 	}
 
 	// 如果是3-7 默认开启thinking
-	if strings.Contains(request.Model, "claude-3-7-sonnet") && (request.OneOtherArg == "thinking" || request.Reasoning != nil) {
+	if strings.Contains(request.Model, "claude-3-7-sonnet") && (strings.Contains(request.Model, "thinking") || request.OneOtherArg == "thinking" || request.Reasoning != nil) {
 		var opErr *types.OpenAIErrorWithStatusCode
 		claudeRequest.MaxTokens, claudeRequest.Thinking, opErr = getThinking(claudeRequest.MaxTokens, request.Reasoning)
 

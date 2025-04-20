@@ -22,6 +22,7 @@ import { useSelector } from 'react-redux';
 import { PAGE_SIZE_OPTIONS, getPageSize, savePageSize } from 'constants';
 import { useTranslation } from 'react-i18next';
 import { UserContext } from 'contexts/UserContext';
+import { isAdmin } from 'utils/common';
 
 export default function Token() {
   const { t } = useTranslation();
@@ -40,7 +41,7 @@ export default function Token() {
   const [openModal, setOpenModal] = useState(false);
   const [editTokenId, setEditTokenId] = useState(0);
   const siteInfo = useSelector((state) => state.siteInfo);
-
+  const userIsAdmin = isAdmin();
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
     if (id !== '') {

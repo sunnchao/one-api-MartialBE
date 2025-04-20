@@ -22,6 +22,7 @@ type OpenAIModels struct {
 
 func ListModelsByToken(c *gin.Context) {
 	groupName := c.GetString("token_group")
+	groupNameList := c.GetStringSlice("token_group_list")
 	if groupName == "" {
 		groupName = c.GetString("group")
 	}
@@ -31,7 +32,14 @@ func ListModelsByToken(c *gin.Context) {
 		return
 	}
 
-	models, err := model.ChannelGroup.GetGroupModels(groupName)
+	var models []string
+	var err error
+	if len(groupNameList) > 1 {
+		models, err = model.ChannelGroup.GetGroupListModels(groupNameList)
+	} else {
+		models, err = model.ChannelGroup.GetGroupModels(groupName)
+	}
+
 	if err != nil {
 		c.JSON(200, gin.H{
 			"object": "list",

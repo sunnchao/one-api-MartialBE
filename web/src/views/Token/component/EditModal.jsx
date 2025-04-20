@@ -20,8 +20,11 @@ import {
   FormControlLabel,
   FormHelperText,
   Select,
-  MenuItem
+  MenuItem,
+  Stack,
+  IconButton
 } from '@mui/material';
+import { Icon } from '@iconify/react';
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -30,6 +33,7 @@ import { renderQuotaWithPrompt, showSuccess, showError } from 'utils/common';
 import { API } from 'utils/api';
 import { useTranslation } from 'react-i18next';
 import 'dayjs/locale/zh-cn';
+import { remove } from 'lodash';
 
 const billingTypeOptions = [
   { value: 'tokens', label: 'Tokens' }
@@ -44,7 +48,8 @@ const validationSchema = Yup.object().shape({
   unlimited_quota: Yup.boolean(),
   model_limits: Yup.string(),
   model_limits_enabled: Yup.boolean(),
-  billing_type: Yup.string().required('计费类型 不能为空')
+  billing_type: Yup.string().required('计费类型 不能为空'),
+  group: Yup.array().of(Yup.string()).required('分组 不能为空')
 });
 
 const originInputs = {
@@ -52,8 +57,8 @@ const originInputs = {
   name: '',
   remain_quota: 0,
   expired_time: -1,
-  unlimited_quota: false,
-  group: 'default',
+  unlimited_quota: true,
+  group: ['default'],
   model_limits: '',
   model_limits_enabled: false,
   billing_type: 'tokens'
@@ -72,9 +77,9 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
 
     try {
       if (values.is_edit) {
-        res = await API.put(`/api/token/`, { ...values, id: parseInt(tokenId) });
+        res = await API.put(`/api/token/`, { ...values, id: parseInt(tokenId), group: values.group.join(',') });
       } else {
-        res = await API.post(`/api/token/`, values);
+        res = await API.post(`/api/token/`, { ...values, group: values.group.join(',') });
       }
       const { success, message } = res.data;
       if (success) {
@@ -101,6 +106,7 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
       const { success, message, data } = res.data;
       if (success) {
         data.is_edit = true;
+        data.group = data.group.split(',');
         setInputs(data);
       } else {
         showError(message);
@@ -230,25 +236,53 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
                   label={t('token_index.unlimitedQuota')}
                 />
               </FormControl>
-              <FormControl fullWidth>
-                <InputLabel>{t('token_index.userGroup')}</InputLabel>
-                <Select
-                  label={t('token_index.userGroup')}
-                  name="group"
-                  value={values.group || '-1'}
-                  onChange={(e) => {
-                    const value = e.target.value === '-1' ? '' : e.target.value;
-                    setFieldValue('group', value);
-                  }}
-                >
-                  {/* <MenuItem value="-1">跟随用户分组</MenuItem> */}
-                  {userGroupOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              {/* 分组 */}
+              <Stack direction="column" spacing={2} sx={{ marginTop: 2 }}>
+                {values.group.map((group, idx) => (
+                  <Stack direction="row" spacing={2} sx={{ width: '100%' }} key={idx}>
+                    <FormControl fullWidth key={idx}>
+                      <InputLabel>{t('token_index.userGroup')}</InputLabel>
+                      <Select
+                        label={t('token_index.userGroup')}
+                        name="group"
+                        value={group}
+                        onChange={(e) => {
+                          values.group[idx] = e.target.value;
+                          setFieldValue('group', [...values.group]);
+                        }}
+                      >
+                        {userGroupOptions.map((option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    {/* 如果只有一个分组，则不显示删除按钮 */}
+                    {values.group.length > 1 && (
+                      <IconButton
+                        onClick={() => {
+                          remove(values.group, (_, i) => i === idx);
+                          setFieldValue('group', values.group);
+                        }}
+                      >
+                        <Icon icon="solar:trash-bin-trash-bold-duotone" />
+                      </IconButton>
+                    )}
+                    {/* 如果是最后一个，则显示添加按钮 */}
+                    {idx === values.group.length - 1 && (
+                      <IconButton
+                        onClick={() => {
+                          setFieldValue('group', [...values.group, '']);
+                        }}
+                      >
+                        <Icon icon={'solar:add-circle-outline'} />
+                      </IconButton>
+                    )}
+                  </Stack>
+                ))}
+              </Stack>
+
               <FormControl fullWidth>
                 <FormControlLabel
                   control={

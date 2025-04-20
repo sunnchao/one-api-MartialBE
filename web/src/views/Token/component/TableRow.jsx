@@ -16,7 +16,9 @@ import {
   Button,
   Tooltip,
   Stack,
-  ButtonGroup
+  ButtonGroup,
+  Chip,
+  Switch
 } from '@mui/material';
 
 import TableSwitch from 'ui-component/Switch';
@@ -176,7 +178,13 @@ export default function TokensTableRow({ item, manageToken, handleOpenModal, set
       <TableRow tabIndex={item.id}>
         <TableCell>{item.name}</TableCell>
         <TableCell>
-          <Label color={userGroup[item.group]?.color}>{renderGroup(userGroupOptions, item.group)}</Label>
+          <Stack direction="row" spacing={1}>
+            {item.group.split(',').map((group, idx) => (
+              <Label key={idx} color={userGroup[group]?.color} size="small">
+                {renderGroup(userGroupOptions, group)}
+              </Label>
+            ))}
+          </Stack>
         </TableCell>
 
         <TableCell>
@@ -186,10 +194,11 @@ export default function TokensTableRow({ item, manageToken, handleOpenModal, set
             })()}
             placement="top"
           >
-            <TableSwitch
+            <Switch
               id={`switch-${item.id}`}
               checked={statusSwitch === 1}
               onChange={handleStatus}
+              size="small"
               // disabled={statusSwitch !== 1 && statusSwitch !== 2}
             />
           </Tooltip>

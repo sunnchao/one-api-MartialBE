@@ -3,6 +3,7 @@ import React, { useEffect, useCallback, createContext, useState } from 'react';
 import { API } from 'utils/api';
 import { LOGIN } from 'store/actions';
 import { useDispatch } from 'react-redux';
+import { isAdmin } from 'utils/common';
 
 export const UserContext = createContext();
 
@@ -11,7 +12,7 @@ const UserProvider = ({ children }) => {
   const dispatch = useDispatch();
   const [isUserLoaded, setIsUserLoaded] = useState(false);
   const [userGroup, setUserGroup] = useState({});
-
+  const userIsAdmin = isAdmin();
   const loadUser = useCallback(() => {
     let user = localStorage.getItem('user');
     if (user) {
@@ -23,7 +24,7 @@ const UserProvider = ({ children }) => {
 
   const loadUserGroup = useCallback(() => {
     try {
-      API.get('/api/user_group_map').then((res) => {
+      API.get(userIsAdmin ? '/api/user_group_map_by_admin' : '/api/user_group_map').then((res) => {
         const { success, data } = res.data;
         if (success) {
           setUserGroup(data);

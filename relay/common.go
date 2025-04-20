@@ -59,7 +59,18 @@ func Path2Relay(c *gin.Context, path string) RelayBaseInterface {
 }
 
 func GetProvider(c *gin.Context, modelName string) (provider providersBase.ProviderInterface, newModelName string, fail error) {
-	channel, fail := fetchChannel(c, modelName)
+	groupList := c.GetStringSlice("token_group_list")
+
+	var channel *model.Channel
+	if len(groupList) > 1 {
+		for _, group := range groupList {
+			c.Set("token_group", group)
+			channel, fail = fetchChannel(c, modelName)
+		}
+	} else {
+		channel, fail = fetchChannel(c, modelName)
+	}
+
 	if fail != nil {
 		return
 	}
@@ -139,7 +150,10 @@ func fetchChannelByModel(c *gin.Context, modelName string) (*model.Channel, erro
 		filters = append(filters, model.FilterDisabledStream(modelName))
 	}
 
-	channel, err := model.ChannelGroup.Next(group, modelName, filters...)
+	var channel *model.Channel
+	var err error
+	channel, err = model.ChannelGroup.Next(group, modelName, filters...)
+
 	if err != nil {
 		message := fmt.Sprintf("当前分组 %s 下对于模型 %s 无可用渠道", group, modelName)
 		if channel != nil {

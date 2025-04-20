@@ -2,12 +2,14 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/utils"
 	"one-api/model"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -112,12 +114,16 @@ func AddToken(c *gin.Context) {
 	if token.Group == "" {
 		token.Group = "default"
 	}
-	err = validateTokenGroup(token.Group, userId)
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
+	groups := strings.Split(token.Group, ",")
+	for _, group := range groups {
+		err = validateTokenGroup(group, userId)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
 	}
 
 	cleanToken := model.Token{
@@ -217,13 +223,16 @@ func UpdateToken(c *gin.Context) {
 		if token.Group == "" {
 			token.Group = "default"
 		}
-		err = validateTokenGroup(token.Group, userId)
-		if err != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": err.Error(),
-			})
-			return
+		groups := strings.Split(token.Group, ",")
+		for _, group := range groups {
+			err = validateTokenGroup(group, userId)
+			if err != nil {
+				c.JSON(http.StatusOK, gin.H{
+					"success": false,
+					"message": err.Error(),
+				})
+				return
+			}
 		}
 	}
 
@@ -260,16 +269,16 @@ func UpdateToken(c *gin.Context) {
 func validateTokenGroup(tokenGroup string, userId int) error {
 	userGroup, _ := model.CacheGetUserGroup(userId)
 	if userGroup == "" {
-		return errors.New("获取用户组信息失败")
+		return errors.New(fmt.Sprintf("获取用户组信息失败: %s", tokenGroup))
 	}
 
 	groupRatio := model.GlobalUserGroupRatio.GetBySymbol(tokenGroup)
 	if groupRatio == nil {
-		return errors.New("无效的用户组")
+		return errors.New(fmt.Sprintf("无效的用户组: %s", tokenGroup))
 	}
 
 	if !groupRatio.Public && userGroup != tokenGroup {
-		return errors.New("当前用户组无权使用指定的分组")
+		return errors.New(fmt.Sprintf("当前用户组无权使用指定的分组: %s", tokenGroup))
 	}
 
 	return nil
