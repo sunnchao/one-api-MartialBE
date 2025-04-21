@@ -9,13 +9,13 @@ import (
 )
 
 const (
-	TokensPriceType    = "tokens"
-	TimesPriceType     = "times"
-	DefaultPrice       = 30.0
-	DollarRate         = 0.002
-	RMBRate            = 0.014
+	TokensPriceType = "tokens"
+	TimesPriceType  = "times"
+	DefaultPrice    = 30.0
+	DollarRate      = 0.002
+	RMBRate         = 0.014
 	// DefaultCacheRatios = 0
-	DefaultAudioRatio  = 40
+	DefaultAudioRatio = 40
 
 	DefaultCachedWriteRatio = 1.25
 	DefaultCachedReadRatio  = 0.1
@@ -41,7 +41,7 @@ func GetExtraPriceIsPrompt(key string) bool {
 }
 
 var defaultExtraPrice = map[string]float64{
-	config.UsageExtraCache:            0.5,
+	config.UsageExtraCache:            1,
 	config.UsageExtraCachedWrite:      1.25,
 	config.UsageExtraCachedRead:       0.1,
 	config.UsageExtraInputAudio:       40,
