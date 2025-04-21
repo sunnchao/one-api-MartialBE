@@ -76,10 +76,18 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
     let res;
 
     try {
+      // values.group 可能包含空字符串 或者重复，需要过滤掉
       if (values.is_edit) {
-        res = await API.put(`/api/token/`, { ...values, id: parseInt(tokenId), group: values.group.join(',') });
+        res = await API.put(`/api/token/`, {
+          ...values,
+          id: parseInt(tokenId),
+          group: Array.from(new Set(values.group.filter((group) => group !== ''))).join(',')
+        });
       } else {
-        res = await API.post(`/api/token/`, { ...values, group: values.group.join(',') });
+        res = await API.post(`/api/token/`, {
+          ...values,
+          group: Array.from(new Set(values.group.filter((group) => group !== ''))).join(',')
+        });
       }
       const { success, message } = res.data;
       if (success) {
