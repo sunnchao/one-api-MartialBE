@@ -29,7 +29,9 @@
   "Header 配置": "Header 配置",
   "sidebar": {
     "totalQuota": "總額度",
-    "remainingBalance": "可用額度"
+    "remainingBalance": "可用額度",
+    "lastLoginTime": "最後登錄時間",
+    "lastLoginIp": "最後登錄IP"
   },
   "about": {
     "aboutDescription": "可在設置頁面設置關於內容，支持 HTML 和 Markdown",

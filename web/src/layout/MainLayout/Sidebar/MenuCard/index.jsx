@@ -8,6 +8,7 @@ import User1 from 'assets/images/users/user-round.svg';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
+import dayjs from 'dayjs';
 
 const CardStyle = styled(Card)(({ theme }) => ({
   background: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.8) : alpha(theme.palette.background.paper, 0.9),
@@ -159,6 +160,7 @@ const MenuCard = () => {
             </Tooltip>
           </Stack>
 
+
           <Box sx={{ position: 'relative' }}>
             <ProgressBarWrapper>
               <LinearProgress
@@ -184,6 +186,26 @@ const MenuCard = () => {
             >
               {`💲${usedQuota} (${Math.round(progressValue)}%)`}
             </Typography>
+          </Box>
+
+
+          {/* 最后登录时间 */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', width: '100%', flexDirection: 'column' }}>
+            <Typography variant="body2" color="text.secondary">
+              {t('sidebar.lastLoginTime')}
+            </Typography>
+            <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.7rem' }}>
+              {user?.last_login_time ? dayjs(user.last_login_time * 1000).format('YYYY-MM-DD HH:mm:ss') : t('dashboard_index.unknown')}
+            </div>
+          </Box>
+          {/* 最后登录IP */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', width: '100%', flexDirection: 'column' }}>
+            <Typography variant="body2" color="text.secondary">
+              {t('sidebar.lastLoginIp')}
+            </Typography>
+            <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.7rem' }}>
+              {user?.last_login_ip || t('dashboard_index.unknown')}
+            </div>
           </Box>
         </Box>
       </CardContent>

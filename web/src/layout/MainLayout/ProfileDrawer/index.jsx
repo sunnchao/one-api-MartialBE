@@ -34,7 +34,6 @@ const ProfileDrawer = ({ open, onClose }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { user, userGroup } = useSelector((state) => state.account);
-
   const { logout } = useLogin();
 
   const handleLogout = async () => {
@@ -92,10 +91,11 @@ const ProfileDrawer = ({ open, onClose }) => {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {user?.email || 'Unknown'}
           </Typography>
+
           <Box
             sx={{
               border: `1px solid ${theme.palette.primary.main}`,
-              borderRadius: '15px',
+              borderRadius: '0',
               px: 2,
               py: 0.5,
               display: 'inline-block'
@@ -106,6 +106,7 @@ const ProfileDrawer = ({ open, onClose }) => {
               {userGroup?.[user?.group]?.ratio || t('dashboard_index.unknown')}/ {t('modelpricePage.RPM')}:{userGroup?.[user?.group]?.api_rate || t('dashboard_index.unknown')}）
             </Typography>
           </Box>
+          
         </Box>
 
         {/* 用户数据区域 - 严格按照图片布局 */}
@@ -149,6 +150,7 @@ const ProfileDrawer = ({ open, onClose }) => {
                 {user?.aff_quota ? '$' + calculateQuota(user.aff_quota) : t('dashboard_index.unknown')}
               </Typography>
             </Box>
+  
           </Stack>
           <Divider sx={{ borderWidth: '1px', borderStyle: 'dashed', mt: 2, mb: 2 }} />
           {/* 按钮区域 */}
@@ -158,7 +160,7 @@ const ProfileDrawer = ({ open, onClose }) => {
               variant="contained"
               color="primary"
               sx={{
-                borderRadius: '4px',
+                borderRadius: '0',
                 py: 1,
                 textTransform: 'none',
                 fontWeight: 'normal',

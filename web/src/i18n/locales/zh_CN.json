@@ -35,7 +35,9 @@
   },
   "sidebar": {
     "totalQuota": "总额度",
-    "remainingBalance": "可用额度"
+    "remainingBalance": "可用额度",
+    "lastLoginTime": "最后登录时间",
+    "lastLoginIp": "最后登录IP"
   },
   "registerForm": {
     "enterEmail": "请输入邮箱",

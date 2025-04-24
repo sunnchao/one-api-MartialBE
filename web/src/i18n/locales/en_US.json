@@ -28,7 +28,9 @@
   },
   "sidebar": {
     "totalQuota": "Total Quota",
-    "remainingBalance": "Remaining Balance"
+    "remainingBalance": "Remaining Balance",
+    "lastLoginTime": "Last Login Time",
+    "lastLoginIp": "Last Login IP"
   },
   "Header 配置": "Header configuration",
   "about": {

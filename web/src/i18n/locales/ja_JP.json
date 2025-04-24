@@ -28,7 +28,9 @@
   },
   "sidebar": {
     "totalQuota": "総額",
-    "remainingBalance": "残高"
+    "remainingBalance": "残高",
+    "lastLoginTime": "最終ログイン時間",
+    "lastLoginIp": "最終ログインIP"
   },
   "Header 配置": "ヘッダー構成",
   "about": {
