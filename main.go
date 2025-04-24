@@ -1,33 +1,33 @@
 package main
 
 import (
-	"embed"
-	"fmt"
-	"one-api/cli"
-	"one-api/common"
-	"one-api/common/cache"
-	"one-api/common/config"
-	"one-api/common/logger"
-	"one-api/common/notify"
-	"one-api/common/oidc"
-	"one-api/common/redis"
-	"one-api/common/requester"
-	"one-api/common/search"
-	"one-api/common/storage"
-	"one-api/common/telegram"
-	"one-api/controller"
-	"one-api/cron"
-	"one-api/middleware"
-	"one-api/model"
-	"one-api/relay/task"
-	"one-api/router"
-	"one-api/safty"
-	"time"
+  "embed"
+  "fmt"
+  "one-api/cli"
+  "one-api/common"
+  "one-api/common/cache"
+  "one-api/common/config"
+  "one-api/common/logger"
+  "one-api/common/notify"
+  "one-api/common/oidc"
+  "one-api/common/redis"
+  "one-api/common/requester"
+  "one-api/common/search"
+  "one-api/common/storage"
+  "one-api/common/telegram"
+  "one-api/controller"
+  "one-api/cron"
+  "one-api/middleware"
+  "one-api/model"
+  "one-api/relay/task"
+  "one-api/router"
+  "one-api/safty"
+  "time"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
+  "github.com/gin-contrib/sessions"
+  "github.com/gin-contrib/sessions/cookie"
+  "github.com/gin-gonic/gin"
+  "github.com/spf13/viper"
 )
 
 //go:embed web/build
@@ -74,20 +74,20 @@ func main() {
   // Initialize Telegram bot
   telegram.InitTelegramBot()
 
-	controller.InitMidjourneyTask()
-	task.InitTask()
-	notify.InitNotifier()
-	cron.InitCron()
-	storage.InitStorage()
-	search.InitSearcher()
-	// 初始化安全检查器
-	safty.InitSaftyTools()
-	// 初始化账单数据
-	if config.UserInvoiceMonth {
-		logger.SysLog("Enable User Invoice Monthly Data")
-		go model.InsertStatisticsMonth()
-	}
-	initHttpServer()
+  controller.InitMidjourneyTask()
+  task.InitTask()
+  notify.InitNotifier()
+  cron.InitCron()
+  storage.InitStorage()
+  search.InitSearcher()
+  // 初始化安全检查器
+  safty.InitSaftyTools()
+  // 初始化账单数据
+  //if config.UserInvoiceMonth {
+  //	logger.SysLog("Enable User Invoice Monthly Data")
+  //	go model.InsertStatisticsMonth()
+  //}
+  initHttpServer()
 }
 
 func initMemoryCache() {

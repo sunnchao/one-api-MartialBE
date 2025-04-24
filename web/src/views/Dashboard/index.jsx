@@ -74,7 +74,7 @@ const Dashboard = () => {
       {/* 今日请求、消费、token */}
       <Grid item xs={12}>
         <Grid container spacing={gridSpacing}>
-          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
+          <Grid item lg={3} xs={6} sx={{ height: '160' }}>
             <StatisticalLineChartCard
               isLoading={isLoading}
               title={t('dashboard_index.today_requests')}
@@ -84,7 +84,7 @@ const Dashboard = () => {
               lastDayValue={requestChart?.lastDayValue}
             />
           </Grid>
-          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
+          <Grid item lg={3} xs={6} sx={{ height: '160' }}>
             <StatisticalLineChartCard
               isLoading={isLoading}
               title={t('dashboard_index.today_consumption')}
@@ -94,7 +94,7 @@ const Dashboard = () => {
               lastDayValue={quotaChart?.lastDayValue}
             />
           </Grid>
-          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
+          <Grid item lg={3} xs={6} sx={{ height: '160' }}>
             <StatisticalLineChartCard
               isLoading={isLoading}
               title={t('dashboard_index.today_tokens')}
@@ -104,49 +104,38 @@ const Dashboard = () => {
               lastDayValue={tokenChart?.lastDayValue}
             />
           </Grid>
-          <Grid item lg={3} xs={12} sx={{ height: '160' }}>
+          <Grid item lg={3} xs={6} sx={{ height: '160' }}>
             <RPM />
           </Grid>
         </Grid>
       </Grid>
       <Grid item xs={12}>
         <Grid container spacing={gridSpacing}>
+          <Grid item lg={12} xs={12}>
+            <Box>
+              <QuickStartCard />
+            </Box>
+          </Grid>
           {/* 日历插件 */}
           <Grid item lg={6} xs={12}>
             <Calendar checkinDates={checkInList} />
           </Grid>
-          <Grid item lg={8} xs={12}>
-            {/* 7日模型消费统计 */}
-            <ApexCharts isLoading={isLoading} chartDatas={statisticalData} title={t('dashboard_index.week_model_statistics')} />
-            <Box mt={2}>
-              {/* 7日消费统计 */}
-              <QuotaLogWeek data={dashboardData} />
-            </Box>
+          <Grid item lg={6} xs={12}>
+            <InviteCard />
           </Grid>
 
-          <Grid item lg={6} xs={12}>
+          <Grid item lg={12} xs={12}>
+            {/* 7日模型消费统计 */}
+            <QuotaLogWeek data={dashboardData} />
+          </Grid>
+
+          <Grid item lg={12} xs={12}>
             {/* 用户信息 */}
             <ModelUsagePieChart isLoading={isLoading} data={modelUsageData} />
-            <Box mt={2}>
-              <QuickStartCard />
-            </Box>
-            {/* 邀请 */}
-            <Box>
-              <InviteCard />
-            </Box>
           </Grid>
           <Grid item lg={12} xs={12}>
             {/* 7日模型消费统计 */}
             <ApexCharts isLoading={isLoading} chartDatas={statisticalData} title={t('dashboard_index.week_model_statistics')} />
-            <Box>
-              {/* 7日消费统计 */}
-              <QuotaLogWeek />
-            </Box>
-          </Grid>
-
-          {/* 消费统计 */}
-          <Grid item lg={12} xs={12}>
-            <ApexCharts isLoading={isLoading} chartDatas={statisticalData} />
           </Grid>
         </Grid>
       </Grid>
