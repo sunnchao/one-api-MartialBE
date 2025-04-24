@@ -216,7 +216,7 @@ function viewInput(item, t, totalInputTokens, totalOutputTokens, show, tokenDeta
   if (!show) return prompt_tokens;
 
   const tooltipContent = tokenDetails.map(({ key, label, tokens, value, rate, labelParams }) => (
-    <MetadataTypography key={key}>{`${t(label, labelParams)}: ${value} * ${rate} = ${tokens}`}</MetadataTypography>
+    <MetadataTypography key={key}>{`${t(label, labelParams)}: ${value} *  (${rate} - 1) = ${tokens}`}</MetadataTypography>
   ));
 
   return (
@@ -272,10 +272,22 @@ function calculateTokens(item) {
   const cached_write_ratio = metadata?.cached_write_tokens_ratio || 0;
   const cached_read_ratio = metadata?.cached_recached_read_tokens_ratioad_ratio || 0;
   const reasoning_tokens = metadata?.reasoning_tokens_ratio || 0;
+  const input_text_tokens_ratio = metadata?.input_text_tokens_ratio || TOKEN_RATIOS.TEXT;
+  const output_text_tokens_ratio = metadata?.output_text_tokens_ratio || TOKEN_RATIOS.TEXT;
 
   const tokenDetails = [
-    { key: 'input_text_tokens', label: 'logPage.inputTextTokens', rate: TOKEN_RATIOS.TEXT, labelParams: { ratio: TOKEN_RATIOS.TEXT } },
-    { key: 'output_text_tokens', label: 'logPage.outputTextTokens', rate: TOKEN_RATIOS.TEXT, labelParams: { ratio: TOKEN_RATIOS.TEXT } },
+    {
+      key: 'input_text_tokens',
+      label: 'logPage.inputTextTokens',
+      rate: input_text_tokens_ratio,
+      labelParams: { ratio: input_text_tokens_ratio }
+    },
+    {
+      key: 'output_text_tokens',
+      label: 'logPage.outputTextTokens',
+      rate: output_text_tokens_ratio,
+      labelParams: { ratio: output_text_tokens_ratio }
+    },
     {
       key: 'input_audio_tokens',
       label: 'logPage.inputAudioTokens',
@@ -300,16 +312,20 @@ function calculateTokens(item) {
   ]
     .filter(({ key }) => metadata[key] > 0)
     .map(({ key, label, rate, labelParams }) => {
-      const tokens = Math.ceil(metadata[key] * rate);
+      const tokens = Math.ceil(metadata[key] * (rate - 1));
 
-      if (key === 'input_audio_tokens' || key === 'cached_tokens') {
-        totalInputTokens += tokens - metadata[key];
-        show = false;
-      } else if (key === 'output_audio_tokens' || key === 'reasoning_tokens') {
-        totalOutputTokens += tokens - metadata[key];
-        show = true;
-      } else if (key === 'cached_write_tokens' || key === 'cached_read_tokens') {
+      if (
+        key === 'input_text_tokens' ||
+        key === 'output_text_tokens' ||
+        key === 'input_audio_tokens' ||
+        key === 'cached_tokens' ||
+        key === 'cached_write_tokens' ||
+        key === 'cached_read_tokens'
+      ) {
         totalInputTokens += tokens;
+        show = key !== 'cached_tokens';
+      } else if (key === 'output_audio_tokens' || key === 'reasoning_tokens') {
+        totalOutputTokens += tokens;
         show = true;
       }
 

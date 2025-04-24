@@ -116,8 +116,8 @@ func InitDB() (err error) {
 	}
 
 	// 根据实际负载调整连接池参数
-	sqlDB.SetMaxIdleConns(utils.GetOrDefault("SQL_MAX_IDLE_CONNS", 25))
-	sqlDB.SetMaxOpenConns(utils.GetOrDefault("SQL_MAX_OPEN_CONNS", 100))
+  sqlDB.SetMaxIdleConns(utils.GetOrDefault("SQL_MAX_IDLE_CONNS", 100))
+  sqlDB.SetMaxOpenConns(utils.GetOrDefault("SQL_MAX_OPEN_CONNS", 1000))
 	sqlDB.SetConnMaxLifetime(time.Minute * time.Duration(utils.GetOrDefault("SQL_MAX_LIFETIME", 30)))
 	sqlDB.SetConnMaxIdleTime(time.Minute * 10)
 
@@ -200,7 +200,19 @@ func InitDB() (err error) {
 		}
 	}
 
-	migrationAfter(DB)
+		if config.UserInvoiceMonth {
+			err = db.AutoMigrate(&StatisticsMonthGeneratedHistory{})
+			if err != nil {
+				return err
+			}
+
+			err = db.AutoMigrate(&StatisticsMonth{})
+			if err != nil {
+				return err
+			}
+		}
+
+		migrationAfter(DB)
 	logger.SysLog("database migration completed")
 
 	// 创建root账号

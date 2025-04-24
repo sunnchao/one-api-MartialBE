@@ -130,37 +130,27 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 		Stream:        request.Stream,
 	}
 
-  var prevUserMessage bool
-  systemMessage := ""
+	systemMessage := ""
+	mgsLen := len(request.Messages) - 1
+	isThink := strings.Contains(request.Model, "claude-3-7-sonnet") && (request.OneOtherArg == "thinking" || request.Reasoning != nil)
 
-  for _, msg := range request.Messages {
-    if msg.Role == "system" {
-      systemMessage += msg.StringContent()
-      continue
-    }
-    messageContent, err := convertMessageContent(&msg)
-    if err != nil {
-      return nil, common.ErrorWrapper(err, "conversion_error", http.StatusBadRequest)
-    }
-    if messageContent != nil {
-      if messageContent.Role == "user" && prevUserMessage {
-        assistantMessage := Message{
-          Role: "assistant",
-          Content: []MessageContent{
-            {
-              Type: "text",
-              Text: "ok",
-            },
-          },
-        }
-        claudeRequest.Messages = append(claudeRequest.Messages, assistantMessage)
-        prevUserMessage = false
-      } else {
-        prevUserMessage = messageContent.Role == "user"
-      }
-      claudeRequest.Messages = append(claudeRequest.Messages, *messageContent)
-    }
-  }
+	for index, msg := range request.Messages {
+		if isThink && index == mgsLen && (msg.Role == types.ChatMessageRoleAssistant || msg.Role == types.ChatMessageRoleSystem) {
+			msg.Role = types.ChatMessageRoleUser
+		}
+
+		if msg.Role == types.ChatMessageRoleSystem {
+			systemMessage += msg.StringContent()
+			continue
+		}
+		messageContent, err := convertMessageContent(&msg)
+		if err != nil {
+			return nil, common.ErrorWrapper(err, "conversion_error", http.StatusBadRequest)
+		}
+		if messageContent != nil {
+			claudeRequest.Messages = append(claudeRequest.Messages, *messageContent)
+		}
+	}
 
   if systemMessage != "" {
     claudeRequest.System = systemMessage

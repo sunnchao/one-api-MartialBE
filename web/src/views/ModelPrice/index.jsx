@@ -24,7 +24,7 @@ import { useTheme } from '@mui/material/styles';
 import IconWrapper from 'ui-component/IconWrapper';
 import Label from 'ui-component/Label';
 import ToggleButtonGroup from 'ui-component/ToggleButton';
-import { isAdmin } from 'utils/common';
+import { useIsAdmin } from 'utils/common';
 // ----------------------------------------------------------------------
 export default function ModelPrice() {
   const { t } = useTranslation();
@@ -38,7 +38,7 @@ export default function ModelPrice() {
   const [selectedGroup, setSelectedGroup] = useState('default');
   const [selectedOwnedBy, setSelectedOwnedBy] = useState(1);
   const [unit, setUnit] = useState('K');
-  const userIsAdmin = isAdmin();
+  const userIsAdmin = useIsAdmin();
 
   const unitOptions = [
     { value: 'K', label: 'K' },
@@ -374,17 +374,22 @@ export default function ModelPrice() {
 
 function getOther(t, extraRatios) {
   if (!extraRatios) return '';
-  const inputRatio = extraRatios.input_audio_tokens_ratio;
-  const outputRatio = extraRatios.output_audio_tokens_ratio;
+  // const inputRatio = extraRatios.input_audio_tokens_ratio;
+  // const outputRatio = extraRatios.output_audio_tokens_ratio;
 
   return (
     <Stack direction="column" spacing={1}>
-      <Label color="primary" variant="ghost">
+      {Object.entries(extraRatios).map(([key, value]) => (
+        <Label key={key} color="primary" variant="ghost">
+          {t(`modelpricePage.${key}`)}: {value}
+        </Label>
+      ))}
+      {/* <Label color="primary" variant="outlined">
         {t('modelpricePage.inputAudioTokensRatio')}: {inputRatio}
       </Label>
       <Label color="primary" variant="ghost">
         {t('modelpricePage.outputAudioTokensRatio')}: {outputRatio}
-      </Label>
+      </Label> */}
     </Stack>
   );
 }

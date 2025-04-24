@@ -22,7 +22,7 @@ import { useSelector } from 'react-redux';
 import { PAGE_SIZE_OPTIONS, getPageSize, savePageSize } from 'constants';
 import { useTranslation } from 'react-i18next';
 import { UserContext } from 'contexts/UserContext';
-import { isAdmin } from 'utils/common';
+import { useIsAdmin } from 'utils/common';
 
 export default function Token() {
   const { t } = useTranslation();
@@ -35,13 +35,15 @@ export default function Token() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [tokens, setTokens] = useState([]);
   const [refreshFlag, setRefreshFlag] = useState(false);
-  const { userGroup, loadUserGroup } = useContext(UserContext);
+  const { loadUserGroup } = useContext(UserContext);
   const [userGroupOptions, setUserGroupOptions] = useState([]);
 
   const [openModal, setOpenModal] = useState(false);
   const [editTokenId, setEditTokenId] = useState(0);
   const siteInfo = useSelector((state) => state.siteInfo);
-  const userIsAdmin = isAdmin();
+  const { userGroup } = useSelector((state) => state.account);
+
+  const userIsAdmin = useIsAdmin();
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
     if (id !== '') {
