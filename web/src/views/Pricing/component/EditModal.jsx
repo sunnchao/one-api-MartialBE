@@ -157,7 +157,8 @@ const EditModal = ({ open, pricesItem, onCancel, onOk, ownedby, noPriceModel }) 
           channel_type: values.channel_type,
           input: calculateRate(values.input),
           output: calculateRate(values.output),
-          locked: values.locked
+          locked: values.locked,
+          cache_input: calculateRate(values.cache_input)
         }
       });
       const { success, message } = res.data;
