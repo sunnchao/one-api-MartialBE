@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const AuthGuard = ({ children }) => {
   const account = useSelector((state) => state.account);
+  console.log('account', account);
   const { isUserLoaded } = useContext(UserContext);
   const navigate = useNavigate();
   useEffect(() => {
