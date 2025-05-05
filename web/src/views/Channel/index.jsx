@@ -494,7 +494,7 @@ export default function ChannelList() {
               headLabel={[
                 // { id: 'collapse', label: '', disableSort: true, width: '50px' },
                 { id: 'id', label: 'ID', disableSort: false, width: '80px' },
-                { id: 'name', label: t('channel_index.name'), disableSort: false },
+                { id: 'name', label: t('channel_index.name'), disableSort: false, maxWidth: '300px' },
                 { id: 'group', label: t('channel_index.group'), disableSort: true },
                 { id: 'type', label: t('channel_index.type'), disableSort: false },
                 { id: 'status', label: t('channel_index.status'), disableSort: false },

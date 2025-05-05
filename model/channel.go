@@ -15,7 +15,7 @@ import (
 )
 
 type Channel struct {
-	Id                 int     `json:"id"`
+	Id                 int     `json:"id" form:"id"`
 	Type               int     `json:"type" form:"type" gorm:"default:0"`
 	Key                string  `json:"key" form:"key" gorm:"type:text"` // Kept for backward compatibility
 	Status             int     `json:"status" form:"status" gorm:"default:1"`
@@ -51,7 +51,7 @@ type Channel struct {
 	DeletedAt gorm.DeletedAt                  `json:"-" gorm:"index"`
 
 	// Virtual field for multiple keys input/display
-	Keys   string    `json:"keys" form:"keys" gorm:"-"`
+	Keys string `json:"keys" form:"keys" gorm:"-"`
 	// Related keys
 	ChannelKeys []*ChannelKey `json:"channel_keys,omitempty" gorm:"-"`
 	// Current active key (populated during request handling)
@@ -103,14 +103,14 @@ func (channel *Channel) LoadKeys() error {
 	}
 
 	channel.ChannelKeys = keys
-	
+
 	// Prepare the Keys field for display/editing
 	var keyStrings []string
 	for _, key := range keys {
 		keyStrings = append(keyStrings, key.Key)
 	}
 	channel.Keys = strings.Join(keyStrings, ",")
-	
+
 	return nil
 }
 
@@ -133,8 +133,8 @@ func (channel *Channel) SaveKeys() error {
 	}
 
 	// Replace newlines with commas and handle both comma and newline separators
-	cleanedKeys := strings.ReplaceAll(channel.Keys, "\n", ",")
-	
+	cleanedKeys := strings.ReplaceAll(channel.Keys, "\n", "")
+
 	// Parse the new keys by comma delimiter
 	keyStrings := strings.Split(cleanedKeys, ",")
 	for i, keyString := range keyStrings {
@@ -269,6 +269,7 @@ func GetChannelsList(params *SearchChannelsParams) (*DataResult[Channel], error)
 
 	if params.Id != 0 {
 		db = db.Where("id = ?", params.Id)
+		tagDB = tagDB.Where("id = ?", params.Id)
 	}
 
 	return PaginateAndOrder(db, &params.PaginationParams, &channels, allowedChannelOrderFields)
@@ -413,17 +414,17 @@ func (channel *Channel) GetCustomParameter() string {
 func (channel *Channel) Insert() error {
 	// Store keys temporarily
 	keys := channel.Keys
-	
+
 	// Create the channel first
 	err := DB.Omit("UsedQuota").Create(channel).Error
 	if err != nil {
 		return err
 	}
-	
+
 	// Now add the keys
 	channel.Keys = keys
 	err = channel.SaveKeys()
-	
+
 	if err == nil {
 		ChannelGroup.Load()
 	}
@@ -435,15 +436,14 @@ func (channel *Channel) Insert() error {
 func (channel *Channel) Update(overwrite bool) error {
 	// Store keys temporarily
 	keys := channel.Keys
-	
+
 	err := channel.UpdateRaw(overwrite)
 	if err != nil {
 		return err
 	}
-	
+
 	// Now update the keys if provided
 	if keys != "" {
-		channel.Keys = keys
 		err = channel.SaveKeys()
 	}
 
@@ -496,7 +496,7 @@ func (channel *Channel) Delete() error {
 	if err != nil {
 		return err
 	}
-	
+
 	// Delete the channel
 	err = DB.Delete(channel).Error
 	if err == nil {

@@ -146,18 +146,8 @@ func DeleteDisabledChannel(c *gin.Context) {
 }
 
 func UpdateChannel(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
-		return
-	}
-	
 	channel := model.Channel{}
-	err = c.ShouldBindJSON(&channel)
+	err := c.ShouldBindJSON(&channel)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -171,7 +161,6 @@ func UpdateChannel(c *gin.Context) {
 		channel.Keys = channel.Key
 	}
 	
-	channel.Id = id
 	err = channel.Update(true)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{

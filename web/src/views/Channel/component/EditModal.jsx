@@ -271,6 +271,12 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
     const modelsStr = allUniqueModelIds.join(',');
     values.group = values.groups.join(',');
 
+    // 创建新的 channel_keys
+    const channelKeys = values.key.split(',').map((key) => {
+      return key.trim();
+    });
+    values.keys = channelKeys.join(',');
+
     let baseApiUrl = '/api/channel/';
 
     if (isTag) {
@@ -385,6 +391,13 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
         data.is_edit = true;
         if (data.plugin === null) {
           data.plugin = {};
+        }
+        if (data.channel_keys !== null) {
+          data.key = data.channel_keys
+            .map((ck, index) => {
+              return ck.key + (index === data.channel_keys.length - 1 ? '' : ',');
+            })
+            .join('\n');
         }
         initChannel(data.type);
         setInitialInput(data);
@@ -756,7 +769,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
               <FormControl fullWidth error={Boolean(touched.key && errors.key)} sx={{ ...theme.typography.otherInput }}>
                 {!batchAdd ? (
                   <>
-                    <InputLabel htmlFor="channel-key-label">{customizeT(inputLabel.key)}</InputLabel>
+                    {/* <InputLabel htmlFor="channel-key-label">{customizeT(inputLabel.key)}</InputLabel>
                     <OutlinedInput
                       id="channel-key-label"
                       label={customizeT(inputLabel.key)}
@@ -767,6 +780,18 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
                       onChange={handleChange}
                       inputProps={{}}
                       aria-describedby="helper-text-channel-key-label"
+                    /> */}
+                    <TextField
+                      multiline
+                      id="channel-key-label"
+                      label={customizeT(inputLabel.key)}
+                      value={values.key}
+                      name="key"
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      aria-describedby="helper-text-channel-key-label"
+                      minRows={5}
+                      placeholder={customizeT(inputPrompt.key) + t('channel_edit.batchKeytip')}
                     />
                   </>
                 ) : (
@@ -879,14 +904,18 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
                         }
                       }, 0);
                     }}
-                    placeholder={parameterFocused ? '{\n  "temperature": 0.7,\n  "top_p": 0.9,\n  "nested_param": {\n      "key": "value"\n  }\n}' : ''}
+                    placeholder={
+                      parameterFocused ? '{\n  "temperature": 0.7,\n  "top_p": 0.9,\n  "nested_param": {\n      "key": "value"\n  }\n}' : ''
+                    }
                   />
                   {touched.custom_parameter && errors.custom_parameter ? (
                     <FormHelperText error id="helper-tex-channel-custom_parameter-label">
                       {errors.custom_parameter}
                     </FormHelperText>
                   ) : (
-                    <FormHelperText id="helper-tex-channel-custom_parameter-label">{customizeT(inputPrompt.custom_parameter)}</FormHelperText>
+                    <FormHelperText id="helper-tex-channel-custom_parameter-label">
+                      {customizeT(inputPrompt.custom_parameter)}
+                    </FormHelperText>
                   )}
                 </FormControl>
               )}

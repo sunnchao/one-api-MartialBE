@@ -339,7 +339,7 @@ export default function ChannelTableRow({ item, manageChannel, onRefresh, groupO
             )}
           </Box>
         </TableCell>
-        <TableCell sx={{ minWidth: 100, maxWidth: 220, overflow: 'hidden' }}>
+        <TableCell sx={{ minWidth: 100, maxWidth: 220 }}>
           {item.tag ? (
             <Typography
               variant="subtitle1"
@@ -355,7 +355,6 @@ export default function ChannelTableRow({ item, manageChannel, onRefresh, groupO
             <Typography
               variant="subtitle1"
               sx={{
-                maxWidth: 100,
                 lineHeight: 1.4
               }}
             >
