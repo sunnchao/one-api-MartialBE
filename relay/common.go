@@ -413,6 +413,16 @@ func shouldRetry(c *gin.Context, apiErr *types.OpenAIErrorWithStatusCode, channe
 		return false
 	}
 
+	// Record the error for the specific key
+	keyId := c.GetInt("channel_key_id")
+	if keyId > 0 {
+		// If we have a key ID, record the error for that specific key
+		channelKeyErr := model.RecordKeyError(keyId, apiErr.Error())
+		if channelKeyErr != nil {
+			logger.SysError("failed to record key error: " + channelKeyErr.Error())
+		}
+	}
+
 	switch apiErr.StatusCode {
 	case http.StatusTooManyRequests, http.StatusTemporaryRedirect:
 		return true

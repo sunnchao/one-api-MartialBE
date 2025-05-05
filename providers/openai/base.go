@@ -165,12 +165,29 @@ func (p *OpenAIProvider) GetFullRequestURL(requestURL string, modelName string) 
 func (p *OpenAIProvider) GetRequestHeaders() (headers map[string]string) {
 	headers = make(map[string]string)
 	p.CommonRequestHeaders(headers)
+	
 	if p.IsAzure {
-		headers["api-key"] = p.Channel.Key
+		// For Azure, use a different header format
+		key, keyId, err := p.Channel.GetKeyForRequest()
+		if err != nil || key == "" {
+			// Fall back to the legacy key
+			headers["api-key"] = p.Channel.Key
+		} else {
+			// Store the key ID for potential error tracking
+			if p.Context != nil {
+				p.Context.Set("channel_key_id", keyId)
+			}
+			headers["api-key"] = key
+		}
 	} else {
-		headers["Authorization"] = fmt.Sprintf("Bearer %s", p.Channel.Key)
+		// For regular OpenAI, use the standard Bearer auth
+		err := p.UpdateAuthHeader(headers)
+		if err != nil {
+			// If there's an error getting a key, fall back to the old behavior
+			headers["Authorization"] = fmt.Sprintf("Bearer %s", p.Channel.Key)
+		}
 	}
-
+	
 	return headers
 }
 

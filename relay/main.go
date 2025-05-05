@@ -1,19 +1,19 @@
 package relay
 
 import (
-  "fmt"
-  "net/http"
-  "one-api/common"
-  "one-api/common/config"
-  "one-api/common/logger"
-  "one-api/common/utils"
-  "one-api/metrics"
-  "one-api/model"
-  "one-api/relay/relay_util"
-  "one-api/types"
-  "time"
+	"fmt"
+	"net/http"
+	"one-api/common"
+	"one-api/common/config"
+	"one-api/common/logger"
+	"one-api/common/utils"
+	"one-api/metrics"
+	"one-api/model"
+	"one-api/relay/relay_util"
+	"one-api/types"
+	"time"
 
-  "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 )
 
 func Relay(c *gin.Context) {
@@ -31,7 +31,6 @@ func Relay(c *gin.Context) {
       model.RecordConsumeErrorLog(
         c.Request.Context(),
         c.GetInt("id"),
-
         c.GetInt("channel_id"),
         c.GetString("original_model"),
         c.GetString("token_name"),
@@ -88,6 +87,10 @@ func Relay(c *gin.Context) {
   groupList := c.GetStringSlice("token_group_list")
 
   channel := relay.getProvider().GetChannel()
+  
+  // Record the error for this specific key
+  channel.RecordKeyError(apiErr.Error())
+  
   go processChannelRelayError(c.Request.Context(), channel.Id, channel.Name, apiErr, channel.Type)
 
   retryTimes := config.RetryTimes

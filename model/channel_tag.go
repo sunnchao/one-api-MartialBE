@@ -63,10 +63,10 @@ func GetChannelsTag(tag string) (*ChannelTagCollection, error) {
 		keyMd5 := md5.Sum([]byte(c.Key))
 		keyMd5Str := hex.EncodeToString(keyMd5[:])
 		channelTag.KeyMap[keyMd5Str] = c.Id
-		channelTag.Key += c.Key + "\n"
+		channelTag.Key += c.Key + ","
 	}
 
-	channelTag.Key = strings.TrimRight(channelTag.Key, "\n")
+	channelTag.Key = strings.TrimRight(channelTag.Key, ",")
 	return &channelTag, nil
 }
 
@@ -85,8 +85,12 @@ func UpdateChannelsTag(tag string, channel *Channel) error {
 
 	newKeysMap := make(map[string]bool)
 
-	keys := strings.Split(channel.Key, "\n")
+	// Replace newlines with commas and handle both separators
+	cleanedKey := strings.ReplaceAll(channel.Key, "\n", ",")
+	keys := strings.Split(cleanedKey, ",")
+	
 	for _, key := range keys {
+		key = strings.TrimSpace(key)
 		if key == "" {
 			continue
 		}

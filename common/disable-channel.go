@@ -24,18 +24,7 @@ func init() {
 }
 
 func GetDefaultDisableChannelKeywords() string {
-	return `Your credit balance is too low
-This organization has been disabled.
-You exceeded your current quota
-Permission denied
-Quota exceeded for quota metric
-API key not valid
-The security token included in the request is invalid
-Operation not allowed
-Your account is not authorized
-your account balance is insufficient
-Your account is currently blocked
-too many invalid requests`
+	return `Your credit balance is too low,This organization has been disabled.,You exceeded your current quota,Permission denied,Quota exceeded for quota metric,API key not valid,The security token included in the request is invalid,Operation not allowed,Your account is not authorized,your account balance is insufficient,Your account is currently blocked,too many invalid requests`
 }
 
 func (d *DisableChannelKeyword) Load(keywords string) {
@@ -47,15 +36,17 @@ func (d *DisableChannelKeyword) Load(keywords string) {
 		return
 	}
 
-	keywordsList := strings.Split(keywords, "\n")
+	// Replace newlines with commas, then split by both newlines and commas
+	cleanedKeywords := strings.ReplaceAll(keywords, "\n", ",")
+	keywordsList := strings.Split(cleanedKeywords, ",")
 	patterns := make([][]rune, 0, len(keywordsList))
 
 	for _, keyword := range keywordsList {
+		keyword = strings.TrimSpace(keyword)
 		if keyword == "" {
 			continue
 		}
 
-		keyword = strings.TrimSpace(keyword)
 		patterns = append(patterns, []rune(keyword))
 	}
 	d.mutex.Lock()

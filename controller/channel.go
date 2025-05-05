@@ -7,7 +7,6 @@ import (
 	"one-api/common/utils"
 	"one-api/model"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -49,6 +48,14 @@ func GetChannel(c *gin.Context) {
 		})
 		return
 	}
+	err = channel.LoadKeys()
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
@@ -67,32 +74,14 @@ func AddChannel(c *gin.Context) {
 		return
 	}
 	channel.CreatedTime = utils.GetTimestamp()
-	keys := strings.Split(channel.Key, "\n")
-
-	baseUrls := []string{}
-	if channel.BaseURL != nil && *channel.BaseURL != "" {
-		baseUrls = strings.Split(*channel.BaseURL, "\n")
+	
+	// Check if the key field contains multiple keys (might be in Key or Keys)
+	if channel.Keys == "" && channel.Key != "" {
+		channel.Keys = channel.Key
 	}
-	channels := make([]model.Channel, 0, len(keys))
-	for index, key := range keys {
-		if key == "" {
-			continue
-		}
-		localChannel := channel
-		localChannel.Key = key
-		if index > 0 {
-			localChannel.Name = localChannel.Name + "_" + strconv.Itoa(index+1)
-		}
-
-		if len(baseUrls) > index && baseUrls[index] != "" {
-			localChannel.BaseURL = &baseUrls[index]
-		} else if len(baseUrls) > 0 {
-			localChannel.BaseURL = &baseUrls[0]
-		}
-
-		channels = append(channels, localChannel)
-	}
-	err = model.BatchInsertChannels(channels)
+	
+	// Insert channel and keys
+	err = channel.Insert()
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -100,6 +89,7 @@ func AddChannel(c *gin.Context) {
 		})
 		return
 	}
+	
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
@@ -156,8 +146,18 @@ func DeleteDisabledChannel(c *gin.Context) {
 }
 
 func UpdateChannel(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	
 	channel := model.Channel{}
-	err := c.ShouldBindJSON(&channel)
+	err = c.ShouldBindJSON(&channel)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -165,11 +165,14 @@ func UpdateChannel(c *gin.Context) {
 		})
 		return
 	}
-	if channel.Models == "" {
-		err = channel.Update(false)
-	} else {
-		err = channel.Update(true)
+	
+	// Check if the key field contains multiple keys (might be in Key or Keys)
+	if channel.Keys == "" && channel.Key != "" {
+		channel.Keys = channel.Key
 	}
+	
+	channel.Id = id
+	err = channel.Update(true)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -177,10 +180,10 @@ func UpdateChannel(c *gin.Context) {
 		})
 		return
 	}
+	
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
-		"data":    channel,
 	})
 }
 

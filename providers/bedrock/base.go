@@ -90,6 +90,7 @@ func (p *BedrockProvider) GetRequestHeaders() (headers map[string]string) {
 }
 
 func getKeyConfig(bedrock *BedrockProvider) {
+	// Use pipe character as separator for Bedrock credentials
 	keys := strings.Split(bedrock.Channel.Key, "|")
 	if len(keys) < 3 {
 		return

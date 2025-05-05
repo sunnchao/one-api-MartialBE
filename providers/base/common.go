@@ -233,3 +233,50 @@ func (p *BaseProvider) GetOtherArg() string {
 func (p *BaseProvider) SetOtherArg(otherArg string) {
 	p.OtherArg = otherArg
 }
+
+// UpdateAuthHeader updates the authorization header with the appropriate key
+func (p *BaseProvider) UpdateAuthHeader(headers map[string]string) error {
+	// Get the next available key using round-robin
+	key, keyId, err := p.Channel.GetKeyForRequest()
+	if err != nil {
+		return err
+	}
+	
+	// If no key is available
+	if key == "" {
+		return fmt.Errorf("no available API key found for this channel")
+	}
+	
+	// Store the keyId for potential error tracking
+	if p.Context != nil {
+		p.Context.Set("channel_key_id", keyId)
+	}
+	
+	// Default auth header - can be overridden by provider implementations
+	headers["Authorization"] = "Bearer " + key
+	
+	return nil
+}
+
+// HandleRequestError processes errors from API requests and updates key status if needed
+func (p *BaseProvider) HandleRequestError(err *types.OpenAIErrorWithStatusCode) {
+	if err == nil || p.Channel == nil {
+		return
+	}
+	
+	// Record the error for the key if appropriate
+	switch err.StatusCode {
+	case http.StatusUnauthorized, http.StatusForbidden, http.StatusTooManyRequests, http.StatusBadRequest:
+		// Errors that might be related to the key
+		p.Channel.RecordKeyError(err.Error())
+	}
+}
+
+// GetAuthorizationHeader returns the authorization header for API requests
+func (p *BaseProvider) GetAuthorizationHeader() string {
+	key, _, _ := p.Channel.GetKeyForRequest()
+	if key == "" {
+		return ""
+	}
+	return "Bearer " + key
+}
