@@ -18,7 +18,6 @@ func GetChannelsList(c *gin.Context) {
 		return
 	}
 
-	// 打印params
 	channels, err := model.GetChannelsList(&params)
 	if err != nil {
 		common.APIRespondWithError(c, http.StatusOK, err)
@@ -74,12 +73,12 @@ func AddChannel(c *gin.Context) {
 		return
 	}
 	channel.CreatedTime = utils.GetTimestamp()
-	
+
 	// Check if the key field contains multiple keys (might be in Key or Keys)
 	if channel.Keys == "" && channel.Key != "" {
 		channel.Keys = channel.Key
 	}
-	
+
 	// Insert channel and keys
 	err = channel.Insert()
 	if err != nil {
@@ -89,7 +88,7 @@ func AddChannel(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
@@ -155,13 +154,17 @@ func UpdateChannel(c *gin.Context) {
 		})
 		return
 	}
-	
-	// Check if the key field contains multiple keys (might be in Key or Keys)
-	if channel.Keys == "" && channel.Key != "" {
-		channel.Keys = channel.Key
+
+	if channel.Models == "" {
+		err = channel.Update(false)
+	} else {
+		// Check if the key field contains multiple keys (might be in Key or Keys)
+		if channel.Keys == "" && channel.Key != "" {
+			channel.Keys = channel.Key
+		}
+		err = channel.Update(true)
 	}
-	
-	err = channel.Update(true)
+
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -169,10 +172,11 @@ func UpdateChannel(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
+		"data":    channel,
 	})
 }
 
