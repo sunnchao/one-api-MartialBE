@@ -5,13 +5,14 @@ import {
   Card,
   Stack,
   Typography,
+  Tabs,
+  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Box,
   InputBase,
   Paper,
   IconButton,
@@ -19,12 +20,17 @@ import {
   useMediaQuery,
   Avatar,
   ButtonBase,
-  Tooltip
+  Tooltip,
+  TextField,
+  InputAdornment,
+  Box
 } from '@mui/material';
 import { Icon } from '@iconify/react';
+import SearchIcon from '@mui/icons-material/Search';
 import { API } from 'utils/api';
 import { showError, ValueFormatter, copy } from 'utils/common';
 import { useTheme } from '@mui/material/styles';
+import IconWrapper from 'ui-component/IconWrapper';
 import Label from 'ui-component/Label';
 import ToggleButtonGroup from 'ui-component/ToggleButton';
 import { useIsAdmin } from 'utils/common';
@@ -134,14 +140,18 @@ export default function ModelPrice() {
 
     const filtered = calculatedRows.filter((row) => row.model.toLowerCase().includes(searchQuery.toLowerCase()));
     setFilteredRows(filtered);
-  }, [availableModels, userGroupMap, selectedGroup, selectedOwnedBy, t, unit, onlyShowAvailable]);
+  }, [availableModels, userGroupMap, selectedGroup, selectedOwnedBy, t, unit, onlyShowAvailable, searchQuery]);
 
-  useEffect(() => {
-    const filtered = rows.filter((row) => row.model.toLowerCase().includes(searchQuery.toLowerCase()));
-    setFilteredRows(filtered);
-  }, [searchQuery, rows]);
+  // useEffect(() => {
+  //   const filtered = rows.filter((row) => row.model.toLowerCase().includes(searchQuery.toLowerCase()));
+  //   setFilteredRows(filtered);
+  // }, [searchQuery, rows]);
 
   const handleOwnedByChange = (newValue) => {
+    setSelectedOwnedBy(newValue);
+  };
+
+  const handleTabChange = (event, newValue) => {
     setSelectedOwnedBy(newValue);
   };
 
@@ -194,7 +204,15 @@ export default function ModelPrice() {
         </Typography>
       </Stack>
 
-      <Card sx={{ p: 2 }}>
+      <Card
+        elevation={0}
+        sx={{
+          p: 3,
+          overflow: 'visible',
+          backgroundColor: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.6) : theme.palette.background.paper,
+          borderRadius: 0
+        }}
+      >
         <Stack spacing={2}>
           {/* <Typography variant="subtitle2" color="textSecondary">
             {t('modelpricePage.group')}
@@ -209,7 +227,7 @@ export default function ModelPrice() {
             {Object.entries(userGroupMap).map(([key, group]) => (
               <Card
                 key={key}
-                onClick={() => handleGroupChange({ target: { value: key } })}
+                onClick={() => handleGroupChange(key)}
                 sx={{
                   p: 2,
                   cursor: 'pointer',
@@ -243,75 +261,120 @@ export default function ModelPrice() {
               </Card>
             ))}
           </Box>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <TextField
-              placeholder={t('modelpricePage.search')}
-              value={searchQuery}
-              onChange={handleSearchChange}
-              variant="outlined"
-              size="small"
-              sx={{ backgroundColor: theme.palette.background.paper }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                )
-              }}
-            />
-            <ToggleButtonGroup value={unit} onChange={handleUnitChange} options={unitOptions} aria-label="unit toggle" />
-          </Stack>
-        </Stack>
-      </Card>
-
-      {/* 模型所属 */}
-      <Box sx={{ width: '100%', backgroundColor: theme.palette.background.paper, p: 2 }}>
-        <Tabs
-          value={selectedOwnedBy}
-          onChange={handleTabChange}
-          textColor="inherit"
-          indicatorColor="primary"
-          variant="standard"
-          sx={{
-            '& .MuiTabs-flexContainer': {
+          {/* 搜索和单位选择 */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
               flexWrap: 'wrap',
-              gap: 1
-            },
-            '& .MuiTabs-indicator': {
-              display: 'none'
-            },
-            borderRadius: 0
-          }}
-        >
-          {uniqueOwnedBy.map((ownedBy, index) => (
-            <Tab
-              key={index}
-              value={ownedBy.id}
-              icon={
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <IconWrapper url={getIconByName(ownedBy.name)} />
-                  <span>{ownedBy.name}</span>
-                </Stack>
-              }
+              gap: 2,
+              mb: 3
+            }}
+          >
+            <Paper
+              component="form"
               sx={{
-                p: 1,
-                borderRadius: 0,
-                transition: 'all 0.2s ease-in-out',
-                '& .MuiTab-iconWrapper': {
-                  margin: 0
-                },
-                '&:hover': {
-                  backgroundColor: (theme) => theme.palette.action.hover,
-                  transform: 'translateY(-1px)'
-                },
-                '&.Mui-selected': {
-                  backgroundColor: (theme) => theme.palette.action.selected
-                }
+                p: '2px 4px',
+                display: 'flex',
+                alignItems: 'center',
+                width: isMobile ? '100%' : 300,
+                borderRadius: '8px',
+                border: 'none',
+                boxShadow: theme.palette.mode === 'dark' ? '0 2px 8px rgba(0,0,0,0.2)' : '0 2px 8px rgba(0,0,0,0.05)',
+                backgroundColor:
+                  theme.palette.mode === 'dark' ? alpha(theme.palette.background.default, 0.6) : theme.palette.background.default
               }}
-            />
-          ))}
-        </Tabs>
-      </Box>
+            >
+              <IconButton sx={{ p: '8px' }} aria-label="search">
+                <Icon icon="eva:search-fill" width={18} height={18} />
+              </IconButton>
+              <InputBase sx={{ ml: 1, flex: 1 }} placeholder={t('modelpricePage.search')} value={searchQuery} onChange={handleSearchChange} />
+              {searchQuery && (
+                <IconButton sx={{ p: '8px' }} aria-label="clear" onClick={clearSearch}>
+                  <Icon icon="eva:close-fill" width={16} height={16} />
+                </IconButton>
+              )}
+            </Paper>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                Unit:
+              </Typography>
+              <ToggleButtonGroup
+                value={unit}
+                onChange={handleUnitChange}
+                options={unitOptions}
+                aria-label="unit toggle"
+                size="small"
+                sx={{
+                  '& .MuiToggleButtonGroup-grouped': {
+                    borderRadius: '6px !important',
+                    mx: 0.5,
+                    border: 0,
+                    boxShadow: theme.palette.mode === 'dark' ? '0 1px 4px rgba(0,0,0,0.2)' : '0 1px 4px rgba(0,0,0,0.05)',
+                    '&.Mui-selected': {
+                      boxShadow: `0 0 0 1px ${theme.palette.primary.main}`
+                    }
+                  }
+                }}
+              />
+            </Box>
+          </Box>
+        </Stack>
+
+
+
+        {/* 模型所属 */}
+        <Box sx={{ width: '100%', backgroundColor: theme.palette.background.paper, p: 0, mt: 2 }}>
+          <Tabs
+            value={selectedOwnedBy}
+            onChange={handleTabChange}
+            textColor="inherit"
+            indicatorColor="primary"
+            variant="standard"
+            sx={{
+              '& .MuiTabs-flexContainer': {
+                flexWrap: 'wrap',
+                gap: 1
+              },
+              '& .MuiTabs-indicator': {
+                display: 'none'
+              },
+              borderRadius: 0
+            }}
+          >
+            {uniqueOwnedBy.map((ownedBy, index) => (
+              <Tab
+                key={index}
+                value={ownedBy.id}
+                icon={
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <IconWrapper url={getIconByName(ownedBy.name)} />
+                    <span>{ownedBy.name}</span>
+                  </Stack>
+                }
+                sx={{
+                  p: 1,
+                  borderRadius: 0,
+                  transition: 'all 0.2s ease-in-out',
+                  '& .MuiTab-iconWrapper': {
+                    margin: 0
+                  },
+                  '&:hover': {
+                    backgroundColor: (theme) => theme.palette.action.hover,
+                    transform: 'translateY(-1px)'
+                  },
+                  '&.Mui-selected': {
+                    backgroundColor: (theme) => theme.palette.action.selected
+                  }
+                }}
+              />
+            ))}
+          </Tabs>
+        </Box>
+
+      </Card>
 
       <Card>
         <TableContainer>
