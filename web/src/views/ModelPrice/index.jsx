@@ -5,32 +5,39 @@ import {
   Card,
   Stack,
   Typography,
-  Tabs,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  InputAdornment,
-  Box
+  Box,
+  InputBase,
+  Paper,
+  IconButton,
+  Fade,
+  useMediaQuery,
+  Avatar,
+  ButtonBase,
+  Tooltip
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import { Icon } from '@iconify/react';
 import { API } from 'utils/api';
-import { showError, ValueFormatter } from 'utils/common';
+import { showError, ValueFormatter, copy } from 'utils/common';
 import { useTheme } from '@mui/material/styles';
-import IconWrapper from 'ui-component/IconWrapper';
 import Label from 'ui-component/Label';
 import ToggleButtonGroup from 'ui-component/ToggleButton';
 import { useIsAdmin } from 'utils/common';
+import { alpha } from '@mui/material/styles';
+
 // ----------------------------------------------------------------------
 export default function ModelPrice() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const ownedby = useSelector((state) => state.siteInfo?.ownedby);
 
+  const [rows, setRows] = useState([]);
   const [filteredRows, setFilteredRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [availableModels, setAvailableModels] = useState({});
@@ -38,6 +45,7 @@ export default function ModelPrice() {
   const [selectedGroup, setSelectedGroup] = useState('default');
   const [selectedOwnedBy, setSelectedOwnedBy] = useState(1);
   const [unit, setUnit] = useState('K');
+  const [onlyShowAvailable, setOnlyShowAvailable] = useState(false);
   const userIsAdmin = useIsAdmin();
 
   const unitOptions = [
@@ -84,6 +92,7 @@ export default function ModelPrice() {
 
     const calculatedRows = Object.entries(availableModels)
       .filter(([, model]) => model.owned_by_id === selectedOwnedBy)
+      .filter(([, model]) => !onlyShowAvailable || model.groups.includes(selectedGroup))
       .map(([modelName, model], index) => {
         const group = userGroupMap[selectedGroup];
         const price =
@@ -113,6 +122,7 @@ export default function ModelPrice() {
         return {
           id: index + 1,
           model: modelName,
+          provider: model.owned_by,
           userGroup: model.groups,
           type: model.price.type,
           input: formatPrice(price.input, model.price.type),
@@ -124,14 +134,19 @@ export default function ModelPrice() {
 
     const filtered = calculatedRows.filter((row) => row.model.toLowerCase().includes(searchQuery.toLowerCase()));
     setFilteredRows(filtered);
-  }, [availableModels, userGroupMap, selectedGroup, selectedOwnedBy, t, unit, searchQuery]);
+  }, [availableModels, userGroupMap, selectedGroup, selectedOwnedBy, t, unit, onlyShowAvailable]);
 
-  const handleTabChange = (event, newValue) => {
+  useEffect(() => {
+    const filtered = rows.filter((row) => row.model.toLowerCase().includes(searchQuery.toLowerCase()));
+    setFilteredRows(filtered);
+  }, [searchQuery, rows]);
+
+  const handleOwnedByChange = (newValue) => {
     setSelectedOwnedBy(newValue);
   };
 
-  const handleGroupChange = (event) => {
-    setSelectedGroup(event.target.value);
+  const handleGroupChange = (groupKey) => {
+    setSelectedGroup(groupKey);
   };
 
   const handleSearchChange = (event) => {
@@ -142,6 +157,10 @@ export default function ModelPrice() {
     if (newUnit !== null) {
       setUnit(newUnit);
     }
+  };
+
+  const toggleOnlyShowAvailable = () => {
+    setOnlyShowAvailable((prev) => !prev);
   };
 
   const uniqueOwnedBy = [
@@ -157,8 +176,13 @@ export default function ModelPrice() {
   }
 
   const getIconByName = (name) => {
+    if (name === 'all') return null;
     const owner = ownedby.find((item) => item.name === name);
     return owner?.icon;
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
   };
 
   return (
@@ -302,67 +326,80 @@ export default function ModelPrice() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredRows.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell>{row.model}</TableCell>
-                  <TableCell>
-                    {row.type === 'tokens' ? (
-                      <Label color="primary">{t('modelpricePage.tokens')}</Label>
-                    ) : (
-                      <Label variant="outlined" color="primary">
-                        {t('modelpricePage.times')}
-                      </Label>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Stack spacing={1}>
-                      {row.enable ? (
-                        <>
-                          <Box>
-                            <Label color="primary" variant="outlined">
-                              {t('modelpricePage.inputMultiplier')}: {row.input}
-                            </Label>
-                          </Box>
-                          <Box>
-                            <Label color="primary" variant="outlined">
-                              {t('modelpricePage.outputMultiplier')}: {row.output}
-                            </Label>
-                          </Box>
-                        </>
-                      ) : (
-                        <Box>
-                          <Label color="warning">{t('modelpricePage.noneGroup')}</Label>
-                        </Box>
-                      )}
-                    </Stack>
-                  </TableCell>
-                  {/* 可用分组 */}
-                  <TableCell>
-                    <Stack direction="row" spacing={1} flexWrap="wrap">
-                      {row.userGroup.map((groupId) => {
-                        const group = userGroupMap[groupId];
-                        return group ? (
-                          <Label
-                            key={groupId}
-                            color={groupId === selectedGroup ? 'primary' : 'info'}
-                            variant={groupId === selectedGroup ? 'filled' : 'ghost'}
-                            onClick={() => handleGroupChange({ target: { value: groupId } })}
-                            sx={{
-                              cursor: 'pointer',
-                              '&:hover': {
-                                opacity: 0.8
-                              }
-                            }}
-                          >
-                            {group.name}
+              {filteredRows.length > 0 ? (
+                filteredRows.map((row) => (
+                    <TableRow key={row.id}>
+                      <TableCell>{row.model}</TableCell>
+                      <TableCell>
+                        {row.type === 'tokens' ? (
+                          <Label color="primary">{t('modelpricePage.tokens')}</Label>
+                        ) : (
+                          <Label variant="outlined" color="primary">
+                            {t('modelpricePage.times')}
                           </Label>
-                        ) : null;
-                      })}
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Stack spacing={1}>
+                          {row.enable ? (
+                            <>
+                              <Box>
+                                <Label color="primary" variant="outlined">
+                                  {t('modelpricePage.inputMultiplier')}: {row.input}
+                                </Label>
+                              </Box>
+                              <Box>
+                                <Label color="primary" variant="outlined">
+                                  {t('modelpricePage.outputMultiplier')}: {row.output}
+                                </Label>
+                              </Box>
+                            </>
+                          ) : (
+                            <Box>
+                              <Label color="warning">{t('modelpricePage.noneGroup')}</Label>
+                            </Box>
+                          )}
+                        </Stack>
+                      </TableCell>
+                      {/* 可用分组 */}
+                      <TableCell>
+                        <Stack direction="row" spacing={1} flexWrap="wrap">
+                          {row.userGroup.map((groupId) => {
+                            const group = userGroupMap[groupId];
+                            return group ? (
+                              <Label
+                                key={groupId}
+                                color={groupId === selectedGroup ? 'primary' : 'info'}
+                                variant={groupId === selectedGroup ? 'filled' : 'ghost'}
+                                onClick={() => handleGroupChange({ target: { value: groupId } })}
+                                sx={{
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    opacity: 0.8
+                                  }
+                                }}
+                              >
+                                {group.name}
+                              </Label>
+                            ) : null;
+                          })}
+                        </Stack>
+                      </TableCell>
+                      <TableCell>{getOther(t, row.extraRatios)}</TableCell>
+                    </TableRow>
+                  ))
+                ): (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                    <Stack spacing={1.5} alignItems="center">
+                      <Icon icon="eva:search-outline" width={32} height={32} color={theme.palette.text.secondary} />
+                      <Typography variant="body2" color="text.secondary">
+                        {t('common.noData')}
+                      </Typography>
                     </Stack>
                   </TableCell>
-                  <TableCell>{getOther(t, row.extraRatios)}</TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -374,11 +411,9 @@ export default function ModelPrice() {
 
 function getOther(t, extraRatios) {
   if (!extraRatios) return '';
-  // const inputRatio = extraRatios.input_audio_tokens_ratio;
-  // const outputRatio = extraRatios.output_audio_tokens_ratio;
 
   return (
-    <Stack direction="column" spacing={1}>
+    <Stack direction="column" spacing={0.5}>
       {Object.entries(extraRatios).map(([key, value]) => (
         <Label key={key} color="primary" variant="ghost">
           {t(`modelpricePage.${key}`)}: {value}

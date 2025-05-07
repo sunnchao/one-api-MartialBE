@@ -60,7 +60,7 @@ func GetRedemptionById(id int) (*Redemption, error) {
 	return &redemption, err
 }
 
-func Redeem(key string, userId int) (quota int, err error) {
+func Redeem(key string, userId int, ip string) (quota int, err error) {
 	if key == "" {
 		return 0, errors.New("未提供兑换码")
 	}
@@ -107,25 +107,25 @@ func Redeem(key string, userId int) (quota int, err error) {
 	if err != nil {
 		return 0, errors.New("兑换失败，" + err.Error())
 	}
-	RecordLog(userId, LogTypeTopup, fmt.Sprintf("通过兑换码充值 %s", common.LogQuota(redemption.Quota)), "")
+	RecordQuotaLog(userId, LogTypeTopup, redemption.Quota, ip, fmt.Sprintf("通过兑换码充值 %s", common.LogQuota(redemption.Quota)))
 
-	// 本次充值的额度
-	var redeQuota = redemption.Quota
+  // 本次充值的额度
+  var redeQuota = redemption.Quota
 
-	// 截止到2024.6.19 活动兑换 加25%
-	if redemption.RedeemedTime <= 1718726399 {
-		otherQuota := redemption.Quota * 25 / 100
-		err = DB.Model(&User{}).Where("id = ?", userId).Update("quota", gorm.Expr("quota + ?", otherQuota)).Error
-		if err != nil {
-			logger.SysLog("活动兑换加倍失败，" + err.Error())
-		} else {
-			RecordLog(userId, LogTypeTopup, fmt.Sprintf("6.18活动兑换赠送 %s", common.LogQuota(otherQuota)), "")
-			redeQuota = redemption.Quota + otherQuota
-		}
+  // 截止到2024.6.19 活动兑换 加25%
+  if redemption.RedeemedTime <= 1718726399 {
+    otherQuota := redemption.Quota * 25 / 100
+    err = DB.Model(&User{}).Where("id = ?", userId).Update("quota", gorm.Expr("quota + ?", otherQuota)).Error
+    if err != nil {
+      logger.SysLog("活动兑换加倍失败，" + err.Error())
+    } else {
+      RecordLog(userId, LogTypeTopup, fmt.Sprintf("6.18活动兑换赠送 %s", common.LogQuota(otherQuota)), "")
+      redeQuota = redemption.Quota + otherQuota
+    }
 
-	}
+  }
 
-	return redeQuota, nil
+  return redeQuota, nil
 }
 
 func (redemption *Redemption) Insert() error {

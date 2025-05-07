@@ -9,10 +9,10 @@ import { TableRow, TableCell, Stack, Tooltip, Typography } from '@mui/material';
 
 import { timestamp2string, renderQuota } from 'utils/common';
 import Label from 'ui-component/Label';
-import LogType from '../type/LogType';
+import { useLogType } from '../type/LogType';
 import { useTranslation } from 'react-i18next';
 
-function renderType(type, isError) {
+function renderType(type, logTypes, isError) {
   if (isError) {
     return (
       <Label color="error" variant="outlined">
@@ -20,7 +20,7 @@ function renderType(type, isError) {
       </Label>
     );
   }
-  const typeOption = LogType[type];
+  const typeOption = logTypes[type];
   if (typeOption) {
     return (
       <Label variant="filled" color={typeOption.color}>
@@ -70,6 +70,7 @@ function requestTSLabelOptions(request_ts) {
 
 export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibility }) {
   const { t } = useTranslation();
+  const LogType = useLogType();
   let request_time = item.request_time / 1000;
   let request_time_str = request_time.toFixed(2) + ' S';
 
@@ -126,8 +127,8 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
             )}
           </TableCell>
         )}
-        {columnVisibility.type && <TableCell sx={{ p: '12px 12px' }}>{renderType(item.type, item.is_error)}</TableCell>}
-        {columnVisibility.model_name && <TableCell sx={{ p: '12px 12px' }}>{viewModelName(item.model_name, item.is_stream)}</TableCell>}
+        {columnVisibility.type && <TableCell sx={{ p: '10px 8px' }}>{renderType(item.type, LogType, item.is_error)}</TableCell>}
+        {columnVisibility.model_name && <TableCell sx={{ p: '10px 8px' }}>{viewModelName(item.model_name, item.is_stream)}</TableCell>}
 
         {columnVisibility.duration && (
           <TableCell sx={{ p: '12px 12px' }}>
