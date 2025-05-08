@@ -272,10 +272,10 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
     values.group = values.groups.join(',');
 
     // 创建新的 channel_keys
-    const channelKeys = values.key.split(',').map((key) => {
+    const channelKeys = values.key?.split(',').map((key) => {
       return key.trim();
     });
-    values.keys = channelKeys.join(',');
+    values.keys = channelKeys?.join(',');
 
     let baseApiUrl = '/api/channel/';
 
@@ -394,7 +394,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
         }
         if (data.channel_keys !== null) {
           data.key = data.channel_keys
-            .map((ck, index) => {
+            ?.map((ck, index) => {
               return ck.key + (index === data.channel_keys.length - 1 ? '' : ',');
             })
             .join('\n');
