@@ -242,6 +242,14 @@ func MjAuth() func(c *gin.Context) {
 		c.Set("mj_model", model)
 
 		key := c.Request.Header.Get("mj-api-secret")
+		if key == "" {
+			// 获取 bearer token
+			key = c.Request.Header.Get("Authorization")
+			if key == "" {
+				abortWithMessage(c, http.StatusUnauthorized, "无权进行此操作，未提供 mj-api-secret 或 Authorization")
+				return
+			}
+		}
 		tokenAuth(c, key)
 	}
 }
