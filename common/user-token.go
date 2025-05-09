@@ -66,7 +66,8 @@ func GenerateToken(tokenID, userID int) (string, error) {
 	h.Write([]byte(payload))
 	signature := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 
-	return payload + "_" + signature, nil
+	// return payload + "_" + signature, nil
+	return payload + "" + signature, nil
 }
 
 func ValidateToken(token string) (tokenID, userID int, err error) {

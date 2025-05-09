@@ -98,26 +98,26 @@ func GetTokenModel(key string) (token *Token, err error) {
 	var tokenId int
 	validUser := false
 
-	switch len(key) {
-	case 48:
-		validUser = true
-		if config.RedisEnabled {
-			exists, _ := redis.RedisSIsMember(OldUserTokensCacheKey, key)
-			if !exists {
-				return nil, ErrTokenInvalid
-			}
-		}
-	case 59:
-		tokenId, userId, err = common.ValidateToken(key)
-		if err != nil || userId == 0 || tokenId == 0 {
-			return nil, ErrTokenInvalid
-		}
-		if userEnabled, err := CacheIsUserEnabled(userId); err != nil || !userEnabled {
-			return nil, ErrTokenInvalid
-		}
-	default:
-		return nil, ErrTokenInvalid
-	}
+	// switch len(key) {
+	// case 48:
+	// 	validUser = true
+	// 	if config.RedisEnabled {
+	// 		exists, _ := redis.RedisSIsMember(OldUserTokensCacheKey, key)
+	// 		if !exists {
+	// 			return nil, ErrTokenInvalid
+	// 		}
+	// 	}
+	// case 59:
+	// 	tokenId, userId, err = common.ValidateToken(key)
+	// 	if err != nil || userId == 0 || tokenId == 0 {
+	// 		return nil, ErrTokenInvalid
+	// 	}
+	// 	if userEnabled, err := CacheIsUserEnabled(userId); err != nil || !userEnabled {
+	// 		return nil, ErrTokenInvalid
+	// 	}
+	// default:
+	// 	return nil, ErrTokenInvalid
+	// }
 
 	token, err = CacheGetTokenByKey(key)
 	if err != nil {
