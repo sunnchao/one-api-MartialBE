@@ -227,7 +227,8 @@ const EditModal = ({
           await onSaveSingle({
             ...values,
             input: calculateRate(values.input),
-            output: calculateRate(values.output)
+            output: calculateRate(values.output),
+            cache_input: calculateRate(values.cache_input)
           });
         }
         setSubmitting(false);

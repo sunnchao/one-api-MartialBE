@@ -82,6 +82,10 @@ const Single = ({ ownedby, prices, reloadData }) => {
     try {
       let res;
       formData = trims(formData);
+      // 处理cache_input input output 格式化
+      formData.cache_input = Number(formData.cache_input);
+      formData.input = Number(formData.input);
+      formData.output = Number(formData.output);
       if (formData.isNew || !editRow?.model) {
         res = await API.post('/api/prices/single', formData);
       } else {
