@@ -24,9 +24,9 @@ func Relay(c *gin.Context) {
     return
   }
 
-  if err := relay.setRequest(); err != nil {
-    openaiErr := common.StringErrorWrapperLocal(err.Error(), "chirou_api_error", http.StatusBadRequest)
-    relay.HandleError(openaiErr)
+	if err := relay.setRequest(); err != nil {
+		openaiErr := common.StringErrorWrapperLocal(err.Error(), "one_hub_error", http.StatusBadRequest)
+		relay.HandleJsonError(openaiErr)
     go func() {
       model.RecordConsumeErrorLog(
         c.Request.Context(),
@@ -40,14 +40,13 @@ func Relay(c *gin.Context) {
         c.GetString(logger.RequestIdKey),
       )
     }()
-    return
-  }
+		return
+	}
 
-  c.Set("is_stream", relay.IsStream())
-
-  if err := relay.setProvider(relay.getOriginalModel()); err != nil {
-    openaiErr := common.StringErrorWrapperLocal(err.Error(), "chirou_api_error", http.StatusServiceUnavailable)
-    relay.HandleError(openaiErr)
+	c.Set("is_stream", relay.IsStream())
+	if err := relay.setProvider(relay.getOriginalModel()); err != nil {
+		openaiErr := common.StringErrorWrapperLocal(err.Error(), "one_hub_error", http.StatusServiceUnavailable)
+		relay.HandleJsonError(openaiErr)
     go func() {
       model.RecordConsumeErrorLog(
         c.Request.Context(),
@@ -61,14 +60,30 @@ func Relay(c *gin.Context) {
         c.GetString(logger.RequestIdKey),
       )
     }()
-    return
-  }
+		return
+	}
 
-  apiErr, done := RelayHandler(relay)
-  if apiErr == nil {
-    metrics.RecordProvider(c, 200)
-    return
-  } else {
+	var heartbeat *relay_util.Heartbeat
+	if relay.IsStream() {
+		if setting, exists := c.Get("token_setting"); exists {
+			if tokenSetting, ok := setting.(*model.TokenSetting); ok {
+				if tokenSetting.Heartbeat.Enabled {
+					heartbeat = relay_util.NewHeartbeat(relay_util.HeartbeatConfig{
+						TimeoutSeconds:  tokenSetting.Heartbeat.TimeoutSeconds,
+						IntervalSeconds: 5, // 5s 发送一次心跳
+					}, c)
+					heartbeat.Start()
+					defer heartbeat.Close()
+				}
+			}
+		}
+	}
+
+	apiErr, done := RelayHandler(relay)
+	if apiErr == nil {
+		metrics.RecordProvider(c, 200)
+		return
+	} else {
     go func() {
       model.RecordConsumeErrorLog(
         c.Request.Context(),
@@ -87,10 +102,10 @@ func Relay(c *gin.Context) {
   groupList := c.GetStringSlice("token_group_list")
 
   channel := relay.getProvider().GetChannel()
-  
+
   // Record the error for this specific key
   channel.RecordKeyError(apiErr.Error())
-  
+
   go processChannelRelayError(c.Request.Context(), channel.Id, channel.Name, apiErr, channel.Type)
 
   retryTimes := config.RetryTimes
@@ -157,7 +172,11 @@ func Relay(c *gin.Context) {
     }
   }
 
-  if apiErr != nil {
+	if apiErr != nil {
+		if heartbeat != nil && heartbeat.IsSafeWriteStream() {
+			relay.HandleStreamError(apiErr)
+			return
+		}
     go func() {
       model.RecordConsumeErrorLog(
         c.Request.Context(),
@@ -171,8 +190,8 @@ func Relay(c *gin.Context) {
         c.GetString(logger.RequestIdKey),
       )
     }()
-    relay.HandleError(apiErr)
-  }
+		relay.HandleJsonError(apiErr)
+	}
 }
 
 func RelayHandler(relay RelayBaseInterface) (err *types.OpenAIErrorWithStatusCode, done bool) {

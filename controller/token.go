@@ -126,6 +126,13 @@ func AddToken(c *gin.Context) {
 		}
 	}
 
+	setting := token.Setting.Data()
+	err = validateTokenSetting(&setting)
+	if err != nil {
+		common.APIRespondWithError(c, http.StatusOK, err)
+		return
+	}
+
 	cleanToken := model.Token{
 		UserId:             userId,
 		Name:               token.Name,
@@ -140,6 +147,7 @@ func AddToken(c *gin.Context) {
 		AllowIps:           token.AllowIps,
 		AllowIpsEnabled:    token.AllowIpsEnabled,
 		BillingType:        token.BillingType,
+    Setting:        token.Setting,
 	}
 	if token.Group == "" {
 		token.Group = "default"
@@ -194,6 +202,14 @@ func UpdateToken(c *gin.Context) {
 		})
 		return
 	}
+
+	setting := token.Setting.Data()
+	err = validateTokenSetting(&setting)
+	if err != nil {
+		common.APIRespondWithError(c, http.StatusOK, err)
+		return
+	}
+
 	cleanToken, err := model.GetTokenByIds(token.Id, userId)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -250,7 +266,8 @@ func UpdateToken(c *gin.Context) {
 		cleanToken.AllowIps = token.AllowIps
 		cleanToken.AllowIpsEnabled = token.AllowIpsEnabled
 		cleanToken.BillingType = token.BillingType
-	}
+    cleanToken.Setting = token.Setting
+  }
 	err = cleanToken.Update()
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -301,4 +318,18 @@ func GetUserTokensListByUserId(c *gin.Context) {
 		"message": "",
 		"data":    tokens,
 	})
+}
+
+func validateTokenSetting(setting *model.TokenSetting) error {
+  if setting == nil {
+    return nil
+  }
+
+  if setting.Heartbeat.Enabled {
+    if setting.Heartbeat.TimeoutSeconds < 30 || setting.Heartbeat.TimeoutSeconds > 90 {
+      return errors.New("heartbeat timeout seconds must be between 30 and 90")
+    }
+  }
+
+  return nil
 }

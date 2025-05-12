@@ -22,7 +22,8 @@ import {
   Select,
   MenuItem,
   Stack,
-  IconButton
+  IconButton,
+  Typography
 } from '@mui/material';
 import { Icon } from '@iconify/react';
 
@@ -49,7 +50,17 @@ const validationSchema = Yup.object().shape({
   model_limits: Yup.string(),
   model_limits_enabled: Yup.boolean(),
   billing_type: Yup.string().required('计费类型 不能为空'),
-  group: Yup.array().of(Yup.string()).required('分组 不能为空')
+  group: Yup.array().of(Yup.string()).required('分组 不能为空'),
+  setting: Yup.object().shape({
+    heartbeat: Yup.object().shape({
+      enabled: Yup.boolean(),
+      timeout_seconds: Yup.number().when('enabled', {
+        is: true,
+        then: () => Yup.number().min(30, '时间 必须大于等于30秒').max(90, '时间 必须小于等于90秒').required('时间 不能为空'),
+        otherwise: () => Yup.number()
+      })
+    })
+  })
 });
 
 const originInputs = {
@@ -61,7 +72,13 @@ const originInputs = {
   group: ['default'],
   model_limits: '',
   model_limits_enabled: false,
-  billing_type: 'tokens'
+  billing_type: 'tokens',
+  setting: {
+    heartbeat: {
+      enabled: false,
+      timeout_seconds: 30
+    }
+  }
 };
 
 const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
@@ -73,6 +90,7 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
     setSubmitting(true);
 
     values.remain_quota = parseInt(values.remain_quota);
+    values.setting.heartbeat.timeout_seconds = parseInt(values.setting.heartbeat.timeout_seconds);
     let res;
 
     try {
@@ -244,6 +262,32 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
                   label={t('token_index.unlimitedQuota')}
                 />
               </FormControl>
+
+              {values?.setting?.heartbeat?.enabled && (
+                <FormControl fullWidth>
+                  <InputLabel>{t('token_index.heartbeatTimeout')}</InputLabel>
+                  <OutlinedInput
+                    id="channel-heartbeat-timeout-label"
+                    label={t('token_index.heartbeatTimeout')}
+                    type="number"
+                    value={values?.setting?.heartbeat?.timeout_seconds}
+                    onChange={(e) => {
+                      setFieldValue('setting.heartbeat.timeout_seconds', e.target.value);
+                    }}
+                  />
+
+                  {touched.setting?.heartbeat?.timeout_seconds && errors.setting?.heartbeat?.timeout_seconds ? (
+                    <FormHelperText error id="helper-tex-channel-heartbeat-timeout-label">
+                      {errors.setting?.heartbeat?.timeout_seconds}
+                    </FormHelperText>
+                  ) : (
+                    <FormHelperText id="helper-tex-channel-heartbeat-timeout-label">
+                      {t('token_index.heartbeatTimeoutHelperText')}
+                    </FormHelperText>
+                  )}
+                </FormControl>
+              )}
+
               {/* 分组 */}
               <Stack direction="column" spacing={2} sx={{ marginTop: 2 }}>
                 {values.group.map((group, idx) => (
