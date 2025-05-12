@@ -1,17 +1,17 @@
 package model
 
 import (
-  "crypto/md5"
-  "encoding/hex"
-  "one-api/common/config"
-  "one-api/common/logger"
-  "one-api/common/utils"
-  "slices"
-  "strings"
-  "time"
+	"crypto/md5"
+	"encoding/hex"
+	"one-api/common/config"
+	"one-api/common/logger"
+	"one-api/common/utils"
+	"slices"
+	"strings"
+	"time"
 
-  "gorm.io/datatypes"
-  "gorm.io/gorm"
+	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 type Channel struct {
@@ -101,6 +101,10 @@ func (channel *Channel) LoadKeys() error {
   if err != nil {
     return err
   }
+  // 过滤掉is_deleted为1的key
+  keys = utils.Filter(keys, func(key *ChannelKey) bool {
+    return key.IsDeleted == 0
+  })
 
   channel.ChannelKeys = keys
 
@@ -126,48 +130,35 @@ func (channel *Channel) SaveKeys() error {
   if err != nil {
     return err
   }
-
-  existingKeyMap := make(map[string]*ChannelKey)
-  for _, key := range existingKeys {
-    existingKeyMap[key.Key] = key
-  }
-
-  // Replace newlines with commas and handle both comma and newline separators
-  cleanedKeys := strings.ReplaceAll(channel.Keys, "\n", "")
-
-  // Parse the new keys by comma delimiter
-  keyStrings := strings.Split(cleanedKeys, ",")
-  for i, keyString := range keyStrings {
-    keyString = strings.TrimSpace(keyString)
-    if keyString == "" {
-      continue
-    }
-
-    if _, exists := existingKeyMap[keyString]; exists {
-      // Key already exists, keep it
-      delete(existingKeyMap, keyString)
-    } else {
-      // New key, add it
-      channelKey := &ChannelKey{
-        ChannelId:   channel.Id,
-        Key:         keyString,
-        Status:      ChannelKeyStatusEnabled,
-        CreatedTime: time.Now().Unix(),
-      }
-      if err := DB.Create(channelKey).Error; err != nil {
-        return err
+  // 如果existingKeys长度大于0，则删除所有的channel key
+  var ifExist bool
+  ifExist = false
+  if len(existingKeys) > 0 {
+    for _, key := range existingKeys {
+      // 如果key.Key在channel.Keys中，则不删除
+      if !strings.Contains(channel.Keys, key.Key) {
+        key.IsDeleted = 1
+        key.DeletedAt = gorm.DeletedAt{Time: time.Now(), Valid: true}
+        key.Status = ChannelKeyStatusDisabled
+        err = DB.Model(&ChannelKey{}).Where("id = ?", key.Id).Updates(key).Error
+        if err != nil {
+          return err
+        }
+      } else {
+        ifExist = true
       }
     }
-
-    // For backward compatibility, set the first key as the primary key
-    if i == 0 {
-      channel.Key = keyString
-    }
   }
+  if !ifExist {
+    // New key, add it
+    channelKey := &ChannelKey{
+      ChannelId:   channel.Id,
+      Key:         channel.Keys,
+      Status:      ChannelKeyStatusEnabled,
+      CreatedTime: time.Now().Unix(),
+    }
 
-  // Delete keys that are no longer in the list
-  for _, key := range existingKeyMap {
-    if err := DB.Delete(key).Error; err != nil {
+    if err := DB.Create(channelKey).Error; err != nil {
       return err
     }
   }

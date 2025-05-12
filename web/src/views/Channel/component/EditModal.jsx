@@ -272,9 +272,9 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
     values.group = values.groups.join(',');
 
     // 创建新的 channel_keys
-    const channelKeys = values.key?.split(',').map((key) => {
-      return key.trim();
-    });
+    const channelKeys = [values.key]; // values.key?.split(',').map((key) => {
+    //   return key.trim();
+    // });
     values.keys = channelKeys?.join(',');
 
     let baseApiUrl = '/api/channel/';
