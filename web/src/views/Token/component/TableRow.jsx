@@ -178,12 +178,18 @@ export default function TokensTableRow({ item, manageToken, handleOpenModal, set
       <TableRow tabIndex={item.id}>
         <TableCell>{item.name}</TableCell>
         <TableCell>
-          <Stack direction="row" spacing={1}>
-            {item.group.split(',').map((group, idx) => (
-              <Label key={idx} color={userGroup[group]?.color} size="small">
-                {renderGroup(userGroupOptions, group)}
-              </Label>
-            ))}
+          <Stack direction="row" alignItems="center" spacing={0.5}>
+            {item.group.split(',').reduce((acc, group, idx, arr) => {
+              acc.push(
+                <Label key={`label-${group}-${idx}`} color={userGroup[group]?.color} size="small">
+                  {renderGroup(userGroupOptions, group)}
+                </Label>
+              );
+              if (idx < arr.length - 1) {
+                acc.push(<Icon key={`icon-${idx}`} icon="mdi:arrow-right" width={16} height={16} />);
+              }
+              return acc;
+            }, [])}
           </Stack>
         </TableCell>
 
