@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/datatypes"
 )
 
 func GetUserTokensList(c *gin.Context) {
@@ -332,4 +333,31 @@ func validateTokenSetting(setting *model.TokenSetting) error {
   }
 
   return nil
+}
+
+// 创建初始令牌
+func createInitialToken(userId int) error {
+  token := model.Token{
+    UserId: userId,
+    Name: "sys_default",
+    CreatedTime: utils.GetTimestamp(),
+    AccessedTime: utils.GetTimestamp(),
+    ExpiredTime: -1,
+    RemainQuota: 0,
+    UnlimitedQuota: true,
+    Group: "default",
+    ModelLimits: "",
+    ModelLimitsEnabled: false,
+    AllowIps: "",
+    AllowIpsEnabled: false,
+    BillingType: "tokens",
+    Setting: datatypes.NewJSONType(model.TokenSetting{
+      Heartbeat: model.HeartbeatSetting{
+        Enabled: true,
+        TimeoutSeconds: 0,
+      },
+    }),
+  }
+  err := token.Insert()
+  return err
 }

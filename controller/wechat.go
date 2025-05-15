@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"one-api/common/config"
+	"one-api/common/logger"
 	"one-api/model"
 	"strconv"
 	"time"
@@ -93,6 +94,12 @@ func WeChatAuth(c *gin.Context) {
 				})
 				return
 			}
+			go func ()  {
+				err := createInitialToken(user.Id)
+				if err != nil {
+					logger.SysError("创建初始令牌失败: " + err.Error())
+				}
+			}()
 		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,

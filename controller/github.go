@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"golang.org/x/net/proxy"
 	"net"
 	"net/http"
 	"net/url"
@@ -17,6 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/net/proxy"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -307,6 +308,13 @@ func GitHubOAuth(c *gin.Context) {
 			return
 		}
 
+		// 创建初始令牌
+		go func ()  {
+			err := createInitialToken(user.Id)
+			if err != nil {
+				logger.SysError("创建初始令牌失败: " + err.Error())
+			}
+		}()
 	} else {
 		// 如果用户存在，则更新用户
 		user.GitHubId = githubUser.Login

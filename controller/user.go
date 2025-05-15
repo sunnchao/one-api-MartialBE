@@ -9,6 +9,7 @@ import (
 	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/limit"
+	"one-api/common/logger"
 	"one-api/common/utils"
 	"one-api/model"
 	"strconv"
@@ -182,6 +183,12 @@ func Register(c *gin.Context) {
 		})
 		return
 	}
+	go func ()  {
+		err := createInitialToken(cleanUser.Id)
+		if err != nil {
+			logger.SysError("创建初始令牌失败: " + err.Error())
+		}
+	}()
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",

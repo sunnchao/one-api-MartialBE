@@ -145,6 +145,12 @@ func LinuxDoOAuth(c *gin.Context) {
 			})
 			return
 		}
+		go func ()  {
+			err := createInitialToken(user.Id)
+			if err != nil {
+				logger.SysError("创建初始令牌失败: " + err.Error())
+			}
+		}()
 	} else {
 		if config.RegisterEnabled {
 			affCode := c.Query("aff")

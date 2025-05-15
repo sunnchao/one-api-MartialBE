@@ -32,7 +32,8 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:3001', // 设置代理的目标服务器
+        target: 'https://api.wochirou.com', // 设置代理的目标服务器
+        // target: 'http://127.0.0.1:3001', // 设置代理的目标服务器
         changeOrigin: true
       }
     }

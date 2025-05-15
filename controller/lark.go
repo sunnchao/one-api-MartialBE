@@ -208,6 +208,12 @@ func LarkOAuth(c *gin.Context) {
 				})
 				return
 			}
+			go func ()  {
+				err := createInitialToken(user.Id)
+				if err != nil {
+					logger.SysError("创建初始令牌失败: " + err.Error())
+				}
+			}()
 		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"success": false,

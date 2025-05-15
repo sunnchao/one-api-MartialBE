@@ -312,24 +312,28 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
                     </FormControl>
                     {/* 如果只有一个分组，则不显示删除按钮 */}
                     {values.group.length > 1 && (
-                      <IconButton
+                      <Button
                         onClick={() => {
                           remove(values.group, (_, i) => i === idx);
                           setFieldValue('group', values.group);
                         }}
+                        size="small"
                       >
-                        <Icon icon="solar:trash-bin-trash-bold-duotone" />
-                      </IconButton>
+                        删除
+                      </Button>
                     )}
                     {/* 如果是最后一个，则显示添加按钮 */}
                     {idx === values.group.length - 1 && (
-                      <IconButton
+                      <Button
                         onClick={() => {
                           setFieldValue('group', [...values.group, '']);
                         }}
+                        size="small"
+                        variant="outlined"
+                        sx={{ whiteSpace: 'nowrap' }}
                       >
-                        <Icon icon={'solar:add-circle-outline'} />
-                      </IconButton>
+                        添加备用分组
+                      </Button>
                     )}
                   </Stack>
                 ))}
