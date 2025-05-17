@@ -193,7 +193,6 @@ const StatisticalLineChartCard = ({ isLoading, title, chartData, todayValue, las
                           display: 'flex',
                           alignItems: 'center',
                           bgcolor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
-                          borderRadius: '12px',
                           py: 0.5,
                           px: 1
                         }}
