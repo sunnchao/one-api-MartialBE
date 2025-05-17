@@ -215,13 +215,20 @@ func GetTokenByName(name string, userId int) (*Token, error) {
 }
 
 func GetTokenByKey(key string) (*Token, error) {
+	// Strip 'Bearer ' prefix if present
+	key = strings.TrimPrefix(strings.TrimSpace(key), "Bearer ")
+	
+	// Check if key is empty after processing
+	if key == "" {
+		return nil, ErrTokenInvalid
+	}
+
 	keyCol := "`key`"
 	if common.UsingPostgreSQL {
 		keyCol = `"key"`
 	}
 
 	var token Token
-
 	err := DB.Where(keyCol+" = ?", key).First(&token).Error
 	return &token, err
 }
