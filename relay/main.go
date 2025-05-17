@@ -63,7 +63,7 @@ func Relay(c *gin.Context) {
 		return
 	}
 
-	heartbeat := relay.SetHeartbeat()
+	heartbeat := relay.SetHeartbeat(relay.IsStream())
 	if heartbeat != nil {
 		defer heartbeat.Close()
 	}
