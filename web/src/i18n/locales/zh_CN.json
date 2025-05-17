@@ -28,7 +28,7 @@
     "status": "状态",
     "login": "登录",
     "signup": "注册",
-    "signout": "注销",
+    "signout": "退出登录",
     "console": "控制台",
     "error": "错误",
     "unknownVersion": "未知版本",

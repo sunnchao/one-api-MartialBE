@@ -307,7 +307,7 @@ const BaseIndex = () => {
                   }}
                 >
                   {[
-                    { count: '100万+', label: '日调用次数' },
+                    // { count: '100万+', label: '日调用次数' },
                     { count: '99.99%', label: '服务可用性' },
                     { count: '24/7', label: '全天候稳定运行' }
                   ].map((stat, index) => (
