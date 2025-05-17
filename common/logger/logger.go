@@ -19,9 +19,10 @@ import (
 )
 
 const (
-  loggerINFO  = "INFO"
-  loggerWarn  = "WARN"
-  loggerError = "ERR"
+	loggerINFO  = "INFO"
+	loggerWarn  = "WARN"
+	loggerError = "ERR"
+	loggerDEBUG = "DEBUG"
 )
 const (
   RequestIdKey = "X-Oneapi-Request-Id"
@@ -49,7 +50,7 @@ func NewHourlyRotateWriter(logDir string, baseFilename string, maxSize, maxAge, 
     baseFilename: baseFilename,
     currentHour: now.Hour(),
   }
-  
+
   // Initialize the lumberjack logger
   writer.lumberjackLogger = &lumberjack.Logger{
     Filename:   filepath.Join(logDir, baseFilename),
@@ -58,7 +59,7 @@ func NewHourlyRotateWriter(logDir string, baseFilename string, maxSize, maxAge, 
     MaxBackups: maxBackups,
     Compress:   compress,
   }
-  
+
   return writer
 }
 
@@ -66,10 +67,10 @@ func NewHourlyRotateWriter(logDir string, baseFilename string, maxSize, maxAge, 
 func (w *HourlyRotateWriter) Write(p []byte) (n int, err error) {
   w.mu.Lock()
   defer w.mu.Unlock()
-  
+
   now := time.Now()
   currentHour := now.Hour()
-  
+
   // Check if hour has changed
   if currentHour != w.currentHour {
     // Rename the current log file with timestamp
@@ -77,20 +78,20 @@ func (w *HourlyRotateWriter) Write(p []byte) (n int, err error) {
     if utils.IsFileExist(oldFilePath) {
       // Format: one-hub.YYYYMMDDHH.log
       timestamp := time.Date(now.Year(), now.Month(), now.Day(), w.currentHour, 0, 0, 0, now.Location())
-      newFileName := fmt.Sprintf("%s.%s.log", 
+      newFileName := fmt.Sprintf("%s.%s.log",
         strings.TrimSuffix(w.baseFilename, filepath.Ext(w.baseFilename)),
         timestamp.Format("20060102150405")[0:10])
       newFilePath := filepath.Join(w.logDir, newFileName)
-      
+
       // Close current file
       w.lumberjackLogger.Close()
-      
+
       // Rename the file
       os.Rename(oldFilePath, newFilePath)
-      
+
       // Update current hour
       w.currentHour = currentHour
-      
+
       // Create a new lumberjack logger with the same settings
       w.lumberjackLogger = &lumberjack.Logger{
         Filename:   oldFilePath,
@@ -101,7 +102,7 @@ func (w *HourlyRotateWriter) Write(p []byte) (n int, err error) {
       }
     }
   }
-  
+
   return w.lumberjackLogger.Write(p)
 }
 
@@ -143,7 +144,7 @@ func getEncoder() zapcore.Encoder {
 
 func getLogWriter(logDir string) zapcore.WriteSyncer {
   filename := utils.GetOrDefault("logs.filename", "one-hub.log")
-  
+
   maxsize := utils.GetOrDefault("logs.max_size", 100)
   maxAge := utils.GetOrDefault("logs.max_age", 7)
   maxBackup := utils.GetOrDefault("logs.max_backup", 10)
@@ -224,6 +225,10 @@ func SysError(s string) {
   Logger.Error("[SYS] | " + s)
 }
 
+func SysDebug(s string) {
+	Logger.Debug("[SYS] | " + s)
+}
+
 func LogInfo(ctx context.Context, msg string) {
   logHelper(ctx, loggerINFO, msg)
 }
@@ -236,6 +241,10 @@ func LogError(ctx context.Context, msg string) {
   logHelper(ctx, loggerError, msg)
 }
 
+func LogDebug(ctx context.Context, msg string) {
+	logHelper(ctx, loggerDEBUG, msg)
+}
+
 func logHelper(ctx context.Context, level string, msg string) {
 
   id, ok := ctx.Value(RequestIdKey).(string)
@@ -245,16 +254,18 @@ func logHelper(ctx context.Context, level string, msg string) {
 
   logMsg := fmt.Sprintf("%s | %s \n", id, msg)
 
-  switch level {
-  case loggerINFO:
-    Logger.Info(logMsg)
-  case loggerWarn:
-    Logger.Warn(logMsg)
-  case loggerError:
-    Logger.Error(logMsg)
-  default:
-    Logger.Info(logMsg)
-  }
+	switch level {
+	case loggerINFO:
+		Logger.Info(logMsg)
+	case loggerWarn:
+		Logger.Warn(logMsg)
+	case loggerError:
+		Logger.Error(logMsg)
+	case loggerDEBUG:
+		Logger.Debug(logMsg)
+	default:
+		Logger.Info(logMsg)
+	}
 
 }
 

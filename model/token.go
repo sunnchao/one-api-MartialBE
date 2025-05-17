@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"one-api/common"
 	"one-api/common/config"
+	"one-api/common/database"
 	"one-api/common/logger"
 	"one-api/common/redis"
 	"one-api/common/stmp"
 	"one-api/common/utils"
 	"strings"
 
-	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -36,26 +36,27 @@ const (
 )
 
 type Token struct {
-	Id                 int              `json:"id"`
-	UserId             int              `json:"user_id"`
-	Key                string           `json:"key" gorm:"type:varchar(59);uniqueIndex"`
-	Status             int              `json:"status" gorm:"default:1"`
-	Name               string           `json:"name" gorm:"index" `
-	CreatedTime        int64            `json:"created_time" gorm:"bigint"`
-	AccessedTime       int64            `json:"accessed_time" gorm:"bigint"`
-	ExpiredTime        int64            `json:"expired_time" gorm:"bigint;default:-1"` // -1 means never expired
-	RemainQuota        int              `json:"remain_quota" gorm:"default:0"`
-	UnlimitedQuota     bool             `json:"unlimited_quota" gorm:"default:false"`
-	UsedQuota          int              `json:"used_quota" gorm:"default:0"` // used quota
-	Group              string           `json:"group" gorm:"default:''"`
-	ModelLimits        string           `json:"model_limits" gorm:"default:''"`
-	ModelLimitsEnabled bool             `json:"model_limits_enabled" gorm:"default:false"`
-	AllowIps           string           `json:"allow_ips" gorm:"default:''"`
-	AllowIpsEnabled    bool             `json:"allow_ips_enabled" gorm:"default:false"`
-	BillingType        TokenBillingType `json:"billing_type" gorm:"default:'tokens'"` // 计费类型
+	Id             int            `json:"id"`
+	UserId         int            `json:"user_id"`
+	Key            string         `json:"key" gorm:"type:varchar(59);uniqueIndex"`
+	Status         int            `json:"status" gorm:"default:1"`
+	Name           string         `json:"name" gorm:"index" `
+	CreatedTime    int64          `json:"created_time" gorm:"bigint"`
+	AccessedTime   int64          `json:"accessed_time" gorm:"bigint"`
+	ExpiredTime    int64          `json:"expired_time" gorm:"bigint;default:-1"` // -1 means never expired
+	RemainQuota    int            `json:"remain_quota" gorm:"default:0"`
+	UnlimitedQuota bool           `json:"unlimited_quota" gorm:"default:false"`
+	UsedQuota      int            `json:"used_quota" gorm:"default:0"` // used quota
+	Group          string         `json:"group" gorm:"default:''"`
+  ModelLimits        string           `json:"model_limits" gorm:"default:''"`
+  ModelLimitsEnabled bool             `json:"model_limits_enabled" gorm:"default:false"`
+  AllowIps           string           `json:"allow_ips" gorm:"default:''"`
+  AllowIpsEnabled    bool             `json:"allow_ips_enabled" gorm:"default:false"`
+  BillingType        TokenBillingType `json:"billing_type" gorm:"default:'tokens'"` // 计费类型
 
-	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
-  Setting datatypes.JSONType[TokenSetting] `json:"setting" form:"setting" gorm:"type:json"`
+  DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+
+	Setting database.JSONType[TokenSetting] `json:"setting" form:"setting" gorm:"type:json"`
 }
 
 var allowedTokenOrderFields = map[string]bool{
