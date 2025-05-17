@@ -208,6 +208,10 @@ var BatchUpdateInterval = 5
 
 var MCP_ENABLE = false
 
+var UPTIMEKUMA_ENABLE = false
+var UPTIMEKUMA_DOMAIN = ""
+var UPTIMEKUMA_STATUS_PAGE_NAME = ""
+
 // Gemini
 var GeminiAPIEnabled = true
 
