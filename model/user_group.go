@@ -1,23 +1,26 @@
 package model
 
 import (
+	"fmt"
+	"one-api/common/config"
 	"one-api/common/limit"
 	"one-api/common/logger"
+	"one-api/common/redis"
 	"sync"
 	"time"
 )
 
 type UserGroup struct {
-	Id      int     `json:"id"`
-	Symbol  string  `json:"symbol" gorm:"type:varchar(50);uniqueIndex"`
-	Name    string  `json:"name" gorm:"type:varchar(50)"`
-	Ratio   float64 `json:"ratio" gorm:"type:decimal(10,2); default:1"` // 倍率
-	APIRate int     `json:"api_rate" gorm:"default:600"`                // 每分组允许的请求数
-	Public  bool    `json:"public" form:"public" gorm:"default:false"`  // 是否为公开分组，如果是，则可以被用户在令牌中选择
-	// Promotion bool  `json:"promotion" form:"promotion" gorm:"default:false"` // 是否是自动升级用户组， 如果是则用户充值金额满足条件自动升级
-	// Min       int   `json:"min" form:"min" gorm:"default:0"`                 // 晋级条件最小值
-	// Max       int   `json:"max" form:"max" gorm:"default:0"`                 // 晋级条件最大值
-	Enable *bool `json:"enable" form:"enable" gorm:"default:true"` // 是否启用
+	Id        int     `json:"id"`
+	Symbol    string  `json:"symbol" gorm:"type:varchar(50);uniqueIndex"`
+	Name      string  `json:"name" gorm:"type:varchar(50)"`
+	Ratio     float64 `json:"ratio" gorm:"type:decimal(10,2); default:1"`      // 倍率
+	APIRate   int     `json:"api_rate" gorm:"default:600"`                     // 每分组允许的请求数
+	Public    bool    `json:"public" form:"public" gorm:"default:false"`       // 是否为公开分组，如果是，则可以被用户在令牌中选择
+	Promotion bool    `json:"promotion" form:"promotion" gorm:"default:false"` // 是否是自动升级用户组， 如果是则用户充值金额满足条件自动升级
+	Min       int     `json:"min" form:"min" gorm:"default:0"`                 // 晋级条件最小值
+	Max       int     `json:"max" form:"max" gorm:"default:0"`                 // 晋级条件最大值
+	Enable    *bool   `json:"enable" form:"enable" gorm:"default:true"`        // 是否启用
 }
 
 type SearchUserGroupParams struct {
@@ -73,7 +76,7 @@ func (c *UserGroup) Create() error {
 }
 
 func (c *UserGroup) Update() error {
-	err := DB.Select("name", "ratio", "public", "api_rate").Updates(c).Error
+	err := DB.Select("name", "ratio", "public", "api_rate", "promotion", "min", "max").Updates(c).Error
 	if err == nil {
 		GlobalUserGroupRatio.Load()
 	}
@@ -194,14 +197,65 @@ func (cgrm *UserGroupRatio) GetAPILimiter(symbol string) limit.RateLimiter {
 
 // 创建 定时任务
 func SyncUserGroupRatioCache(frequency int) {
-	// 只有 从 服务器端获取数据的时候才会用到
+  // 只有 从 服务器端获取数据的时候才会用到
   // if config.IsMasterNode {
   //   logger.SysLog("master node does't synchronize the channel")
   //   return
   // }
-	for {
-		time.Sleep(time.Duration(frequency) * time.Second)
-		logger.SysLog("sync user group ratio cache")
-		GlobalUserGroupRatio.Load()
+  for {
+    time.Sleep(time.Duration(frequency) * time.Second)
+    logger.SysLog("sync user group ratio cache")
+    GlobalUserGroupRatio.Load()
+  }
+}
+
+// CheckAndUpgradeUserGroup checks if a user's cumulative recharge amount falls within any promotion group's range
+// and upgrades the user to that group if a match is found.
+// The cumulative recharge amount is calculated as Quota + UsedQuota + rechargeAmount.
+func CheckAndUpgradeUserGroup(userId int, rechargeAmount int) error {
+	// Get user's current quota and used quota
+	user := &User{}
+	err := DB.Where("id = ?", userId).First(user).Error
+	if err != nil {
+		return err
 	}
+
+	// Calculate cumulative recharge amount
+	cumulativeAmount := user.Quota + user.UsedQuota + rechargeAmount
+	logger.SysError(fmt.Sprintf("use:%f q:%f  cumulative:%f rechargeAmount:%f", (float64)(user.UsedQuota)/config.QuotaPerUnit, (float64)(user.Quota)/config.QuotaPerUnit, cumulativeAmount, rechargeAmount))
+	// Get all promotion-enabled user groups
+	var promotionGroups []*UserGroup
+	err = DB.Where("promotion = ? AND enable = ?", true, true).Find(&promotionGroups).Error
+	if err != nil {
+		return err
+	}
+
+	// Find a matching group (min <= cumulativeAmount < max)
+	var targetGroup *UserGroup
+	for _, group := range promotionGroups {
+		var minQuota = (float64)(group.Min) * config.QuotaPerUnit
+		var maxQuota = (float64)(group.Max) * config.QuotaPerUnit
+		if (float64)(cumulativeAmount) >= minQuota && (group.Max == 0 || (float64)(cumulativeAmount) < maxQuota) {
+			// If multiple groups match, choose the one with higher min value
+			if targetGroup == nil || group.Min > targetGroup.Min {
+				targetGroup = group
+			}
+		}
+	}
+
+	// If a matching group is found, upgrade the user
+	if targetGroup != nil && targetGroup.Symbol != user.Group {
+		// Update user's group
+		err = DB.Model(&User{}).Where("id = ?", userId).Update("group", targetGroup.Symbol).Error
+		if err != nil {
+			return err
+		}
+
+		// Delete cache if Redis is enabled
+		if config.RedisEnabled {
+			redis.RedisDel(fmt.Sprintf(UserGroupCacheKey, userId))
+		}
+	}
+
+	return nil
 }
