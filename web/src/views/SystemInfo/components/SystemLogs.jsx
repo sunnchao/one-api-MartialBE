@@ -97,7 +97,7 @@ const SystemLogs = () => {
     // Initial fetch only when component mounts
     fetchLogs();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);  // Empty dependency array means this runs once on mount
+  }, []); // Empty dependency array means this runs once on mount
 
   // Fetch logs when maxEntries changes
   useEffect(() => {
@@ -105,7 +105,8 @@ const SystemLogs = () => {
     const controller = new AbortController();
 
     // Skip the initial render
-    if (maxEntries !== 50) { // 50 is the default value
+    if (maxEntries !== 50) {
+      // 50 is the default value
       fetchLogs();
     }
 
@@ -205,9 +206,9 @@ const SystemLogs = () => {
     <MainCard
       title={t('System Logs')}
       secondary={
-        <Stack 
-          direction={{ xs: 'column', sm: 'row' }} 
-          spacing={2} 
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={2}
           alignItems={{ xs: 'flex-start', sm: 'center' }}
           sx={{ flexWrap: 'wrap' }}
         >
@@ -243,10 +244,10 @@ const SystemLogs = () => {
             InputProps={{ inputProps: { min: 1, max: 500 } }}
             sx={{ width: { xs: '100%', sm: '120px' } }}
           />
-          <Button 
-            variant="outlined" 
-            color="error" 
-            onClick={handleClearLogs} 
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={handleClearLogs}
             startIcon={<Icon icon="solar:trash-bin-trash-bold" />}
             sx={{ width: { xs: '100%', sm: 'auto' } }}
           >
@@ -289,7 +290,7 @@ const SystemLogs = () => {
       <Box
         ref={logsContainerRef}
         sx={{
-          height: '450px',
+          height: '100%',
           overflowY: 'auto',
           bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'background.paper' : 'grey.50'),
           p: 1,
@@ -305,13 +306,9 @@ const SystemLogs = () => {
             {t('No matching logs found')}
           </Typography>
         ) : (
-          filteredLogs.map((log, index) => (
+          filteredLogs.reverse().map((log, index) => (
             <Box key={index} sx={{ mb: 1, p: 1, borderRadius: 1, bgcolor: 'background.paper' }}>
-              <Stack 
-                direction={{ xs: 'column', sm: 'row' }} 
-                spacing={1} 
-                alignItems={{ xs: 'flex-start', sm: 'center' }}
-              >
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: { xs: '100%', sm: 'auto' } }}>
                   <Typography variant="caption" color="textSecondary">
                     {formatTimestamp(log.timestamp)}
