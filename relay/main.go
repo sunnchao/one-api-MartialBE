@@ -1,19 +1,19 @@
 package relay
 
 import (
-	"fmt"
-	"net/http"
-	"one-api/common"
-	"one-api/common/config"
-	"one-api/common/logger"
-	"one-api/common/utils"
-	"one-api/metrics"
-	"one-api/model"
-	"one-api/relay/relay_util"
-	"one-api/types"
-	"time"
+  "fmt"
+  "net/http"
+  "one-api/common"
+  "one-api/common/config"
+  "one-api/common/logger"
+  "one-api/common/utils"
+  "one-api/metrics"
+  "one-api/model"
+  "one-api/relay/relay_util"
+  "one-api/types"
+  "time"
 
-	"github.com/gin-gonic/gin"
+  "github.com/gin-gonic/gin"
 )
 
 func Relay(c *gin.Context) {
@@ -24,9 +24,9 @@ func Relay(c *gin.Context) {
     return
   }
 
-	if err := relay.setRequest(); err != nil {
-		openaiErr := common.StringErrorWrapperLocal(err.Error(), "one_hub_error", http.StatusBadRequest)
-		relay.HandleJsonError(openaiErr)
+  if err := relay.setRequest(); err != nil {
+    openaiErr := common.StringErrorWrapperLocal(err.Error(), "chirou_api_error", http.StatusBadRequest)
+    relay.HandleJsonError(openaiErr)
     go func() {
       model.RecordConsumeErrorLog(
         c.Request.Context(),
@@ -40,13 +40,13 @@ func Relay(c *gin.Context) {
         c.GetString(logger.RequestIdKey),
       )
     }()
-		return
-	}
+    return
+  }
 
-	c.Set("is_stream", relay.IsStream())
-	if err := relay.setProvider(relay.getOriginalModel()); err != nil {
-		openaiErr := common.StringErrorWrapperLocal(err.Error(), "one_hub_error", http.StatusServiceUnavailable)
-		relay.HandleJsonError(openaiErr)
+  c.Set("is_stream", relay.IsStream())
+  if err := relay.setProvider(relay.getOriginalModel()); err != nil {
+    openaiErr := common.StringErrorWrapperLocal(err.Error(), "chirou_api_error", http.StatusServiceUnavailable)
+    relay.HandleJsonError(openaiErr)
     go func() {
       model.RecordConsumeErrorLog(
         c.Request.Context(),
@@ -60,19 +60,19 @@ func Relay(c *gin.Context) {
         c.GetString(logger.RequestIdKey),
       )
     }()
-		return
-	}
+    return
+  }
 
-	heartbeat := relay.SetHeartbeat(relay.IsStream())
-	if heartbeat != nil {
-		defer heartbeat.Close()
-	}
+  heartbeat := relay.SetHeartbeat(relay.IsStream())
+  if heartbeat != nil {
+    defer heartbeat.Close()
+  }
 
-	apiErr, done := RelayHandler(relay)
-	if apiErr == nil {
-		metrics.RecordProvider(c, 200)
-		return
-	} else {
+  apiErr, done := RelayHandler(relay)
+  if apiErr == nil {
+    metrics.RecordProvider(c, 200)
+    return
+  } else {
     go func() {
       model.RecordConsumeErrorLog(
         c.Request.Context(),
@@ -161,11 +161,11 @@ func Relay(c *gin.Context) {
     }
   }
 
-	if apiErr != nil {
-		if heartbeat != nil && heartbeat.IsSafeWriteStream() {
-			relay.HandleStreamError(apiErr)
-			return
-		}
+  if apiErr != nil {
+    if heartbeat != nil && heartbeat.IsSafeWriteStream() {
+      relay.HandleStreamError(apiErr)
+      return
+    }
     go func() {
       model.RecordConsumeErrorLog(
         c.Request.Context(),
@@ -179,8 +179,8 @@ func Relay(c *gin.Context) {
         c.GetString(logger.RequestIdKey),
       )
     }()
-		relay.HandleJsonError(apiErr)
-	}
+    relay.HandleJsonError(apiErr)
+  }
 }
 
 func RelayHandler(relay RelayBaseInterface) (err *types.OpenAIErrorWithStatusCode, done bool) {
