@@ -1,18 +1,19 @@
 import PropTypes from 'prop-types';
-import { useMemo } from 'react';
-import Decimal from 'decimal.js';
+import { useMemo, useState } from 'react';
 
-import { styled } from '@mui/material/styles';
 import Badge from '@mui/material/Badge';
 
-import { TableRow, TableCell, Stack, Tooltip, Typography } from '@mui/material';
+import { TableRow, TableCell, Stack, Collapse } from '@mui/material';
 
 import { timestamp2string, renderQuota } from 'utils/common';
 import Label from 'ui-component/Label';
 import { useLogType } from '../type/LogType';
 import { useTranslation } from 'react-i18next';
+import QuotaWithDetailRow from './QuotaWithDetailRow';
+import QuotaWithDetailContent from './QuotaWithDetailContent';
+import { calculatePrice } from './QuotaWithDetailContent';
 
-function renderType(type, logTypes, isError) {
+function renderType(type, logTypes, t, isError) {
   if (isError) {
     return (
       <Label color="error" variant="outlined">
@@ -32,7 +33,7 @@ function renderType(type, logTypes, isError) {
     return (
       <Label variant="filled" color="error">
         {' '}
-        未知{' '}
+        {t('logPage.unknown')}{' '}
       </Label>
     );
   }
@@ -82,11 +83,19 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
   let request_ts = 0;
   let request_ts_str = '';
   if (first_time > 0 && item.completion_tokens > 0) {
-    request_ts = (item.completion_tokens ? item.completion_tokens : 1) / stream_time;
+    // Using the completion_tokens directly since we already checked it's > 0
+    request_ts = item.completion_tokens / stream_time;
     request_ts_str = `${request_ts.toFixed(2)} t/s`;
   }
 
   const { totalInputTokens, totalOutputTokens, show, tokenDetails } = useMemo(() => calculateTokens(item), [item]);
+
+  // 计算当前显示的列数
+  const colCount = Object.values(columnVisibility).filter(Boolean).length;
+
+  // 展开状态（仅type=2时才有展开）
+  const [open, setOpen] = useState(false);
+  const showExpand = item.type === 2 && columnVisibility.quota;
 
   return (
     <>
@@ -127,36 +136,52 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
             )}
           </TableCell>
         )}
-        {columnVisibility.type && <TableCell sx={{ p: '10px 8px' }}>{renderType(item.type, LogType, item.is_error)}</TableCell>}
+        {columnVisibility.type && <TableCell sx={{ p: '10px 8px' }}>{renderType(item.type, LogType, t, item.is_error)}</TableCell>}
         {columnVisibility.model_name && <TableCell sx={{ p: '10px 8px' }}>{viewModelName(item.model_name, item.is_stream)}</TableCell>}
 
         {columnVisibility.duration && (
-          <TableCell sx={{ p: '12px 12px' }}>
+          <TableCell sx={{ p: '10px 8px' }}>
             {item.type === 2 ? (
-              <Stack direction="column" spacing={1}>
-                <Label sx={{ fontSize: '12px' }} variant="outlined" color={requestTimeLabelOptions(request_time)}>
-                  {item.request_time == 0 ? '无' : request_time_str} {first_time_str ? ' / ' + first_time_str : ''}
+              <Stack direction="column" spacing={0.5}>
+                <Label color={requestTimeLabelOptions(request_time)} variant="outlined">
+                  {item.request_time === 0 ? '无' : request_time_str} {first_time_str ? ' / ' + first_time_str : ''}
                 </Label>
 
-                {request_ts_str && (
-                  <Label sx={{ fontSize: '12px' }} variant="outlined" color={requestTSLabelOptions(request_ts)}>
-                    {request_ts_str}
-                  </Label>
-                )}
+                {request_ts_str && <Label color={requestTSLabelOptions(request_ts)} variant="outlined">{request_ts_str}</Label>}
               </Stack>
             ) : null}
           </TableCell>
         )}
         {columnVisibility.message && (
-          <TableCell sx={{ p: '12px 12px' }}>{viewInput(item, t, totalInputTokens, totalOutputTokens, show, tokenDetails)}</TableCell>
+          <TableCell sx={{ p: '10px 8px' }}>{viewInput(item, t, totalInputTokens, totalOutputTokens, show, tokenDetails)}</TableCell>
         )}
-        {columnVisibility.completion && <TableCell sx={{ p: '12px 12px' }}>{item.completion_tokens || ''}</TableCell>}
-        {columnVisibility.quota && <TableCell sx={{ p: '12px 12px' }}>{item.type === 2 ? renderQuota(item.quota, 6) : ''}</TableCell>}
-        {columnVisibility.request_ip && <TableCell sx={{ p: '12px 12px' }}>{item.request_ip || ''}</TableCell>}
+        {columnVisibility.completion && <TableCell sx={{ p: '10px 8px' }}>{item.completion_tokens || ''}</TableCell>}
+        {columnVisibility.quota && (
+          <TableCell sx={{ p: '10px 8px' }}>
+            {item.type === 2 ? (
+              <QuotaWithDetailRow item={item} open={open} setOpen={setOpen} />
+            ) : item.quota ? (
+              renderQuota(item.quota, 6)
+            ) : (
+              '$0'
+            )}
+          </TableCell>
+        )}
+        {columnVisibility.request_ip && <TableCell sx={{ p: '10px 8px' }}>{item.request_ip || ''}</TableCell>}
         {columnVisibility.detail && (
-          <TableCell sx={{ p: '12px 12px' }}>{viewLogContent(item, t, totalInputTokens, totalOutputTokens)}</TableCell>
+          <TableCell sx={{ p: '10px 8px' }}>{viewLogContent(item, t, totalInputTokens, totalOutputTokens)}</TableCell>
         )}
       </TableRow>
+      {/* 展开行 */}
+      {showExpand && (
+        <TableRow>
+          <TableCell colSpan={colCount} sx={{ p: 0, border: 0, bgcolor: 'transparent' }}>
+            <Collapse in={open} timeout="auto" unmountOnExit>
+              <QuotaWithDetailContent item={item} t={t} />
+            </Collapse>
+          </TableCell>
+        </TableRow>
+      )}
     </>
   );
 }
@@ -202,43 +227,16 @@ function viewModelName(model_name, isStream) {
   );
 }
 
-const MetadataTypography = styled(Typography)(({ theme }) => ({
-  fontSize: 12,
-  color: theme.palette.grey[300],
-  '&:not(:last-child)': {
-    marginBottom: theme.spacing(0.5)
-  }
-}));
-
-function viewInput(item, t, totalInputTokens, totalOutputTokens, show, tokenDetails) {
+function viewInput(item, t, totalInputTokens, totalOutputTokens, show) {
+  // tokenDetails is passed but not used in this function
   const { prompt_tokens } = item;
 
   if (!prompt_tokens) return '';
   if (!show) return prompt_tokens;
 
-  const tooltipContent = tokenDetails.map(({ key, label, tokens, value, rate, labelParams }) => (
-    <MetadataTypography key={key}>{`${t(label, labelParams)}: ${value} *  (${rate} - 1) = ${tokens}`}</MetadataTypography>
-  ));
-
   return (
     <Badge variant="dot" color="primary">
-      <Tooltip
-        title={
-          <>
-            {tooltipContent}
-            <MetadataTypography>
-              {t('logPage.totalInputTokens')}: {totalInputTokens}
-            </MetadataTypography>
-            <MetadataTypography>
-              {t('logPage.totalOutputTokens')}: {totalOutputTokens}
-            </MetadataTypography>
-          </>
-        }
-        placement="top"
-        arrow
-      >
-        <span style={{ cursor: 'help' }}>{prompt_tokens}</span>
-      </Tooltip>
+      <span>{prompt_tokens}</span>
     </Badge>
   );
 }
@@ -271,7 +269,7 @@ function calculateTokens(item) {
 
   const cached_ratio = metadata?.cached_tokens_ratio || TOKEN_RATIOS.CACHED;
   const cached_write_ratio = metadata?.cached_write_tokens_ratio || 0;
-  const cached_read_ratio = metadata?.cached_recached_read_tokens_ratioad_ratio || 0;
+  const cached_read_ratio = metadata?.cached_read_tokens_ratio || 0;
   const reasoning_tokens = metadata?.reasoning_tokens_ratio || 0;
   const input_text_tokens_ratio = metadata?.input_text_tokens_ratio || TOKEN_RATIOS.TEXT;
   const output_text_tokens_ratio = metadata?.output_text_tokens_ratio || TOKEN_RATIOS.TEXT;
@@ -315,17 +313,22 @@ function calculateTokens(item) {
     .map(({ key, label, rate, labelParams }) => {
       const tokens = Math.ceil(metadata[key] * (rate - 1));
 
-      if (
-        key === 'input_text_tokens' ||
-        key === 'output_text_tokens' ||
-        key === 'input_audio_tokens' ||
-        key === 'cached_tokens' ||
-        key === 'cached_write_tokens' ||
-        key === 'cached_read_tokens'
-      ) {
+      // Check if this token type affects input or output totals
+      const isInputToken = [
+        'input_text_tokens',
+        'output_text_tokens',
+        'input_audio_tokens',
+        'cached_tokens',
+        'cached_write_tokens',
+        'cached_read_tokens'
+      ].includes(key);
+
+      const isOutputToken = ['output_audio_tokens', 'reasoning_tokens'].includes(key);
+
+      if (isInputToken) {
         totalInputTokens += tokens;
-        show = key !== 'cached_tokens';
-      } else if (key === 'output_audio_tokens' || key === 'reasoning_tokens') {
+        show = true;
+      } else if (isOutputToken) {
         totalOutputTokens += tokens;
         show = true;
       }
@@ -341,64 +344,39 @@ function calculateTokens(item) {
   };
 }
 
-function viewLogContent(item, t, totalInputTokens, totalOutputTokens) {
-  if (item.is_error) {
-    return (
-      <Stack sx={{ fontSize: 12 }} color="error" variant="outlined">
-        {item.content}
-      </Stack>
-    );
-  }
-
+function viewLogContent(item, t) {
+  // totalOutputTokens is passed but not used in this function
+  // Check if we have the necessary data to calculate prices
   if (!item?.metadata?.input_ratio) {
-    let free = false;
-    if (item.quota === 0 && ['2'].includes(item.type)) {
-      free = true;
-    }
-    const tips = (
-      <>
-        <MetadataTypography>{item.content}</MetadataTypography>
-        {item.quota !== 0 && <MetadataTypography>{t('logPage.content.illustrate')}</MetadataTypography>}
-        <MetadataTypography>{t('logPage.content.calculate_steps_tip')}</MetadataTypography>
-      </>
-    );
-    return (
-      <Tooltip title={tips} placement="top" arrow>
-        <Stack justifyContent={'center'} spacing={1}>
-          <Stack sx={{ fontSize: 12 }} color={free ? 'success' : 'info'}>
-            {free ? t('logPage.content.free') : item.content}
-          </Stack>
-        </Stack>
-      </Tooltip>
+    const free = (item.quota === 0 || item.quota === undefined) && item.type === 2;
+    return free ? (
+      <Stack direction="column" spacing={0.3}>
+        <Label color={free ? 'success' : 'secondary'} variant="soft">
+          {t('logPage.content.free')}
+        </Label>
+      </Stack>
+    ) : (
+      <>{item.content || ''}</>
     );
   }
+
+  // Ensure we have valid values with appropriate defaults
   const groupDiscount = item?.metadata?.group_ratio || 1;
+  const priceType = item?.metadata?.price_type || '';
+  const originalCompletionRatio = item?.metadata?.output_ratio || 0;
+  const originalInputRatio = item?.metadata?.input_ratio || 0;
 
-  const priceType = item?.metadata?.price_type;
-  const originalCompletionRatio = item?.metadata?.output_ratio;
-  const originalInputRatio = item?.metadata?.input_ratio;
-
-  let inputPriceInfo = '';
-  let inputRatioInfo = '';
+  let inputPriceInfo;
   let outputPriceInfo = '';
-  let outputRatioInfo = '';
-  let calculateSteps = '';
-  let originalInputPriceInfo = '';
-  let originalOutputPriceInfo = '';
-
   if (priceType === 'times') {
+    // Calculate prices for 'times' price type
     const inputPrice = calculatePrice(originalInputRatio, groupDiscount, true);
 
     inputPriceInfo = t('logPage.content.times_price', {
       times: inputPrice
     });
-
-    const originalInputPrice = calculatePrice(originalInputRatio, 1, 1, true, true);
-
-    originalInputPriceInfo = t('logPage.content.original_times_price', {
-      times: originalInputPrice
-    });
   } else {
+    // Calculate prices for a standard price type
     const inputPrice = calculatePrice(originalInputRatio, groupDiscount, false);
     const outputPrice = calculatePrice(originalCompletionRatio, groupDiscount, false);
 
@@ -411,100 +389,20 @@ function viewLogContent(item, t, totalInputTokens, totalOutputTokens) {
     outputPriceInfo = t('logPage.content.output_price', {
       price: outputPrice
     });
-    outputRatioInfo = t('logPage.content.output_ratio', {
-      ratio: originalCompletionRatio
-    });
-
-    const originalInputPrice = calculatePrice(originalInputRatio, 1, false);
-
-    originalInputPriceInfo = t('logPage.content.original_input_price', {
-      price: originalInputPrice
-    });
-
-    const originalOutputPrice = calculatePrice(originalCompletionRatio, 1, false);
-
-    originalOutputPriceInfo = t('logPage.content.original_output_price', {
-      price: originalOutputPrice
-    });
-
-    calculateSteps = `${t('logPage.content.calculate_steps')}( ${totalInputTokens} / 1000000 * ${inputPrice}) `;
-
-    if (totalOutputTokens > 0) {
-      calculateSteps += `+ (${totalOutputTokens} / 1000000 * ${outputPrice})`;
-    }
-
-    calculateSteps += ` = ${renderQuota(item.quota, 6)}`;
   }
-
-  const tips = (
-    <>
-      {originalInputPriceInfo && <MetadataTypography>{originalInputPriceInfo}</MetadataTypography>}
-      {originalOutputPriceInfo && <MetadataTypography>{originalOutputPriceInfo}</MetadataTypography>}
-      {groupDiscount > 0 && groupDiscount !== 1 && (
-        <MetadataTypography>
-          {t('logPage.content.group_discount', {
-            discount: getDiscountLang(groupDiscount, 1)
-          })}
-        </MetadataTypography>
-      )}
-      {calculateSteps && (
-        <>
-          <MetadataTypography>{calculateSteps}</MetadataTypography>
-          <MetadataTypography>{t('logPage.content.calculate_steps_tip')}</MetadataTypography>
-        </>
-      )}
-    </>
-  );
 
   return (
-    <Tooltip title={tips} placement="top" arrow>
-      <Stack sx={{ fontSize: 12 }}>
-        {/* 如果是按次数 */}
-        {priceType === 'times' ? (
-          <>
-            {[
-              inputPriceInfo,
-              t('logPage.content.group_discount', {
-                discount: groupDiscount
-              })
-            ]
-              .filter(Boolean)
-              .join(', ')}
-          </>
-        ) : (
-          <>
-            {[
-              inputRatioInfo,
-              outputRatioInfo,
-              t('logPage.content.group_discount', {
-                discount: groupDiscount
-              })
-            ]
-              .filter(Boolean)
-              .join(', ')}
-          </>
-        )}
-      </Stack>
-    </Tooltip>
+    <Stack direction="column" spacing={0.3}>
+      {inputPriceInfo && (
+        <Label color="info" variant="soft">
+          {inputPriceInfo}
+        </Label>
+      )}
+      {outputPriceInfo && (
+        <Label color="info" variant="soft">
+          {outputPriceInfo}
+        </Label>
+      )}
+    </Stack>
   );
-}
-
-function calculatePrice(ratio, groupDiscount, isTimes) {
-  let discount = new Decimal(ratio).mul(groupDiscount);
-
-  if (!isTimes) {
-    discount = discount.mul(1000);
-  }
-
-  let price = discount.mul(0.002).toFixed(6);
-  price = price.replace(/(\.\d*?[1-9])0+$|\.0*$/, '$1');
-
-  return price;
-}
-
-export function getDiscountLang(value1, value2) {
-  const discount = new Decimal(value1).mul(value2);
-
-  const discountMultiplier = discount.toFixed(2);
-  return `${discountMultiplier} 倍`;
 }
