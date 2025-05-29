@@ -69,11 +69,7 @@ export default function QuotaWithDetailContent({ item }) {
   return (
     <Box
       sx={{
-        mt: 2,
-        mb: 2,
-        mx: 2,
-        boxShadow: (theme) => `0 2px 8px 0 ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.04)'}`,
-        borderRadius: 2,
+        borderRadius: 0,
         background: (theme) => theme.palette.background.paper,
         p: 2,
         display: 'flex',
@@ -92,7 +88,7 @@ export default function QuotaWithDetailContent({ item }) {
           },
           '&::-webkit-scrollbar-thumb': {
             backgroundColor: (theme) => theme.palette.divider,
-            borderRadius: '3px'
+            borderRadius: '0'
           },
           '&::-webkit-scrollbar-track': {
             backgroundColor: 'transparent'
@@ -105,18 +101,18 @@ export default function QuotaWithDetailContent({ item }) {
             flex: 1,
             minWidth: 0,
             p: 2,
-            borderRadius: 1,
+            borderRadius: 0,
             background: (theme) => (theme.palette.mode === 'dark' ? theme.palette.background.default : '#fafbfc')
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <AttachMoneyIcon sx={{ fontSize: 20, mr: 1, color: (theme) => theme.palette.info.main }} />
-            <Typography sx={{ fontWeight: 600, fontSize: 15 }}>{t('logPage.quotaDetail.originalPrice')}</Typography>
+            <Typography sx={{ fontWeight: 600, fontSize: 12 }}>{t('logPage.quotaDetail.originalPrice')}</Typography>
           </Box>
-          <Typography sx={{ fontSize: 13, color: (theme) => theme.palette.text.secondary, mb: 0.5, textAlign: 'left' }}>
+          <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, mb: 0.5, textAlign: 'left' }}>
             {t('logPage.quotaDetail.inputPrice')}: {originalInputPrice}
           </Typography>
-          <Typography sx={{ fontSize: 13, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
+          <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
             {t('logPage.quotaDetail.outputPrice')}: {originalOutputPrice}
           </Typography>
         </Box>
@@ -126,18 +122,18 @@ export default function QuotaWithDetailContent({ item }) {
             flex: 1,
             minWidth: 0,
             p: 2,
-            borderRadius: 1,
+            borderRadius: 0,
             background: (theme) => (theme.palette.mode === 'dark' ? theme.palette.background.default : '#fafbfc')
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <PercentIcon sx={{ fontSize: 20, mr: 1, color: (theme) => theme.palette.info.main }} />
-            <Typography sx={{ fontWeight: 600, fontSize: 15 }}>{t('logPage.quotaDetail.groupRatio')}</Typography>
+            <Typography sx={{ fontWeight: 600, fontSize: 12 }}>{t('logPage.quotaDetail.groupRatio')}</Typography>
           </Box>
-          <Typography sx={{ fontSize: 13, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
+          <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
             {t('logPage.groupLabel')}: {item.metadata?.group_name}
           </Typography>
-          <Typography sx={{ fontSize: 13, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
+          <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
             {t('logPage.quotaDetail.groupRatioValue')}: {groupRatio}
           </Typography>
         </Box>
@@ -147,18 +143,18 @@ export default function QuotaWithDetailContent({ item }) {
             flex: 1,
             minWidth: 0,
             p: 2,
-            borderRadius: 1,
+            borderRadius: 0,
             background: (theme) => (theme.palette.mode === 'dark' ? theme.palette.background.default : '#fafbfc')
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <CreditCardIcon sx={{ fontSize: 20, mr: 1, color: (theme) => theme.palette.primary.main }} />
-            <Typography sx={{ fontWeight: 600, fontSize: 15 }}>{t('logPage.quotaDetail.actualPrice')}</Typography>
+            <Typography sx={{ fontWeight: 600, fontSize: 12 }}>{t('logPage.quotaDetail.actualPrice')}</Typography>
           </Box>
-          <Typography sx={{ fontSize: 13, color: (theme) => theme.palette.text.secondary, mb: 0.5, textAlign: 'left' }}>
+          <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, mb: 0.5, textAlign: 'left' }}>
             {t('logPage.quotaDetail.input')}: {inputPrice}
           </Typography>
-          <Typography sx={{ fontSize: 13, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
+          <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
             {t('logPage.quotaDetail.output')}: {outputPrice}
           </Typography>
         </Box>
@@ -167,19 +163,19 @@ export default function QuotaWithDetailContent({ item }) {
       <Box
         sx={{
           p: 2,
-          borderRadius: 1,
+          borderRadius: 0,
           background: (theme) => (theme.palette.mode === 'dark' ? theme.palette.background.default : '#f7f8fa')
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
           <CalculateIcon sx={{ fontSize: 20, mr: 1, color: (theme) => theme.palette.success.main }} />
-          <Typography sx={{ fontWeight: 600, fontSize: 15 }}>{t('logPage.quotaDetail.finalCalculation')}</Typography>
+          <Typography sx={{ fontWeight: 600, fontSize: 12 }}>{t('logPage.quotaDetail.finalCalculation')}</Typography>
         </Box>
-        <Typography sx={{ fontSize: 13, color: (theme) => theme.palette.text.secondary, mb: 1, textAlign: 'left' }}>{stepStr}</Typography>
+        <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, mb: 1, textAlign: 'left' }}>{stepStr}</Typography>
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, mb: 1 }}>
           <Typography
             sx={{
-              fontSize: 13,
+              fontSize: 12,
               color: (theme) => theme.palette.text.secondary,
               textDecoration: 'line-through',
               mr: 2,
@@ -191,7 +187,7 @@ export default function QuotaWithDetailContent({ item }) {
           </Typography>
           <Typography
             sx={{
-              fontSize: 13,
+              fontSize: 12,
               color: (theme) => theme.palette.success.main,
               fontWeight: 500,
               mr: 2,
@@ -209,7 +205,7 @@ export default function QuotaWithDetailContent({ item }) {
                 color: (theme) => theme.palette.success.contrastText,
                 fontSize: 12,
                 fontWeight: 500,
-                borderRadius: 1,
+                borderRadius: 0,
                 px: 1.2,
                 py: 0.2
               }}

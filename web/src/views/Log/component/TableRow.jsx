@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import QuotaWithDetailRow from './QuotaWithDetailRow';
 import QuotaWithDetailContent from './QuotaWithDetailContent';
 import { calculatePrice } from './QuotaWithDetailContent';
+import { fontSize } from '@mui/system';
 
 function renderType(type, logTypes, t, isError) {
   if (isError) {
@@ -100,16 +101,16 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
   return (
     <>
       <TableRow tabIndex={item.id}>
-        {columnVisibility.created_at && <TableCell sx={{ p: '12px 12px' }}>{timestamp2string(item.created_at)}</TableCell>}
+        {columnVisibility.created_at && <TableCell sx={{ p: '10px 8px' }}>{timestamp2string(item.created_at)}</TableCell>}
 
         {userIsAdmin && columnVisibility.channel_id && (
-          <TableCell sx={{ p: '12px 12px' }}>
+          <TableCell sx={{ p: '10px 8px' }}>
             {item.channel_id || ''}
             {item.channel?.name ? <div style={{ fontSize: '12px', color: '#6C7A92' }}>({item.channel.name})</div> : ''}
           </TableCell>
         )}
         {userIsAdmin && columnVisibility.user_id && (
-          <TableCell sx={{ p: '12px 12px' }}>
+          <TableCell sx={{ p: '10px 8px' }}>
             <Label color="default" variant="outlined" copyText={item.username}>
               {item.username}
             </Label>
@@ -117,7 +118,7 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
         )}
 
         {columnVisibility.group && (
-          <TableCell sx={{ p: '12px 12px' }}>
+          <TableCell sx={{ p: '10px 8px' }}>
             {item?.metadata?.group_name ? (
               <Label color="default" variant="soft">
                 {userGroup[item.metadata.group_name]?.name || '默认分组'}
@@ -128,7 +129,7 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
           </TableCell>
         )}
         {columnVisibility.token_name && (
-          <TableCell sx={{ p: '12px 12px' }}>
+          <TableCell sx={{ p: '10px 8px' }}>
             {item.token_name && (
               <Label color="default" variant="soft" copyText={item.token_name}>
                 {item.token_name}
@@ -147,7 +148,11 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
                   {item.request_time === 0 ? '无' : request_time_str} {first_time_str ? ' / ' + first_time_str : ''}
                 </Label>
 
-                {request_ts_str && <Label color={requestTSLabelOptions(request_ts)} variant="outlined">{request_ts_str}</Label>}
+                {request_ts_str && (
+                  <Label color={requestTSLabelOptions(request_ts)} variant="outlined">
+                    {request_ts_str}
+                  </Label>
+                )}
               </Stack>
             ) : null}
           </TableCell>
@@ -163,7 +168,7 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
             ) : item.quota ? (
               renderQuota(item.quota, 6)
             ) : (
-              '$0'
+              ''
             )}
           </TableCell>
         )}
@@ -175,7 +180,7 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
       {/* 展开行 */}
       {showExpand && (
         <TableRow>
-          <TableCell colSpan={colCount} sx={{ p: 0, border: 0, bgcolor: 'transparent' }}>
+          <TableCell colSpan={colCount} sx={{ p: 0, border: 0, background: (theme) => theme.palette.background.paper }}>
             <Collapse in={open} timeout="auto" unmountOnExit>
               <QuotaWithDetailContent item={item} t={t} />
             </Collapse>
@@ -350,13 +355,19 @@ function viewLogContent(item, t) {
   if (!item?.metadata?.input_ratio) {
     const free = (item.quota === 0 || item.quota === undefined) && item.type === 2;
     return free ? (
-      <Stack direction="column" spacing={0.3}>
-        <Label color={free ? 'success' : 'secondary'} variant="soft">
+      <Stack direction="column" spacing={0.5}>
+        <Label
+          color={free ? 'success' : 'secondary'}
+          variant="soft"
+          sx={{
+            fontSize: 13
+          }}
+        >
           {t('logPage.content.free')}
         </Label>
       </Stack>
     ) : (
-      <>{item.content || ''}</>
+      <span style={{ fontSize: 13 }}>{item.content || ''}</span>
     );
   }
 
@@ -383,23 +394,20 @@ function viewLogContent(item, t) {
     inputPriceInfo = t('logPage.content.input_price', {
       price: inputPrice
     });
-    inputRatioInfo = t('logPage.content.input_ratio', {
-      ratio: originalInputRatio
-    });
     outputPriceInfo = t('logPage.content.output_price', {
       price: outputPrice
     });
   }
 
   return (
-    <Stack direction="column" spacing={0.3}>
+    <Stack direction="row" spacing={0.3} display={'flex'} justifyContent={'center'}>
       {inputPriceInfo && (
-        <Label color="info" variant="soft">
+        <Label color="info" variant="ghost" sx={{ fontSize: 12 }}>
           {inputPriceInfo}
         </Label>
       )}
       {outputPriceInfo && (
-        <Label color="info" variant="soft">
+        <Label color="info" variant="ghost">
           {outputPriceInfo}
         </Label>
       )}
