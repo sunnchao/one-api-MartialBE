@@ -1256,6 +1256,7 @@
     "inputPlaceholder": "請輸入兌換碼！",
     "noRedemptionCodeText": "還沒有兌換碼？ 點擊獲取兌換碼：",
     "onlineTopup": "在線充值",
+    "invoiceAndRefundWarning": "因考慮到合規風險，本站不提供任何類型的發票開具，且一旦充值將不支持退款",
     "positiveIntegerAmount": "請輸入正整數金額",
     "redemptionCodeTopup": "兌換碼充值",
     "selectPaymentMethod": "請選擇支付方式",

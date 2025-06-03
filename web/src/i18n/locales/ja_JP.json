@@ -1255,6 +1255,7 @@
     "inputPlaceholder": "引き換えコードを入力してください！",
     "noRedemptionCodeText": "まだ引き換えコードがありませんか？ コードを取得するにはクリックしてください：",
     "onlineTopup": "オンラインチャージ",
+    "invoiceAndRefundWarning": "法的な観点から、このサイトでは請求書の発行を提供しておらず、また、一度チャージが完了すると返金はサポートされません",
     "positiveIntegerAmount": "正の整数金額を入力してください",
     "redemptionCodeTopup": "引き換えコードチャージ",
     "selectPaymentMethod": "支払い方法を選択してください",

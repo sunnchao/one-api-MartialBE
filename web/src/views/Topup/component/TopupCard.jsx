@@ -216,6 +216,9 @@ const TopupCard = () => {
           }}
           title={t('topupCard.onlineTopup')}
         >
+          <Typography variant="body2" color="error" sx={{ mb: 2 }}>
+            {t('topupCard.invoiceAndRefundWarning')}
+          </Typography>
           <Stack spacing={2}>
             {payment.map((item, index) => (
               <AnimateButton key={index}>

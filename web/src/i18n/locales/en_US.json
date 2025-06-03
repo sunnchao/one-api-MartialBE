@@ -1269,6 +1269,7 @@
     "inputPlaceholder": "Enter redemption code!",
     "noRedemptionCodeText": "No redemption code yet? Click to get redemption code:",
     "onlineTopup": "Online top-up",
+    "invoiceAndRefundWarning": "Due to compliance considerations, this site does not provide any type of invoice issuance, and once the top-up is completed, no refunds are supported",
     "positiveIntegerAmount": "Please enter a positive integer amount",
     "redemptionCodeTopup": "Redemption code top-up",
     "selectPaymentMethod": "Select payment method",
