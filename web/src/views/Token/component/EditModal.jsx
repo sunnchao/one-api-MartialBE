@@ -263,6 +263,24 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
                 />
               </FormControl>
 
+              <Divider sx={{ margin: '16px 0px' }} />
+              <Typography variant="h4">{t('token_index.heartbeat')}</Typography>
+              <Typography variant="caption">{t('token_index.heartbeatTip')}</Typography>
+
+              <FormControl fullWidth>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={values?.setting?.heartbeat?.enabled === true}
+                      onClick={() => {
+                        setFieldValue('setting.heartbeat.enabled', !values.setting?.heartbeat?.enabled);
+                      }}
+                    />
+                  }
+                  label={t('token_index.heartbeat')}
+                />
+              </FormControl>
+
               {values?.setting?.heartbeat?.enabled && (
                 <FormControl fullWidth>
                   <InputLabel>{t('token_index.heartbeatTimeout')}</InputLabel>
