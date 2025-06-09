@@ -1,7 +1,10 @@
 package relay
 
 import (
+  "bytes"
+  "encoding/json"
   "fmt"
+  "io"
   "net/http"
   "one-api/common"
   "one-api/common/config"
@@ -11,6 +14,7 @@ import (
   "one-api/model"
   "one-api/relay/relay_util"
   "one-api/types"
+  "strings"
   "time"
 
   "github.com/gin-gonic/gin"
@@ -24,9 +28,12 @@ func Relay(c *gin.Context) {
     return
   }
 
-  if err := relay.setRequest(); err != nil {
-    openaiErr := common.StringErrorWrapperLocal(err.Error(), "chirou_api_error", http.StatusBadRequest)
-    relay.HandleJsonError(openaiErr)
+	// Apply pre-mapping before setRequest to ensure request body modifications take effect
+	applyPreMappingBeforeRequest(c)
+
+	if err := relay.setRequest(); err != nil {
+		openaiErr := common.StringErrorWrapperLocal(err.Error(), "chirou_api_error", http.StatusBadRequest)
+		relay.HandleJsonError(openaiErr)
     go func() {
       model.RecordConsumeErrorLog(
         c.Request.Context(),
@@ -40,8 +47,8 @@ func Relay(c *gin.Context) {
         c.GetString(logger.RequestIdKey),
       )
     }()
-    return
-  }
+		return
+	}
 
   c.Set("is_stream", relay.IsStream())
   if err := relay.setProvider(relay.getOriginalModel()); err != nil {
@@ -234,4 +241,60 @@ func shouldCooldowns(c *gin.Context, channel *model.Channel, apiErr *types.OpenA
   skipChannelIds = append(skipChannelIds, channelId)
 
   c.Set("skip_channel_ids", skipChannelIds)
+}
+
+// applies pre-mapping before setRequest to ensure modifications take effect
+func applyPreMappingBeforeRequest(c *gin.Context) {
+	// check if this is a chat completion request that needs pre-mapping
+	path := c.Request.URL.Path
+	if !(strings.HasPrefix(path, "/v1/chat/completions") || strings.HasPrefix(path, "/v1/completions")) {
+		return
+	}
+
+	bodyBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		return
+	}
+	c.Request.Body.Close()
+
+	// Use defer to ensure request body is always restored
+	var finalBodyBytes []byte = bodyBytes // default to original body
+	defer func() {
+		c.Request.Body = io.NopCloser(bytes.NewBuffer(finalBodyBytes))
+	}()
+
+	var requestBody struct {
+		Model string `json:"model"`
+	}
+	if err := json.Unmarshal(bodyBytes, &requestBody); err != nil || requestBody.Model == "" {
+		return
+	}
+
+	provider, _, err := GetProvider(c, requestBody.Model)
+	if err != nil {
+		return
+	}
+
+	customParams, err := provider.CustomParameterHandler()
+	if err != nil || customParams == nil {
+		return
+	}
+
+	preAdd, exists := customParams["pre_add"]
+	if !exists || preAdd != true {
+		return
+	}
+
+	var requestMap map[string]interface{}
+	if err := json.Unmarshal(bodyBytes, &requestMap); err != nil {
+		return
+	}
+
+	// Apply custom parameter merging
+	modifiedRequestMap := mergeCustomParamsForPreMapping(requestMap, customParams)
+
+	// Convert back to JSON - if successful, use modified body; otherwise use original
+	if modifiedBodyBytes, err := json.Marshal(modifiedRequestMap); err == nil {
+		finalBodyBytes = modifiedBodyBytes
+	}
 }
