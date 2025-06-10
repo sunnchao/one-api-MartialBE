@@ -219,9 +219,9 @@ const BaseIndex = () => {
                     }
                   }}
                 >
-                  企业级
+                  专业的
                   <br />
-                  AI接口调用平台
+                  AI大模型接口调用服务平台
                 </Typography>
                 <Typography
                   variant="h4"
@@ -235,7 +235,7 @@ const BaseIndex = () => {
                     fontWeight: 400
                   }}
                 >
-                  专业的高性能、高并发、高可用AI服务平台，支持OpenAI、Claude、Deepseek、Gemini等多种模型，为个人和企业提供一站式AI解决方案
+                  致力于提供高性能、高并发、高可用AI大模型接口调用服务平台，支持OpenAI、Claude、Deepseek、Gemini、Midjourney等多种模型，为个人和企业提供一站式AI解决方案
                 </Typography>
                 <Stack
                   direction={{ xs: 'column', sm: 'row' }}
