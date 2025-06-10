@@ -68,7 +68,6 @@ const getValidationSchema = (t) =>
       otherwise: Yup.string() // 在其他情况下，base_url 可以是任意字符串
     }),
     model_mapping: Yup.array(),
-    // cache_input_status: Yup.number().required(t('channel_edit.requiredCacheInputStatus'))
     model_headers: Yup.array(),
     custom_parameter: Yup.string().nullable()
   });
@@ -267,12 +266,6 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
     const modelsStr = allUniqueModelIds.join(',');
     values.group = values.groups.join(',');
 
-    // 创建新的 channel_keys
-    // const channelKeys = [values.key]; // values.key?.split(',').map((key) => {
-    //   return key.trim();
-    // });
-    // values.keys = channelKeys?.join(',');
-
     let baseApiUrl = '/api/channel/';
 
     if (isTag) {
@@ -388,13 +381,6 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
         if (data.plugin === null) {
           data.plugin = {};
         }
-        // if (data.channel_keys !== null) {
-        //   data.key = data.channel_keys
-        //     ?.map((ck, index) => {
-        //       return ck.key + (index === data.channel_keys.length - 1 ? '' : ',');
-        //     })
-        //     .join('\n');
-        // }
         initChannel(data.type);
         setInitialInput(data);
 
