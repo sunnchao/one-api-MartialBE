@@ -23,12 +23,8 @@ func (p *VertexAIProvider) CreateGeminiChat(request *gemini.GeminiChatRequest) (
 		return nil, openaiErr
 	}
 
-	if len(geminiResponse.Candidates) == 0 {
-		return nil, common.StringErrorWrapper("no candidates", "no_candidates", http.StatusInternalServerError)
-	}
-
 	usage := p.GetUsage()
-	*usage = convertOpenAIUsage(geminiResponse.UsageMetadata)
+	*usage = gemini.ConvertOpenAIUsage(geminiResponse.UsageMetadata)
 
 	return geminiResponse, nil
 }
@@ -63,8 +59,8 @@ func (p *VertexAIProvider) CreateGeminiChatStream(request *gemini.GeminiChatRequ
 func (p *VertexAIProvider) getGeminiRequest(request *gemini.GeminiChatRequest) (*http.Request, *types.OpenAIErrorWithStatusCode) {
 	var err error
 	p.Category, err = category.GetCategory(request.Model)
-	if err != nil || p.Category.ChatComplete == nil || p.Category.ResponseChatComplete == nil {
-		return nil, common.StringErrorWrapperLocal("vertexAI gemini provider not found", "vertexAI_err", http.StatusInternalServerError)
+	if err != nil || p.Category.Category != "gemini" {
+		return nil, common.StringErrorWrapperLocal("vertexAI provider not found", "vertexAI_err", http.StatusInternalServerError)
 	}
 
 	otherUrl := p.Category.GetOtherUrl(request.Stream)
@@ -73,36 +69,28 @@ func (p *VertexAIProvider) getGeminiRequest(request *gemini.GeminiChatRequest) (
 	// 获取请求地址
 	fullRequestURL := p.GetFullRequestURL(modelName, otherUrl)
 	if fullRequestURL == "" {
-		return nil, common.ErrorWrapperLocal(nil, "invalid_vertexai_config", http.StatusInternalServerError)
+		return nil, common.StringErrorWrapperLocal("vertexAI config error", "invalid_vertexai_config", http.StatusInternalServerError)
 	}
 
 	headers := p.GetRequestHeaders()
+
 	if headers == nil {
-		return nil, common.ErrorWrapperLocal(nil, "invalid_vertexai_config", http.StatusInternalServerError)
+		return nil, common.StringErrorWrapperLocal("vertexAI config error", "invalid_vertexai_config", http.StatusInternalServerError)
 	}
+
+	if request.Stream {
+		headers["Accept"] = "text/event-stream"
+	}
+
+	body := request.GetJsonRaw()
 
 	// 错误处理
 	p.Requester.ErrorHandler = RequestErrorHandle(p.Category.ErrorHandler)
 
-	// 使用BaseProvider的统一方法创建请求，支持额外参数处理
-	req, errWithCode := p.NewRequestWithCustomParams(http.MethodPost, fullRequestURL, request.GetJsonRaw(), headers, request.Model)
-	if errWithCode != nil {
-		return nil, errWithCode
+	// 创建请求
+	req, err := p.Requester.NewRequest(http.MethodPost, fullRequestURL, p.Requester.WithBody(body), p.Requester.WithHeader(headers))
+	if err != nil {
+		return nil, common.StringErrorWrapperLocal(err.Error(), "new_request_failed", http.StatusInternalServerError)
 	}
 	return req, nil
-}
-
-func convertOpenAIUsage(geminiUsage *gemini.GeminiUsageMetadata) types.Usage {
-	if geminiUsage == nil {
-		return types.Usage{}
-	}
-	return types.Usage{
-		PromptTokens:     geminiUsage.PromptTokenCount,
-		CompletionTokens: geminiUsage.CandidatesTokenCount + geminiUsage.ThoughtsTokenCount,
-		TotalTokens:      geminiUsage.TotalTokenCount,
-
-		CompletionTokensDetails: types.CompletionTokensDetails{
-			ReasoningTokens: geminiUsage.ThoughtsTokenCount,
-		},
-	}
 }
