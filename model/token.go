@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gorm.io/gorm"
 	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/database"
@@ -133,7 +134,8 @@ func GetTokenModel(key string) (token *Token, err error) {
 
 	token, err = CacheGetTokenByKey(key)
 	if err != nil {
-		logger.SysError(fmt.Sprintf("DB Not Found: userId=%d, tokenId=%d, key=%s, err=%s", userId, tokenId, key, err.Error()))
+		maskedKey := key[:3] + "*********" + key[len(key)-3:]
+		logger.SysError(fmt.Sprintf("DB Not Found: userId=%d, tokenId=%d, key=%s, err=%s", userId, tokenId, maskedKey, err.Error()))
 		return nil, ErrTokenInvalid
 	}
 
@@ -217,7 +219,7 @@ func GetTokenByName(name string, userId int) (*Token, error) {
 func GetTokenByKey(key string) (*Token, error) {
 	// Strip 'Bearer ' prefix if present
 	key = strings.TrimPrefix(strings.TrimSpace(key), "Bearer ")
-	
+
 	// Check if key is empty after processing
 	if key == "" {
 		return nil, ErrTokenInvalid

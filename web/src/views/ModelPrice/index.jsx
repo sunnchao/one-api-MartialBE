@@ -391,67 +391,100 @@ export default function ModelPrice() {
             <TableBody>
               {filteredRows.length > 0 ? (
                 filteredRows.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell>{row.model}</TableCell>
-                      <TableCell>
-                        {row.type === 'tokens' ? (
-                          <Label color="primary">{t('modelpricePage.tokens')}</Label>
-                        ) : (
-                          <Label variant="outlined" color="primary">
-                            {t('modelpricePage.times')}
-                          </Label>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Stack spacing={1}>
-                          {row.enable ? (
-                            <>
-                              <Box>
-                                <Label color="primary" variant="outlined">
-                                  {t('modelpricePage.inputMultiplier')}: {row.input}
-                                </Label>
-                              </Box>
-                              <Box>
-                                <Label color="primary" variant="outlined">
-                                  {t('modelpricePage.outputMultiplier')}: {row.output}
-                                </Label>
-                              </Box>
-                            </>
-                          ) : (
-                            <Box>
-                              <Label color="warning">{t('modelpricePage.noneGroup')}</Label>
-                            </Box>
-                          )}
-                        </Stack>
-                      </TableCell>
-                      {/* 可用分组 */}
-                      <TableCell>
-                        <Stack direction="row" spacing={1} flexWrap="wrap">
-                          {row.userGroup.map((groupId) => {
-                            const group = userGroupMap[groupId];
-                            return group ? (
-                              <Label
-                                key={groupId}
-                                color={groupId === selectedGroup ? 'primary' : 'info'}
-                                variant={groupId === selectedGroup ? 'filled' : 'ghost'}
-                                onClick={() => handleGroupChange({ target: { value: groupId } })}
-                                sx={{
-                                  cursor: 'pointer',
-                                  '&:hover': {
-                                    opacity: 0.8
-                                  }
-                                }}
-                              >
-                                {group.name}
-                              </Label>
-                            ) : null;
-                          })}
-                        </Stack>
-                      </TableCell>
-                      <TableCell>{getOther(t, row.extraRatios)}</TableCell>
-                    </TableRow>
-                  ))
-                ): (
+                  <TableRow key={row.id}>
+                    <TableCell sx={{ py: 1.5 }}>
+                      <Stack direction="row" justifyContent="center" alignItems="center" spacing={1}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {row.model}
+                        </Typography>
+                        <IconButton size="small" onClick={() => copy(row.model)}>
+                          <Icon icon="eva:copy-outline" width={16} height={16} />
+                        </IconButton>
+                      </Stack>
+                    </TableCell>
+                    <TableCell sx={{ py: 1.5 }}>
+                      <Box sx={{ display: 'flex',  alignItems: 'center', gap: 1, justifyContent: 'center' }}>
+                        <Avatar
+                          src={getIconByName(row.provider)}
+                          alt={row.provider}
+                          sx={{
+                            width: 20,
+                            height: 20,
+                            backgroundColor: theme.palette.mode === 'dark' ? '#fff' : theme.palette.background.paper,
+                            '.MuiAvatar-img': {
+                              objectFit: 'contain',
+                              padding: '2px'
+                            }
+                          }}
+                        >
+                          {row.provider?.charAt(0).toUpperCase()}
+                        </Avatar>
+                        <Typography variant="body2">{row.provider}</Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell sx={{ py: 1.5 }}>
+                      {row.type === 'tokens' ? (
+                        <Label
+                          color="primary"
+                          sx={{
+                            borderRadius: '4px',
+                            fontWeight: 500,
+                            fontSize: '0.75rem',
+                            py: 0.25,
+                            px: 0.75
+                          }}
+                        >
+                          {t('modelpricePage.tokens')}
+                        </Label>
+                      ) : (
+                        <Label
+                          color="secondary"
+                          sx={{
+                            borderRadius: '4px',
+                            fontWeight: 500,
+                            fontSize: '0.75rem',
+                            py: 0.25,
+                            px: 0.75
+                          }}
+                        >
+                          {t('modelpricePage.times')}
+                        </Label>
+                      )}
+                    </TableCell>
+                    <TableCell sx={{ py: 1.5 }}>
+                      <Label
+                        color="info"
+                        variant="outlined"
+                        sx={{
+                          borderRadius: '4px',
+                          fontWeight: 500,
+                          fontSize: '0.75rem',
+                          py: 0.25,
+                          px: 0.75
+                        }}
+                      >
+                        {row.input}
+                      </Label>
+                    </TableCell>
+                    <TableCell sx={{ py: 1.5 }}>
+                      <Label
+                        color="info"
+                        variant="outlined"
+                        sx={{
+                          borderRadius: '4px',
+                          fontWeight: 500,
+                          fontSize: '0.75rem',
+                          py: 0.25,
+                          px: 0.75
+                        }}
+                      >
+                        {row.output}
+                      </Label>
+                    </TableCell>
+                    <TableCell sx={{ py: 1.5 }}>{getOther(t, row.extraRatios)}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
                     <Stack spacing={1.5} alignItems="center">

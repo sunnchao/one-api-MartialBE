@@ -37,15 +37,16 @@ func (f OpenAIProviderFactory) Create(channel *model.Channel) base.ProviderInter
 func CreateOpenAIProvider(channel *model.Channel, baseURL string) *OpenAIProvider {
   openaiConfig := getOpenAIConfig(baseURL, channel)
 
-  OpenAIProvider := &OpenAIProvider{
-    BaseProvider: base.BaseProvider{
-      Config:    openaiConfig,
-      Channel:   channel,
-      Requester: requester.NewHTTPRequester(*channel.Proxy, RequestErrorHandle),
-    },
-    IsAzure:       false,
-    BalanceAction: true,
-  }
+	OpenAIProvider := &OpenAIProvider{
+		BaseProvider: base.BaseProvider{
+			Config:          openaiConfig,
+			Channel:         channel,
+			Requester:       requester.NewHTTPRequester(*channel.Proxy, RequestErrorHandle),
+			SupportResponse: true,
+		},
+		IsAzure:       false,
+		BalanceAction: true,
+	}
 
   if channel.Type == config.ChannelTypeOpenAI {
     OpenAIProvider.SupportStreamOptions = true
