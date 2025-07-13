@@ -28,6 +28,7 @@ import (
 
 const TokenCacheKey = "api_token:vertexai"
 const defaultScope = "https://www.googleapis.com/auth/cloud-platform"
+const defaultMetaBaseUrl = "https://%s-aiplatform.googleapis.com/v1beta1/projects/%s/locations/%s/endpoints/openapi/chat/completions"
 
 type VertexAIProviderFactory struct{}
 
@@ -74,6 +75,9 @@ func getKeyConfig(vertexAI *VertexAIProvider) {
 func (p *VertexAIProvider) GetFullRequestURL(modelName string, other string) string {
 	if p.Region == "global" {
 		return fmt.Sprintf(p.GetBaseURL(), "", p.ProjectID, p.Region, modelName, other)
+	}
+	if strings.Contains("deepseek", modelName) {
+		return fmt.Sprintf(defaultMetaBaseUrl, p.Region, p.ProjectID, p.Region)
 	}
 	return fmt.Sprintf(p.GetBaseURL(), p.Region+"-", p.ProjectID, p.Region, modelName, other)
 }

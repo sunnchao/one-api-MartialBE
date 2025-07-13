@@ -29,6 +29,8 @@ func GetCategory(modelName string) (*Category, error) {
 		category = "gemini"
 	} else if strings.HasPrefix(modelName, "claude") {
 		category = "claude"
+	} else if strings.HasPrefix(modelName, "deepseek") {
+		category = "deepseek"
 	}
 
 	if category == "" {
