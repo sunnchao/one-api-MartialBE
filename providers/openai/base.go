@@ -133,23 +133,27 @@ func (p *OpenAIProvider) GetFullRequestURL(requestURL string, modelName string) 
       // 检测模型是是否包含 . 如果有则直接去掉
       // modelName = strings.Replace(modelName, ".", "", -1)
 
-      if modelName == "dall-e-2" {
-        // 因为dall-e-3需要api-version=2023-12-01-preview，但是该版本
-        // 已经没有dall-e-2了，所以暂时写死
-        requestURL = fmt.Sprintf("/openai/%s:submit?api-version=2023-09-01-preview", requestURL)
-      } else {
-        requestURL = fmt.Sprintf("/openai/deployments/%s%s?api-version=%s", modelName, requestURL, apiVersion)
-      }
-    } else {
-      if strings.Contains(requestURL, "isGetAzureModelList") {
-        //专门生成用于azure获取模型部署列表的URL，因为azure只有2023-03-15-preview版本等特定版本支持通过api-key获取models 所以本url固定写死
-        requestURL = "/openai/deployments?api-version=2023-03-15-preview"
-      } else {
-        requestURL = strings.TrimPrefix(requestURL, "/v1")
-        requestURL = fmt.Sprintf("/openai%s?api-version=%s", requestURL, apiVersion)
-      }
-    }
-  }
+			if modelName == "dall-e-2" {
+				// 因为dall-e-3需要api-version=2023-12-01-preview，但是该版本
+				// 已经没有dall-e-2了，所以暂时写死
+				requestURL = fmt.Sprintf("/openai/%s:submit?api-version=2023-09-01-preview", requestURL)
+			} else {
+				if strings.HasPrefix(requestURL, "/v1") {
+					requestURL = fmt.Sprintf("/openai/%s?api-version=%s", requestURL, apiVersion)
+				} else {
+					requestURL = fmt.Sprintf("/openai/deployments/%s%s?api-version=%s", modelName, requestURL, apiVersion)
+				}
+			}
+		} else {
+			if strings.Contains(requestURL, "isGetAzureModelList") {
+				//专门生成用于azure获取模型部署列表的URL，因为azure只有2023-03-15-preview版本等特定版本支持通过api-key获取models 所以本url固定写死
+				requestURL = "/openai/deployments?api-version=2023-03-15-preview"
+			} else {
+				requestURL = strings.TrimPrefix(requestURL, "/v1")
+				requestURL = fmt.Sprintf("/openai%s?api-version=%s", requestURL, apiVersion)
+			}
+		}
+	}
 
   if strings.HasPrefix(baseURL, "https://gateway.ai.cloudflare.com") {
     if p.IsAzure {
@@ -165,13 +169,14 @@ func (p *OpenAIProvider) GetFullRequestURL(requestURL string, modelName string) 
 
 // 获取请求头
 func (p *OpenAIProvider) GetRequestHeaders() (headers map[string]string) {
-  headers = make(map[string]string)
-  p.CommonRequestHeaders(headers)
-  if p.IsAzure {
-    headers["api-key"] = p.Channel.Key
-  } else {
-    headers["Authorization"] = fmt.Sprintf("Bearer %s", p.Channel.Key)
-  }
+	headers = make(map[string]string)
+	p.CommonRequestHeaders(headers)
+	if p.IsAzure {
+		headers["api-key"] = p.Channel.Key
+		headers["Authorization"] = fmt.Sprintf("Bearer %s", p.Channel.Key)
+	} else {
+		headers["Authorization"] = fmt.Sprintf("Bearer %s", p.Channel.Key)
+	}
 
   return headers
 }
