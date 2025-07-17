@@ -518,7 +518,8 @@
     "signout": "登出",
     "signup": "註冊",
     "unknownVersion": "未知版本",
-    "welcomeBack": "歡迎回來"
+    "welcomeBack": "歡迎回來",
+    "claude-code": "Claude Code"
   },
   "midjourneyPage": {
     "channel": "渠道",

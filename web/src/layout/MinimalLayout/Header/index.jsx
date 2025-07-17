@@ -141,6 +141,21 @@ const Header = () => {
             >
               {t('menu.about')}
             </Button>
+            {/* Claude Code 介绍 */}
+            <Button
+              component={Link}
+              variant="text"
+              to="/claude-code"
+              color={pathname === '/claude-code' ? 'primary' : 'inherit'}
+              sx={{
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                textTransform: 'none'
+              }}
+            >
+              {t('menu.claude-code')}
+            </Button>
+
             {siteInfo.UptimeEnabled && (
               <Button
                 component="a"
@@ -319,6 +334,23 @@ const Header = () => {
                             }}
                           >
                             {t('menu.about')}
+                          </Typography>
+                        }
+                      />
+                    </ListItemButton>
+                    {/* Claude Code 介绍页 */}
+                    <ListItemButton component={Link} to="/claude-code" selected={pathname === '/claude-code'}>
+                      <ListItemText
+                        primary={
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              fontWeight: pathname === '/claude-code' ? 500 : 400,
+                              textAlign: 'center',
+                              color: pathname === '/claude-code' ? theme.palette.primary.main : theme.palette.text.primary
+                            }}
+                          >
+                            {t('menu.claude-code')}
                           </Typography>
                         }
                       />
