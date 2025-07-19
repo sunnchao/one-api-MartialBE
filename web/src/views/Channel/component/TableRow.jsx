@@ -345,7 +345,6 @@ export default function ChannelTableRow({ item, manageChannel, onRefresh, groupO
               variant="subtitle1"
               sx={{
                 color: 'primary.main',
-                maxWidth: 100,
                 display: 'block'
               }}
             >
