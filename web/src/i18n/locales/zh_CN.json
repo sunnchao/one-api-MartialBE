@@ -50,7 +50,8 @@
     "console": "控制台",
     "error": "错误",
     "unknownVersion": "未知版本",
-    "welcomeBack": "欢迎回来"
+    "welcomeBack": "欢迎回来",
+    "claude-code": "Claude Code"
   },
   "sidebar": {
     "totalQuota": "总额度",

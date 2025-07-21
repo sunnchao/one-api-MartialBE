@@ -515,7 +515,8 @@
     "signup": "サインアップ",
     "status": "ステータス",
     "unknownVersion": "未知バージョン",
-    "welcomeBack": "おかえりなさい"
+    "welcomeBack": "おかえりなさい",
+    "claude-code": "Claude Code"
   },
   "midjourneyPage": {
     "channel": "チャネル",

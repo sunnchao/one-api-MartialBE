@@ -29,6 +29,7 @@ const InvoiceDetail = Loadable(lazy(() => import('views/Invoice/detail')));
 const Dashboard = Loadable(lazy(() => import('views/Dashboard')));
 
 const SystemInfo = Loadable(lazy(() => import('views/SystemInfo')));
+const ClaudeCode = Loadable(lazy(() => import('views/ClaudeCode')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -131,6 +132,10 @@ const MainRoutes = {
     {
       path: 'system_info',
       element: <SystemInfo />
+    },
+    {
+      path: 'claude-code',
+      element: <ClaudeCode />
     }
   ]
 };

@@ -60,7 +60,8 @@
     "console": "Console",
     "error": "Error",
     "unknownVersion": "Unknown Version",
-    "welcomeBack": "Welcome Back"
+    "welcomeBack": "Welcome Back",
+    "claude-code": "Claude Code"
   },
   "sidebar": {
     "totalQuota": "Total Quota",
