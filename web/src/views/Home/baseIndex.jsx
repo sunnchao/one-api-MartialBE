@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router';
-import { Box, Typography, Button, Container, Stack, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Typography, Button, Container, Stack } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
-import { GitHub, Bolt, Cloud, Security, SyncAlt, Shield, Brush, ArrowForward, ArrowRightAlt } from '@mui/icons-material';
-import { useTranslation } from 'react-i18next';
+import { Bolt, Cloud, Security, SyncAlt, Shield, Brush, ArrowRightAlt, MailOutline, Forum, Telegram } from '@mui/icons-material';
 import { keyframes } from '@mui/system';
 
 const fadeIn = keyframes`
@@ -33,16 +32,7 @@ const shimmer = keyframes`
   100% { background-position: 200% 0; }
 `;
 
-const rotate = keyframes`
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-`;
-
 const BaseIndex = () => {
-  const { t } = useTranslation();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
   const navigate = useNavigate();
 
   return (
@@ -268,7 +258,7 @@ const BaseIndex = () => {
                         boxShadow: '0 5px 15px rgba(144,202,249,0.2)'
                       }
                     }}
-                    endIcon={<ArrowForward />}
+                    endIcon={<ArrowRightAlt />}
                   >
                     前往控制台
                   </Button>
@@ -583,20 +573,33 @@ const BaseIndex = () => {
                 {
                   type: 'email',
                   label: '邮件支持',
-                  content: 'chirou.api@outlook.com',
-                  icon: '📧'
+                  content: (
+                    <a href="mailto:chirou.api@outlook.com" style={{ color: 'inherit', textDecoration: 'none' }}>
+                      chirou.api@outlook.com
+                    </a>
+                  ),
+                  icon: <MailOutline />
                 },
                 {
                   type: 'qq',
                   label: 'QQ 交流群',
                   content: '924076327',
-                  icon: '💬'
+                  icon: <Forum />
                 },
                 {
                   type: 'telegram',
                   label: 'Telegram',
-                  content: '@chirou_api',
-                  icon: '✈️'
+                  content: (
+                    <a
+                      href="https://t.me/chirou_api"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: 'inherit', textDecoration: 'none' }}
+                    >
+                      @chirou_api
+                    </a>
+                  ),
+                  icon: <Telegram />
                 }
               ].map((item, index) => (
                 <Grid item xs={12} sm={4} key={index}>
@@ -643,7 +646,8 @@ const BaseIndex = () => {
                         fontSize: '3rem',
                         mb: 3,
                         transition: 'transform 0.5s ease',
-                        filter: 'drop-shadow(0 5px 15px rgba(0,0,0,0.2))'
+                        filter: 'drop-shadow(0 5px 15px rgba(0,0,0,0.2))',
+                        color: '#90caf9'
                       }}
                     >
                       {item.icon}
