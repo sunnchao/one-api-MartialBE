@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router';
+import { useRef } from 'react';
 import { Box, Typography, Button, Container, Stack } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Bolt, Cloud, Security, SyncAlt, Shield, Brush, ArrowRightAlt, MailOutline, Forum, Telegram } from '@mui/icons-material';
@@ -34,6 +35,11 @@ const shimmer = keyframes`
 
 const BaseIndex = () => {
   const navigate = useNavigate();
+  const advantagesRef = useRef(null);
+
+  const handleLearnMoreClick = () => {
+    advantagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <>
@@ -262,8 +268,9 @@ const BaseIndex = () => {
                   >
                     前往控制台
                   </Button>
-                  {/* <Button
+                  <Button
                     variant="outlined"
+                    onClick={handleLearnMoreClick}
                     sx={{
                       color: '#fff',
                       borderColor: 'rgba(255,255,255,0.3)',
@@ -284,7 +291,7 @@ const BaseIndex = () => {
                     endIcon={<ArrowRightAlt />}
                   >
                     了解更多
-                  </Button> */}
+                  </Button>
                 </Stack>
 
                 <Box
@@ -329,6 +336,7 @@ const BaseIndex = () => {
           </Grid>
 
           <Box
+            ref={advantagesRef}
             sx={{
               py: { xs: 10, md: 16 },
               position: 'relative'
@@ -380,33 +388,38 @@ const BaseIndex = () => {
               {[
                 {
                   icon: <Bolt sx={{ fontSize: 36, color: '#90caf9' }} />,
-                  title: '企业级性能保障',
-                  features: ['MySQL8.2超高并发架构', '日承接量超100万次调用', '智能负载均衡确保稳定', '已稳定运行超过1年']
+                  title: '企业级卓越性能',
+                  features: ['高并发架构，稳定可靠', '千万级每日调用处理能力', '智能负载均衡，确保服务稳定', '超一年稳定运行验证']
                 },
                 {
                   icon: <Cloud sx={{ fontSize: 36, color: '#90caf9' }} />,
-                  title: '全球化部署',
-                  features: ['多区域服务器部署', 'CN2专线高速接入', '70+全球中转节点', '智能路由就近接入']
+                  title: '全球高速网络',
+                  features: ['全球多区域节点部署', 'CN2 GIA 专线接入，延迟更低', '全球70+高速中转节点', '智能路由，自动选择最优线路']
                 },
                 {
                   icon: <Security sx={{ fontSize: 36, color: '#90caf9' }} />,
-                  title: '透明计费系统',
-                  features: ['对标官方计费标准', '无隐藏费用设计', '按量计费更经济', '余额永不过期']
+                  title: '透明化计费',
+                  features: ['官方标准计费，公开透明', '无任何隐藏费用', '按需使用，成本可控', '账户余额，永不过期']
                 },
                 {
                   icon: <SyncAlt sx={{ fontSize: 36, color: '#90caf9' }} />,
-                  title: '完美兼容性',
-                  features: ['兼容OpenAI、Claude、Gemini官方接口', '支持所有主流模型', '无缝对接第三方应用', '持续更新新功能']
+                  title: '全面的模型支持',
+                  features: [
+                    '完美兼容 OpenAI, Claude, Gemini 等官方接口',
+                    '支持全球所有主流大语言模型',
+                    '轻松集成至现有应用与工作流',
+                    '模型库与功能持续更新'
+                  ]
                 },
                 {
                   icon: <Shield sx={{ fontSize: 36, color: '#90caf9' }} />,
-                  title: '服务保障',
-                  features: ['7*24小时持续服务', '自助充值系统', '实时余额查询', '专业技术支持']
+                  title: '全方位服务保障',
+                  features: ['7x24 小时全天候在线服务', '便捷的在线自助充值', '详尽的消费日志与余额查询', '专业工程师团队在线支持']
                 },
                 {
                   icon: <Brush sx={{ fontSize: 36, color: '#90caf9' }} />,
-                  title: 'Midjourney 增强',
-                  features: ['内置中文翻译接口', '高性能反代服务', '支持最新版本', '快速并发响应']
+                  title: '强大的 Midjourney 功能',
+                  features: ['内置提示词中文优化', '高速稳定的反向代理', '同步支持 Midjourney 最新版本', '高并发任务处理，无需等待']
                 }
               ].map((feature, index) => (
                 <Grid item xs={12} md={4} key={index}>
