@@ -82,17 +82,7 @@ export default function QuotaWithDetailContent({ item, totalInputTokens, totalOu
 
   let calculateSteps = '';
   if (priceType === 'tokens') {
-    let inputTokens = item.prompt_tokens;
-    if (item.metadata?.cached_write_tokens > 0) {
-      inputTokens -= item.metadata?.cached_write_tokens;
-    }
-    calculateSteps = `(${inputTokens} / 1M × ${inputPrice} x ${groupRatio}倍)`;
-    if (item.metadata?.cached_write_tokens > 0) {
-      calculateSteps += ` + (${item.metadata?.cached_write_tokens} / 1M × ${cachedWritePrice})`;
-    }
-    if (item.metadata?.reasoning_tokens > 0) {
-      calculateSteps += ` + (${item.metadata?.reasoning_tokens} / 1M × ${reasoningPrice})`;
-    }
+    calculateSteps = `(${totalInputTokens} / 1M × ${inputPrice} x ${groupRatio}倍)`;
     if (totalOutputTokens > 0) {
       calculateSteps += ` + (${totalOutputTokens} / 1M × ${outputPrice} x ${groupRatio}倍)`;
     }
