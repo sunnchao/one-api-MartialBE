@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router';
 import { useRef } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Box, Typography, Button, Container, Stack } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Bolt, Cloud, Security, SyncAlt, Shield, Brush, ArrowRightAlt, MailOutline, Forum, Telegram } from '@mui/icons-material';
@@ -43,6 +44,26 @@ const BaseIndex = () => {
 
   return (
     <>
+      <Helmet>
+        <title>Chirou API - 企业级AI接口调用平台</title>
+        <meta
+          name="description"
+          content="Chirou API，企业级AI接口调用平台，专为企业级需求打造，提供高性能、高并发、高可用的服务，一站式处理大规模数据和复杂任务。我们的稳定高并发处理能力和高可用性保证您的业务流畅运行，结合OpenAI, ClaudeAI, GeminiAI, Meta LLama, API等AI接口和专业的技术支持，为您的企业快速部署和实现AI接口应用，释放商业价值"
+        />
+        <meta name="keywords" content="Chirou API,OpenAI,Claude,Midjourney,Claude Code,高并发,高可用,高性能,企业级AI接口调用平台" />
+        <script type="application/ld+json">
+          {`
+            {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Chirou API",
+              "url": "https://www.wochirou.com",
+              "logo": "https://www.wochirou.com/logo.png",
+              "description": "企业级AI接口调用平台，提供高性能、高并发、高可用的AI接口服务。"
+            }
+          `}
+        </script>
+      </Helmet>
       <Box
         sx={{
           minHeight: '100vh',

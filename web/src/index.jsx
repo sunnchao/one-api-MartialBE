@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 // third party
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
+import { HelmetProvider } from 'react-helmet-async';
 
 // project imports
 import App from 'App';
@@ -19,7 +20,9 @@ const root = createRoot(container); // createRoot(container!) if you use TypeScr
 root.render(
   <Provider store={store}>
     <BrowserRouter basename={config.basename}>
-      <App />
+      <HelmetProvider>
+        <App />
+      </HelmetProvider>
     </BrowserRouter>
   </Provider>
 );
