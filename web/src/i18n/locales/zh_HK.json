@@ -477,7 +477,13 @@
       "originalBilling": "原始計費",
       "actualBilling": "實際計費",
       "calculationNote": "PS：本系統按照積分計算，所有金額均為積分換算而來，1積分=$0.000002，最低消費為1積分，本計算步驟僅供參考，以實際扣費為準。",
-      "times": "倍"
+      "times": "倍",
+      "cachedWrite": "緩存寫入價格",
+      "cachedWritePrice": "緩存寫入價格",
+      "cachedRead": "緩存讀取價格",
+      "cachedReadPrice": "緩存讀取價格",
+      "reasoning": "推理價格",
+      "reasoningPrice": "推理價格"
     },
     "cachedReadTokens": "緩存讀取Tokens (* {{ ratio }})",
     "reasoningTokens": "推理Tokens (* {{ ratio }})",

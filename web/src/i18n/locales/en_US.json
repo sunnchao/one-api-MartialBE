@@ -498,7 +498,13 @@
       "originalBilling": "Original Billing",
       "actualBilling": "Actual Billing",
       "calculationNote": "PS: This system calculates based on points, and all amounts are converted from points. 1 point = $0.000002, with a minimum spending of 1 point. This calculation is for reference only; actual charges may vary.",
-      "times": "times"
+      "times": "times",
+      "cachedWrite": "Cached Write Price",
+      "cachedWritePrice": "Cached Write Price",
+      "cachedRead": "Cached Read Price",
+      "cachedReadPrice": "Cached Read Price",
+      "reasoning": "Reasoning Price",
+      "reasoningPrice": "Reasoning Price"
     },
     "cachedReadTokens": "Cache read Tokens (* {{ ratio }})",
     "cachedWriteTokens": "Write tokens to cache (* {{ ratio }})",

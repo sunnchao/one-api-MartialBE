@@ -88,8 +88,17 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
     request_ts = item.completion_tokens / stream_time;
     request_ts_str = `${request_ts.toFixed(2)} t/s`;
   }
-
-  const { totalInputTokens, totalOutputTokens, show, tokenDetails } = useMemo(() => calculateTokens(item), [item]);
+  const {
+    totalInputTokens,
+    totalOutputTokens,
+    show,
+    tokenDetails,
+    cached_write_tokens,
+    cached_read_tokens,
+    reasoning_tokens,
+    cached_read_tokens_ratio,
+    cached_write_tokens_ratio
+  } = useMemo(() => calculateTokens(item), [item]);
 
   // 计算当前显示的列数
   const colCount = Object.values(columnVisibility).filter(Boolean).length;
@@ -282,11 +291,16 @@ const TOKEN_RATIOS = {
 
 function calculateTokens(item) {
   const { prompt_tokens, completion_tokens, metadata } = item;
-
   if (!prompt_tokens || !metadata) {
     return {
       totalInputTokens: prompt_tokens || 0,
       totalOutputTokens: completion_tokens || 0,
+      cached_write_tokens: metadata?.cached_write_tokens || 0,
+      cached_write_tokens_ratio: metadata?.cached_write_tokens_ratio || 0,
+      cached_read_tokens: metadata?.cached_read_tokens || 0,
+      cached_read_tokens_ratio: metadata?.cached_read_tokens_ratio || 0,
+      reasoning_tokens: metadata?.reasoning_tokens || 0,
+      reasoning_tokens_ratio: metadata?.reasoning_tokens_ratio || 0,
       show: false,
       tokenDetails: []
     };

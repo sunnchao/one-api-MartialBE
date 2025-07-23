@@ -54,18 +54,47 @@ export default function QuotaWithDetailContent({ item, totalInputTokens, totalOu
   const groupRatio = item.metadata?.group_ratio || 1;
   const inputPrice =
     item.metadata?.input_price || (item.metadata?.input_ratio ? `$${calculatePrice(item.metadata.input_ratio, groupRatio, false)} ` : '$0');
+  //
+  const cachedWritePrice =
+    item.metadata?.input_price ||
+    (item.metadata?.cached_write_tokens_ratio
+      ? `$${calculatePrice(item.metadata.input_ratio, item.metadata.cached_write_tokens_ratio, false)} `
+      : '$0');
+  const cachedReadPrice =
+    item.metadata?.input_price ||
+    (item.metadata?.cached_read_token_ratio
+      ? `$${calculatePrice(item.metadata.input_ratio, item.metadata.cached_read_token_ratio, false)} `
+      : '$0');
+  const reasoningPrice =
+    item.metadata?.input_price ||
+    (item.metadata?.reasoning_tokens_ratio
+      ? `$${calculatePrice(item.metadata.input_ratio, item.metadata.reasoning_tokens_ratio, false)} `
+      : '$0');
   const outputPrice =
     item.metadata?.output_price ||
     (item.metadata?.output_ratio ? `$${calculatePrice(item.metadata.output_ratio, groupRatio, false)}` : '$0');
 
   const inputPriceUnit = inputPrice + ' /M';
+  const cachedWritePriceUnit = cachedWritePrice + ' /M';
+  const cachedReadPriceUnit = cachedReadPrice + ' /M';
+  const reasoningPriceUnit = reasoningPrice + ' /M';
   const outputPriceUnit = outputPrice + ' /M';
 
   let calculateSteps = '';
   if (priceType === 'tokens') {
-    calculateSteps = `(${totalInputTokens} / 1M × ${inputPrice})`;
+    let inputTokens = item.prompt_tokens;
+    if (item.metadata?.cached_write_tokens > 0) {
+      inputTokens -= item.metadata?.cached_write_tokens;
+    }
+    calculateSteps = `(${inputTokens} / 1M × ${inputPrice} x ${groupRatio}倍)`;
+    if (item.metadata?.cached_write_tokens > 0) {
+      calculateSteps += ` + (${item.metadata?.cached_write_tokens} / 1M × ${cachedWritePrice})`;
+    }
+    if (item.metadata?.reasoning_tokens > 0) {
+      calculateSteps += ` + (${item.metadata?.reasoning_tokens} / 1M × ${reasoningPrice})`;
+    }
     if (totalOutputTokens > 0) {
-      calculateSteps += ` + (${totalOutputTokens} / 1M × ${outputPrice})`;
+      calculateSteps += ` + (${totalOutputTokens} / 1M × ${outputPrice} x ${groupRatio}倍)`;
     }
   } else {
     calculateSteps = `${inputPrice}`;
@@ -140,6 +169,16 @@ export default function QuotaWithDetailContent({ item, totalInputTokens, totalOu
           <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
             {t('logPage.quotaDetail.outputPrice')}: {originalOutputPrice}
           </Typography>
+          {item.metadata?.cached_write_tokens > 0 && (
+            <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, mt: 0.5, textAlign: 'left' }}>
+              {t('logPage.quotaDetail.cachedWritePrice')}: {cachedWritePriceUnit}
+            </Typography>
+          )}
+          {item.metadata?.reasoning_tokens > 0 && (
+            <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, mt: 0.5, textAlign: 'left' }}>
+              {t('logPage.quotaDetail.reasoningPrice')}: {reasoningPriceUnit}
+            </Typography>
+          )}
         </Box>
         {/* Group Ratio */}
         <Box
@@ -161,6 +200,14 @@ export default function QuotaWithDetailContent({ item, totalInputTokens, totalOu
           <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
             {t('logPage.quotaDetail.groupRatioValue')}: {groupRatio}
           </Typography>
+          {
+            // 缓存读取倍率
+            item.metadata?.cached_read_tokens_ratio && (
+              <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
+                {t('logPage.quotaDetail.cachedReadRatio')}: {item.metadata?.cached_read_tokens_ratio}
+              </Typography>
+            )
+          }
         </Box>
         {/* Actual Price */}
         <Box
@@ -182,6 +229,16 @@ export default function QuotaWithDetailContent({ item, totalInputTokens, totalOu
           <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
             {t('logPage.quotaDetail.output')}: {outputPriceUnit}
           </Typography>
+          {item.metadata?.cached_write_tokens > 0 && (
+            <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, mt: 0.5, textAlign: 'left' }}>
+              {t('logPage.quotaDetail.cachedWrite')}: {cachedWritePriceUnit}
+            </Typography>
+          )}
+          {item.metadata?.reasoning_tokens > 0 && (
+            <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, mt: 0.5, textAlign: 'left' }}>
+              {t('logPage.quotaDetail.reasoning')}: {reasoningPriceUnit}
+            </Typography>
+          )}
         </Box>
       </Box>
       {/* Final Calculation Area */}

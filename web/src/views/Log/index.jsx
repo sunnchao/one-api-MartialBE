@@ -34,7 +34,7 @@ export default function Log() {
     p: 0,
     username: '',
     token_name: '',
-    model_name: '',
+    model_name: 'claude-sonnet-4-20250514',
     start_timestamp: dayjs().startOf('day').unix(), // 开始时间 当日 0 点
     end_timestamp: dayjs().endOf('day').unix(), // 结束时间 当日 23:59:59
     log_type: '0',
