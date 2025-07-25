@@ -1,11 +1,11 @@
 package model
 
 import (
-  "one-api/common/config"
+	"one-api/common/config"
 
-  "github.com/shopspring/decimal"
-  "gorm.io/datatypes"
-  "gorm.io/gorm"
+	"github.com/shopspring/decimal"
+	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 const (
@@ -14,7 +14,7 @@ const (
   DefaultPrice       = 30.0
   DollarRate         = 0.002
   RMBRate            = 0.014
-  DefaultCacheRatios = 0.5
+  DefaultCacheRatios = 1
   DefaultAudioRatio  = 40
 
   DefaultCachedWriteRatio = 1.25
@@ -42,7 +42,7 @@ func GetExtraPriceIsPrompt(key string) bool {
 }
 
 var defaultExtraPrice = map[string]float64{
-  config.UsageExtraCache:            0.5,
+  config.UsageExtraCache:            1,
   config.UsageExtraCachedWrite:      1.25,
   config.UsageExtraCachedRead:       0.1,
   config.UsageExtraInputAudio:       40,
