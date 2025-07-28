@@ -1,11 +1,11 @@
 package model
 
 import (
-	"one-api/common/config"
+  "one-api/common/config"
 
-	"github.com/shopspring/decimal"
-	"gorm.io/datatypes"
-	"gorm.io/gorm"
+  "github.com/shopspring/decimal"
+  "gorm.io/datatypes"
+  "gorm.io/gorm"
 )
 
 const (

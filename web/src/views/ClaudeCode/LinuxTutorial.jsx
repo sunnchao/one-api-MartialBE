@@ -4,15 +4,9 @@ import {
   Typography,
   Box,
   Paper,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
-  Button,
   Card,
   CardContent,
   Alert,
-  Chip,
   List,
   ListItem,
   ListItemIcon,
@@ -20,37 +14,27 @@ import {
   Divider,
   Grid,
   Tabs,
-  Tab,
+  Tab
 } from '@mui/material';
 import {
   Download as DownloadIcon,
-  Terminal as TerminalIcon,
   Code as CodeIcon,
   CheckCircle as CheckCircleIcon,
-  Warning as WarningIcon,
   Info as InfoIcon,
-  ArrowBack as ArrowBackIcon,
-  Storage as StorageIcon,
+  Storage as StorageIcon
 } from '@mui/icons-material';
-import { SiUbuntu, SiCentos, SiDebian, SiArchlinux } from 'react-icons/si';
+import { SiUbuntu, SiCentos, SiArchlinux } from 'react-icons/si';
 
 // 简单的 TabPanel 组件实现
 const TabPanel = ({ children, value, index, ...other }) => {
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
+    <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 };
 
-const LinuxTutorial = ({ onBack }) => {
-  const [activeStep, setActiveStep] = React.useState(0);
+const LinuxTutorial = () => {
   const [distroTab, setDistroTab] = React.useState(0);
 
   const handleDistroChange = (event, newValue) => {
@@ -63,7 +47,7 @@ const LinuxTutorial = ({ onBack }) => {
       content: (
         <Box>
           <Typography variant="h6" gutterBottom>
-            安装 Node.js（需要版本 >= 18.0.0）
+            安装 Node.js（需要版本 {'>='} 18.0.0）
           </Typography>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={distroTab} onChange={handleDistroChange} aria-label="Linux distributions">
@@ -73,70 +57,106 @@ const LinuxTutorial = ({ onBack }) => {
               <Tab label="通用方法" icon={<DownloadIcon />} />
             </Tabs>
           </Box>
-          
+
           <TabPanel value={distroTab} index={0}>
-            <Typography variant="h6" gutterBottom>Ubuntu/Debian 系统</Typography>
+            <Typography variant="h6" gutterBottom>
+              Ubuntu/Debian 系统
+            </Typography>
             <Paper sx={{ p: 2, bgcolor: 'grey.100' }}>
               <Typography variant="body2" fontFamily="monospace">
-                # 更新包列表<br/>
-                sudo apt update<br/><br/>
-                # 安装 Node.js<br/>
-                curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -<br/>
-                sudo apt-get install -y nodejs<br/><br/>
-                # 验证安装<br/>
-                node --version<br/>
+                # 更新包列表
+                <br />
+                sudo apt update
+                <br />
+                <br />
+                # 安装 Node.js
+                <br />
+                curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -<br />
+                sudo apt-get install -y nodejs
+                <br />
+                <br />
+                # 验证安装
+                <br />
+                node --version
+                <br />
                 npm --version
               </Typography>
             </Paper>
           </TabPanel>
-          
+
           <TabPanel value={distroTab} index={1}>
-            <Typography variant="h6" gutterBottom>CentOS/RHEL 系统</Typography>
+            <Typography variant="h6" gutterBottom>
+              CentOS/RHEL 系统
+            </Typography>
             <Paper sx={{ p: 2, bgcolor: 'grey.100' }}>
               <Typography variant="body2" fontFamily="monospace">
-                # 安装 Node.js<br/>
-                curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -<br/>
-                sudo yum install -y nodejs<br/><br/>
-                # 验证安装<br/>
-                node --version<br/>
+                # 安装 Node.js
+                <br />
+                curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -<br />
+                sudo yum install -y nodejs
+                <br />
+                <br />
+                # 验证安装
+                <br />
+                node --version
+                <br />
                 npm --version
               </Typography>
             </Paper>
           </TabPanel>
-          
+
           <TabPanel value={distroTab} index={2}>
-            <Typography variant="h6" gutterBottom>Arch Linux 系统</Typography>
+            <Typography variant="h6" gutterBottom>
+              Arch Linux 系统
+            </Typography>
             <Paper sx={{ p: 2, bgcolor: 'grey.100' }}>
               <Typography variant="body2" fontFamily="monospace">
-                # 安装 Node.js<br/>
-                sudo pacman -S nodejs npm<br/><br/>
-                # 验证安装<br/>
-                node --version<br/>
+                # 安装 Node.js
+                <br />
+                sudo pacman -S nodejs npm
+                <br />
+                <br />
+                # 验证安装
+                <br />
+                node --version
+                <br />
                 npm --version
               </Typography>
             </Paper>
           </TabPanel>
-          
+
           <TabPanel value={distroTab} index={3}>
-            <Typography variant="h6" gutterBottom>通用方法（适用于所有 Linux 发行版）</Typography>
+            <Typography variant="h6" gutterBottom>
+              通用方法（适用于所有 Linux 发行版）
+            </Typography>
             <Paper sx={{ p: 2, bgcolor: 'grey.100' }}>
               <Typography variant="body2" fontFamily="monospace">
-                # 使用 Node Version Manager (NVM)<br/>
-                curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash<br/>
-                source ~/.bashrc<br/><br/>
-                # 安装 Node.js<br/>
-                nvm install 18<br/>
-                nvm use 18<br/><br/>
-                # 验证安装<br/>
-                node --version<br/>
+                # 使用 Node Version Manager (NVM)
+                <br />
+                curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+                <br />
+                source ~/.bashrc
+                <br />
+                <br />
+                # 安装 Node.js
+                <br />
+                nvm install 18
+                <br />
+                nvm use 18
+                <br />
+                <br />
+                # 验证安装
+                <br />
+                node --version
+                <br />
                 npm --version
               </Typography>
             </Paper>
           </TabPanel>
-          
+
           <Alert severity="info" sx={{ mt: 2 }}>
             <Typography variant="body2">
-              <strong>系统要求：</strong> Linux 内核 3.10+，glibc 2.17+，Node.js 版本需要 >= 18.0.0，支持 x86_64 和 aarch64 架构
+              <strong>系统要求：</strong> Linux 内核 3.10+，glibc 2.17+，Node.js 版本需要 {'>='} 18.0.0，支持 x86_64 和 aarch64 架构
             </Typography>
           </Alert>
         </Box>
@@ -151,7 +171,8 @@ const LinuxTutorial = ({ onBack }) => {
           </Typography>
           <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
             <Typography variant="body2" fontFamily="monospace">
-              # 全局安装 Claude Code<br/>
+              # 全局安装 Claude Code
+              <br />
               npm install -g @anthropic-ai/claude-code
             </Typography>
           </Paper>
@@ -160,7 +181,8 @@ const LinuxTutorial = ({ onBack }) => {
           </Typography>
           <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
             <Typography variant="body2" fontFamily="monospace">
-              # 查看是否安装成功<br/>
+              # 查看是否安装成功
+              <br />
               claude --version
             </Typography>
           </Paper>
@@ -192,38 +214,33 @@ const LinuxTutorial = ({ onBack }) => {
               <ListItemIcon>
                 <CheckCircleIcon color="success" />
               </ListItemIcon>
-              <ListItemText 
-                primary="创建 .claude 目录"
-                secondary="在项目根目录下创建 .claude 文件夹"
-              />
+              <ListItemText primary="创建 .claude 目录" secondary="在项目根目录下创建 .claude 文件夹" />
             </ListItem>
             <ListItem>
               <ListItemIcon>
                 <CheckCircleIcon color="success" />
               </ListItemIcon>
-              <ListItemText 
-                primary="创建配置文件"
-                secondary="在 .claude 目录下创建 settings.json 文件"
-              />
+              <ListItemText primary="创建配置文件" secondary="在 .claude 目录下创建 settings.json 文件" />
             </ListItem>
           </List>
           <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
             配置文件内容
           </Typography>
           <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              {"{"}<br/>
-              &nbsp;&nbsp;"env": {"{"}<br/>
-              &nbsp;&nbsp;&nbsp;&nbsp;"ANTHROPIC_BASE_URL": "https://api.wochirou.com/claude",<br/>
-              &nbsp;&nbsp;&nbsp;&nbsp;"ANTHROPIC_AUTH_TOKEN": "sk-xxxxx",<br/>
-              &nbsp;&nbsp;&nbsp;&nbsp;"ANTHROPIC_MODEL": "claude-3-7-sonnet-20250219"<br/>
-              &nbsp;&nbsp;{"}"}<br/>
-              {"}"}
+            <Typography variant="body2" component="pre" fontFamily="monospace" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+              {`{
+ "env": {
+   "ANTHROPIC_BASE_URL": "https://api.wochirou.com/claude",
+   "ANTHROPIC_AUTH_TOKEN": "sk-xxxxx",
+   "ANTHROPIC_MODEL": "claude-3-7-sonnet-20250219"
+ }
+}`}
             </Typography>
           </Paper>
           <Alert severity="warning" sx={{ mt: 2 }}>
             <Typography variant="body2">
-              <strong>重要：</strong> 请将 ANTHROPIC_AUTH_TOKEN 替换为您的实际 API 密钥，ANTHROPIC_MODEL 替换为您需要的模型。模型只能使用 claude 模型或本站的 claude 模型别名。
+              <strong>重要：</strong> 请将 ANTHROPIC_AUTH_TOKEN 替换为您的实际 API 密钥，ANTHROPIC_MODEL 替换为您需要的模型。模型只能使用
+              claude 模型或本站的 claude 模型别名。
             </Typography>
           </Alert>
         </Box>
@@ -241,8 +258,10 @@ const LinuxTutorial = ({ onBack }) => {
           </Typography>
           <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
             <Typography variant="body2" fontFamily="monospace">
-              # 创建全局配置目录和文件<br/>
-              mkdir -p ~/.claude<br/>
+              # 创建全局配置目录和文件
+              <br />
+              mkdir -p ~/.claude
+              <br />
               touch ~/.claude/settings.json
             </Typography>
           </Paper>
@@ -251,11 +270,18 @@ const LinuxTutorial = ({ onBack }) => {
           </Typography>
           <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
             <Typography variant="body2" fontFamily="monospace">
-              # 使用 vi 编辑器<br/>
-              vi ~/.claude/settings.json<br/><br/>
-              # 或使用 nano 编辑器<br/>
-              nano ~/.claude/settings.json<br/><br/>
-              # 或使用 VS Code（如果已安装）<br/>
+              # 使用 vi 编辑器
+              <br />
+              vi ~/.claude/settings.json
+              <br />
+              <br />
+              # 或使用 nano 编辑器
+              <br />
+              nano ~/.claude/settings.json
+              <br />
+              <br />
+              # 或使用 VS Code（如果已安装）
+              <br />
               code ~/.claude/settings.json
             </Typography>
           </Paper>
@@ -276,7 +302,8 @@ const LinuxTutorial = ({ onBack }) => {
           </Typography>
           <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
             <Typography variant="body2" fontFamily="monospace">
-              # 在项目根目录下执行<br/>
+              # 在项目根目录下执行
+              <br />
               claude
             </Typography>
           </Paper>
@@ -293,19 +320,13 @@ const LinuxTutorial = ({ onBack }) => {
                       <ListItemIcon>
                         <InfoIcon color="primary" />
                       </ListItemIcon>
-                      <ListItemText 
-                        primary="重新加载配置"
-                        secondary="每次修改配置后，需要重新打开终端窗口"
-                      />
+                      <ListItemText primary="重新加载配置" secondary="每次修改配置后，需要重新打开终端窗口" />
                     </ListItem>
                     <ListItem>
                       <ListItemIcon>
                         <InfoIcon color="primary" />
                       </ListItemIcon>
-                      <ListItemText 
-                        primary="模型限制"
-                        secondary="只支持 Claude 模型及其别名"
-                      />
+                      <ListItemText primary="模型限制" secondary="只支持 Claude 模型及其别名" />
                     </ListItem>
                   </List>
                 </CardContent>
@@ -323,19 +344,13 @@ const LinuxTutorial = ({ onBack }) => {
                       <ListItemIcon>
                         <CheckCircleIcon color="success" />
                       </ListItemIcon>
-                      <ListItemText 
-                        primary="Shell 集成"
-                        secondary="支持 bash、zsh、fish 等 Shell"
-                      />
+                      <ListItemText primary="Shell 集成" secondary="支持 bash、zsh、fish 等 Shell" />
                     </ListItem>
                     <ListItem>
                       <ListItemIcon>
                         <CheckCircleIcon color="success" />
                       </ListItemIcon>
-                      <ListItemText 
-                        primary="容器化支持"
-                        secondary="完美支持 Docker、Podman 环境"
-                      />
+                      <ListItemText primary="容器化支持" secondary="完美支持 Docker、Podman 环境" />
                     </ListItem>
                   </List>
                 </CardContent>
@@ -352,28 +367,9 @@ const LinuxTutorial = ({ onBack }) => {
     }
   ];
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-  };
-
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box mb={4}>
-        <Button 
-          startIcon={<ArrowBackIcon />} 
-          onClick={onBack}
-          sx={{ mb: 2 }}
-        >
-          返回主页
-        </Button>
         <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
           Linux 版本教程
         </Typography>
@@ -382,51 +378,15 @@ const LinuxTutorial = ({ onBack }) => {
         </Typography>
       </Box>
 
-      <Stepper activeStep={activeStep} orientation="vertical">
-        {steps.map((step, index) => (
-          <Step key={index}>
-            <StepLabel>
-              <Typography variant="h6">{step.label}</Typography>
-            </StepLabel>
-            <StepContent>
-              {step.content}
-              <Box sx={{ mt: 2 }}>
-                <Button
-                  variant="contained"
-                  onClick={handleNext}
-                  sx={{ mr: 1 }}
-                >
-                  {index === steps.length - 1 ? '完成' : '下一步'}
-                </Button>
-                <Button
-                  disabled={index === 0}
-                  onClick={handleBack}
-                  sx={{ mr: 1 }}
-                >
-                  上一步
-                </Button>
-              </Box>
-            </StepContent>
-          </Step>
-        ))}
-      </Stepper>
-
-      {activeStep === steps.length && (
-        <Paper square elevation={0} sx={{ p: 3, mt: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            安装完成！
+      {steps.map((step, index) => (
+        <Paper key={index} sx={{ p: 3, mb: 3, borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+          <Typography variant="h5" component="h2" gutterBottom>
+            {`步骤 ${index + 1}: ${step.label}`}
           </Typography>
-          <Typography variant="body1" color="text.secondary">
-            您已成功完成 Claude Code 在 Linux 上的安装和配置。现在可以充分利用 Linux 的强大功能和 AI 助手的智能特性了。
-          </Typography>
-          <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
-            重新开始
-          </Button>
-          <Button onClick={onBack} variant="contained" sx={{ mt: 1 }}>
-            返回主页
-          </Button>
+          <Divider sx={{ mb: 2 }} />
+          {step.content}
         </Paper>
-      )}
+      ))}
     </Container>
   );
 };

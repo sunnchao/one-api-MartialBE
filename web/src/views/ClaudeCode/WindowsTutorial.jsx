@@ -4,42 +4,33 @@ import {
   Typography,
   Box,
   Paper,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
   Button,
   Card,
   CardContent,
   Alert,
-  Chip,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
   Divider,
-  Grid,
+  Grid
 } from '@mui/material';
 import {
   Download as DownloadIcon,
   Terminal as TerminalIcon,
   Code as CodeIcon,
   CheckCircle as CheckCircleIcon,
-  Warning as WarningIcon,
-  Info as InfoIcon,
-  ArrowBack as ArrowBackIcon,
+  Info as InfoIcon
 } from '@mui/icons-material';
 
-const WindowsTutorial = ({ onBack }) => {
-  const [activeStep, setActiveStep] = React.useState(0);
-
+const WindowsTutorial = () => {
   const steps = [
     {
       label: '安装 Node.js',
       content: (
         <Box>
           <Typography variant="h6" gutterBottom>
-            安装 Node.js（需要版本 >= 18.0.0）
+            安装 Node.js（需要版本 {'>='} 18.0.0）
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
@@ -52,13 +43,7 @@ const WindowsTutorial = ({ onBack }) => {
                   <Typography variant="body2" color="text.secondary" mb={2}>
                     从 Node.js 官网下载最新版本
                   </Typography>
-                  <Button 
-                    variant="contained" 
-                    fullWidth
-                    startIcon={<DownloadIcon />}
-                    href="https://nodejs.org/en/download"
-                    target="_blank"
-                  >
+                  <Button variant="contained" fullWidth startIcon={<DownloadIcon />} href="https://nodejs.org/en/download" target="_blank">
                     访问 Node.js 官网
                   </Button>
                 </CardContent>
@@ -76,9 +61,13 @@ const WindowsTutorial = ({ onBack }) => {
                   </Typography>
                   <Paper sx={{ p: 2, bgcolor: 'grey.100' }}>
                     <Typography variant="body2" fontFamily="monospace">
-                      # 检查 Node.js 版本<br/>
-                      node --version<br/><br/>
-                      # 检查 npm 版本<br/>
+                      # 检查 Node.js 版本
+                      <br />
+                      node --version
+                      <br />
+                      <br />
+                      # 检查 npm 版本
+                      <br />
                       npm --version
                     </Typography>
                   </Paper>
@@ -88,7 +77,7 @@ const WindowsTutorial = ({ onBack }) => {
           </Grid>
           <Alert severity="info" sx={{ mt: 2 }}>
             <Typography variant="body2">
-              <strong>系统要求：</strong> Windows 10 版本 1903 或更高版本，Node.js 版本需要 >= 18.0.0
+              <strong>系统要求：</strong> Windows 10 版本 1903 或更高版本，Node.js 版本需要 {'>='} 18.0.0
             </Typography>
           </Alert>
         </Box>
@@ -103,7 +92,8 @@ const WindowsTutorial = ({ onBack }) => {
           </Typography>
           <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
             <Typography variant="body2" fontFamily="monospace">
-              # 全局安装 Claude Code<br/>
+              # 全局安装 Claude Code
+              <br />
               npm install -g @anthropic-ai/claude-code
             </Typography>
           </Paper>
@@ -112,7 +102,8 @@ const WindowsTutorial = ({ onBack }) => {
           </Typography>
           <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
             <Typography variant="body2" fontFamily="monospace">
-              # 查看是否安装成功<br/>
+              # 查看是否安装成功
+              <br />
               claude --version
             </Typography>
           </Paper>
@@ -144,38 +135,33 @@ const WindowsTutorial = ({ onBack }) => {
               <ListItemIcon>
                 <CheckCircleIcon color="success" />
               </ListItemIcon>
-              <ListItemText 
-                primary="创建 .claude 目录"
-                secondary="在项目根目录下创建 .claude 文件夹"
-              />
+              <ListItemText primary="创建 .claude 目录" secondary="在项目根目录下创建 .claude 文件夹" />
             </ListItem>
             <ListItem>
               <ListItemIcon>
                 <CheckCircleIcon color="success" />
               </ListItemIcon>
-              <ListItemText 
-                primary="创建配置文件"
-                secondary="在 .claude 目录下创建 settings.json 文件"
-              />
+              <ListItemText primary="创建配置文件" secondary="在 .claude 目录下创建 settings.json 文件" />
             </ListItem>
           </List>
           <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
             配置文件内容
           </Typography>
           <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              {"{"}<br/>
-              &nbsp;&nbsp;"env": {"{"}<br/>
-              &nbsp;&nbsp;&nbsp;&nbsp;"ANTHROPIC_BASE_URL": "https://api.wochirou.com/claude",<br/>
-              &nbsp;&nbsp;&nbsp;&nbsp;"ANTHROPIC_AUTH_TOKEN": "sk-xxxxx",<br/>
-              &nbsp;&nbsp;&nbsp;&nbsp;"ANTHROPIC_MODEL": "claude-3-7-sonnet-20250219"<br/>
-              &nbsp;&nbsp;{"}"}<br/>
-              {"}"}
+            <Typography variant="body2" component="pre" fontFamily="monospace" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+              {`{
+ "env": {
+   "ANTHROPIC_BASE_URL": "https://api.wochirou.com/claude",
+   "ANTHROPIC_AUTH_TOKEN": "sk-xxxxx",
+   "ANTHROPIC_MODEL": "claude-3-7-sonnet-20250219"
+ }
+}`}
             </Typography>
           </Paper>
           <Alert severity="warning" sx={{ mt: 2 }}>
             <Typography variant="body2">
-              <strong>重要：</strong> 请将 ANTHROPIC_AUTH_TOKEN 替换为您的实际 API 密钥，ANTHROPIC_MODEL 替换为您需要的模型。模型只能使用 claude 模型或本站的 claude 模型别名。
+              <strong>重要：</strong> 请将 ANTHROPIC_AUTH_TOKEN 替换为您的实际 API 密钥，ANTHROPIC_MODEL 替换为您需要的模型。模型只能使用
+              claude 模型或本站的 claude 模型别名。
             </Typography>
           </Alert>
         </Box>
@@ -193,9 +179,13 @@ const WindowsTutorial = ({ onBack }) => {
           </Typography>
           <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
             <Typography variant="body2" fontFamily="monospace">
-              # 进入用户目录下的 .claude 文件夹<br/>
-              cd C:\Users\%username%\.claude<br/><br/>
-              # 如果目录不存在，先创建<br/>
+              # 进入用户目录下的 .claude 文件夹
+              <br />
+              cd C:\Users\%username%\.claude
+              <br />
+              <br />
+              # 如果目录不存在，先创建
+              <br />
               mkdir C:\Users\%username%\.claude
             </Typography>
           </Paper>
@@ -207,19 +197,13 @@ const WindowsTutorial = ({ onBack }) => {
               <ListItemIcon>
                 <CheckCircleIcon color="success" />
               </ListItemIcon>
-              <ListItemText 
-                primary="使用 VS Code"
-                secondary="code C:\Users\%username%\.claude\settings.json"
-              />
+              <ListItemText primary="使用 VS Code" secondary="code C:\Users\%username%\.claude\settings.json" />
             </ListItem>
             <ListItem>
               <ListItemIcon>
                 <CheckCircleIcon color="success" />
               </ListItemIcon>
-              <ListItemText 
-                primary="使用记事本"
-                secondary="notepad C:\Users\%username%\.claude\settings.json"
-              />
+              <ListItemText primary="使用记事本" secondary="notepad C:\Users\%username%\.claude\settings.json" />
             </ListItem>
           </List>
           <Alert severity="info" sx={{ mt: 2 }}>
@@ -239,7 +223,8 @@ const WindowsTutorial = ({ onBack }) => {
           </Typography>
           <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
             <Typography variant="body2" fontFamily="monospace">
-              # 在项目根目录下执行<br/>
+              # 在项目根目录下执行
+              <br />
               claude
             </Typography>
           </Paper>
@@ -256,19 +241,13 @@ const WindowsTutorial = ({ onBack }) => {
                       <ListItemIcon>
                         <InfoIcon color="primary" />
                       </ListItemIcon>
-                      <ListItemText 
-                        primary="重新加载配置"
-                        secondary="每次修改配置后，需要重新打开终端窗口"
-                      />
+                      <ListItemText primary="重新加载配置" secondary="每次修改配置后，需要重新打开终端窗口" />
                     </ListItem>
                     <ListItem>
                       <ListItemIcon>
                         <InfoIcon color="primary" />
                       </ListItemIcon>
-                      <ListItemText 
-                        primary="模型限制"
-                        secondary="只支持 Claude 模型及其别名"
-                      />
+                      <ListItemText primary="模型限制" secondary="只支持 Claude 模型及其别名" />
                     </ListItem>
                   </List>
                 </CardContent>
@@ -286,19 +265,13 @@ const WindowsTutorial = ({ onBack }) => {
                       <ListItemIcon>
                         <CheckCircleIcon color="success" />
                       </ListItemIcon>
-                      <ListItemText 
-                        primary="智能对话"
-                        secondary="与 AI 助手进行编程对话"
-                      />
+                      <ListItemText primary="智能对话" secondary="与 AI 助手进行编程对话" />
                     </ListItem>
                     <ListItem>
                       <ListItemIcon>
                         <CheckCircleIcon color="success" />
                       </ListItemIcon>
-                      <ListItemText 
-                        primary="代码生成"
-                        secondary="根据需求生成代码片段"
-                      />
+                      <ListItemText primary="代码生成" secondary="根据需求生成代码片段" />
                     </ListItem>
                   </List>
                 </CardContent>
@@ -315,28 +288,9 @@ const WindowsTutorial = ({ onBack }) => {
     }
   ];
 
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-  };
-
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box mb={4}>
-        <Button 
-          startIcon={<ArrowBackIcon />} 
-          onClick={onBack}
-          sx={{ mb: 2 }}
-        >
-          返回主页
-        </Button>
         <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
           Windows 版本教程
         </Typography>
@@ -345,51 +299,15 @@ const WindowsTutorial = ({ onBack }) => {
         </Typography>
       </Box>
 
-      <Stepper activeStep={activeStep} orientation="vertical">
-        {steps.map((step, index) => (
-          <Step key={index}>
-            <StepLabel>
-              <Typography variant="h6">{step.label}</Typography>
-            </StepLabel>
-            <StepContent>
-              {step.content}
-              <Box sx={{ mt: 2 }}>
-                <Button
-                  variant="contained"
-                  onClick={handleNext}
-                  sx={{ mr: 1 }}
-                >
-                  {index === steps.length - 1 ? '完成' : '下一步'}
-                </Button>
-                <Button
-                  disabled={index === 0}
-                  onClick={handleBack}
-                  sx={{ mr: 1 }}
-                >
-                  上一步
-                </Button>
-              </Box>
-            </StepContent>
-          </Step>
-        ))}
-      </Stepper>
-
-      {activeStep === steps.length && (
-        <Paper square elevation={0} sx={{ p: 3, mt: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            安装完成！
+      {steps.map((step, index) => (
+        <Paper key={index} sx={{ p: 3, mb: 3, borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+          <Typography variant="h5" component="h2" gutterBottom>
+            {`步骤 ${index + 1}: ${step.label}`}
           </Typography>
-          <Typography variant="body1" color="text.secondary">
-            您已成功完成 Claude Code 的安装和配置。现在可以开始使用 AI 助手来提高您的编程效率了。
-          </Typography>
-          <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
-            重新开始
-          </Button>
-          <Button onClick={onBack} variant="contained" sx={{ mt: 1 }}>
-            返回主页
-          </Button>
+          <Divider sx={{ mb: 2 }} />
+          {step.content}
         </Paper>
-      )}
+      ))}
     </Container>
   );
 };
