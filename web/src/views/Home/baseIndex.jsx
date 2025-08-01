@@ -1,9 +1,22 @@
 import { useNavigate } from 'react-router';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Box, Typography, Button, Container, Stack } from '@mui/material';
+import { Box, Typography, Button, Container, Stack, Tooltip, IconButton } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
-import { Bolt, Cloud, Security, SyncAlt, Shield, Brush, ArrowRightAlt, MailOutline, Forum, Telegram } from '@mui/icons-material';
+import {
+  Bolt,
+  Cloud,
+  Security,
+  SyncAlt,
+  Shield,
+  Brush,
+  ArrowRightAlt,
+  MailOutline,
+  Forum,
+  Telegram,
+  ContentCopy,
+  Check
+} from '@mui/icons-material';
 import { keyframes } from '@mui/system';
 
 const fadeIn = keyframes`
@@ -17,29 +30,97 @@ const fadeIn = keyframes`
   }
 `;
 
-const float = keyframes`
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-15px) rotate(2deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
-`;
-
-const pulse = keyframes`
-  0% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.05); opacity: 1; }
-  100% { transform: scale(1); opacity: 0.8; }
-`;
-
-const shimmer = keyframes`
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+const textAnimation = keyframes`
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
 `;
 
 const BaseIndex = () => {
   const navigate = useNavigate();
   const advantagesRef = useRef(null);
+  const [copied, setCopied] = useState(false);
+  const [currentEndpointIndex, setCurrentEndpointIndex] = useState(0);
+  const [models] = useState([
+    { id: 1, name: 'OpenAI', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/openai.webp' },
+    { id: 11, name: 'Google Gemini', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/gemini.webp' },
+    { id: 14, name: 'Anthropic', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/claude.webp' },
+    { id: 15, name: 'Baidu', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/wenxin.webp' },
+    { id: 16, name: 'Zhipu', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/zhipu.webp' },
+    { id: 17, name: 'Qwen', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/qwen.webp' },
+    { id: 18, name: 'Spark', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/spark.webp' },
+    // { id: 19, name: '360', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/ai360.webp' },
+    // { id: 20, name: 'OpenRouter', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/openrouter.webp' },
+    { id: 23, name: 'Tencent', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/hunyuan.webp' },
+    // { id: 25, name: 'Google Gemini', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/gemini.webp' },
+    // { id: 26, name: 'Baichuan', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/baichuan.webp' },
+    { id: 27, name: 'MiniMax', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/minimax.webp' },
+    { id: 28, name: 'Deepseek', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/deepseek.webp' },
+    { id: 29, name: 'Moonshot', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/moonshot.webp' },
+    // { id: 30, name: 'Mistral', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/mistral.webp' },
+    { id: 31, name: 'Groq', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/groq.webp' },
+    { id: 33, name: 'Yi', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/yi.webp' },
+    { id: 34, name: 'Midjourney', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/midjourney.webp' },
+    // { id: 35, name: 'Cloudflare AI', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/cloudflare.webp' },
+    { id: 36, name: 'Cohere', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/cohere.webp' },
+    // { id: 37, name: 'Stability AI', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/stability.webp' },
+    { id: 38, name: 'Coze', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/coze.webp' },
+    // { id: 39, name: 'Ollama', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/ollama.webp' },
+    { id: 40, name: 'Hunyuan', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/hunyuan.webp' },
+    // { id: 41, name: 'Suno', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/suno.webp' },
+    // { id: 43, name: 'Meta', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/meta.webp' },
+    // { id: 44, name: 'Ideogram', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/ideogram.webp' },
+    // { id: 45, name: 'Siliconflow', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/siliconcloud.webp' },
+    // { id: 46, name: 'Flux', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/flux.webp' },
+    // { id: 47, name: 'Jina', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/jina.webp' },
+    // { id: 51, name: 'RecraftAI', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/recraft.webp' },
+    // { id: 53, name: 'Kling', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/kling.webp' },
+    { id: 1001, name: 'Doubao', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/doubao.webp' },
+    { id: 1002, name: 'Grok', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/grok.webp' },
+    { id: 1003, name: '智谱清言', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/chatglm.webp' }
+    // { id: 1004, name: 'Cursor', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/cursor.webp' },
+    // { id: 1005, name: 'Kolors', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/kolors.webp' },
+    // { id: 1006, name: 'OpenRouter', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/openrouter.webp' }
+  ]);
+
+  const endpoints = [
+    '/v1/chat/completions',
+    '/v1/images/generations',
+    '/v1/embeddings',
+    '/v1/audio/speech',
+    '/mj/submit/imagine',
+    '/claude/v1/messages'
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentEndpointIndex((prevIndex) => (prevIndex + 1) % endpoints.length);
+    }, 3000); // Change endpoint every 3 seconds
+    return () => clearInterval(interval);
+  }, [endpoints.length]);
 
   const handleLearnMoreClick = () => {
     advantagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleCopy = () => {
+    const textToCopy = `https://api.wochirou.com${endpoints[currentEndpointIndex]}`;
+    navigator.clipboard.writeText(textToCopy);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -86,70 +167,6 @@ const BaseIndex = () => {
           }
         }}
       >
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '5%',
-            right: '8%',
-            width: { xs: '250px', md: '500px' },
-            height: { xs: '250px', md: '500px' },
-            background: 'radial-gradient(circle, rgba(63,81,181,0.3) 0%, transparent 70%)',
-            filter: 'blur(80px)',
-            animation: `${float} 12s ease-in-out infinite`,
-            zIndex: 0,
-            opacity: 0.8
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: '10%',
-            left: '5%',
-            width: { xs: '200px', md: '400px' },
-            height: { xs: '200px', md: '400px' },
-            background: 'radial-gradient(circle, rgba(25,118,210,0.25) 0%, transparent 70%)',
-            filter: 'blur(70px)',
-            animation: `${float} 14s ease-in-out infinite`,
-            animationDelay: '-4s',
-            zIndex: 0,
-            opacity: 0.7
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '40%',
-            left: '20%',
-            width: { xs: '150px', md: '300px' },
-            height: { xs: '150px', md: '300px' },
-            background: 'radial-gradient(circle, rgba(100,181,246,0.2) 0%, transparent 70%)',
-            filter: 'blur(60px)',
-            animation: `${pulse} 8s ease-in-out infinite`,
-            zIndex: 0,
-            opacity: 0.5
-          }}
-        />
-
-        {[...Array(8)].map((_, i) => (
-          <Box
-            key={i}
-            sx={{
-              position: 'absolute',
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              width: `${Math.random() * 40 + 10}px`,
-              height: `${Math.random() * 40 + 10}px`,
-              borderRadius: Math.random() > 0.5 ? '50%' : '6px',
-              background: 'rgba(255,255,255,0.05)',
-              backdropFilter: 'blur(5px)',
-              transform: `rotate(${Math.random() * 45}deg)`,
-              animation: `${float} ${Math.random() * 10 + 10}s ease-in-out infinite`,
-              animationDelay: `-${Math.random() * 10}s`,
-              zIndex: 0
-            }}
-          />
-        ))}
-
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
           <Grid
             container
@@ -160,7 +177,7 @@ const BaseIndex = () => {
               pt: { xs: 8, md: 0 }
             }}
           >
-            <Grid xs={12} md={12} lg={8}>
+            <Grid xs={12} md={10} lg={8}>
               <Stack
                 spacing={5}
                 sx={{
@@ -202,8 +219,7 @@ const BaseIndex = () => {
                         height: 8,
                         borderRadius: '50%',
                         background: '#4fc3f7',
-                        display: 'inline-block',
-                        animation: `${pulse} 2s infinite`
+                        display: 'inline-block'
                       }}
                     />
                     全天候稳定运行 · 企业级可靠性
@@ -221,7 +237,6 @@ const BaseIndex = () => {
                     textFillColor: 'transparent',
                     letterSpacing: '-0.02em',
                     position: 'relative',
-                    animation: `${shimmer} 5s linear infinite`,
                     marginBottom: 1,
                     textShadow: '0 10px 30px rgba(0,0,0,0.2)',
                     '&::before': {
@@ -236,9 +251,7 @@ const BaseIndex = () => {
                     }
                   }}
                 >
-                  专业的
-                  <br />
-                  AI大模型接口调用服务平台
+                  专业的AI大模型接口调用服务平台
                 </Typography>
                 <Typography
                   variant="h4"
@@ -252,8 +265,56 @@ const BaseIndex = () => {
                     fontWeight: 400
                   }}
                 >
-                  致力于提供高性能、高并发、高可用AI大模型接口调用服务平台，支持OpenAI、Claude、Deepseek、Gemini、Midjourney等多种模型，为个人和企业提供一站式AI解决方案
+                  致力于提供高性能、高并发、高可用AI大模型接口调用服务平台，为个人和企业提供一站式AI解决方案
                 </Typography>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(0, 0, 0, 0.2)',
+                    borderRadius: '12px',
+                    p: '8px 16px',
+                    width: { xs: '100%', sm: 'auto' },
+                    minWidth: { xs: 'auto', sm: '450px' },
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    backdropFilter: 'blur(10px)',
+                    position: 'relative',
+                    height: 'auto',
+                    minHeight: '40px'
+                  }}
+                >
+                  <Typography variant="body1" sx={{ fontFamily: 'monospace', color: '#fff', mr: 2 }}>
+                    https://api.wochirou.com
+                  </Typography>
+                  <Box sx={{ position: 'relative', width: { xs: '200px', sm: '250px' }, height: '21px', overflow: 'hidden' }}>
+                    {endpoints.map((endpoint, index) => (
+                      <Typography
+                        key={index}
+                        variant="body1"
+                        sx={{
+                          fontFamily: 'monospace',
+                          color: '#90caf9',
+                          position: 'absolute',
+                          width: '100%',
+                          textAlign: 'center',
+                          opacity: 0,
+                          animation: currentEndpointIndex === index ? `${textAnimation} 3s ease-in-out` : 'none',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        {endpoint}
+                      </Typography>
+                    ))}
+                  </Box>
+                  <Tooltip title={copied ? '已复制!' : '复制'} placement="top">
+                    <IconButton onClick={handleCopy} size="small" sx={{ color: '#fff', ml: 2 }}>
+                      {copied ? <Check sx={{ color: 'lightgreen' }} /> : <ContentCopy />}
+                    </IconButton>
+                  </Tooltip>
+                </Box>
                 <Stack
                   direction={{ xs: 'column', sm: 'row' }}
                   spacing={3}
@@ -355,7 +416,65 @@ const BaseIndex = () => {
               </Stack>
             </Grid>
           </Grid>
-
+          <Box
+            sx={{
+              background: 'rgba(0, 0, 0, 0.1)',
+              backdropFilter: 'blur(15px)',
+              py: { xs: 8, md: 12 },
+              borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+            }}
+          >
+            <Container maxWidth="lg">
+              <Typography
+                variant="h4"
+                align="center"
+                sx={{
+                  fontWeight: 700,
+                  color: '#bbdefb',
+                  mb: 6,
+                  textShadow: '0 2px 10px rgba(0,0,0,0.2)'
+                }}
+              >
+                支持众多的大模型供应商
+              </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: { xs: 4, md: 6 },
+                  px: 2
+                }}
+              >
+                {models.map(
+                  (model) =>
+                    model.icon && (
+                      <Tooltip title={model.name} key={model.id}>
+                        <Box
+                          component="img"
+                          src={model.icon}
+                          alt={model.name}
+                          sx={{
+                            width: { xs: 40, md: 48 },
+                            height: { xs: 40, md: 48 },
+                            objectFit: 'contain',
+                            filter: 'grayscale(30%)',
+                            opacity: 0.7,
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              filter: 'grayscale(0%)',
+                              opacity: 1,
+                              transform: 'scale(1.2)'
+                            }
+                          }}
+                        />
+                      </Tooltip>
+                    )
+                )}
+              </Box>
+            </Container>
+          </Box>
           <Box
             ref={advantagesRef}
             sx={{
