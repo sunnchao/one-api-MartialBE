@@ -98,11 +98,13 @@ const BaseIndex = () => {
 
   const endpoints = [
     '/v1/chat/completions',
+    '/v1/responses',
     '/v1/images/generations',
     '/v1/embeddings',
     '/v1/audio/speech',
     '/mj/submit/imagine',
-    '/claude/v1/messages'
+    '/claude/v1/messages',
+    '/gemini/v1beta/models'
   ];
 
   useEffect(() => {
