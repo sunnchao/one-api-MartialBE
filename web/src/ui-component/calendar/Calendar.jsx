@@ -1,4 +1,4 @@
-import {useState, useEffect, useMemo} from 'react';
+import { useState, useEffect } from 'react';
 import { Paper, Grid, Typography, Box, useTheme, Chip, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle, Circle, CloseOutlined } from '@mui/icons-material';
@@ -18,28 +18,26 @@ const Calendar = ({ checkinDates = [] }) => {
     const firstDayOfMonth = today.startOf('month');
     const startDay = firstDayOfMonth.day(); // Get day of week (0-6)
     const daysInMonth = today.daysInMonth();
-    
+
     const calendarDays = [];
-    
+
     // Fill in empty days at start
     for (let i = 0; i < startDay; i++) {
       calendarDays.push(null);
     }
-    
+
     // Fill in actual days
     for (let day = 1; day <= daysInMonth; day++) {
       calendarDays.push(day);
     }
-    
+
     setCalendar(calendarDays);
   }, []);
 
   const isCheckedIn = (day) => {
     if (!day) return false;
     const currentDate = dayjs().set('date', day);
-    return checkinDates.some((date) => 
-      dayjs(date.created_time).isSame(currentDate, 'date')
-    );
+    return checkinDates.some((date) => dayjs(date.created_time).isSame(currentDate, 'date'));
   };
 
   const isToday = (day) => {
@@ -67,28 +65,72 @@ const Calendar = ({ checkinDates = [] }) => {
     setCheckInModalOpen(true);
   };
 
-  const showTurnstile = () => {
-    // 弹框 显示 Cloudflare Turnstile
-    console.log('showTurnstile');
-  };
-
   return (
-    <Paper style={{ height: '100%', minHeight: '500px', display: 'flex', flexDirection: 'column' }} sx={{ p: 2 }}>
-      <Typography variant="h4" sx={{ mb: 2 }}>
+    <Paper
+      sx={{
+        height: '100%',
+        minHeight: '500px',
+        display: 'flex',
+        flexDirection: 'column',
+        p: 2.5,
+        borderRadius: '12px',
+        boxShadow: theme.palette.mode === 'dark' ? 'none' : '0px 2px 8px rgba(0, 0, 0, 0.08)',
+        transition: 'transform 0.3s, box-shadow 0.3s',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: theme.palette.mode === 'dark' ? '0px 4px 12px rgba(255, 255, 255, 0.1)' : '0px 4px 12px rgba(0, 0, 0, 0.12)'
+        }
+      }}
+    >
+      <Typography
+        variant="h4"
+        sx={{
+          mb: 2.5,
+          fontSize: '20px',
+          fontWeight: 600,
+          position: 'relative',
+          '&:after': {
+            content: '""',
+            position: 'absolute',
+            bottom: '-8px',
+            left: 0,
+            width: '40px',
+            height: '3px',
+            backgroundColor: theme.palette.primary.main,
+            borderRadius: '2px'
+          }
+        }}
+      >
         {t('calendar.title')}
       </Typography>
-      <Box style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <Grid style={{ height: 48 }} container>
+      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', mt: 1 }}>
+        <Grid
+          container
+          sx={{
+            height: 48,
+            mb: 1,
+            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
+            borderRadius: '8px',
+            py: 1
+          }}
+        >
           {/* 星期标题 */}
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
             <Grid container item xs={12 / 7} key={day} alignItems={'center'} justifyContent={'center'}>
-              <Typography align="center" color={theme.palette.text.dark}>
+              <Typography
+                align="center"
+                sx={{
+                  color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)',
+                  fontWeight: 500,
+                  fontSize: '0.875rem'
+                }}
+              >
                 {t(`calendar.${day.toLowerCase()}`)}
               </Typography>
             </Grid>
           ))}
         </Grid>
-        <Grid container spacing={1} style={{ height: '100%' }}>
+        <Grid container spacing={1.5} sx={{ height: '100%' }}>
           {/* 日历格子 */}
           {calendar.map((day, index) => (
             <Grid
@@ -99,28 +141,59 @@ const Calendar = ({ checkinDates = [] }) => {
               alignItems={'center'}
               justifyContent={'center'}
               onClick={() => {
-                // 签到
-                onCheckIn(day);
+                if (day) onCheckIn(day);
+              }}
+              sx={{
+                cursor: day ? 'pointer' : 'default',
+                '&:hover': {
+                  '& .calendar-day': {
+                    transform: day ? 'translateY(-2px)' : 'none',
+                    boxShadow: day
+                      ? theme.palette.mode === 'dark'
+                        ? '0 4px 8px rgba(255, 255, 255, 0.1)'
+                        : '0 4px 8px rgba(0, 0, 0, 0.1)'
+                      : 'none'
+                  }
+                }
               }}
             >
               {day && (
-                <div
-                  style={{
+                <Box
+                  className="calendar-day"
+                  sx={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexDirection: 'column',
                     height: '100%',
                     width: '100%',
-                    border: `1px solid ${isToday(day) ? theme.palette.primary.dark : 'transparent'}`,
-                    color: isPendingCheck(day) ? theme.palette.text.dark : theme.palette.text.disabled,
-                    fontSize: 16
+                    borderRadius: '8px',
+                    backgroundColor: isToday(day)
+                      ? theme.palette.mode === 'dark'
+                        ? 'rgba(25, 118, 210, 0.15)'
+                        : 'rgba(25, 118, 210, 0.08)'
+                      : 'transparent',
+                    border: `1px solid ${isToday(day) ? theme.palette.primary.main : theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'}`,
+                    color: isPendingCheck(day) ? theme.palette.text.primary : theme.palette.text.secondary,
+                    fontSize: 16,
+                    fontWeight: isToday(day) ? 600 : 400,
+                    py: 1,
+                    transition: 'all 0.3s ease'
                   }}
                 >
-                  {day}
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontSize: '16px',
+                      fontWeight: isToday(day) ? 600 : 400,
+                      mb: 0.5
+                    }}
+                  >
+                    {day}
+                  </Typography>
                   {/* 签到状态 */}
                   {isPendingCheck(day) ? <PendingCheck /> : isCheckedIn(day) ? <Checked /> : <UnChecked />}
-                </div>
+                </Box>
               )}
             </Grid>
           ))}
@@ -139,13 +212,15 @@ const Checked = () => {
     <Chip
       label={
         <Stack direction="row" alignItems="center" justifyContent={'center'} gap={0.5}>
-          <CheckCircle sx={{ color: theme.palette.primary.dark, fontSize: 14 }} />
-          <Typography sx={{ color: theme.palette.primary.dark, fontSize: 12 }}>已签到</Typography>
+          <CheckCircle sx={{ color: theme.palette.success.main, fontSize: 14 }} />
+          <Typography sx={{ color: theme.palette.success.main, fontSize: 12, fontWeight: 500 }}>已签到</Typography>
         </Stack>
       }
       sx={{
         border: 'none',
-        mt: 1
+        backgroundColor: theme.palette.mode === 'dark' ? 'rgba(76, 175, 80, 0.15)' : 'rgba(76, 175, 80, 0.1)',
+        borderRadius: '16px',
+        py: 0.2
       }}
       size="small"
       variant="outlined"
@@ -159,13 +234,15 @@ const UnChecked = () => {
     <Chip
       label={
         <Stack direction="row" alignItems="center" justifyContent={'center'} gap={0.5}>
-          <CloseOutlined sx={{ color: theme.palette.error.dark, fontSize: 14 }} />
-          <Typography sx={{ color: theme.palette.error.dark, fontSize: 12 }}>未签到</Typography>
+          <CloseOutlined sx={{ color: theme.palette.error.main, fontSize: 14 }} />
+          <Typography sx={{ color: theme.palette.error.main, fontSize: 12, fontWeight: 500 }}>未签到</Typography>
         </Stack>
       }
       sx={{
         border: 'none',
-        mt: 1
+        backgroundColor: theme.palette.mode === 'dark' ? 'rgba(244, 67, 54, 0.15)' : 'rgba(244, 67, 54, 0.1)',
+        borderRadius: '16px',
+        py: 0.2
       }}
       size="small"
       variant="outlined"
@@ -180,13 +257,15 @@ const PendingCheck = () => {
     <Chip
       label={
         <Stack direction="row" alignItems="center" justifyContent={'center'} gap={0.5}>
-          <Circle sx={{ color: theme.palette.warning.dark, fontSize: 14 }} />
-          <Typography sx={{ color: theme.palette.warning.dark, fontSize: 12 }}>待签到</Typography>
+          <Circle sx={{ color: theme.palette.warning.main, fontSize: 14 }} />
+          <Typography sx={{ color: theme.palette.warning.main, fontSize: 12, fontWeight: 500 }}>待签到</Typography>
         </Stack>
       }
       sx={{
         border: 'none',
-        mt: 1
+        backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 152, 0, 0.15)' : 'rgba(255, 152, 0, 0.1)',
+        borderRadius: '16px',
+        py: 0.2
       }}
       size="small"
       variant="outlined"
