@@ -213,14 +213,14 @@ const Checked = () => {
       label={
         <Stack direction="row" alignItems="center" justifyContent={'center'} gap={0.5}>
           <CheckCircle sx={{ color: theme.palette.success.main, fontSize: 14 }} />
-          <Typography sx={{ color: theme.palette.success.main, fontSize: 12, fontWeight: 500 }}>已签到</Typography>
+          <Typography sx={{ color: theme.palette.success.main, fontSize: 12, fontWeight: 500, display: { xs: 'none', sm: 'block' } }}>已签到</Typography>
         </Stack>
       }
       sx={{
         border: 'none',
         backgroundColor: theme.palette.mode === 'dark' ? 'rgba(76, 175, 80, 0.15)' : 'rgba(76, 175, 80, 0.1)',
         borderRadius: '16px',
-        py: 0.2
+        py: { xs: 0.5, sm: 0.2 }
       }}
       size="small"
       variant="outlined"
@@ -235,14 +235,14 @@ const UnChecked = () => {
       label={
         <Stack direction="row" alignItems="center" justifyContent={'center'} gap={0.5}>
           <CloseOutlined sx={{ color: theme.palette.error.main, fontSize: 14 }} />
-          <Typography sx={{ color: theme.palette.error.main, fontSize: 12, fontWeight: 500 }}>未签到</Typography>
+          <Typography sx={{ color: theme.palette.error.main, fontSize: 12, fontWeight: 500, display: { xs: 'none', sm: 'block' } }}>未签到</Typography>
         </Stack>
       }
       sx={{
         border: 'none',
         backgroundColor: theme.palette.mode === 'dark' ? 'rgba(244, 67, 54, 0.15)' : 'rgba(244, 67, 54, 0.1)',
         borderRadius: '16px',
-        py: 0.2
+        py: { xs: 0.5, sm: 0.2 }
       }}
       size="small"
       variant="outlined"
@@ -258,14 +258,14 @@ const PendingCheck = () => {
       label={
         <Stack direction="row" alignItems="center" justifyContent={'center'} gap={0.5}>
           <Circle sx={{ color: theme.palette.warning.main, fontSize: 14 }} />
-          <Typography sx={{ color: theme.palette.warning.main, fontSize: 12, fontWeight: 500 }}>待签到</Typography>
+          <Typography sx={{ color: theme.palette.warning.main, fontSize: 12, fontWeight: 500, display: { xs: 'none', sm: 'block' } }}>待签到</Typography>
         </Stack>
       }
       sx={{
         border: 'none',
         backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 152, 0, 0.15)' : 'rgba(255, 152, 0, 0.1)',
         borderRadius: '16px',
-        py: 0.2
+        py: { xs: 0.5, sm: 0.2 }
       }}
       size="small"
       variant="outlined"
