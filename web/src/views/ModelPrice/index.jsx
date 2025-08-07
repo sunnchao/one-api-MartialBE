@@ -18,7 +18,6 @@ import {
   Avatar,
   Box,
   Chip,
-  Divider,
   Grid,
   Paper,
   FormControlLabel,
@@ -26,7 +25,7 @@ import {
 } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { API } from 'utils/api';
-import { showError, ValueFormatter, copy } from 'utils/common';
+import { showError, ValueFormatter } from 'utils/common';
 import { useTheme } from '@mui/material/styles';
 import IconWrapper from 'ui-component/IconWrapper';
 import ToggleButtonGroup from 'ui-component/ToggleButton';
@@ -100,14 +99,19 @@ export default function ModelPrice() {
           output: model?.price.output
         };
 
-        const price =
-          group && model.groups.includes(selectedGroup)
-            ? {
-                input: group?.ratio * model?.price.input,
-                output: group?.ratio * model?.price.output,
-                enable: true
-              }
-            : { input: t('modelpricePage.noneGroup'), output: t('modelpricePage.noneGroup'), enable: false };
+        const price = group
+          ? {
+              input: group.ratio * model?.price.input,
+              output: group.ratio * model?.price.output,
+              enable: model.groups.includes(selectedGroup),
+              ratio: group.ratio
+            }
+          : {
+              input: model?.price.input,
+              output: model?.price.output,
+              enable: false,
+              ratio: 1
+            };
 
         const formatPrice = (value, type) => {
           if (typeof value === 'number') {
@@ -237,7 +241,7 @@ export default function ModelPrice() {
       </Paper>
 
       {/* 用户组选择区域 */}
-      <Paper
+      {/* <Paper
         elevation={0}
         sx={{
           p: 4,
@@ -327,7 +331,7 @@ export default function ModelPrice() {
             </Grid>
           ))}
         </Grid>
-      </Paper>
+      </Paper> */}
 
       {/* 搜索和筛选工具栏 */}
       <Paper
@@ -420,10 +424,8 @@ export default function ModelPrice() {
                   '& .MuiToggleButtonGroup-grouped': {
                     borderRadius: '0 !important',
                     border: `2px solid ${theme.palette.divider}`,
-                    px: 3,
-                    py: 1,
                     fontWeight: 600,
-                    fontSize: '0.9rem',
+                    fontSize: '14px',
                     '&.Mui-selected': {
                       backgroundColor: theme.palette.primary.main,
                       color: theme.palette.primary.contrastText,
@@ -553,7 +555,7 @@ export default function ModelPrice() {
             <TableHead>
               <TableRow
                 sx={{
-                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  backgroundColor: alpha(theme.palette.primary.main, 0.01),
                   '& th': {
                     borderBottom: `2px solid ${theme.palette.divider}`
                   }
@@ -562,47 +564,35 @@ export default function ModelPrice() {
                 <TableCell
                   sx={{
                     fontWeight: 700,
-                    fontSize: '0.95rem',
-                    py: 2.5,
+                    fontSize: '0.9rem',
+                    py: 2,
                     color: theme.palette.text.primary,
-                    textAlign: 'center',
+                    textAlign: 'left',
                     minWidth: 200
                   }}
                 >
                   模型名称
                 </TableCell>
-                <TableCell
+                {/* <TableCell
                   sx={{
                     fontWeight: 700,
-                    fontSize: '0.95rem',
-                    py: 2.5,
+                    fontSize: '0.9rem',
+                    py: 2,
                     color: theme.palette.text.primary,
                     textAlign: 'center',
                     minWidth: 120
                   }}
                 >
-                  提供商
-                </TableCell>
+                  标签
+                </TableCell> */}
                 <TableCell
                   sx={{
                     fontWeight: 700,
-                    fontSize: '0.95rem',
-                    py: 2.5,
+                    fontSize: '0.9rem',
+                    py: 2,
                     color: theme.palette.text.primary,
                     textAlign: 'center',
-                    minWidth: 150
-                  }}
-                >
-                  可用分组
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: '0.95rem',
-                    py: 2.5,
-                    color: theme.palette.text.primary,
-                    textAlign: 'center',
-                    minWidth: 100
+                    minWidth: 120
                   }}
                 >
                   计费类型
@@ -610,39 +600,50 @@ export default function ModelPrice() {
                 <TableCell
                   sx={{
                     fontWeight: 700,
-                    fontSize: '0.95rem',
-                    py: 2.5,
+                    fontSize: '0.9rem',
+                    py: 2,
                     color: theme.palette.text.primary,
                     textAlign: 'center',
-                    minWidth: 280
+                    minWidth: 200
                   }}
                 >
-                  <Stack spacing={1} alignItems="center">
-                    <span>价格详情</span>
-                    <Chip
-                      label={`倍率: ${userGroupMap[selectedGroup]?.ratio || 1}x`}
-                      size="small"
-                      sx={{
-                        borderRadius: 0,
-                        fontWeight: 600,
-                        fontSize: '0.8rem',
-                        backgroundColor: userGroupMap[selectedGroup]?.ratio > 1 ? theme.palette.warning.main : theme.palette.success.main,
-                        color: theme.palette.common.white
-                      }}
-                    />
-                  </Stack>
+                  最终价格
                 </TableCell>
                 <TableCell
                   sx={{
                     fontWeight: 700,
-                    fontSize: '0.95rem',
-                    py: 2.5,
+                    fontSize: '0.9rem',
+                    py: 2,
                     color: theme.palette.text.primary,
                     textAlign: 'center',
-                    minWidth: 120
+                    minWidth: 150
                   }}
                 >
-                  其他信息
+                  支持分组
+                </TableCell>
+                {/* <TableCell
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    py: 2,
+                    color: theme.palette.text.primary,
+                    textAlign: 'left',
+                    minWidth: 300
+                  }}
+                >
+                  说明
+                </TableCell> */}
+                <TableCell
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    py: 2,
+                    color: theme.palette.text.primary,
+                    textAlign: 'center',
+                    minWidth: 100
+                  }}
+                >
+                  可用性
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -662,22 +663,40 @@ export default function ModelPrice() {
                     }}
                   >
                     {/* 模型名称 */}
-                    <TableCell sx={{ py: 3, textAlign: 'center' }}>
-                      <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
+                    <TableCell sx={{ py: 2, textAlign: 'left' }}>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Avatar
+                          src={getIconByName(row.provider)}
+                          alt={row.provider}
+                          sx={{
+                            width: 20,
+                            height: 20,
+                            backgroundColor: theme.palette.background.paper,
+                            '.MuiAvatar-img': {
+                              objectFit: 'contain',
+                              padding: '1px'
+                            }
+                          }}
+                        >
+                          {row.provider?.charAt(0).toUpperCase()}
+                        </Avatar>
                         <Typography
                           variant="body2"
                           fontWeight={600}
                           sx={{
                             color: theme.palette.text.primary,
-                            fontSize: '0.9rem'
+                            fontSize: '0.85rem'
                           }}
                         >
                           {row.model}
                         </Typography>
                         <IconButton
                           size="small"
-                          onClick={() => copy(row.model)}
+                          onClick={() => {
+                            navigator.clipboard.writeText(row.model);
+                          }}
                           sx={{
+                            ml: 1,
                             p: 0.5,
                             '&:hover': {
                               backgroundColor: alpha(theme.palette.primary.main, 0.1)
@@ -689,39 +708,175 @@ export default function ModelPrice() {
                       </Stack>
                     </TableCell>
 
-                    {/* 提供商 */}
-                    <TableCell sx={{ py: 3, textAlign: 'center' }}>
-                      <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
-                        <Avatar
-                          src={getIconByName(row.provider)}
-                          alt={row.provider}
+                    {/* 标签 */}
+                    {/* <TableCell sx={{ py: 2, textAlign: 'center' }}>
+                      <Stack direction="row" spacing={0.5} justifyContent="center">
+                        <Chip
+                          label="对话"
+                          size="small"
                           sx={{
-                            width: 24,
-                            height: 24,
-                            backgroundColor: theme.palette.background.paper,
-                            '.MuiAvatar-img': {
-                              objectFit: 'contain',
-                              padding: '2px'
-                            }
+                            borderRadius: '4px',
+                            fontSize: '0.7rem',
+                            height: 20,
+                            backgroundColor: '#9333ea',
+                            color: 'white',
+                            fontWeight: 600
                           }}
-                        >
-                          {row.provider?.charAt(0).toUpperCase()}
-                        </Avatar>
-                        <Typography
-                          variant="body2"
+                        />
+                        <Chip
+                          label="思考"
+                          size="small"
                           sx={{
-                            fontSize: '0.9rem',
-                            fontWeight: 500
+                            borderRadius: '4px',
+                            fontSize: '0.7rem',
+                            height: 20,
+                            backgroundColor: '#3b82f6',
+                            color: 'white',
+                            fontWeight: 600
                           }}
-                        >
-                          {row.provider}
-                        </Typography>
+                        />
                       </Stack>
+                    </TableCell> */}
+
+                    {/* 计费类型 */}
+                    <TableCell sx={{ py: 2, textAlign: 'center' }}>
+                      <Chip
+                        label={row.type === 'times' ? '按次计费' : '按量计费'}
+                        icon={<Icon icon={row.type === 'times' ? 'tabler:click' : 'tabler:activity'} width={14} height={14} />}
+                        size="small"
+                        sx={{
+                          borderRadius: '4px',
+                          fontSize: '0.75rem',
+                          height: 24,
+                          backgroundColor: row.type === 'times' ? theme.palette.info.main : theme.palette.success.main,
+                          color: 'white',
+                          fontWeight: 600,
+                          '& .MuiChip-icon': {
+                            color: 'white'
+                          }
+                        }}
+                      />
                     </TableCell>
 
-                    {/* 可用分组 */}
-                    <TableCell sx={{ py: 3, textAlign: 'center' }}>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'center', maxWidth: 120 }}>
+                    {/* 最终价格 */}
+                    <TableCell sx={{ py: 2, textAlign: 'center' }}>
+                      <Box>
+                        {row.type === 'times' ? (
+                          // 按次计费
+                          row.ratio === 1 ? (
+                            // 1倍倍率，直接显示价格
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontSize: '0.75rem',
+                                color: theme.palette.text.primary
+                              }}
+                            >
+                              {row.input}
+                            </Typography>
+                          ) : (
+                            // 非1倍倍率，显示原始价格和最终价格
+                            <>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  fontSize: '0.75rem',
+                                  color: theme.palette.text.primary,
+                                  textDecoration: 'line-through',
+                                  mb: 0.5
+                                }}
+                              >
+                                原价: {row.originalInput}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  fontSize: '0.75rem',
+                                  color: theme.palette.text.primary
+                                }}
+                              >
+                                {row.input}
+                              </Typography>
+                            </>
+                          )
+                        ) : // 按量计费
+                        row.ratio === 1 ? (
+                          // 1倍倍率，直接显示价格
+                          <>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontSize: '0.75rem',
+                                color: theme.palette.text.primary,
+                                mb: 0.5
+                              }}
+                            >
+                              输入Token: <span style={{ color: theme.palette.text.primary }}>{row.input}</span>
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontSize: '0.75rem',
+                                color: theme.palette.text.primary
+                              }}
+                            >
+                              输出Token: <span style={{ color: theme.palette.text.primary }}>{row.output}</span>
+                            </Typography>
+                          </>
+                        ) : (
+                          // 非1倍倍率，显示原始价格和最终价格
+                          <>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontSize: '0.7rem',
+                                color: theme.palette.text.secondary,
+                                textDecoration: 'line-through',
+                                mb: 0.3
+                              }}
+                            >
+                              原价 输入: {row.originalInput} 输出: {row.originalOutput}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontSize: '0.75rem',
+                                color: theme.palette.text.secondary,
+                                mb: 0.3
+                              }}
+                            >
+                              输入Token: <span style={{ color: theme.palette.text.primary }}>{row.input}</span>
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontSize: '0.75rem',
+                                color: theme.palette.text.secondary
+                              }}
+                            >
+                              输出Token: <span style={{ color: theme.palette.text.primary }}>{row.output}</span>
+                            </Typography>
+                          </>
+                        )}
+                        {row.ratio !== 1 && (
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontSize: '0.7rem',
+                              color: theme.palette.text.primary,
+                              fontWeight: 600,
+                              mt: 0.5
+                            }}
+                          >
+                            倍率: {row.ratio}x
+                          </Typography>
+                        )}
+                      </Box>
+                    </TableCell>
+
+                    {/* 支持分组 */}
+                    <TableCell sx={{ py: 2, textAlign: 'center' }}>
+                      <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap">
                         {row.userGroup && row.userGroup.length > 0 ? (
                           row.userGroup.map((group) => (
                             <Chip
@@ -729,23 +884,36 @@ export default function ModelPrice() {
                               label={userGroupMap[group]?.name || group}
                               size="small"
                               onClick={() => handleGroupChange(group)}
+                              variant={selectedGroup === group ? 'filled' : 'outlined'}
                               sx={{
-                                borderRadius: 0,
+                                borderRadius: '4px',
                                 fontSize: '0.7rem',
                                 fontWeight: 600,
-                                height: 22,
+                                height: 20,
                                 cursor: 'pointer',
-                                transition: 'all 0.2s ease',
-                                backgroundColor:
-                                  selectedGroup === group ? theme.palette.primary.main : alpha(theme.palette.primary.main, 0.1),
-                                color: selectedGroup === group ? theme.palette.common.white : theme.palette.primary.main,
-                                border: `1px solid ${selectedGroup === group ? theme.palette.primary.main : theme.palette.primary.light}`,
-                                '&:hover': {
-                                  backgroundColor: theme.palette.primary.main,
-                                  color: theme.palette.common.white,
-                                  transform: 'translateY(-1px)',
-                                  boxShadow: `0 4px 8px ${alpha(theme.palette.primary.main, 0.3)}`
-                                }
+                                ...(selectedGroup === group
+                                  ? {
+                                      // 选中的分组：实心高亮
+                                      backgroundColor: theme.palette.primary.main,
+                                      color: 'white',
+                                      borderColor: theme.palette.primary.main,
+                                      '&:hover': {
+                                        backgroundColor: theme.palette.primary.dark,
+                                        borderColor: theme.palette.primary.dark
+                                      }
+                                    }
+                                  : {
+                                      // 未选中的分组：镂空效果
+                                      backgroundColor: 'transparent',
+                                      color: theme.palette.primary.main,
+                                      borderColor: theme.palette.primary.main,
+                                      border: `1px solid ${theme.palette.primary.main}`,
+                                      '&:hover': {
+                                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                                        borderColor: theme.palette.primary.dark,
+                                        color: theme.palette.primary.dark
+                                      }
+                                    })
                               }}
                             />
                           ))
@@ -754,170 +922,66 @@ export default function ModelPrice() {
                             variant="body2"
                             sx={{
                               color: theme.palette.text.secondary,
-                              fontSize: '0.8rem',
-                              fontStyle: 'italic'
-                            }}
-                          >
-                            无可用分组
-                          </Typography>
-                        )}
-                      </Box>
-                    </TableCell>
-
-                    {/* 计费类型 */}
-                    <TableCell sx={{ py: 3, textAlign: 'center' }}>
-                      <Chip
-                        label={row.type === 'tokens' ? '按Token计费' : '按次计费'}
-                        size="small"
-                        sx={{
-                          borderRadius: 0,
-                          fontWeight: 600,
-                          fontSize: '0.8rem',
-                          backgroundColor: row.type === 'tokens' ? theme.palette.primary.main : theme.palette.secondary.main,
-                          color: theme.palette.common.white
-                        }}
-                      />
-                    </TableCell>
-
-                    {/* 价格详情 - 合并列 */}
-                    <TableCell sx={{ py: 3 }}>
-                      {row.enable ? (
-                        <Stack spacing={2} alignItems="center">
-                          {/* 输入价格流程 */}
-                          <Box sx={{ textAlign: 'center', width: '100%' }}>
-                            <Typography
-                              variant="caption"
-                              sx={{ color: theme.palette.text.secondary, fontSize: '0.75rem', mb: 1, display: 'block' }}
-                            >
-                              输入价格
-                            </Typography>
-                            <Stack direction="row" alignItems="center" justifyContent="center" spacing={1.5}>
-                              <Typography
-                                variant="body2"
-                                fontWeight={500}
-                                sx={{
-                                  color: theme.palette.text.secondary,
-                                  fontSize: '0.85rem',
-                                  fontFamily: 'monospace',
-                                  minWidth: 60,
-                                  textAlign: 'right'
-                                }}
-                              >
-                                {row.originalInput}
-                              </Typography>
-                              <Icon icon="eva:arrow-right-fill" width={16} height={16} color={theme.palette.text.secondary} />
-                              <Chip
-                                label={`${row.ratio}x`}
-                                size="small"
-                                sx={{
-                                  borderRadius: 0,
-                                  fontSize: '0.7rem',
-                                  fontWeight: 600,
-                                  height: 20,
-                                  backgroundColor: row.ratio > 1 ? theme.palette.warning.main : theme.palette.success.main,
-                                  color: theme.palette.common.white,
-                                  minWidth: 35
-                                }}
-                              />
-                              <Icon icon="eva:arrow-right-fill" width={16} height={16} color={theme.palette.primary.main} />
-                              <Typography
-                                variant="body2"
-                                fontWeight={700}
-                                sx={{
-                                  color: theme.palette.primary.main,
-                                  fontSize: '0.9rem',
-                                  fontFamily: 'monospace',
-                                  minWidth: 60,
-                                  textAlign: 'left'
-                                }}
-                              >
-                                {row.input}
-                              </Typography>
-                            </Stack>
-                          </Box>
-
-                          <Divider sx={{ width: '80%', borderColor: theme.palette.divider }} />
-
-                          {/* 输出价格流程 */}
-                          <Box sx={{ textAlign: 'center', width: '100%' }}>
-                            <Typography
-                              variant="caption"
-                              sx={{ color: theme.palette.text.secondary, fontSize: '0.75rem', mb: 1, display: 'block' }}
-                            >
-                              输出价格
-                            </Typography>
-                            <Stack direction="row" alignItems="center" justifyContent="center" spacing={1.5}>
-                              <Typography
-                                variant="body2"
-                                fontWeight={500}
-                                sx={{
-                                  color: theme.palette.text.secondary,
-                                  fontSize: '0.85rem',
-                                  fontFamily: 'monospace',
-                                  minWidth: 60,
-                                  textAlign: 'right'
-                                }}
-                              >
-                                {row.originalOutput}
-                              </Typography>
-                              <Icon icon="eva:arrow-right-fill" width={16} height={16} color={theme.palette.text.secondary} />
-                              <Chip
-                                label={`${row.ratio}x`}
-                                size="small"
-                                sx={{
-                                  borderRadius: 0,
-                                  fontSize: '0.7rem',
-                                  fontWeight: 600,
-                                  height: 20,
-                                  backgroundColor: row.ratio > 1 ? theme.palette.warning.main : theme.palette.success.main,
-                                  color: theme.palette.common.white,
-                                  minWidth: 35
-                                }}
-                              />
-                              <Icon icon="eva:arrow-right-fill" width={16} height={16} color={theme.palette.primary.main} />
-                              <Typography
-                                variant="body2"
-                                fontWeight={700}
-                                sx={{
-                                  color: theme.palette.primary.main,
-                                  fontSize: '0.9rem',
-                                  fontFamily: 'monospace',
-                                  minWidth: 60,
-                                  textAlign: 'left'
-                                }}
-                              >
-                                {row.output}
-                              </Typography>
-                            </Stack>
-                          </Box>
-                        </Stack>
-                      ) : (
-                        <Box sx={{ textAlign: 'center', py: 3 }}>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: theme.palette.error.main,
-                              fontSize: '0.9rem',
-                              fontWeight: 600
-                            }}
-                          >
-                            当前分组不可用
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              color: theme.palette.text.secondary,
                               fontSize: '0.8rem'
                             }}
                           >
-                            请选择其他分组
+                            -
                           </Typography>
-                        </Box>
-                      )}
+                        )}
+                      </Stack>
                     </TableCell>
 
-                    {/* 其他信息 */}
-                    <TableCell sx={{ py: 3, textAlign: 'center' }}>{getOther(t, row.extraRatios)}</TableCell>
+                    {/* 说明 */}
+                    {/* <TableCell sx={{ py: 2, textAlign: 'left' }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontSize: '0.8rem',
+                          color: theme.palette.text.secondary,
+                          maxWidth: 280,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {row.model.includes('gpt-4.5')
+                          ? 'openai最新模型，gpt-4.5'
+                          : row.model.includes('o3')
+                            ? 'OpenAI先进推理模型，提长考虑分析，支持思考功能'
+                            : `${row.provider}提供的${row.model}模型`}
+                      </Typography>
+                    </TableCell> */}
+
+                    {/* 可用性 */}
+                    <TableCell sx={{ py: 2, textAlign: 'center' }}>
+                      {row.enable ? (
+                        <Chip
+                          label="当前分组可用"
+                          size="small"
+                          sx={{
+                            borderRadius: '4px',
+                            fontSize: '0.7rem',
+                            height: 20,
+                            backgroundColor: theme.palette.success.main,
+                            color: 'white',
+                            fontWeight: 600
+                          }}
+                        />
+                      ) : (
+                        <Chip
+                          label="当前分组不可用"
+                          size="small"
+                          sx={{
+                            borderRadius: '4px',
+                            fontSize: '0.7rem',
+                            height: 20,
+                            backgroundColor: theme.palette.error.main,
+                            color: 'white',
+                            fontWeight: 600
+                          }}
+                        />
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -946,45 +1010,5 @@ export default function ModelPrice() {
         </TableContainer>
       </Paper>
     </Box>
-  );
-}
-
-function getOther(t, extraRatios) {
-  if (!extraRatios || Object.keys(extraRatios).length === 0) {
-    return (
-      <Typography
-        variant="body2"
-        sx={{
-          color: '#9ca3af',
-          fontSize: '0.8rem',
-          fontStyle: 'italic'
-        }}
-      >
-        -
-      </Typography>
-    );
-  }
-
-  return (
-    <Stack spacing={0.5} alignItems="center">
-      {Object.entries(extraRatios).map(([key, value]) => (
-        <Chip
-          key={key}
-          label={`${t(`modelpricePage.${key}`)}: ${value}`}
-          size="small"
-          variant="outlined"
-          sx={{
-            borderRadius: 0,
-            fontSize: '0.75rem',
-            fontWeight: 500,
-            borderColor: '#e5e7eb',
-            color: '#6b7280',
-            '& .MuiChip-label': {
-              px: 1
-            }
-          }}
-        />
-      ))}
-    </Stack>
   );
 }
