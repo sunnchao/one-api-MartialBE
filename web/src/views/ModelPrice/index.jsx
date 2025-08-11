@@ -1,34 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import {
-  Card,
-  Stack,
-  Typography,
-  Tabs,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  InputBase,
-  IconButton,
-  Avatar,
-  Box,
-  Chip,
-  Grid,
-  Paper,
-  FormControlLabel,
-  Switch
-} from '@mui/material';
+import { Card, Stack, Typography, Tabs, Tab, InputBase, Avatar, Box, Chip, Grid, CardContent, IconButton, Tooltip } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { API } from 'utils/api';
 import { showError, ValueFormatter } from 'utils/common';
 import { useTheme } from '@mui/material/styles';
-import IconWrapper from 'ui-component/IconWrapper';
-import ToggleButtonGroup from 'ui-component/ToggleButton';
 import { useIsAdmin } from 'utils/common';
 import { alpha } from '@mui/material/styles';
 
@@ -44,14 +21,9 @@ export default function ModelPrice() {
   const [userGroupMap, setUserGroupMap] = useState({});
   const [selectedGroup, setSelectedGroup] = useState('default');
   const [selectedOwnedBy, setSelectedOwnedBy] = useState(1);
-  const [unit, setUnit] = useState('K');
-  const [hideUnavailable, setHideUnavailable] = useState(false);
+  const [unit] = useState('K');
+  const [hideUnavailable] = useState(false);
   const userIsAdmin = useIsAdmin();
-
-  const unitOptions = [
-    { value: 'K', label: 'K' },
-    { value: 'M', label: 'M' }
-  ];
 
   const fetchAvailableModels = useCallback(async () => {
     try {
@@ -166,20 +138,6 @@ export default function ModelPrice() {
     setSearchQuery(event.target.value);
   };
 
-  const handleUnitChange = (event, newUnit) => {
-    if (newUnit !== null) {
-      setUnit(newUnit);
-    }
-  };
-
-  const clearSearch = () => {
-    setSearchQuery('');
-  };
-
-  const handleHideUnavailableChange = (event) => {
-    setHideUnavailable(event.target.checked);
-  };
-
   const uniqueOwnedBy = [
     ...new Set(Object.values(availableModels).map((model) => JSON.stringify({ id: model.owned_by_id, name: model.owned_by })))
   ].map((item) => JSON.parse(item));
@@ -200,311 +158,169 @@ export default function ModelPrice() {
     <Box
       sx={{
         minHeight: '100vh',
-        backgroundColor: theme.palette.mode === 'dark' ? '#0a0a0a' : '#f8fafc',
-        p: { xs: 2, md: 4 }
+        backgroundColor: theme.palette.mode === 'dark' ? '#121212' : '#f5f5f5',
+        p: { xs: 2, md: 3 }
       }}
     >
-      {/* 页面标题区域 */}
-      <Paper
-        elevation={0}
+      {/* 搜索框 */}
+      <Box
         sx={{
-          p: 4,
-          mb: 2,
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: 0,
-          border: `1px solid ${theme.palette.divider}`,
-          borderLeft: `4px solid ${theme.palette.primary.main}`
+          display: 'flex',
+          justifyContent: 'center',
+          mb: 4,
+          mt: 2
         }}
       >
-        <Stack spacing={2}>
-          <Typography
-            variant="h4"
-            fontWeight={700}
-            sx={{
-              color: theme.palette.text.primary,
-              letterSpacing: '-0.025em'
-            }}
-          >
-            模型价格详情
-          </Typography>
-          {/* <Typography
-            variant="body1"
-            sx={{
-              color: theme.palette.text.secondary,
-              fontSize: '1.1rem',
-              lineHeight: 1.6
-            }}
-          >
-            清晰展示原始价格与用户组倍率计算后的最终价格
-          </Typography> */}
-        </Stack>
-      </Paper>
-
-      {/* 用户组选择区域 */}
-      {/* <Paper
-        elevation={0}
-        sx={{
-          p: 4,
-          mb: 2,
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: 0,
-          border: `1px solid ${theme.palette.divider}`
-        }}
-      >
-        <Typography variant="h6" fontWeight={600} sx={{ mb: 3, color: theme.palette.text.primary }}>
-          选择用户组
-        </Typography>
-
-        <Grid container spacing={2}>
-          {Object.entries(userGroupMap).map(([key, group]) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={key}>
-              <Card
-                onClick={() => handleGroupChange(key)}
-                sx={{
-                  height: '100%',
-                  cursor: 'pointer',
-                  borderRadius: 0,
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  border: `2px solid ${selectedGroup === key ? theme.palette.primary.main : theme.palette.divider}`,
-                  backgroundColor: selectedGroup === key ? alpha(theme.palette.primary.main, 0.05) : theme.palette.background.paper,
-                  transform: selectedGroup === key ? 'translateY(-2px)' : 'none',
-                  boxShadow: selectedGroup === key ? `0 8px 24px ${alpha(theme.palette.primary.main, 0.15)}` : '0 2px 4px rgba(0,0,0,0.05)',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.15)}`,
-                    borderColor: theme.palette.primary.main
-                  }
-                }}
-              >
-                <Box sx={{ p: 2 }}>
-                  <Stack spacing={2} alignItems="center" textAlign="center">
-                    <Typography
-                      variant="h6"
-                      fontWeight={600}
-                      sx={{
-                        color: selectedGroup === key ? theme.palette.primary.main : theme.palette.text.primary,
-                        fontSize: '1.1rem'
-                      }}
-                    >
-                      {group.name}
-                    </Typography>
-
-                    <Box>
-                      {group.ratio > 0 ? (
-                        <Chip
-                          label={`${group.ratio}x 倍率`}
-                          size="medium"
-                          sx={{
-                            borderRadius: 0,
-                            fontSize: '14px',
-                            height: 'auto',
-                            backgroundColor: group.ratio > 1 ? theme.palette.primary.main : theme.palette.primary.main,
-                            color: theme.palette.common.white,
-                            '& .MuiChip-label': {
-                              px: 1
-                            }
-                          }}
-                        />
-                      ) : (
-                        <Chip
-                          label="免费使用"
-                          size="medium"
-                          sx={{
-                            borderRadius: 0,
-                            fontWeight: 600,
-                            fontSize: '0.9rem',
-                            px: 2,
-                            py: 1,
-                            height: 'auto',
-                            backgroundColor: theme.palette.success.main,
-                            color: theme.palette.common.white,
-                            '& .MuiChip-label': {
-                              px: 1
-                            }
-                          }}
-                        />
-                      )}
-                    </Box>
-                  </Stack>
-                </Box>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Paper> */}
-
-      {/* 搜索和筛选工具栏 */}
-      <Paper
-        elevation={0}
-        sx={{
-          p: 3,
-          mb: 2,
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: 0,
-          border: `1px solid ${theme.palette.divider}`
-        }}
-      >
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={3}
-          alignItems={{ xs: 'stretch', md: 'center' }}
-          justifyContent="space-between"
+        <Box
+          sx={{
+            position: 'relative',
+            width: '100%',
+            maxWidth: 500,
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: 0,
+            border: `1px solid ${theme.palette.divider}`,
+            '&:focus-within': {
+              borderColor: theme.palette.primary.main,
+              boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.1)}`
+            }
+          }}
         >
-          {/* 搜索框 */}
+          <InputBase
+            sx={{
+              width: '100%',
+              px: 2,
+              py: 1.5,
+              '& input': {
+                fontSize: '1rem'
+              }
+            }}
+            placeholder="搜索提供商模型名称"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            startAdornment={
+              <Icon icon="eva:search-fill" width={20} height={20} color={theme.palette.text.secondary} style={{ marginRight: 8 }} />
+            }
+          />
+        </Box>
+      </Box>
+
+      {/* 用户分组选择器 */}
+      {Object.keys(userGroupMap).length > 0 && (
+        <Box sx={{ mb: 3 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              mb: 2,
+              color: theme.palette.text.primary,
+              fontWeight: 600,
+              fontSize: '16px'
+            }}
+          >
+            选择用户分组
+          </Typography>
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center',
-              width: { xs: '100%', md: 400 },
-              border: `2px solid ${theme.palette.divider}`,
-              borderRadius: 0,
-              backgroundColor: theme.palette.background.default,
-              transition: 'border-color 0.2s ease',
-              '&:hover': {
-                borderColor: theme.palette.primary.light
-              },
-              '&:focus-within': {
-                borderColor: theme.palette.primary.main,
-                boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.1)}`
+              flexWrap: 'wrap',
+              ml: -2, // 负的左边距来抵消子元素的左边距
+              '& > *': {
+                ml: 2, // 给每个子元素添加左边距
+                mb: 2 // 给每个子元素添加底部间距
               }
             }}
           >
-            <Box sx={{ p: 1.5, display: 'flex', alignItems: 'center' }}>
-              <Icon icon="eva:search-fill" width={20} height={20} color={theme.palette.text.secondary} />
-            </Box>
-            <InputBase
-              sx={{
-                flex: 1,
-                px: 1,
-                '& input': {
-                  padding: '8px 0',
-                  fontSize: '1rem'
-                }
-              }}
-              placeholder="搜索模型名称..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-            />
-            {searchQuery && (
-              <IconButton
-                onClick={clearSearch}
+            {Object.entries(userGroupMap).map(([key, group]) => (
+              <Box
+                key={key}
+                onClick={() => handleGroupChange(key)}
                 sx={{
-                  p: 1.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  px: 3,
+                  py: 1.5,
+                  borderRadius: 1,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  border: `2px solid ${selectedGroup === key ? theme.palette.primary.main : theme.palette.divider}`,
+                  backgroundColor: selectedGroup === key ? alpha(theme.palette.primary.main, 0.08) : theme.palette.background.paper,
+                  width: 200,
                   '&:hover': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1)
+                    borderColor: theme.palette.primary.main,
+                    backgroundColor: alpha(theme.palette.primary.main, 0.05)
                   }
                 }}
               >
-                <Icon icon="eva:close-fill" width={18} height={18} />
-              </IconButton>
-            )}
-          </Box>
-
-          {/* 控制选项组 */}
-          <Stack direction="row" alignItems="center" spacing={4}>
-            {/* 单位选择 */}
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <Typography
-                variant="body2"
-                fontWeight={600}
-                sx={{
-                  color: theme.palette.text.primary,
-                  fontSize: '0.95rem',
-                  minWidth: 'fit-content'
-                }}
-              >
-                计费单位:
-              </Typography>
-              <ToggleButtonGroup
-                value={unit}
-                onChange={handleUnitChange}
-                options={unitOptions}
-                size="medium"
-                sx={{
-                  '& .MuiToggleButtonGroup-grouped': {
-                    borderRadius: '0 !important',
-                    border: `2px solid ${theme.palette.divider}`,
-                    fontWeight: 600,
-                    fontSize: '14px',
-                    '&.Mui-selected': {
-                      backgroundColor: theme.palette.primary.main,
-                      color: theme.palette.primary.contrastText,
-                      borderColor: theme.palette.primary.main,
-                      '&:hover': {
-                        backgroundColor: theme.palette.primary.dark
-                      }
-                    },
-                    '&:hover': {
-                      backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                      borderColor: theme.palette.primary.light
-                    }
-                  }
-                }}
-              />
-            </Stack>
-
-            {/* 隐藏不可用模型开关 */}
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={hideUnavailable}
-                  onChange={handleHideUnavailableChange}
+                {/* 左侧图标 */}
+                <Box
                   sx={{
-                    '& .MuiSwitch-switchBase.Mui-checked': {
-                      color: theme.palette.primary.main,
-                      '&:hover': {
-                        backgroundColor: alpha(theme.palette.primary.main, 0.1)
-                      }
-                    },
-                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                      backgroundColor: theme.palette.primary.main
-                    }
-                  }}
-                />
-              }
-              label={
-                <Typography
-                  variant="body2"
-                  fontWeight={600}
-                  sx={{
-                    color: theme.palette.text.primary,
-                    fontSize: '0.95rem'
+                    width: 40,
+                    height: 40,
+                    borderRadius: '50%',
+                    backgroundColor: selectedGroup === key ? theme.palette.primary.main : alpha(theme.palette.primary.main, 0.1),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
                   }}
                 >
-                  隐藏不可用模型
-                </Typography>
-              }
-            />
-          </Stack>
-        </Stack>
-      </Paper>
+                  <Icon
+                    icon="ph:users-three-bold"
+                    width={20}
+                    height={20}
+                    color={selectedGroup === key ? 'white' : theme.palette.primary.main}
+                  />
+                </Box>
+
+                {/* 右侧信息 */}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography
+                    variant="body1"
+                    fontWeight={600}
+                    sx={{
+                      color: selectedGroup === key ? theme.palette.primary.main : theme.palette.text.primary,
+                      fontSize: '16px',
+                      mb: 0.5
+                    }}
+                  >
+                    {group.name}
+                  </Typography>
+
+                  <Chip
+                    label={group.ratio > 0 ? `${group.ratio}x 倍率` : '免费使用'}
+                    size="small"
+                    sx={{
+                      backgroundColor: group.ratio > 0 ? alpha(theme.palette.info.main, 0.1) : alpha(theme.palette.success.main, 0.1),
+                      color: group.ratio > 0 ? theme.palette.info.main : theme.palette.success.main,
+                      fontWeight: 500,
+                      fontSize: '0.75rem',
+                      height: 22
+                    }}
+                  />
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      )}
 
       {/* 提供商标签页 */}
-      <Paper
-        elevation={0}
-        sx={{
-          mb: 2,
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: 0,
-          border: `1px solid ${theme.palette.divider}`,
-          overflow: 'hidden'
-        }}
-      >
+      <Box sx={{ mb: 3 }}>
         <Tabs
           value={selectedOwnedBy}
           onChange={handleTabChange}
           variant="scrollable"
           scrollButtons="auto"
           sx={{
-            backgroundColor: alpha(theme.palette.primary.main, 0.02),
-            borderBottom: `1px solid ${theme.palette.divider}`,
-            '& .MuiTabs-flexContainer': {
-              minHeight: 60
-            },
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: 1,
+            border: `1px solid ${theme.palette.divider}`,
+            py: 1,
+            px: 1,
             '& .MuiTabs-indicator': {
-              height: 4,
-              borderRadius: 0,
-              backgroundColor: theme.palette.primary.main
+              height: 3,
+              backgroundColor: theme.palette.primary.main,
+              borderRadius: '3px 3px 0 0'
             }
           }}
         >
@@ -513,372 +329,241 @@ export default function ModelPrice() {
               key={index}
               value={ownedBy.id}
               label={
-                <Stack direction="row" alignItems="center" spacing={2}>
-                  <IconWrapper url={getIconByName(ownedBy.name)} />
-                  <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.95rem' }}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Avatar
+                    src={getIconByName(ownedBy.name)}
+                    sx={{
+                      width: 20,
+                      height: 20,
+                      backgroundColor: 'transparent'
+                    }}
+                  >
+                    {ownedBy.name.charAt(0).toUpperCase()}
+                  </Avatar>
+                  <Typography variant="body2" fontWeight={500}>
                     {ownedBy.name}
                   </Typography>
                 </Stack>
               }
               sx={{
-                px: 3,
-                py: 2,
-                minHeight: 60,
-                borderRadius: 0,
+                px: 2,
+                py: 1.5,
+                minHeight: 'auto',
                 textTransform: 'none',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.05)
-                },
                 '&.Mui-selected': {
-                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
                   color: theme.palette.primary.main
                 }
               }}
             />
           ))}
         </Tabs>
-      </Paper>
+      </Box>
 
-      {/* 价格表格 */}
-      <Paper
-        elevation={0}
-        sx={{
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: 0,
-          border: `1px solid ${theme.palette.divider}`,
-          overflow: 'hidden'
-        }}
-      >
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow
+      {/* 模型卡片网格 */}
+      <Grid container spacing={3}>
+        {filteredRows.length > 0 ? (
+          filteredRows.map((row) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} key={row.id}>
+              <Card
                 sx={{
-                  backgroundColor: alpha(theme.palette.primary.main, 0.01),
-                  '& th': {
-                    borderBottom: `2px solid ${theme.palette.divider}`
+                  height: '100%',
+                  backgroundColor: theme.palette.background.paper,
+                  border: `1px solid ${theme.palette.divider}`,
+                  borderRadius: 1,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: `0 8px 16px ${alpha(theme.palette.primary.main, 0.1)}`
                   }
                 }}
               >
-                <TableCell
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                    py: 2,
-                    color: theme.palette.text.primary,
-                    textAlign: 'left',
-                    minWidth: 200
-                  }}
-                >
-                  模型名称
-                </TableCell>
-                {/* <TableCell
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                    py: 2,
-                    color: theme.palette.text.primary,
-                    textAlign: 'center',
-                    minWidth: 120
-                  }}
-                >
-                  标签
-                </TableCell> */}
-                <TableCell
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                    py: 2,
-                    color: theme.palette.text.primary,
-                    textAlign: 'center',
-                    minWidth: 120
-                  }}
-                >
-                  计费类型
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                    py: 2,
-                    color: theme.palette.text.primary,
-                    textAlign: 'center',
-                    minWidth: 200
-                  }}
-                >
-                  最终价格
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                    py: 2,
-                    color: theme.palette.text.primary,
-                    textAlign: 'center',
-                    minWidth: 150
-                  }}
-                >
-                  支持分组
-                </TableCell>
-                {/* <TableCell
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                    py: 2,
-                    color: theme.palette.text.primary,
-                    textAlign: 'left',
-                    minWidth: 300
-                  }}
-                >
-                  说明
-                </TableCell> */}
-                <TableCell
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: '0.9rem',
-                    py: 2,
-                    color: theme.palette.text.primary,
-                    textAlign: 'center',
-                    minWidth: 100
-                  }}
-                >
-                  可用性
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredRows.length > 0 ? (
-                filteredRows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    sx={{
-                      '&:nth-of-type(odd)': {
-                        backgroundColor: alpha(theme.palette.primary.main, 0.02)
-                      },
-                      '&:hover': {
-                        backgroundColor: alpha(theme.palette.primary.main, 0.05)
-                      },
-                      transition: 'background-color 0.2s ease'
-                    }}
-                  >
-                    {/* 模型名称 */}
-                    <TableCell sx={{ py: 2, textAlign: 'left' }}>
-                      <Stack direction="row" alignItems="center" spacing={1}>
-                        <Avatar
-                          src={getIconByName(row.provider)}
-                          alt={row.provider}
-                          sx={{
-                            width: 20,
-                            height: 20,
-                            backgroundColor: theme.palette.background.paper,
-                            '.MuiAvatar-img': {
-                              objectFit: 'contain',
-                              padding: '1px'
-                            }
-                          }}
-                        >
-                          {row.provider?.charAt(0).toUpperCase()}
-                        </Avatar>
+                <CardContent sx={{ p: 3 }}>
+                  {/* 头部：图标 + 模型名称 */}
+                  <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                    <Avatar
+                      src={getIconByName(row.provider)}
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                        '.MuiAvatar-img': {
+                          objectFit: 'contain',
+                          padding: '4px'
+                        }
+                      }}
+                    >
+                      <Icon icon="ph:cube-bold" width={24} height={24} color={theme.palette.primary.main} />
+                    </Avatar>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography
-                          variant="body2"
+                          variant="h6"
                           fontWeight={600}
                           sx={{
+                            fontSize: '1rem',
                             color: theme.palette.text.primary,
-                            fontSize: '0.85rem'
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            flex: 1
                           }}
                         >
                           {row.model}
                         </Typography>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            navigator.clipboard.writeText(row.model);
-                          }}
-                          sx={{
-                            ml: 1,
-                            p: 0.5,
-                            '&:hover': {
-                              backgroundColor: alpha(theme.palette.primary.main, 0.1)
-                            }
-                          }}
-                        >
-                          <Icon icon="eva:copy-outline" width={16} height={16} />
-                        </IconButton>
-                      </Stack>
-                    </TableCell>
-
-                    {/* 标签 */}
-                    {/* <TableCell sx={{ py: 2, textAlign: 'center' }}>
-                      <Stack direction="row" spacing={0.5} justifyContent="center">
-                        <Chip
-                          label="对话"
-                          size="small"
-                          sx={{
-                            borderRadius: '4px',
-                            fontSize: '0.7rem',
-                            height: 20,
-                            backgroundColor: '#9333ea',
-                            color: 'white',
-                            fontWeight: 600
-                          }}
-                        />
-                        <Chip
-                          label="思考"
-                          size="small"
-                          sx={{
-                            borderRadius: '4px',
-                            fontSize: '0.7rem',
-                            height: 20,
-                            backgroundColor: '#3b82f6',
-                            color: 'white',
-                            fontWeight: 600
-                          }}
-                        />
-                      </Stack>
-                    </TableCell> */}
-
-                    {/* 计费类型 */}
-                    <TableCell sx={{ py: 2, textAlign: 'center' }}>
-                      <Chip
-                        label={row.type === 'times' ? '按次计费' : '按量计费'}
-                        icon={<Icon icon={row.type === 'times' ? 'tabler:click' : 'tabler:activity'} width={14} height={14} />}
-                        size="small"
+                        <Tooltip title="复制模型名称" arrow>
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              navigator.clipboard.writeText(row.model);
+                            }}
+                            sx={{
+                              p: 0.5,
+                              opacity: 0.7,
+                              '&:hover': {
+                                opacity: 1,
+                                backgroundColor: alpha(theme.palette.primary.main, 0.1)
+                              }
+                            }}
+                          >
+                            <Icon icon="eva:copy-outline" width={16} height={16} />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                      <Typography
+                        variant="body2"
                         sx={{
-                          borderRadius: '4px',
-                          fontSize: '0.75rem',
-                          height: 24,
-                          backgroundColor: row.type === 'times' ? theme.palette.info.main : theme.palette.success.main,
-                          color: 'white',
-                          fontWeight: 600,
-                          '& .MuiChip-icon': {
-                            color: 'white'
-                          }
+                          color: theme.palette.text.secondary,
+                          fontSize: '0.875rem'
                         }}
-                      />
-                    </TableCell>
+                      >
+                        {row.provider}
+                      </Typography>
+                    </Box>
+                  </Stack>
 
-                    {/* 最终价格 */}
-                    <TableCell sx={{ py: 2, textAlign: 'center' }}>
-                      <Box>
-                        {row.type === 'times' ? (
-                          // 按次计费
-                          row.ratio === 1 ? (
-                            // 1倍倍率，直接显示价格
+                  {/* 价格信息 */}
+                  <Box sx={{ mb: 2, minHeight: 100, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <Box>
+                      {row.type === 'times' ? (
+                        <>
+                          {row.ratio !== 1 && (
                             <Typography
                               variant="body2"
                               sx={{
-                                fontSize: '0.75rem',
-                                color: theme.palette.text.primary
-                              }}
-                            >
-                              {row.input}
-                            </Typography>
-                          ) : (
-                            // 非1倍倍率，显示原始价格和最终价格
-                            <>
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  fontSize: '0.75rem',
-                                  color: theme.palette.text.primary,
-                                  textDecoration: 'line-through',
-                                  mb: 0.5
-                                }}
-                              >
-                                原价: {row.originalInput}
-                              </Typography>
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  fontSize: '0.75rem',
-                                  color: theme.palette.text.primary
-                                }}
-                              >
-                                {row.input}
-                              </Typography>
-                            </>
-                          )
-                        ) : // 按量计费
-                        row.ratio === 1 ? (
-                          // 1倍倍率，直接显示价格
-                          <>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontSize: '0.75rem',
-                                color: theme.palette.text.primary,
-                                mb: 0.5
-                              }}
-                            >
-                              输入Token: <span style={{ color: theme.palette.text.primary }}>{row.input}</span>
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontSize: '0.75rem',
-                                color: theme.palette.text.primary
-                              }}
-                            >
-                              输出Token: <span style={{ color: theme.palette.text.primary }}>{row.output}</span>
-                            </Typography>
-                          </>
-                        ) : (
-                          // 非1倍倍率，显示原始价格和最终价格
-                          <>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontSize: '0.7rem',
                                 color: theme.palette.text.secondary,
+                                mb: 0.5,
                                 textDecoration: 'line-through',
-                                mb: 0.3
+                                fontSize: '0.8rem'
                               }}
                             >
-                              原价 输入: {row.originalInput} 输出: {row.originalOutput}
+                              原价: {row.originalInput}
                             </Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontSize: '0.75rem',
-                                color: theme.palette.text.secondary,
-                                mb: 0.3
-                              }}
-                            >
-                              输入Token: <span style={{ color: theme.palette.text.primary }}>{row.input}</span>
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontSize: '0.75rem',
-                                color: theme.palette.text.secondary
-                              }}
-                            >
-                              输出Token: <span style={{ color: theme.palette.text.primary }}>{row.output}</span>
-                            </Typography>
-                          </>
-                        )}
-                        {row.ratio !== 1 && (
+                          )}
                           <Typography
                             variant="body2"
                             sx={{
-                              fontSize: '0.7rem',
                               color: theme.palette.text.primary,
                               fontWeight: 600,
-                              mt: 0.5
+                              mb: 1
                             }}
                           >
-                            倍率: {row.ratio}x
+                            价格: {row.input}
                           </Typography>
-                        )}
-                      </Box>
-                    </TableCell>
+                        </>
+                      ) : (
+                        <>
+                          {row.ratio !== 1 && (
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: theme.palette.text.secondary,
+                                mb: 0.5,
+                                textDecoration: 'line-through',
+                                fontSize: '0.75rem'
+                              }}
+                            >
+                              原价 - 输入: {row.originalInput} | 输出: {row.originalOutput}
+                            </Typography>
+                          )}
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: theme.palette.text.primary,
+                              fontWeight: 600,
+                              mb: 0.5
+                            }}
+                          >
+                            输入: {row.input}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: theme.palette.text.primary,
+                              fontWeight: 600
+                            }}
+                          >
+                            输出: {row.output}
+                          </Typography>
+                        </>
+                      )}
+                    </Box>
 
-                    {/* 支持分组 */}
-                    <TableCell sx={{ py: 2, textAlign: 'center' }}>
-                      <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap">
-                        {row.userGroup && row.userGroup.length > 0 ? (
-                          row.userGroup.map((group) => (
+                    {/* 显示倍率信息 */}
+                    {row.ratio !== 1 && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: theme.palette.primary.main,
+                          fontWeight: 600,
+                          mt: 1,
+                          fontSize: '0.85rem'
+                        }}
+                      >
+                        当前倍率: {row.ratio}x
+                      </Typography>
+                    )}
+                  </Box>
+
+                  {/* 计费类型和可用性状态 */}
+                  <Box sx={{ mb: 2 }}>
+                    <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap', gap: 1 }}>
+                      <Chip
+                        label={row.type === 'times' ? '按次计费' : '按量计费'}
+                        size="small"
+                        sx={{
+                          backgroundColor:
+                            row.type === 'times' ? alpha(theme.palette.warning.main, 0.2) : alpha(theme.palette.success.main, 0.2),
+                          color: row.type === 'times' ? theme.palette.warning.dark : theme.palette.success.dark,
+                          fontWeight: 500
+                        }}
+                      />
+                      <Chip
+                        label={row.enable ? '当前分组可用' : '当前分组不可用'}
+                        size="small"
+                        sx={{
+                          backgroundColor: row.enable ? theme.palette.success.light : theme.palette.error.light,
+                          color: row.enable ? theme.palette.success.dark : theme.palette.error.dark,
+                          fontWeight: 500
+                        }}
+                      />
+                    </Stack>
+
+                    {/* 支持的分组信息 */}
+                    {row.userGroup && row.userGroup.length > 0 && (
+                      <Box>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: theme.palette.text.secondary,
+                            display: 'block',
+                            mb: 0.5,
+                            fontSize: '0.75rem'
+                          }}
+                        >
+                          支持分组:
+                        </Typography>
+                        <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+                          {row.userGroup.map((group) => (
                             <Chip
                               key={group}
                               label={userGroupMap[group]?.name || group}
@@ -886,129 +571,85 @@ export default function ModelPrice() {
                               onClick={() => handleGroupChange(group)}
                               variant={selectedGroup === group ? 'filled' : 'outlined'}
                               sx={{
-                                borderRadius: '4px',
-                                fontSize: '0.7rem',
-                                fontWeight: 600,
-                                height: 20,
+                                fontSize: '12px',
+                                height: 26,
                                 cursor: 'pointer',
                                 ...(selectedGroup === group
                                   ? {
-                                      // 选中的分组：实心高亮
                                       backgroundColor: theme.palette.primary.main,
                                       color: 'white',
-                                      borderColor: theme.palette.primary.main,
                                       '&:hover': {
-                                        backgroundColor: theme.palette.primary.dark,
-                                        borderColor: theme.palette.primary.dark
+                                        backgroundColor: theme.palette.text.primary
                                       }
                                     }
                                   : {
-                                      // 未选中的分组：镂空效果
-                                      backgroundColor: 'transparent',
-                                      color: theme.palette.primary.main,
                                       borderColor: theme.palette.primary.main,
-                                      border: `1px solid ${theme.palette.primary.main}`,
+                                      color: theme.palette.primary.main,
                                       '&:hover': {
-                                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                                        borderColor: theme.palette.primary.dark,
-                                        color: theme.palette.primary.dark
+                                        backgroundColor: theme.palette.primary.main,
+                                        color: 'white'
                                       }
                                     })
                               }}
                             />
-                          ))
-                        ) : (
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: theme.palette.text.secondary,
-                              fontSize: '0.8rem'
-                            }}
-                          >
-                            -
-                          </Typography>
-                        )}
-                      </Stack>
-                    </TableCell>
+                          ))}
+                        </Stack>
+                      </Box>
+                    )}
+                  </Box>
+                </CardContent>
 
-                    {/* 说明 */}
-                    {/* <TableCell sx={{ py: 2, textAlign: 'left' }}>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontSize: '0.8rem',
-                          color: theme.palette.text.secondary,
-                          maxWidth: 280,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        {row.model.includes('gpt-4.5')
-                          ? 'openai最新模型，gpt-4.5'
-                          : row.model.includes('o3')
-                            ? 'OpenAI先进推理模型，提长考虑分析，支持思考功能'
-                            : `${row.provider}提供的${row.model}模型`}
-                      </Typography>
-                    </TableCell> */}
-
-                    {/* 可用性 */}
-                    <TableCell sx={{ py: 2, textAlign: 'center' }}>
-                      {row.enable ? (
-                        <Chip
-                          label="当前分组可用"
-                          size="small"
-                          sx={{
-                            borderRadius: '4px',
-                            fontSize: '0.7rem',
-                            height: 20,
-                            backgroundColor: theme.palette.success.main,
-                            color: 'white',
-                            fontWeight: 600
-                          }}
-                        />
-                      ) : (
-                        <Chip
-                          label="当前分组不可用"
-                          size="small"
-                          sx={{
-                            borderRadius: '4px',
-                            fontSize: '0.7rem',
-                            height: 20,
-                            backgroundColor: theme.palette.error.main,
-                            color: 'white',
-                            fontWeight: 600
-                          }}
-                        />
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} sx={{ py: 8, textAlign: 'center' }}>
-                    <Stack spacing={2} alignItems="center">
-                      <Icon icon="eva:search-outline" width={48} height={48} color={theme.palette.text.secondary} />
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          color: theme.palette.text.secondary,
-                          fontWeight: 500
-                        }}
-                      >
-                        未找到匹配的模型
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                        请尝试调整搜索条件或选择其他用户组
-                      </Typography>
-                    </Stack>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
+                {/* <CardActions sx={{ px: 3, pb: 3, pt: 0 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      borderRadius: 1,
+                      textTransform: 'none',
+                      fontWeight: 500,
+                      flex: 1
+                    }}
+                  >
+                    控制计费
+                  </Button>
+                </CardActions> */}
+              </Card>
+            </Grid>
+          ))
+        ) : (
+          <Grid item xs={12}>
+            <Box
+              sx={{
+                textAlign: 'center',
+                py: 8,
+                backgroundColor: theme.palette.background.paper,
+                borderRadius: 0,
+                border: `1px solid ${theme.palette.divider}`
+              }}
+            >
+              <Icon icon="eva:search-outline" width={64} height={64} color={theme.palette.text.secondary} />
+              <Typography
+                variant="h6"
+                sx={{
+                  mt: 2,
+                  mb: 1,
+                  color: theme.palette.text.secondary
+                }}
+              >
+                未找到匹配的模型
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: theme.palette.text.secondary
+                }}
+              >
+                请尝试调整搜索条件
+              </Typography>
+            </Box>
+          </Grid>
+        )}
+      </Grid>
     </Box>
   );
 }
