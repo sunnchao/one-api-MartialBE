@@ -1,19 +1,19 @@
 package relay_util
 
 import (
-  "context"
-  "errors"
-  "fmt"
-  "math"
-  "net/http"
-  "one-api/common"
-  "one-api/common/config"
-  "one-api/common/logger"
-  "one-api/model"
-  "one-api/types"
-  "time"
+	"context"
+	"errors"
+	"fmt"
+	"math"
+	"net/http"
+	"one-api/common"
+	"one-api/common/config"
+	"one-api/common/logger"
+	"one-api/model"
+	"one-api/types"
+	"time"
 
-  "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 )
 
 type Quota struct {
@@ -88,7 +88,7 @@ func (q *Quota) PreQuotaConsumption() *types.OpenAIErrorWithStatusCode {
   }
 
   if userQuota < q.preConsumedQuota {
-    return common.ErrorWrapper(errors.New(fmt.Sprintf("user quota is not enough, userQuota: %d", userQuota)), "insufficient_user_quota", http.StatusPaymentRequired)
+    return common.ErrorWrapper(fmt.Errorf("user [%d] quota is not enough, userQuota: %d", q.userId, userQuota), "insufficient_user_quota", http.StatusPaymentRequired)
   }
 
   err = model.CacheDecreaseUserQuota(q.userId, q.preConsumedQuota)
@@ -138,7 +138,7 @@ func (q *Quota) UpdateUserRealtimeQuota(usage *types.UsageEvent, nowUsage *types
   }
 
   if cacheQuota >= int64(userQuota) {
-    return errors.New(fmt.Sprintf("user quota is not enough, userQuota: %d", userQuota))
+    return fmt.Errorf("user [%d] quota is not enough, userQuota: %d", q.userId, userQuota)
   }
 
   return nil
