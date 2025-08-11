@@ -379,13 +379,14 @@ export default function ModelPrice() {
               >
                 <CardContent sx={{ p: 3 }}>
                   {/* 头部：图标 + 模型名称 */}
-                  <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                  <Stack direction="row" alignItems="flex-start" spacing={2} sx={{ mb: 2 }}>
                     <Avatar
                       src={getIconByName(row.provider)}
                       sx={{
                         width: 40,
                         height: 40,
                         backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                        flexShrink: 0,
                         '.MuiAvatar-img': {
                           objectFit: 'contain',
                           padding: '4px'
@@ -395,17 +396,16 @@ export default function ModelPrice() {
                       <Icon icon="ph:cube-bold" width={24} height={24} color={theme.palette.primary.main} />
                     </Avatar>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 0.5 }}>
                         <Typography
                           variant="h6"
                           fontWeight={600}
                           sx={{
                             fontSize: '1rem',
                             color: theme.palette.text.primary,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            flex: 1
+                            flex: 1,
+                            lineHeight: 1.3,
+                            wordBreak: 'break-all'
                           }}
                         >
                           {row.model}
@@ -419,6 +419,8 @@ export default function ModelPrice() {
                             sx={{
                               p: 0.5,
                               opacity: 0.7,
+                              flexShrink: 0,
+                              mt: -0.5,
                               '&:hover': {
                                 opacity: 1,
                                 backgroundColor: alpha(theme.palette.primary.main, 0.1)
@@ -429,20 +431,24 @@ export default function ModelPrice() {
                           </IconButton>
                         </Tooltip>
                       </Box>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: theme.palette.text.secondary,
-                          fontSize: '0.875rem'
-                        }}
-                      >
-                        {row.provider}
-                      </Typography>
                     </Box>
                   </Stack>
 
+                  {/* 提供商名称 */}
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: theme.palette.text.secondary,
+                      fontSize: '0.875rem',
+                      mb: 2,
+                      fontWeight: 500
+                    }}
+                  >
+                    {row.provider}
+                  </Typography>
+
                   {/* 价格信息 */}
-                  <Box sx={{ mb: 2, minHeight: 100, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <Box sx={{ mb: 2, minHeight: 80, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <Box>
                       {row.type === 'times' ? (
                         <>
