@@ -18,10 +18,11 @@ import {
   Stack,
   ButtonGroup,
   Chip,
-  Switch
+  Switch,
+  Box,
+  Typography
 } from '@mui/material';
 
-import TableSwitch from 'ui-component/Switch';
 import { renderQuota, timestamp2string, copy, getChatLinks, replaceChatPlaceholders, renderGroup } from 'utils/common';
 import Label from 'ui-component/Label';
 
@@ -177,19 +178,18 @@ export default function TokensTableRow({ item, manageToken, handleOpenModal, set
     <>
       <TableRow tabIndex={item.id}>
         <TableCell>{item.name}</TableCell>
-        <TableCell>
-          <Stack direction="row" alignItems="center" spacing={0.5}>
-            {item.group.split(',').reduce((acc, group, idx, arr) => {
-              acc.push(
-                <Label key={`label-${group}-${idx}`} color={userGroup[group]?.color} size="small">
+        <TableCell sx={{ maxWidth: 200 }}>
+          <Stack direction="column" spacing={0.5}>
+            {item.group.split(',').map((group, idx, arr) => (
+              <Stack key={`group-row-${idx}`} direction="row" alignItems="center" spacing={0.5}>
+                <Label color={userGroup[group]?.color} size="small">
                   {renderGroup(userGroupOptions, group)}
                 </Label>
-              );
-              if (idx < arr.length - 1) {
-                acc.push(<Icon key={`icon-${idx}`} icon="mdi:arrow-right" width={16} height={16} />);
-              }
-              return acc;
-            }, [])}
+                {idx < arr.length - 1 && (
+                  <Icon icon="mdi:arrow-down" width={16} height={16} />
+                )}
+              </Stack>
+            ))}
           </Stack>
         </TableCell>
 
@@ -255,8 +255,10 @@ export default function TokensTableRow({ item, manageToken, handleOpenModal, set
         onClose={handleCloseMenu}
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        PaperProps={{
-          sx: { minWidth: 140 }
+        slotProps={{
+          paper: {
+            sx: { minWidth: 140 }
+          }
         }}
       >
         {menuItems}
@@ -285,5 +287,6 @@ TokensTableRow.propTypes = {
   manageToken: PropTypes.func,
   handleOpenModal: PropTypes.func,
   setModalTokenId: PropTypes.func,
-  userGroup: PropTypes.object
+  userGroup: PropTypes.object,
+  userGroupOptions: PropTypes.array
 };

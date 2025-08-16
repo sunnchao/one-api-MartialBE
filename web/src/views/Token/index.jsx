@@ -22,7 +22,6 @@ import { useSelector } from 'react-redux';
 import { PAGE_SIZE_OPTIONS, getPageSize, savePageSize } from 'constants';
 import { useTranslation } from 'react-i18next';
 import { UserContext } from 'contexts/UserContext';
-import { useIsAdmin } from 'utils/common';
 
 export default function Token() {
   const { t } = useTranslation();
@@ -43,7 +42,6 @@ export default function Token() {
   const siteInfo = useSelector((state) => state.siteInfo);
   const { userGroup } = useSelector((state) => state.account);
 
-  const userIsAdmin = useIsAdmin();
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
     if (id !== '') {
@@ -240,21 +238,21 @@ export default function Token() {
         {searching && <LinearProgress />}
         <PerfectScrollbar component="div">
           <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 800 }}>
+            <Table sx={{ minWidth: 1200 }}>
               <KeywordTableHead
                 order={order}
                 orderBy={orderBy}
                 onRequestSort={handleSort}
                 headLabel={[
                   { id: 'name', label: t('token_index.name'), disableSort: false, width: 150 },
-                  { id: 'group', label: t('token_index.userGroup'), disableSort: false, width: 150 },
+                  { id: 'group', label: t('token_index.userGroup'), disableSort: false, width: 200, minWidth: 180 },
                   { id: 'status', label: t('token_index.status'), disableSort: false, width: 100, minWidth: 100 },
                   { id: 'billing_type', label: t('token_index.billingType.header'), disableSort: false, width: 100, minWidth: 100 },
                   { id: 'used_quota', label: t('token_index.usedQuota'), disableSort: false, width: 100, minWidth: 100 },
-                  { id: 'remain_quota', label: t('token_index.remainingQuota'), disableSort: false, width: 150, minWidth: 100 },
-                  { id: 'created_time', label: t('token_index.createdTime'), disableSort: false, width: 150, minWidth: 100 },
-                  { id: 'expired_time', label: t('token_index.expiryTime'), disableSort: false, width: 150, minWidth: 100 },
-                  { id: 'action', label: t('token_index.actions'), disableSort: true }
+                  { id: 'remain_quota', label: t('token_index.remainingQuota'), disableSort: false, width: 120, minWidth: 100 },
+                  { id: 'created_time', label: t('token_index.createdTime'), disableSort: false, width: 130, minWidth: 100 },
+                  { id: 'expired_time', label: t('token_index.expiryTime'), disableSort: false, width: 130, minWidth: 100 },
+                  { id: 'action', label: t('token_index.actions'), disableSort: true, width: 200 }
                 ]}
               />
               <TableBody>
