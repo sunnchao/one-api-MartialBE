@@ -1078,6 +1078,21 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
                     <FormHelperText id="helper-tex-compatible_response-label">{customizeT(inputPrompt.compatible_response)}</FormHelperText>
                   </FormControl>
                 )}
+                <FormControl fullWidth>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        disabled={hasTag}
+                        checked={Boolean(values.auto_ban)}
+                        onChange={(event) => {
+                          setFieldValue('auto_ban', event.target.checked ? 1 : 0);
+                        }}
+                      />
+                    }
+                    label={customizeT(inputLabel.auto_ban)}
+                  />
+                  <FormHelperText id="helper-tex-auto_ban-label">{customizeT(inputPrompt.auto_ban)}</FormHelperText>
+                </FormControl>
                 {pluginList[values.type] &&
                   Object.keys(pluginList[values.type]).map((pluginId) => {
                     const plugin = pluginList[values.type][pluginId];

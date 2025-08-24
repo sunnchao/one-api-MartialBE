@@ -280,6 +280,13 @@ export default function ChannelTableRow({ item, manageChannel, onRefresh, groupO
     }
   };
 
+  const handleAutoBan = async (value) => {
+    const { success } = await manageChannel(item.id, 'auto_ban', value);
+    if (success) {
+      item.auto_ban = value;
+    }
+  };
+
   const handleResponseTime = async (modelName) => {
     setOpenTest(null);
 
@@ -419,6 +426,27 @@ export default function ChannelTableRow({ item, manageChannel, onRefresh, groupO
                   <Icon icon="mdi:power-off" />
                 </IconButton>
               </Tooltip>
+            </Stack>
+          )}
+        </TableCell>
+
+        <TableCell align="center" sx={{ minWidth: 100 }}>
+          {!item.tag && (
+            <Stack direction="column" alignItems="center" spacing={0.5}>
+              <Switch 
+                checked={Boolean(item.auto_ban)} 
+                onChange={(event) => handleAutoBan(event.target.checked ? 1 : 0)}
+                size="small" 
+              />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: item.auto_ban ? 600 : 400,
+                  color: item.auto_ban ? 'success.main' : 'text.secondary'
+                }}
+              >
+                {item.auto_ban ? '启用' : '禁用'}
+              </Typography>
             </Stack>
           )}
         </TableCell>

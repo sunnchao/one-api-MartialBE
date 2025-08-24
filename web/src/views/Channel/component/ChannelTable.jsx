@@ -98,6 +98,12 @@ export default function ChannelTable({ tag }) {
             weight: parseInt(value)
           });
           break;
+        case 'auto_ban':
+          res = await API.put(url, {
+            ...data,
+            auto_ban: parseInt(value)
+          });
+          break;
         case 'test':
           res = await API.get(url + `test/${id}`, {
             params: { model: value }
@@ -154,6 +160,7 @@ export default function ChannelTable({ tag }) {
                 { id: 'tag', label: t('channel_index.tags'), disableSort: true },
                 { id: 'type', label: t('channel_index.type'), disableSort: false },
                 { id: 'status', label: t('channel_index.status'), disableSort: false },
+                { id: 'auto_ban', label: '自动禁用', disableSort: false, width: '100px' },
                 { id: 'response_time', label: t('channel_index.responseTime'), disableSort: false },
                 { id: 'used', label: t('channel_index.usedBalance'), disableSort: false },
                 { id: 'priority', label: t('channel_index.priority'), disableSort: false, width: '80px' },

@@ -25,9 +25,28 @@ func shouldEnableChannel(err error, openAIErr *types.OpenAIErrorWithStatusCode) 
 	return true
 }
 
-func ShouldDisableChannel(channelType int, err *types.OpenAIErrorWithStatusCode) bool {
-	if !config.AutomaticDisableChannelEnabled || err == nil || err.LocalError {
+func ShouldDisableChannel(channelId int, channelType int, err *types.OpenAIErrorWithStatusCode) bool {
+	if err == nil || err.LocalError {
 		return false
+	}
+
+	// 获取渠道信息，检查渠道的AutoBan设置
+	channel, getChannelErr := model.GetChannelById(channelId)
+	if getChannelErr != nil {
+		// 如果获取渠道信息失败，降级使用全局设置
+		if !config.AutomaticDisableChannelEnabled {
+			return false
+		}
+	} else {
+		// 检查渠道的AutoBan设置
+		if channel.AutoBan == nil || *channel.AutoBan == 0 {
+			// 渠道未启用自动禁用，即使全局启用也不禁用
+			return false
+		}
+		// 如果渠道启用了AutoBan，还需要检查全局设置是否启用
+		if !config.AutomaticDisableChannelEnabled {
+			return false
+		}
 	}
 
 	// 状态码检查

@@ -514,6 +514,7 @@ export default function ChannelList() {
                 { id: 'group', label: t('channel_index.group'), disableSort: true },
                 { id: 'type', label: t('channel_index.type'), disableSort: false },
                 { id: 'status', label: t('channel_index.status'), disableSort: false },
+                { id: 'auto_ban', label: '自动禁用', disableSort: false, width: '100px' },
                 { id: 'response_time', label: t('channel_index.responseTime'), disableSort: false },
                 // { id: 'balance', label: '余额', disableSort: false },
                 { id: 'used', label: t('channel_index.usedBalance'), disableSort: true },

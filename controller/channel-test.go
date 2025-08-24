@@ -200,7 +200,7 @@ func TestChannel(c *gin.Context) {
 	success := false
 	msg := ""
 	if openaiErr != nil {
-		if ShouldDisableChannel(channel.Type, openaiErr) {
+		if ShouldDisableChannel(channel.Id, channel.Type, openaiErr) {
 			msg = fmt.Sprintf("测速失败，已被禁用，原因：%s", err.Error())
 			DisableChannel(channel.Id, channel.Name, err.Error(), true)
 		} else {
@@ -280,7 +280,7 @@ func testAllChannels(isNotify bool) error {
 					continue
 				}
 
-				if ShouldDisableChannel(channel.Type, openaiErr) {
+				if ShouldDisableChannel(channel.Id, channel.Type, openaiErr) {
 					sendMessage += fmt.Sprintf("- 已被禁用，原因：%s\n\n", utils.EscapeMarkdownText(err.Error()))
 					DisableChannel(channel.Id, channel.Name, err.Error(), true)
 					continue
