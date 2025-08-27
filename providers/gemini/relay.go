@@ -105,6 +105,18 @@ func (h *GeminiRelayStreamHandler) HandlerStream(rawLine *[]byte, dataChan chan 
 	h.Usage.PromptTokens = geminiResponse.UsageMetadata.PromptTokenCount
 	h.Usage.CompletionTokens = geminiResponse.UsageMetadata.CandidatesTokenCount + geminiResponse.UsageMetadata.ThoughtsTokenCount
 	h.Usage.CompletionTokensDetails.ReasoningTokens = geminiResponse.UsageMetadata.ThoughtsTokenCount
+	// geminiResponse.UsageMetadata.CandidatesTokensDetails 区分图片Token "candidatesTokensDetails": [{"modality": "IMAGE","tokenCount": 1290}]}
+	for _, detail := range geminiResponse.UsageMetadata.CandidatesTokensDetails {
+		switch detail.Modality {
+		case "IMAGE":
+			h.Usage.CompletionTokensDetails.ImageTokens += detail.TokenCount
+		case "TEXT":
+			h.Usage.CompletionTokensDetails.TextTokens += detail.TokenCount
+		case "AUDIO":
+			h.Usage.CompletionTokensDetails.AudioTokens += detail.TokenCount
+		}
+	}
+	
 	h.Usage.TotalTokens = geminiResponse.UsageMetadata.TotalTokenCount
 
 	dataChan <- rawStr

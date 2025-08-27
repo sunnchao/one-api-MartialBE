@@ -11,4 +11,5 @@ const (
 	UsageExtraInputTextTokens  = "input_text_tokens"   // 输入文本
 	UsageExtraOutputTextTokens = "output_text_tokens"  // 输出文本
 	UsageExtraInputImageTokens = "input_image_tokens"  // 输入图像
+	UsageExtraOutputImageTokens = "output_image_tokens"  // 输出图像
 )

@@ -20,6 +20,7 @@ lastUpdated: true
 - input_text_tokens：输入文字令牌 (输入价格)
 - output_text_tokens：输出文字令牌 (输出价格)
 - input_image_tokens：输入图片令牌 (输入价格)
+- output_image_tokens：输出图片令牌 (输出价格)
 
 ## 计费方法
 

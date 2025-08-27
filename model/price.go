@@ -1,11 +1,11 @@
 package model
 
 import (
-  "one-api/common/config"
+	"one-api/common/config"
 
-  "github.com/shopspring/decimal"
-  "gorm.io/datatypes"
-  "gorm.io/gorm"
+	"github.com/shopspring/decimal"
+	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 const (
@@ -35,6 +35,7 @@ var ExtraKeyIsPrompt = map[string]bool{
   config.UsageExtraInputTextTokens:  true,
   config.UsageExtraOutputTextTokens: false,
   config.UsageExtraInputImageTokens: true,
+  config.UsageExtraOutputImageTokens: true,
 }
 
 func GetExtraPriceIsPrompt(key string) bool {
