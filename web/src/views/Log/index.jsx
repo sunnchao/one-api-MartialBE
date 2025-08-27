@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { renderQuota, showError, trims } from 'utils/common';
+import { renderQuota, showError, showInfo, trims } from 'utils/common';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -12,7 +12,7 @@ import Button from '@mui/material/Button';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Divider from '@mui/material/Divider';
-import { Grid, Card, Stack, Container, Typography, Box, Menu, MenuItem, Checkbox, ListItemText, Tabs, Tab } from '@mui/material';
+import { Grid, Card, Stack, Container, Typography, Box, Menu, MenuItem, Checkbox, ListItemText, Tabs, Tab, Tooltip, Fade, CircularProgress } from '@mui/material';
 import LogTableRow from './component/TableRow';
 import KeywordTableHead from 'ui-component/TableHead';
 import TableToolBar from './component/TableToolBar';
@@ -52,6 +52,7 @@ export default function Log() {
   const [toolBarValue, setToolBarValue] = useState(originalKeyword);
   const [searchKeyword, setSearchKeyword] = useState(originalKeyword);
   const [refreshFlag, setRefreshFlag] = useState(false);
+  const [hasSearchChanges, setHasSearchChanges] = useState(false);
   const { userGroup } = useSelector((state) => state.account);
   const theme = useTheme();
   const matchUpMd = useMediaQuery(theme.breakpoints.up('sm'));
@@ -133,13 +134,59 @@ export default function Log() {
     savePageSize('log', newRowsPerPage);
   };
 
+  // 深度比较两个对象是否相等
+  const deepEqual = (obj1, obj2) => {
+    if (obj1 === obj2) return true;
+    if (obj1 == null || obj2 == null) return false;
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+    if (keys1.length !== keys2.length) return false;
+    for (let key of keys1) {
+      if (!keys2.includes(key)) return false;
+      const val1 = String(obj1[key] ?? '');
+      const val2 = String(obj2[key] ?? '');
+      if (val1 !== val2) return false;
+    }
+    return true;
+  };
+
   const searchLogs = async () => {
+    // 检查是否首次搜索或有变化
+    const isFirstSearch = deepEqual(searchKeyword, originalKeyword);
+    const hasChanged = !deepEqual(toolBarValue, searchKeyword);
+    
+    // 开发环境调试信息
+    if (process.env.NODE_ENV === 'development') {
+      console.log('日志搜索状态:', {
+        isFirstSearch,
+        hasChanged,
+        toolBarValue,
+        searchKeyword,
+        originalKeyword
+      });
+    }
+    
     setPage(0);
-    setSearchKeyword(toolBarValue);
+    
+    if (hasChanged) {
+      // 如果搜索条件有变化，更新搜索关键字
+      setSearchKeyword(toolBarValue);
+      setHasSearchChanges(false);
+      showInfo('搜索条件已更新，正在查询...');
+    } else {
+      // 如果搜索条件没有变化，强制刷新数据
+      setRefreshFlag(!refreshFlag);
+      showInfo('正在刷新最新日志数据...');
+    }
   };
 
   const handleToolBarValue = (event) => {
-    setToolBarValue({ ...toolBarValue, [event.target.name]: event.target.value });
+    const newValue = { ...toolBarValue, [event.target.name]: event.target.value };
+    setToolBarValue(newValue);
+    
+    // 检查搜索条件是否有变化
+    const hasChanged = !deepEqual(newValue, searchKeyword);
+    setHasSearchChanges(hasChanged);
   };
 
   const handleTabsChange = async (event, newValue) => {
@@ -147,6 +194,7 @@ export default function Log() {
     setToolBarValue(updatedToolBarValue);
     setPage(0);
     setSearchKeyword(updatedToolBarValue);
+    setHasSearchChanges(false); // Tab切换时立即应用，重置变化标记
   };
 
   const fetchData = useCallback(
@@ -206,13 +254,32 @@ export default function Log() {
   }, []);
 
   // 处理刷新
-  const handleRefresh = async () => {
-    setOrderBy('created_at');
-    setOrder('desc');
-    setToolBarValue(originalKeyword);
-    setSearchKeyword(originalKeyword);
+  const handleRefresh = async (reset = true) => {
+    if (reset) {
+      setOrderBy('created_at');
+      setOrder('desc');
+      setToolBarValue(originalKeyword);
+      setSearchKeyword(originalKeyword);
+      setPage(0);
+      setHasSearchChanges(false); // 重置变化标记
+    }
     setRefreshFlag(!refreshFlag);
   };
+
+  // 监听搜索条件变化
+  useEffect(() => {
+    const hasChanged = !deepEqual(toolBarValue, searchKeyword);
+    setHasSearchChanges(hasChanged);
+    
+    // 开发环境调试
+    if (process.env.NODE_ENV === 'development') {
+      console.log('日志搜索条件变化检测:', {
+        hasChanged,
+        toolBarValue,
+        searchKeyword
+      });
+    }
+  }, [toolBarValue, searchKeyword]);
 
   useEffect(() => {
     fetchData(page, rowsPerPage, searchKeyword, order, orderBy);
@@ -220,6 +287,24 @@ export default function Log() {
 
   return (
     <>
+      <style>
+        {`
+          @keyframes pulse {
+            0% {
+              transform: scale(1);
+              opacity: 1;
+            }
+            50% {
+              transform: scale(1.1);
+              opacity: 0.7;
+            }
+            100% {
+              transform: scale(1);
+              opacity: 1;
+            }
+          }
+        `}
+      </style>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
         <Stack direction="column" spacing={1}>
           <Typography variant="h2">{t('logPage.title')}</Typography>
@@ -372,46 +457,97 @@ export default function Log() {
         <Toolbar
           sx={{
             textAlign: 'right',
-            height: 50,
+            height: 'auto',
+            minHeight: 64,
             display: 'flex',
             justifyContent: 'space-between',
-            p: (theme) => theme.spacing(0, 1, 0, 3)
+            alignItems: 'center',
+            p: (theme) => theme.spacing(2, 3),
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: 2
           }}
         >
           <Container maxWidth="xl">
-            {matchUpMd ? (
-              <ButtonGroup variant="outlined" aria-label="outlined small primary button group">
-                <Button onClick={handleRefresh} size="small" startIcon={<Icon icon="solar:refresh-bold-duotone" width={18} />}>
-                  {t('logPage.refreshButton')}
-                </Button>
-
-                <Button onClick={searchLogs} size="small" startIcon={<Icon icon="solar:minimalistic-magnifer-line-duotone" width={18} />}>
-                  {t('logPage.searchButton')}
-                </Button>
-
-                <Button onClick={handleColumnMenuOpen} size="small" startIcon={<Icon icon="solar:settings-bold-duotone" width={18} />}>
-                  {t('logPage.columnSettings')}
-                </Button>
-              </ButtonGroup>
-            ) : (
-              <Stack
-                direction="row"
-                spacing={1}
-                divider={<Divider orientation="vertical" flexItem />}
-                justifyContent="space-around"
-                alignItems="center"
-              >
-                <IconButton onClick={handleRefresh} size="small">
-                  <Icon icon="solar:refresh-bold-duotone" width={18} />
-                </IconButton>
-                <IconButton onClick={searchLogs} size="small">
-                  <Icon icon="solar:minimalistic-magnifer-line-duotone" width={18} />
-                </IconButton>
-                <IconButton onClick={handleColumnMenuOpen} size="small">
-                  <Icon icon="solar:settings-bold-duotone" width={18} />
-                </IconButton>
+            <Stack
+              direction={{ xs: 'column', md: 'row' }}
+              spacing={2}
+              justifyContent="space-between" 
+              alignItems={{ xs: 'stretch', md: 'center' }}
+            >
+              {/* 左侧：搜索和重置按钮 */}
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Tooltip 
+                  title={hasSearchChanges ? "执行搜索以应用新的筛选条件" : "刷新数据获取最新日志"}
+                  placement="top"
+                >
+                  <Button 
+                    variant={hasSearchChanges ? "contained" : "outlined"}
+                    color={hasSearchChanges ? "primary" : "primary"}
+                    onClick={searchLogs} 
+                    disabled={searching}
+                    startIcon={searching ? 
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <CircularProgress size={16} color="inherit" />
+                      </Box> : 
+                      <Icon icon="solar:magnifer-bold-duotone" width={18} />
+                    }
+                    sx={{ 
+                      borderRadius: 2, 
+                      textTransform: 'none', 
+                      fontWeight: 600,
+                      position: 'relative',
+                      minWidth: 120, // 固定最小宽度，防止文字变化时按钮跳动
+                      ...(hasSearchChanges && !searching && {
+                        '&::after': {
+                          content: '""',
+                          position: 'absolute',
+                          top: -2,
+                          right: -2,
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          bgcolor: 'warning.main',
+                          animation: 'pulse 2s infinite'
+                        }
+                      })
+                    }}
+                  >
+                    {searching ? '查询中...' : (hasSearchChanges ? '执行搜索' : '搜索/刷新')}
+                  </Button>
+                </Tooltip>
+                <Tooltip title="清空所有筛选条件并重新加载数据" placement="top">
+                  <Button 
+                    variant="outlined"
+                    onClick={() => handleRefresh(true)} 
+                    startIcon={<Icon icon="solar:refresh-circle-bold-duotone" width={18} />}
+                    sx={{ borderRadius: 2, textTransform: 'none' }}
+                  >
+                    重置条件
+                  </Button>
+                </Tooltip>
+                {hasSearchChanges && (
+                  <Fade in={hasSearchChanges}>
+                    <Typography variant="caption" color="warning.main" sx={{ fontWeight: 600 }}>
+                      • 筛选条件已修改，点击搜索应用
+                    </Typography>
+                  </Fade>
+                )}
               </Stack>
-            )}
+
+              {/* 右侧：管理操作按钮 */}
+              <Stack direction="row" spacing={1} sx={{ justifyContent: { xs: 'center', md: 'flex-end' } }}>
+                <Tooltip title="列显示设置" placement="top">
+                  <Button 
+                    variant="outlined"
+                    onClick={handleColumnMenuOpen} 
+                    startIcon={<Icon icon="solar:settings-bold-duotone" width={18} />}
+                    sx={{ borderRadius: 2, textTransform: 'none' }}
+                  >
+                    列设置
+                  </Button>
+                </Tooltip>
+              </Stack>
+            </Stack>
 
             <Menu
               anchorEl={columnMenuAnchor}

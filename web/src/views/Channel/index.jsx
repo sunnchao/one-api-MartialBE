@@ -13,7 +13,7 @@ import Toolbar from '@mui/material/Toolbar';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Alert from '@mui/material/Alert';
 
-import { Button, IconButton, Card, Box, Stack, Container, Typography, Divider } from '@mui/material';
+import { Button, IconButton, Card, Box, Stack, Container, Typography, Divider, Tooltip, Fade, CircularProgress } from '@mui/material';
 import ChannelTableRow from './component/TableRow';
 import KeywordTableHead from 'ui-component/TableHead';
 import { API } from 'utils/api';
@@ -26,6 +26,21 @@ import { useTranslation } from 'react-i18next';
 import { useBoolean } from 'hooks/use-boolean';
 import ConfirmDialog from 'ui-component/confirm-dialog';
 import { Icon } from '@iconify/react';
+
+// CSS 动画关键帧
+const pulseAnimation = `
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+`;
 
 const originalKeyword = {
   type: 0,
@@ -88,6 +103,7 @@ export default function ChannelList() {
   const [groupOptions, setGroupOptions] = useState([]);
   const [toolBarValue, setToolBarValue] = useState(originalKeyword);
   const [searchKeyword, setSearchKeyword] = useState(originalKeyword);
+  const [hasSearchChanges, setHasSearchChanges] = useState(false);
 
   const theme = useTheme();
   const matchUpMd = useMediaQuery(theme.breakpoints.up('sm'));
@@ -130,14 +146,76 @@ export default function ChannelList() {
   }, []);
 
   const searchChannels = async () => {
-    // event.preventDefault();
-    // const formData = new FormData(event.target);
+    // 检查是否首次搜索或有变化
+    const isFirstSearch = deepEqual(searchKeyword, originalKeyword);
+    const hasChanged = !deepEqual(toolBarValue, searchKeyword);
+    
+    // 开发环境调试信息
+    if (process.env.NODE_ENV === 'development') {
+      console.log('搜索状态:', {
+        isFirstSearch,
+        hasChanged,
+        toolBarValue,
+        searchKeyword,
+        originalKeyword
+      });
+    }
+    
     setPage(0);
-    setSearchKeyword(toolBarValue);
+    
+    if (hasChanged) {
+      // 如果搜索条件有变化，更新搜索关键字
+      setSearchKeyword(toolBarValue);
+      setHasSearchChanges(false);
+      showInfo('搜索条件已更新，正在查询...');
+    } else {
+      // 如果搜索条件没有变化，强制刷新数据
+      setRefreshFlag(!refreshFlag);
+      showInfo('正在刷新最新数据...');
+    }
+  };
+
+  // 深度比较两个对象是否相等
+  const deepEqual = (obj1, obj2) => {
+    if (obj1 === obj2) return true;
+    
+    if (obj1 == null || obj2 == null) return false;
+    
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+    
+    if (keys1.length !== keys2.length) return false;
+    
+    for (let key of keys1) {
+      if (!keys2.includes(key)) return false;
+      
+      // 统一转换为字符串进行比较，处理数字和字符串的差异
+      const val1 = String(obj1[key] ?? '');
+      const val2 = String(obj2[key] ?? '');
+      
+      if (val1 !== val2) return false;
+    }
+    
+    return true;
+  };
+
+  // 测试深度比较函数（开发环境使用）
+  const testDeepEqual = () => {
+    console.log('测试深度比较:');
+    console.log('相同对象:', deepEqual({ a: 1, b: 2 }, { a: 1, b: 2 })); // 应该是 true
+    console.log('不同值:', deepEqual({ a: 1, b: 2 }, { a: 1, b: 3 })); // 应该是 false
+    console.log('数字vs字符串:', deepEqual({ a: 1 }, { a: '1' })); // 应该是 true
+    console.log('顺序不同:', deepEqual({ a: 1, b: 2 }, { b: 2, a: 1 })); // 应该是 true
+    console.log('空值处理:', deepEqual({ a: '' }, { a: 0 })); // 应该是 false
   };
 
   const handleToolBarValue = (event) => {
-    setToolBarValue({ ...toolBarValue, [event.target.name]: event.target.value });
+    const newValue = { ...toolBarValue, [event.target.name]: event.target.value };
+    setToolBarValue(newValue);
+    
+    // 检查是否有变化
+    const hasChanged = !deepEqual(newValue, searchKeyword);
+    setHasSearchChanges(hasChanged);
   };
 
   const manageChannel = async (id, action, value, tag = false) => {
@@ -245,6 +323,9 @@ export default function ChannelList() {
       setOrder('desc');
       setToolBarValue(originalKeyword);
       setSearchKeyword(originalKeyword);
+      setHasSearchChanges(false); // 重置变化标记
+      setPage(0); // 重置页码
+      showInfo('已重置所有筛选条件');
     }
     setRefreshFlag(!refreshFlag);
   };
@@ -386,15 +467,28 @@ export default function ChannelList() {
     fetchData(page, rowsPerPage, searchKeyword, order, orderBy);
   }, [page, rowsPerPage, searchKeyword, order, orderBy, refreshFlag]);
 
+  // 初始化时检查是否有变化
+  useEffect(() => {
+    const hasChanged = !deepEqual(toolBarValue, searchKeyword);
+    setHasSearchChanges(hasChanged);
+  }, [toolBarValue, searchKeyword]);
+
   useEffect(() => {
     fetchGroups().then();
     fetchTags().then();
     fetchModels().then();
     fetchPrices().then();
+    
+    // 开发环境测试深度比较函数
+    if (process.env.NODE_ENV === 'development') {
+      testDeepEqual();
+    }
   }, [fetchPrices]);
 
   return (
     <AdminContainer>
+      {/* 添加CSS动画 */}
+      <style>{pulseAnimation}</style>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
         <Stack direction="column" spacing={1}>
           <Typography variant="h2">{t('channel_index.channel')}</Typography>
@@ -430,76 +524,152 @@ export default function ChannelList() {
           <TableToolBar filterName={toolBarValue} handleFilterName={handleToolBarValue} groupOptions={groupOptions} tags={tags} />
         </Box>
 
-        <Toolbar
+        {/* 查询操作栏 */}
+        <Box
           sx={{
-            textAlign: 'right',
-            height: 50,
-            display: 'flex',
-            justifyContent: 'space-between',
-            p: (theme) => theme.spacing(0, 1, 0, 3)
+            p: 2,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.neutral'
           }}
         >
-          <Container maxWidth="xl">
-            {matchUpMd ? (
-              <ButtonGroup variant="outlined" aria-label="outlined small primary button group">
-                <Button onClick={() => handleRefresh(true)} startIcon={<Icon icon="solar:refresh-circle-bold-duotone" width={18} />}>
-                  {t('channel_index.refreshClearSearchConditions')}
-                </Button>
-                <Button onClick={searchChannels} startIcon={<Icon icon="solar:magnifer-bold-duotone" width={18} />}>
-                  {t('channel_index.search')}
-                </Button>
-                <Button
-                  onClick={() => handlePopoverOpen(t('channel_index.testAllChannels'), testAllChannels)}
-                  startIcon={<Icon icon="solar:test-tube-bold-duotone" width={18} />}
-                >
-                  {t('channel_index.testAllChannels')}
-                </Button>
-                <Button
-                  onClick={() => handlePopoverOpen(t('channel_index.updateEnabledBalance'), updateAllChannelsBalance)}
-                  startIcon={<Icon icon="solar:dollar-minimalistic-bold-duotone" width={18} />}
-                >
-                  {t('channel_index.updateEnabledBalance')}
-                </Button>
-                <Button
-                  onClick={() => handlePopoverOpen(t('channel_index.deleteDisabledChannels'), deleteAllDisabledChannels)}
-                  startIcon={<Icon icon="solar:trash-bin-trash-bold-duotone" width={18} />}
-                >
-                  {t('channel_index.deleteDisabledChannels')}
-                </Button>
-              </ButtonGroup>
-            ) : (
-              <Stack
-                direction="row"
-                spacing={0.5}
-                divider={<Divider orientation="vertical" flexItem />}
-                justifyContent="space-around"
-                alignItems="center"
+          <Stack 
+            direction={{ xs: 'column', md: 'row' }} 
+            spacing={2} 
+            justifyContent="space-between" 
+            alignItems={{ xs: 'stretch', md: 'center' }}
+          >
+            {/* 左侧：搜索和重置按钮 */}
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Tooltip 
+                title={hasSearchChanges ? "执行搜索以应用新的筛选条件" : "刷新数据获取最新信息"}
+                placement="top"
               >
-                <IconButton onClick={() => handleRefresh(true)} size="large">
-                  <Icon width={20} icon="solar:refresh-circle-bold-duotone" />
-                </IconButton>
-                <IconButton onClick={searchChannels} size="large">
-                  <Icon width={20} icon="solar:magnifer-bold-duotone" />
-                </IconButton>
-                <IconButton onClick={() => handlePopoverOpen(t('channel_index.testAllChannels'), testAllChannels)} size="large">
-                  <Icon width={20} icon="solar:test-tube-bold-duotone" />
-                </IconButton>
-                <IconButton
-                  onClick={() => handlePopoverOpen(t('channel_index.updateEnabledBalance'), updateAllChannelsBalance)}
-                  size="large"
+                <Button 
+                  variant={hasSearchChanges ? "contained" : "outlined"}
+                  color={hasSearchChanges ? "primary" : "primary"}
+                  onClick={searchChannels} 
+                  disabled={searching}
+                  startIcon={searching ? 
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CircularProgress size={16} color="inherit" />
+                    </Box> : 
+                    <Icon icon="solar:magnifer-bold-duotone" width={18} />
+                  }
+                  sx={{ 
+                    borderRadius: 2, 
+                    textTransform: 'none', 
+                    fontWeight: 600,
+                    position: 'relative',
+                    minWidth: 120, // 固定最小宽度，防止文字变化时按钮跳动
+                    ...(hasSearchChanges && !searching && {
+                      '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        top: -2,
+                        right: -2,
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        bgcolor: 'warning.main',
+                        animation: 'pulse 2s infinite'
+                      }
+                    })
+                  }}
                 >
-                  <Icon width={20} icon="solar:dollar-minimalistic-bold-duotone" />
-                </IconButton>
-                <IconButton
-                  onClick={() => handlePopoverOpen(t('channel_index.deleteDisabledChannels'), deleteAllDisabledChannels)}
-                  size="large"
+                  {searching ? '查询中...' : (hasSearchChanges ? '执行搜索' : '搜索/刷新')}
+                </Button>
+              </Tooltip>
+              <Tooltip title="清空所有筛选条件并重新加载数据" placement="top">
+                <Button 
+                  variant="outlined"
+                  onClick={() => handleRefresh(true)} 
+                  startIcon={<Icon icon="solar:refresh-circle-bold-duotone" width={18} />}
+                  sx={{ borderRadius: 2, textTransform: 'none' }}
                 >
-                  <Icon width={20} icon="solar:trash-bin-trash-bold-duotone" />
-                </IconButton>
-              </Stack>
-            )}
-          </Container>
-        </Toolbar>
+                  重置条件
+                </Button>
+              </Tooltip>
+              {hasSearchChanges && (
+                <Fade in={hasSearchChanges}>
+                  <Typography variant="caption" color="warning.main" sx={{ fontWeight: 600 }}>
+                    • 筛选条件已修改，点击搜索应用
+                  </Typography>
+                </Fade>
+              )}
+            </Stack>
+
+            {/* 右侧：管理操作按钮 */}
+            <Stack direction="row" spacing={1} sx={{ justifyContent: { xs: 'center', md: 'flex-end' } }}>
+              {matchUpMd ? (
+                <>
+                  <Button
+                    variant="outlined"
+                    color="info"
+                    onClick={() => handlePopoverOpen(t('channel_index.testAllChannels'), testAllChannels)}
+                    startIcon={<Icon icon="solar:test-tube-bold-duotone" width={18} />}
+                    sx={{ borderRadius: 2, textTransform: 'none' }}
+                  >
+                    {t('channel_index.testAllChannels')}
+                  </Button>
+                  <Button
+                    variant="outlined" 
+                    color="success"
+                    onClick={() => handlePopoverOpen(t('channel_index.updateEnabledBalance'), updateAllChannelsBalance)}
+                    startIcon={<Icon icon="solar:dollar-minimalistic-bold-duotone" width={18} />}
+                    sx={{ borderRadius: 2, textTransform: 'none' }}
+                    disabled={searching}
+                  >
+                    {t('channel_index.updateEnabledBalance')}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => handlePopoverOpen(t('channel_index.deleteDisabledChannels'), deleteAllDisabledChannels)}
+                    startIcon={<Icon icon="solar:trash-bin-trash-bold-duotone" width={18} />}
+                    sx={{ borderRadius: 2, textTransform: 'none' }}
+                  >
+                    {t('channel_index.deleteDisabledChannels')}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <IconButton 
+                    onClick={() => handlePopoverOpen(t('channel_index.testAllChannels'), testAllChannels)} 
+                    sx={{ 
+                      bgcolor: 'info.lighter', 
+                      color: 'info.main',
+                      '&:hover': { bgcolor: 'info.main', color: 'info.contrastText' }
+                    }}
+                  >
+                    <Icon width={20} icon="solar:test-tube-bold-duotone" />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handlePopoverOpen(t('channel_index.updateEnabledBalance'), updateAllChannelsBalance)}
+                    disabled={searching}
+                    sx={{ 
+                      bgcolor: 'success.lighter', 
+                      color: 'success.main',
+                      '&:hover': { bgcolor: 'success.main', color: 'success.contrastText' }
+                    }}
+                  >
+                    <Icon width={20} icon="solar:dollar-minimalistic-bold-duotone" />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handlePopoverOpen(t('channel_index.deleteDisabledChannels'), deleteAllDisabledChannels)}
+                    sx={{ 
+                      bgcolor: 'error.lighter', 
+                      color: 'error.main',
+                      '&:hover': { bgcolor: 'error.main', color: 'error.contrastText' }
+                    }}
+                  >
+                    <Icon width={20} icon="solar:trash-bin-trash-bold-duotone" />
+                  </IconButton>
+                </>
+              )}
+            </Stack>
+          </Stack>
+        </Box>
         {searching && <LinearProgress />}
         <TableContainer>
           <Table sx={{ minWidth: 800 }}>
