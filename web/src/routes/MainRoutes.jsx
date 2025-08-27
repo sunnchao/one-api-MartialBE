@@ -30,6 +30,8 @@ const Dashboard = Loadable(lazy(() => import('views/Dashboard')));
 
 const SystemInfo = Loadable(lazy(() => import('views/SystemInfo')));
 const ClaudeCode = Loadable(lazy(() => import('views/ClaudeCode')));
+const ClaudeCodeSubscription = Loadable(lazy(() => import('views/ClaudeCode/Subscription')));
+const ClaudeCodeAdmin = Loadable(lazy(() => import('views/ClaudeCode/Admin')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -136,6 +138,14 @@ const MainRoutes = {
     {
       path: 'claude-code',
       element: <ClaudeCode />
+    },
+    {
+      path: 'claude-code/subscription',
+      element: <ClaudeCodeSubscription />
+    },
+    {
+      path: 'claude-code-admin',
+      element: <ClaudeCodeAdmin />
     }
   ]
 };

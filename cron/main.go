@@ -1,12 +1,13 @@
 package cron
 
 import (
-	"github.com/spf13/viper"
 	"one-api/common/config"
 	"one-api/common/logger"
 	"one-api/common/scheduler"
 	"one-api/model"
 	"time"
+
+	"github.com/spf13/viper"
 
 	"github.com/go-co-op/gocron/v2"
 )
@@ -91,5 +92,42 @@ func InitCron() {
 	if err != nil {
 		logger.SysError("Cron job error: " + err.Error())
 		return
+	}
+
+	// 添加Claude Code相关的定时任务
+	// 每小时检查一次过期订阅
+	err = scheduler.Manager.AddJob(
+		"check_expired_claude_code_subscriptions",
+		gocron.DurationJob(1*time.Hour),
+		gocron.NewTask(func() {
+			CheckExpiredSubscriptions()
+		}),
+	)
+	if err != nil {
+		logger.SysError("Claude Code过期订阅检查任务错误: " + err.Error())
+	}
+
+	// 每月1号重置使用量
+	err = scheduler.Manager.AddJob(
+		"reset_claude_code_monthly_usage",
+		gocron.MonthlyJob(1, gocron.NewDaysOfTheMonth(1), gocron.NewAtTimes(gocron.NewAtTime(0, 0, 0))),
+		gocron.NewTask(func() {
+			ResetMonthlyUsage()
+		}),
+	)
+	if err != nil {
+		logger.SysError("Claude Code月度使用量重置任务错误: " + err.Error())
+	}
+
+	// 每天检查即将到期的订阅
+	err = scheduler.Manager.AddJob(
+		"check_expiring_claude_code_subscriptions",
+		gocron.DailyJob(1, gocron.NewAtTimes(gocron.NewAtTime(9, 0, 0))),
+		gocron.NewTask(func() {
+			CheckExpiringSubscriptions()
+		}),
+	)
+	if err != nil {
+		logger.SysError("Claude Code到期提醒任务错误: " + err.Error())
 	}
 }

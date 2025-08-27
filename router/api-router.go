@@ -48,6 +48,7 @@ func SetApiRouter(router *gin.Engine) {
 		apiRouter.GET("/oauth/oidc", middleware.CriticalRateLimit(), controller.OIDCAuth)
 
 		apiRouter.Any("/payment/notify/:uuid", controller.PaymentCallback)
+		apiRouter.Any("/payment/claude-code/notify", controller.ClaudeCodePaymentNotify)
 
 		userRoute := apiRouter.Group("/user")
 		{
@@ -78,6 +79,23 @@ func SetApiRouter(router *gin.Engine) {
 				selfRoute.GET("/notifications", controller.GetUserNotifications)
 				selfRoute.PUT("/notifications", controller.UpdateUserNotifications)
 
+			}
+
+			// Claude Code 相关路由
+			claudeCodeRoute := userRoute.Group("/claude-code")
+			claudeCodeRoute.Use(middleware.UserAuth())
+			{
+				// 订阅管理
+				claudeCodeRoute.GET("/plans", controller.GetClaudeCodePlans)
+				claudeCodeRoute.GET("/subscription", controller.GetClaudeCodeSubscription)
+				claudeCodeRoute.POST("/purchase", controller.PurchaseClaudeCodeSubscription)
+				claudeCodeRoute.POST("/cancel", controller.CancelClaudeCodeSubscription)
+				claudeCodeRoute.GET("/usage-stats", controller.GetClaudeCodeUsageStats)
+
+				// API Key 管理
+				claudeCodeRoute.GET("/api-keys", controller.GetClaudeCodeAPIKeys)
+				claudeCodeRoute.POST("/api-keys", controller.CreateClaudeCodeAPIKey)
+				claudeCodeRoute.DELETE("/api-keys/:id", controller.DeleteClaudeCodeAPIKey)
 			}
 
 			adminRoute := userRoute.Group("/")
@@ -247,6 +265,24 @@ func SetApiRouter(router *gin.Engine) {
 	sseRouter.Use(middleware.GlobalAPIRateLimit())
 	{
 		sseRouter.POST("/channel/check", middleware.AdminAuth(), controller.CheckChannel)
+	}
+
+	// Claude Code API 代理路由（独立的，不与普通API混合）
+	claudeCodeAPIRouter := router.Group("/claude-code-api")
+	claudeCodeAPIRouter.Use(middleware.ClaudeCodeAuth(), middleware.ClaudeCodeRateLimit())
+	{
+		claudeCodeAPIRouter.POST("/v1/messages", controller.ClaudeCodeProxy)
+		claudeCodeAPIRouter.POST("/v1/chat/completions", controller.ClaudeCodeProxy) // OpenAI格式兼容
+	}
+
+	// Claude Code管理员路由
+	claudeCodeAdminRouter := router.Group("/api/claude-code-admin")
+	claudeCodeAdminRouter.Use(middleware.AdminAuth()) // 使用普通管理员权限
+	{
+		claudeCodeAdminRouter.GET("/subscriptions", controller.GetAllClaudeCodeSubscriptions)
+		claudeCodeAdminRouter.GET("/users/search", controller.AdminSearchUsers)
+		claudeCodeAdminRouter.POST("/grant-subscription", controller.AdminGrantClaudeCodeSubscription)
+		claudeCodeAdminRouter.DELETE("/subscriptions/:id", controller.AdminCancelClaudeCodeSubscription)
 	}
 
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 // 导入 Material-UI 组件
 import {
@@ -18,7 +18,8 @@ import {
   Chip,
   Divider,
   Tabs,
-  Tab
+  Tab,
+  Alert
 } from '@mui/material';
 
 // 导入 Material-UI 图标
@@ -31,10 +32,12 @@ import WindowIcon from '@mui/icons-material/Window';
 import AppleIcon from '@mui/icons-material/Apple';
 import { SiLinux } from 'react-icons/si'; // 使用 react-icons 补充一个更形象的 Linux 图标
 
-// 导入教程组件
+// 导入教程组件和API
 import WindowsTutorial from './WindowsTutorial';
 import MacOSTutorial from './MacOSTutorial';
 import LinuxTutorial from './LinuxTutorial';
+import { API } from 'utils/api';
+import { useNavigate } from 'react-router-dom';
 
 // 主要功能特性
 const features = [
@@ -84,14 +87,77 @@ const TabPanel = (props) => {
 
 // 主组件
 const ClaudeCodeTutorialPage = () => {
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = useState(0);
+  const [subscription, setSubscription] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
+  // 检查订阅状态
+  const checkSubscription = async () => {
+    try {
+      const res = await API.get('/api/user/claude-code/subscription');
+      if (res.data.success) {
+        setSubscription(res.data.data);
+      }
+    } catch (error) {
+      console.error('检查订阅状态失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    checkSubscription();
+  }, []);
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* 订阅状态提醒 */}
+      {!loading && (
+        <Box sx={{ mb: 3 }}>
+          {subscription && subscription.status === 'active' ? (
+            <Alert 
+              severity="success" 
+              action={
+                <Button 
+                  color="inherit" 
+                  size="small"
+                  onClick={() => navigate('/claude-code/subscription')}
+                >
+                  管理订阅
+                </Button>
+              }
+            >
+              <Typography variant="body2">
+                您的 <strong>{subscription.plan_type}</strong> 订阅正在正常运行，
+                本月已使用 {subscription.used_requests_this_month}/{subscription.max_requests_per_month} 次请求
+              </Typography>
+            </Alert>
+          ) : (
+            <Alert 
+              severity="info"
+              action={
+                <Button 
+                  color="inherit" 
+                  size="small"
+                  disabled
+                >
+                  敬请期待
+                </Button>
+              }
+            >
+              <Typography variant="body2">
+                Claude Code AI 编程助手功能即将上线，敬请期待！
+              </Typography>
+            </Alert>
+          )}
+        </Box>
+      )}
+
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={value} onChange={handleChange} aria-label="Claude Code Tabs" centered>
           <Tab label="功能介绍" />

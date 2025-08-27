@@ -83,6 +83,8 @@ func main() {
 	search.InitSearcher()
 	// 初始化安全检查器
 	safty.InitSaftyTools()
+	// 初始化Claude Code套餐
+	model.InitClaudeCodePlans()
 	// 初始化账单数据
 	//if config.UserInvoiceMonth {
 	//	logger.SysLog("Enable User Invoice Monthly Data")

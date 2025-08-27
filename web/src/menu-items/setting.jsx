@@ -13,7 +13,8 @@ const icons = {
   IconBrandPaypal: () => <Icon width={20} icon="solar:wallet-money-bold-duotone" />,
   IconCoins: () => <Icon width={20} icon="solar:hand-money-bold-duotone" />,
   IconUsers: () => <Icon width={20} icon="solar:users-group-rounded-bold-duotone" />,
-  IconModel: () => <Icon width={20} icon="mingcute:ai-fill" />
+  IconModel: () => <Icon width={20} icon="mingcute:ai-fill" />,
+  IconClaudeCodeAdmin: () => <Icon width={20} icon="solar:code-square-bold-duotone" />
 };
 
 const Setting = {
@@ -79,6 +80,15 @@ const Setting = {
           type: 'item',
           url: '/panel/model_ownedby',
           icon: icons.IconModel,
+          breadcrumbs: false,
+          isAdmin: true
+        },
+        {
+          id: 'claude-code-admin',
+          title: 'Claude Code 管理',
+          type: 'item',
+          url: '/panel/claude-code-admin',
+          icon: icons.IconClaudeCodeAdmin,
           breadcrumbs: false,
           isAdmin: true
         }
