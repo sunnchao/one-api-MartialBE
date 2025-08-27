@@ -105,12 +105,37 @@ func (p *GeminiProvider) getChatRequest(geminiRequest *GeminiChatRequest, isRela
 	var body any
 	if isRelay {
 		var exists bool
-		body, exists = p.GetRawBody()
+		rawBody, exists := p.GetRawBody()
 		if !exists {
 			return nil, common.StringErrorWrapperLocal("request body not found", "request_body_not_found", http.StatusInternalServerError)
 		}
+		
+		// 如果是 gemini-2.5-flash-image-preview 模型，需要从 raw body 中移除 ThinkingConfig
+		if strings.Contains(geminiRequest.Model, "gemini-2.5-flash-image-preview") {
+			var bodyMap map[string]interface{}
+			if err := json.Unmarshal(rawBody, &bodyMap); err == nil {
+				if genConfig, exists := bodyMap["generationConfig"].(map[string]interface{}); exists {
+					delete(genConfig, "thinkingConfig")
+				}
+				if modifiedBody, err := json.Marshal(bodyMap); err == nil {
+					body = modifiedBody
+				} else {
+					body = rawBody
+				}
+			} else {
+				body = rawBody
+			}
+		} else {
+			body = rawBody
+		}
 	} else {
 		p.pluginHandle(geminiRequest)
+		
+		// 如果是 gemini-2.5-flash-image-preview 模型，移除 ThinkingConfig
+		if strings.Contains(geminiRequest.Model, "gemini-2.5-flash-image-preview") {
+			geminiRequest.GenerationConfig.ThinkingConfig = nil
+		}
+		
 		body = geminiRequest
 	}
 
@@ -171,13 +196,13 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*GeminiChatReq
 		geminiRequest.GenerationConfig.ResponseModalities = []string{"AUDIO"}
 	}
 
-	if request.Reasoning != nil {
+	if request.Reasoning != nil && !strings.Contains(request.Model, "gemini-2.5-flash-image-preview") {
 		geminiRequest.GenerationConfig.ThinkingConfig = &ThinkingConfig{
 			ThinkingBudget: &request.Reasoning.MaxTokens,
 		}
 	}
 
-	if config.GeminiSettingsInstance.GetOpenThink(request.Model) {
+	if config.GeminiSettingsInstance.GetOpenThink(request.Model) && !strings.Contains(request.Model, "gemini-2.5-flash-image-preview") {
 		if geminiRequest.GenerationConfig.ThinkingConfig == nil {
 			geminiRequest.GenerationConfig.ThinkingConfig = &ThinkingConfig{}
 		}
