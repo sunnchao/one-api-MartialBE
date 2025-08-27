@@ -26,31 +26,31 @@ func GetIncreaseTokens(tokens int, ratio float64) int {
 }
 
 var ExtraKeyIsPrompt = map[string]bool{
-  config.UsageExtraCache:            true,
-  config.UsageExtraCachedWrite:      true,
-  config.UsageExtraCachedRead:       true,
-  config.UsageExtraInputAudio:       true,
-  config.UsageExtraOutputAudio:      false,
-  config.UsageExtraReasoning:        false,
-  config.UsageExtraInputTextTokens:  true,
-  config.UsageExtraOutputTextTokens: false,
-  config.UsageExtraInputImageTokens: true,
-  config.UsageExtraOutputImageTokens: true,
+	config.UsageExtraCache:             true,
+	config.UsageExtraCachedWrite:       true,
+	config.UsageExtraCachedRead:        true,
+	config.UsageExtraInputAudio:        true,
+	config.UsageExtraOutputAudio:       false,
+	config.UsageExtraReasoning:         false,
+	config.UsageExtraInputTextTokens:   true,
+	config.UsageExtraOutputTextTokens:  false,
+	config.UsageExtraInputImageTokens:  true,
+	config.UsageExtraOutputImageTokens: false,
 }
 
 func GetExtraPriceIsPrompt(key string) bool {
-  return ExtraKeyIsPrompt[key]
+	return ExtraKeyIsPrompt[key]
 }
 
 var defaultExtraPrice = map[string]float64{
-  config.UsageExtraCache:            1,
-  config.UsageExtraCachedWrite:      1.25,
-  config.UsageExtraCachedRead:       0.1,
-  config.UsageExtraInputAudio:       40,
-  config.UsageExtraOutputAudio:      40,
-  config.UsageExtraReasoning:        1,
-  config.UsageExtraInputTextTokens:  1,
-  config.UsageExtraOutputTextTokens: 1,
+	config.UsageExtraCache:            1,
+	config.UsageExtraCachedWrite:      1.25,
+	config.UsageExtraCachedRead:       0.1,
+	config.UsageExtraInputAudio:       1,
+	config.UsageExtraOutputAudio:      1,
+	config.UsageExtraReasoning:        1,
+	config.UsageExtraInputTextTokens:  1,
+	config.UsageExtraOutputTextTokens: 1,
 }
 
 type Price struct {
@@ -62,76 +62,76 @@ type Price struct {
   CacheInput  float64 `json:"cache_input" gorm:"default:0" binding:"gte=0"`
   Locked      bool    `json:"locked" gorm:"default:false"` // 如果模型为locked 则覆盖模式不会更新locked的模型价格
 
-  ExtraRatios *datatypes.JSONType[map[string]float64] `json:"extra_ratios,omitempty" gorm:"type:json"`
+	ExtraRatios *datatypes.JSONType[map[string]float64] `json:"extra_ratios,omitempty" gorm:"type:json"`
 }
 
 func GetAllPrices() ([]*Price, error) {
-  var prices []*Price
-  if err := DB.Find(&prices).Error; err != nil {
-    return nil, err
-  }
-  // if config.ExtraTokenPriceJson == "" {
-  // 	return prices, nil
-  // }
+	var prices []*Price
+	if err := DB.Find(&prices).Error; err != nil {
+		return nil, err
+	}
+	// if config.ExtraTokenPriceJson == "" {
+	// 	return prices, nil
+	// }
 
-  // extraRatios := make(map[string]map[string]float64)
-  // err := json.Unmarshal([]byte(config.ExtraTokenPriceJson), &extraRatios)
-  // if err != nil {
-  // 	return nil, err
-  // }
+	// extraRatios := make(map[string]map[string]float64)
+	// err := json.Unmarshal([]byte(config.ExtraTokenPriceJson), &extraRatios)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-  // for _, price := range prices {
-  // 	if ratio, ok := extraRatios[price.Model]; ok {
-  // 		price.ExtraRatios = ratio
-  // 	}
-  // }
+	// for _, price := range prices {
+	// 	if ratio, ok := extraRatios[price.Model]; ok {
+	// 		price.ExtraRatios = ratio
+	// 	}
+	// }
 
-  return prices, nil
+	return prices, nil
 }
 
 func (price *Price) Update(modelName string) error {
-  if err := DB.Model(price).Select("*").Where("model = ?", modelName).Updates(price).Error; err != nil {
-    return err
-  }
+	if err := DB.Model(price).Select("*").Where("model = ?", modelName).Updates(price).Error; err != nil {
+		return err
+	}
 
-  return nil
+	return nil
 }
 
 func (price *Price) Insert() error {
-  if err := DB.Create(price).Error; err != nil {
-    return err
-  }
+	if err := DB.Create(price).Error; err != nil {
+		return err
+	}
 
-  return nil
+	return nil
 }
 
 func (price *Price) GetInput() float64 {
-  if price.Input <= 0 {
-    return 0
-  }
-  return price.Input
+	if price.Input <= 0 {
+		return 0
+	}
+	return price.Input
 }
 
 func (price *Price) GetOutput() float64 {
-  if price.Output <= 0 || price.Type == TimesPriceType {
-    return 0
-  }
+	if price.Output <= 0 || price.Type == TimesPriceType {
+		return 0
+	}
 
-  return price.Output
+	return price.Output
 }
 
 func (price *Price) GetExtraRatio(key string) float64 {
-  if price.ExtraRatios != nil {
-    extraRatios := price.ExtraRatios.Data()
-    if ratio, ok := extraRatios[key]; ok {
-      return ratio
-    }
-  }
+	if price.ExtraRatios != nil {
+		extraRatios := price.ExtraRatios.Data()
+		if ratio, ok := extraRatios[key]; ok {
+			return ratio
+		}
+	}
 
-  ratio, ok := defaultExtraPrice[key]
-  if !ok {
-    return 1
-  }
+	ratio, ok := defaultExtraPrice[key]
+	if !ok {
+		return 1
+	}
 
   return ratio
 }
