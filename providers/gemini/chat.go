@@ -16,6 +16,67 @@ const (
 	GeminiVisionMaxImageNum = 16
 )
 
+// Gemini 安全设置类别常量
+var geminiSafetyCategories = []string{
+	"HARM_CATEGORY_HARASSMENT",
+	"HARM_CATEGORY_HATE_SPEECH", 
+	"HARM_CATEGORY_SEXUALLY_EXPLICIT",
+	"HARM_CATEGORY_DANGEROUS_CONTENT",
+	"HARM_CATEGORY_CIVIC_INTEGRITY",
+}
+
+// isImagePreviewModel 检查是否为 image preview 模型
+func isImagePreviewModel(model string) bool {
+	return strings.Contains(model, "gemini-2.5-flash-image-preview")
+}
+
+// createSafetySettings 创建安全设置
+func createSafetySettings(threshold string) []GeminiChatSafetySettings {
+	settings := make([]GeminiChatSafetySettings, 0, len(geminiSafetyCategories))
+	for _, category := range geminiSafetyCategories {
+		settings = append(settings, GeminiChatSafetySettings{
+			Category:  category,
+			Threshold: threshold,
+		})
+	}
+	return settings
+}
+
+// addBuiltinTool 添加内置工具
+func addBuiltinTool(tools *[]GeminiChatTools, toolType string) {
+	switch toolType {
+	case "codeExecution":
+		*tools = append(*tools, GeminiChatTools{
+			CodeExecution: &GeminiCodeExecution{},
+		})
+	case "urlContext":
+		*tools = append(*tools, GeminiChatTools{
+			UrlContext: &GeminiCodeExecution{},
+		})
+	case "googleSearch":
+		*tools = append(*tools, GeminiChatTools{
+			GoogleSearch: &GeminiCodeExecution{},
+		})
+	}
+}
+
+// removeThinkingConfigFromRawBody 从原始请求体中移除 thinkingConfig
+func removeThinkingConfigFromRawBody(rawBody []byte) []byte {
+	var bodyMap map[string]interface{}
+	if err := json.Unmarshal(rawBody, &bodyMap); err != nil {
+		return rawBody
+	}
+	
+	if genConfig, exists := bodyMap["generationConfig"].(map[string]interface{}); exists {
+		delete(genConfig, "thinkingConfig")
+	}
+	
+	if modifiedBody, err := json.Marshal(bodyMap); err == nil {
+		return modifiedBody
+	}
+	return rawBody
+}
+
 type GeminiStreamHandler struct {
 	Usage   *types.Usage
 	Request *types.ChatCompletionRequest
@@ -48,7 +109,7 @@ func (p *GeminiProvider) CreateChatCompletion(request *types.ChatCompletionReque
 	// 发送请求
 	_, errWithCode = p.Requester.SendRequest(req, geminiChatResponse, false)
 	if errWithCode != nil {
-		return nil, errWithCode
+		return nil, common.ErrorWrapper(errWithCode, "gemini_chat_request_failed", errWithCode.StatusCode)
 	}
 
 	return ConvertToChatOpenai(p, geminiChatResponse, request)
@@ -75,7 +136,7 @@ func (p *GeminiProvider) CreateChatCompletionStream(request *types.ChatCompletio
 	// 发送请求
 	resp, errWithCode := p.Requester.SendRequestRaw(req)
 	if errWithCode != nil {
-		return nil, errWithCode
+		return nil, common.ErrorWrapper(errWithCode, "gemini_stream_request_failed", errWithCode.StatusCode)
 	}
 
 	chatHandler := &GeminiStreamHandler{
@@ -111,20 +172,8 @@ func (p *GeminiProvider) getChatRequest(geminiRequest *GeminiChatRequest, isRela
 		}
 		
 		// 如果是 gemini-2.5-flash-image-preview 模型，需要从 raw body 中移除 ThinkingConfig
-		if strings.Contains(geminiRequest.Model, "gemini-2.5-flash-image-preview") {
-			var bodyMap map[string]interface{}
-			if err := json.Unmarshal(rawBody, &bodyMap); err == nil {
-				if genConfig, exists := bodyMap["generationConfig"].(map[string]interface{}); exists {
-					delete(genConfig, "thinkingConfig")
-				}
-				if modifiedBody, err := json.Marshal(bodyMap); err == nil {
-					body = modifiedBody
-				} else {
-					body = rawBody
-				}
-			} else {
-				body = rawBody
-			}
+		if isImagePreviewModel(geminiRequest.Model) {
+			body = removeThinkingConfigFromRawBody(rawBody)
 		} else {
 			body = rawBody
 		}
@@ -132,7 +181,7 @@ func (p *GeminiProvider) getChatRequest(geminiRequest *GeminiChatRequest, isRela
 		p.pluginHandle(geminiRequest)
 		
 		// 如果是 gemini-2.5-flash-image-preview 模型，移除 ThinkingConfig
-		if strings.Contains(geminiRequest.Model, "gemini-2.5-flash-image-preview") {
+		if isImagePreviewModel(geminiRequest.Model) {
 			geminiRequest.GenerationConfig.ThinkingConfig = nil
 		}
 		
@@ -152,34 +201,9 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*GeminiChatReq
 
 	threshold := "BLOCK_NONE"
 
-	// if strings.HasPrefix(request.Model, "gemini-2.0") && !strings.Contains(request.Model, "thinking") {
-	// 	threshold = "OFF"
-	// }
-
 	geminiRequest := GeminiChatRequest{
-		Contents: make([]GeminiChatContent, 0, len(request.Messages)),
-		SafetySettings: []GeminiChatSafetySettings{
-			{
-				Category:  "HARM_CATEGORY_HARASSMENT",
-				Threshold: threshold,
-			},
-			{
-				Category:  "HARM_CATEGORY_HATE_SPEECH",
-				Threshold: threshold,
-			},
-			{
-				Category:  "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-				Threshold: threshold,
-			},
-			{
-				Category:  "HARM_CATEGORY_DANGEROUS_CONTENT",
-				Threshold: threshold,
-			},
-			{
-				Category:  "HARM_CATEGORY_CIVIC_INTEGRITY",
-				Threshold: threshold,
-			},
-		},
+		Contents:       make([]GeminiChatContent, 0, len(request.Messages)),
+		SafetySettings: createSafetySettings(threshold),
 		GenerationConfig: GeminiChatGenerationConfig{
 			Temperature:        request.Temperature,
 			TopP:               request.TopP,
@@ -196,13 +220,13 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*GeminiChatReq
 		geminiRequest.GenerationConfig.ResponseModalities = []string{"AUDIO"}
 	}
 
-	if request.Reasoning != nil && !strings.Contains(request.Model, "gemini-2.5-flash-image-preview") {
+	if request.Reasoning != nil && !isImagePreviewModel(request.Model) {
 		geminiRequest.GenerationConfig.ThinkingConfig = &ThinkingConfig{
 			ThinkingBudget: &request.Reasoning.MaxTokens,
 		}
 	}
 
-	if config.GeminiSettingsInstance.GetOpenThink(request.Model) && !strings.Contains(request.Model, "gemini-2.5-flash-image-preview") {
+	if config.GeminiSettingsInstance.GetOpenThink(request.Model) && !isImagePreviewModel(request.Model) {
 		if geminiRequest.GenerationConfig.ThinkingConfig == nil {
 			geminiRequest.GenerationConfig.ThinkingConfig = &ThinkingConfig{}
 		}
@@ -213,23 +237,16 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*GeminiChatReq
 
 	if functions != nil {
 		var geminiChatTools GeminiChatTools
-		googleSearch := false
-		codeExecution := false
-		urlContext := false
+		builtinTools := make(map[string]bool)
+		
 		for _, function := range functions {
-			if function.Name == "googleSearch" {
-				googleSearch = true
-				continue
-			}
-			if function.Name == "codeExecution" {
-				codeExecution = true
-				continue
-			}
-			if function.Name == "urlContext" {
-				urlContext = true
+			// 检查是否为内置工具
+			if function.Name == "googleSearch" || function.Name == "codeExecution" || function.Name == "urlContext" {
+				builtinTools[function.Name] = true
 				continue
 			}
 
+			// 清理空的参数
 			if params, ok := function.Parameters.(map[string]interface{}); ok {
 				if properties, ok := params["properties"].(map[string]interface{}); ok && len(properties) == 0 {
 					function.Parameters = nil
@@ -239,24 +256,13 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*GeminiChatReq
 			geminiChatTools.FunctionDeclarations = append(geminiChatTools.FunctionDeclarations, *function)
 		}
 
-		if codeExecution && len(geminiRequest.Tools) == 0 {
-			geminiRequest.Tools = append(geminiRequest.Tools, GeminiChatTools{
-				CodeExecution: &GeminiCodeExecution{},
-			})
-		}
-		if urlContext && len(geminiRequest.Tools) == 0 {
-			geminiRequest.Tools = append(geminiRequest.Tools, GeminiChatTools{
-				UrlContext: &GeminiCodeExecution{},
-			})
+		// 添加内置工具
+		for toolName := range builtinTools {
+			addBuiltinTool(&geminiRequest.Tools, toolName)
 		}
 
-		if googleSearch {
-			geminiRequest.Tools = append(geminiRequest.Tools, GeminiChatTools{
-				GoogleSearch: &GeminiCodeExecution{},
-			})
-		}
-
-		if len(geminiRequest.Tools) == 0 {
+		// 如果有自定义函数，添加到工具列表
+		if len(geminiChatTools.FunctionDeclarations) > 0 {
 			geminiRequest.Tools = append(geminiRequest.Tools, geminiChatTools)
 		}
 	}
@@ -371,7 +377,7 @@ func (h *GeminiStreamHandler) HandlerStream(rawLine *[]byte, dataChan chan strin
 	var geminiResponse GeminiChatResponse
 	err := json.Unmarshal(*rawLine, &geminiResponse)
 	if err != nil {
-		errChan <- common.ErrorToOpenAIError(err)
+		errChan <- common.ErrorWrapper(err, "gemini_stream_response_parse_failed", http.StatusInternalServerError)
 		return
 	}
 
@@ -444,48 +450,6 @@ func (h *GeminiStreamHandler) convertToOpenaiStream(geminiResponse *GeminiChatRe
 	usage.TextBuilder = h.Usage.TextBuilder
 	*h.Usage = usage
 }
-
-const tokenThreshold = 1000000
-
-var modelAdjustRatios = map[string]int{
-	"gemini-1.5-pro":   2,
-	"gemini-1.5-flash": 2,
-}
-
-// func adjustTokenCounts(modelName string, usage *GeminiUsageMetadata) {
-// 	if usage.PromptTokenCount <= tokenThreshold && usage.CandidatesTokenCount <= tokenThreshold {
-// 		return
-// 	}
-
-// 	currentRatio := 1
-// 	for model, r := range modelAdjustRatios {
-// 		if strings.HasPrefix(modelName, model) {
-// 			currentRatio = r
-// 			break
-// 		}
-// 	}
-
-// 	if currentRatio == 1 {
-// 		return
-// 	}
-
-// 	adjustTokenCount := func(count int) int {
-// 		if count > tokenThreshold {
-// 			return tokenThreshold + (count-tokenThreshold)*currentRatio
-// 		}
-// 		return count
-// 	}
-
-// 	if usage.PromptTokenCount > tokenThreshold {
-// 		usage.PromptTokenCount = adjustTokenCount(usage.PromptTokenCount)
-// 	}
-
-// 	if usage.CandidatesTokenCount > tokenThreshold {
-// 		usage.CandidatesTokenCount = adjustTokenCount(usage.CandidatesTokenCount)
-// 	}
-
-// 	usage.TotalTokenCount = usage.PromptTokenCount + usage.CandidatesTokenCount
-// }
 
 func ConvertOpenAIUsage(geminiUsage *GeminiUsageMetadata) types.Usage {
 	if geminiUsage == nil {
