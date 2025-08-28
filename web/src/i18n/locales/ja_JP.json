@@ -524,6 +524,57 @@
     "welcomeBack": "おかえりなさい",
     "claude-code": "Claude Code"
   },
+  "claudeCode": {
+    "subscription": {
+      "title": "Claude Code サブスクリプション管理",
+      "currentSubscription": "現在のサブスクリプション",
+      "planType": "プランタイプ",
+      "subscriptionPeriod": "サブスクリプション期間",
+      "price": "価格",
+      "monthlyUsage": "今月の使用量: {{used}} / {{total}}",
+      "usagePercentage": "使用済み {{percentage}}%",
+      "cancelSubscription": "サブスクリプションをキャンセル",
+      "noActiveSubscription": "現在有効なClaude Codeサブスクリプションがありません。適切なプランを選択して開始してください。",
+      "apiKeysManagement": "API Keys 管理",
+      "createApiKey": "API Key を作成",
+      "selectPlan": "サブスクリプションプランを選択",
+      "recommended": "おすすめ",
+      "monthlyRequests": "月間 {{count}} リクエスト",
+      "maxDevices": "最大 {{count}} デバイス",
+      "currentPlan": "現在のプラン",
+      "selectThisPlan": "このプランを選択",
+      "apiKeyName": "API Key 名前",
+      "apiKeyPlaceholder": "例：私の開発環境",
+      "apiKeyCreatedSuccess": "API Keyが正常に作成されました！安全に保存してください。このページを離れた後は再度表示できません：",
+      "clickToCopy": "上のテキストボックスをクリックしてクリップボードにコピー",
+      "confirmPurchase": "購入を確認",
+      "pricePerMonth": "価格：${{price}} {{currency}}/月",
+      "paymentMethod": "支払い方法",
+      "neverUsed": "未使用",
+      "noApiKeys": "API Keyがありません。上のボタンをクリックして作成してください",
+      "table": {
+        "name": "名前",
+        "status": "ステータス",
+        "usageCount": "使用回数",
+        "lastUsed": "最終使用",
+        "createdTime": "作成時間",
+        "actions": "アクション"
+      },
+      "status": {
+        "active": "アクティブ",
+        "disabled": "無効",
+        "expired": "期限切れ",
+        "cancelled": "キャンセル済み",
+        "pending": "支払い待ち",
+        "unknown": "不明"
+      },
+      "paymentMethods": {
+        "stripe": "Stripe (クレジットカード)",
+        "alipay": "Alipay",
+        "wxpay": "WeChat Pay"
+      }
+    }
+  },
   "midjourneyPage": {
     "channel": "チャネル",
     "failureReason": "失敗理由",

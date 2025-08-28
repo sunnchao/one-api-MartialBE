@@ -120,39 +120,29 @@ const ClaudeCodeTutorialPage = () => {
       {!loading && (
         <Box sx={{ mb: 3 }}>
           {subscription && subscription.status === 'active' ? (
-            <Alert 
-              severity="success" 
+            <Alert
+              severity="success"
               action={
-                <Button 
-                  color="inherit" 
-                  size="small"
-                  onClick={() => navigate('/claude-code/subscription')}
-                >
+                <Button color="inherit" size="small" onClick={() => navigate('/panel/claude-code/subscription')}>
                   管理订阅
                 </Button>
               }
             >
               <Typography variant="body2">
-                您的 <strong>{subscription.plan_type}</strong> 订阅正在正常运行，
-                本月已使用 {subscription.used_requests_this_month}/{subscription.max_requests_per_month} 次请求
+                您的 <strong>{subscription.plan_type}</strong> 订阅正在正常运行， 本月已使用 {subscription.used_requests_this_month}/
+                {subscription.max_requests_per_month} 次请求
               </Typography>
             </Alert>
           ) : (
-            <Alert 
+            <Alert
               severity="info"
               action={
-                <Button 
-                  color="inherit" 
-                  size="small"
-                  disabled
-                >
+                <Button color="inherit" size="small" disabled>
                   敬请期待
                 </Button>
               }
             >
-              <Typography variant="body2">
-                Claude Code AI 编程助手功能即将上线，敬请期待！
-              </Typography>
+              <Typography variant="body2">Claude Code AI 编程助手功能即将上线，敬请期待！</Typography>
             </Alert>
           )}
         </Box>

@@ -39,17 +39,23 @@ func InsertOperationCheckIn(userId int, lastDayUsed int64, requestIP string) (qu
 
 	// 生成一个 0-100 的随机数来决定概率区间
 	probability := rand.Float64()        // Generate a random number between 0 and 1
-	coefficient := rand.Float64() * 0.36 // Base random value (0 to 0.18)
+	coefficient := rand.Float64() * 0.18 // Base random value (0 to 0.18)
 
 	switch {
 	case probability >= 0.75 && probability < 0.95: // 20% chance
-		coefficient += 0.12 // Shift to 0.18 - 0.26
+		coefficient += 0.03 // Shift to 0.18 - 0.26
 	case probability >= 0.95: // 5% chance
-		coefficient += 0.24 // Shift to 0.18 - 0.36
+		coefficient += 0.06 // Shift to 0.18 - 0.36
 	}
 
 	// 计算最终额度
 	quota = int(coefficient * float64(lastDayUsed))
+	fmt.Printf("coefficient %v", coefficient)
+	fmt.Printf("probability %v", probability)
+	// 至少获得5000额度
+	if quota < 5000 {
+		quota = 5000
+	}
 
 	// 查询用户现有额度
 	userQuota, err := GetUserQuota(userId)

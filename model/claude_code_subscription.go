@@ -49,6 +49,9 @@ type ClaudeCodePlan struct {
 	Currency            string                                    `json:"currency" gorm:"default:'USD'"`
 	MaxRequestsPerMonth int                                       `json:"max_requests_per_month"`
 	MaxClientCount      int                                       `json:"max_client_count" gorm:"default:3"`
+	// 时间限制设置
+	IsUnlimitedTime     bool  `json:"is_unlimited_time" gorm:"default:false"`          // 是否无时间限制
+	DurationMonths      int   `json:"duration_months" gorm:"default:1"`                // 订阅时长(月)，当 IsUnlimitedTime 为 false 时有效
 	Features            database.JSONType[map[string]interface{}] `json:"features"`
 	IsActive            bool                                      `json:"is_active" gorm:"default:true"`
 	SortOrder           int                                       `json:"sort_order" gorm:"default:0"`
@@ -322,6 +325,43 @@ func GetClaudeCodePlanByType(planType string) (*ClaudeCodePlan, error) {
 	return &plan, err
 }
 
+// GetClaudeCodePlanById 根据ID获取套餐
+func GetClaudeCodePlanById(planId int) (*ClaudeCodePlan, error) {
+	var plan ClaudeCodePlan
+	err := DB.Where("id = ?", planId).First(&plan).Error
+	return &plan, err
+}
+
+// CreateClaudeCodePlan 创建套餐
+func CreateClaudeCodePlan(plan *ClaudeCodePlan) error {
+	return DB.Create(plan).Error
+}
+
+// UpdateClaudeCodePlan 更新套餐
+func UpdateClaudeCodePlan(plan *ClaudeCodePlan) error {
+	return DB.Save(plan).Error
+}
+
+// DeleteClaudeCodePlan 删除套餐
+func DeleteClaudeCodePlan(planId int) error {
+	return DB.Delete(&ClaudeCodePlan{}, planId).Error
+}
+
+// CheckClaudeCodePlanHasSubscriptions 检查套餐是否有关联的订阅
+func CheckClaudeCodePlanHasSubscriptions(planId int) (bool, error) {
+	var plan ClaudeCodePlan
+	if err := DB.Where("id = ?", planId).First(&plan).Error; err != nil {
+		return false, err
+	}
+
+	var count int64
+	err := DB.Model(&ClaudeCodeSubscription{}).
+		Where("plan_type = ?", plan.Type).
+		Count(&count).Error
+	
+	return count > 0, err
+}
+
 // 创建使用日志
 func CreateClaudeCodeUsageLog(log *ClaudeCodeUsageLog) error {
 	log.CreatedTime = utils.GetTimestamp()
@@ -368,6 +408,8 @@ func InitClaudeCodePlans() {
 			Currency:            "USD",
 			MaxRequestsPerMonth: 1000,
 			MaxClientCount:      1,
+			IsUnlimitedTime:     false,
+			DurationMonths:      1,
 			Features:            database.JSONType[map[string]interface{}]{},
 			IsActive:            true,
 			SortOrder:           1,
@@ -382,6 +424,8 @@ func InitClaudeCodePlans() {
 			Currency:            "USD",
 			MaxRequestsPerMonth: 5000,
 			MaxClientCount:      3,
+			IsUnlimitedTime:     false,
+			DurationMonths:      1,
 			Features:            database.JSONType[map[string]interface{}]{},
 			IsActive:            true,
 			SortOrder:           2,
@@ -396,6 +440,8 @@ func InitClaudeCodePlans() {
 			Currency:            "USD",
 			MaxRequestsPerMonth: 20000,
 			MaxClientCount:      10,
+			IsUnlimitedTime:     true,
+			DurationMonths:      0, // 无时间限制时设为0
 			Features:            database.JSONType[map[string]interface{}]{},
 			IsActive:            true,
 			SortOrder:           3,

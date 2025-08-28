@@ -279,10 +279,18 @@ func SetApiRouter(router *gin.Engine) {
 	claudeCodeAdminRouter := router.Group("/api/claude-code-admin")
 	claudeCodeAdminRouter.Use(middleware.AdminAuth()) // 使用普通管理员权限
 	{
+		// 订阅管理
 		claudeCodeAdminRouter.GET("/subscriptions", controller.GetAllClaudeCodeSubscriptions)
 		claudeCodeAdminRouter.GET("/users/search", controller.AdminSearchUsers)
 		claudeCodeAdminRouter.POST("/grant-subscription", controller.AdminGrantClaudeCodeSubscription)
 		claudeCodeAdminRouter.DELETE("/subscriptions/:id", controller.AdminCancelClaudeCodeSubscription)
+		
+		// 套餐管理
+		claudeCodeAdminRouter.GET("/plans", controller.GetClaudeCodePlans)
+		claudeCodeAdminRouter.GET("/plans/:id", controller.GetClaudeCodePlanById)
+		claudeCodeAdminRouter.POST("/plans", controller.CreateClaudeCodePlan)
+		claudeCodeAdminRouter.PUT("/plans/:id", controller.UpdateClaudeCodePlan)
+		claudeCodeAdminRouter.DELETE("/plans/:id", controller.DeleteClaudeCodePlan)
 	}
 
 }

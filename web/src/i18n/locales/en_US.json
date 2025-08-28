@@ -63,6 +63,57 @@
     "welcomeBack": "Welcome Back",
     "claude-code": "Claude Code"
   },
+  "claudeCode": {
+    "subscription": {
+      "title": "Claude Code Subscription Management",
+      "currentSubscription": "Current Subscription",
+      "planType": "Plan Type",
+      "subscriptionPeriod": "Subscription Period",
+      "price": "Price",
+      "monthlyUsage": "Monthly Usage: {{used}} / {{total}}",
+      "usagePercentage": "Used {{percentage}}%",
+      "cancelSubscription": "Cancel Subscription",
+      "noActiveSubscription": "You currently have no active Claude Code subscription, please select a suitable plan to get started.",
+      "apiKeysManagement": "API Keys Management",
+      "createApiKey": "Create API Key",
+      "selectPlan": "Select Subscription Plan",
+      "recommended": "Recommended",
+      "monthlyRequests": "{{count}} requests per month",
+      "maxDevices": "Up to {{count}} devices",
+      "currentPlan": "Current Plan",
+      "selectThisPlan": "Select This Plan",
+      "apiKeyName": "API Key Name",
+      "apiKeyPlaceholder": "e.g.: My Development Environment",
+      "apiKeyCreatedSuccess": "API Key created successfully! Please save it securely, it cannot be viewed again after leaving this page:",
+      "clickToCopy": "Click the text box above to copy to clipboard",
+      "confirmPurchase": "Confirm Purchase",
+      "pricePerMonth": "Price: ${{price}} {{currency}}/month",
+      "paymentMethod": "Payment Method",
+      "neverUsed": "Never Used",
+      "noApiKeys": "No API Keys yet, click the button above to create one",
+      "table": {
+        "name": "Name",
+        "status": "Status",
+        "usageCount": "Usage Count",
+        "lastUsed": "Last Used",
+        "createdTime": "Created Time",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "disabled": "Disabled",
+        "expired": "Expired",
+        "cancelled": "Cancelled",
+        "pending": "Pending",
+        "unknown": "Unknown"
+      },
+      "paymentMethods": {
+        "stripe": "Stripe (Credit Card)",
+        "alipay": "Alipay",
+        "wxpay": "WeChat Pay"
+      }
+    }
+  },
   "sidebar": {
     "totalQuota": "Total Quota",
     "remainingBalance": "Remaining Balance",

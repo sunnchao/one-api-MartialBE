@@ -53,6 +53,57 @@
     "welcomeBack": "欢迎回来",
     "claude-code": "Claude Code"
   },
+  "claudeCode": {
+    "subscription": {
+      "title": "Claude Code 订阅管理",
+      "currentSubscription": "当前订阅",
+      "planType": "套餐类型",
+      "subscriptionPeriod": "订阅期间",
+      "price": "价格",
+      "monthlyUsage": "本月使用量: {{used}} / {{total}}",
+      "usagePercentage": "已使用 {{percentage}}%",
+      "cancelSubscription": "取消订阅",
+      "noActiveSubscription": "您当前没有有效的 Claude Code 订阅，请选择合适的套餐开始使用。",
+      "apiKeysManagement": "API Keys 管理",
+      "createApiKey": "创建 API Key",
+      "selectPlan": "选择订阅套餐",
+      "recommended": "推荐",
+      "monthlyRequests": "每月 {{count}} 次请求",
+      "maxDevices": "最多 {{count}} 个设备",
+      "currentPlan": "当前套餐",
+      "selectThisPlan": "选择此套餐",
+      "apiKeyName": "API Key 名称",
+      "apiKeyPlaceholder": "例如：我的开发环境",
+      "apiKeyCreatedSuccess": "API Key 创建成功！请妥善保存，离开此页面后将无法再次查看：",
+      "clickToCopy": "点击上方文本框可复制到剪贴板",
+      "confirmPurchase": "确认购买",
+      "pricePerMonth": "价格：${{price}} {{currency}}/月",
+      "paymentMethod": "支付方式",
+      "neverUsed": "从未使用",
+      "noApiKeys": "暂无API Key，点击上方按钮创建",
+      "table": {
+        "name": "名称",
+        "status": "状态",
+        "usageCount": "使用次数",
+        "lastUsed": "最后使用",
+        "createdTime": "创建时间",
+        "actions": "操作"
+      },
+      "status": {
+        "active": "活跃",
+        "disabled": "禁用",
+        "expired": "已过期",
+        "cancelled": "已取消",
+        "pending": "待支付",
+        "unknown": "未知"
+      },
+      "paymentMethods": {
+        "stripe": "Stripe (信用卡)",
+        "alipay": "支付宝",
+        "wxpay": "微信支付"
+      }
+    }
+  },
   "sidebar": {
     "totalQuota": "总额度",
     "remainingBalance": "可用额度",
