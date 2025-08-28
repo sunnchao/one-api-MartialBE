@@ -197,6 +197,10 @@ func InitDB() (err error) {
 		&Statistics{},
 		&UserOperation{},
 		&UserNotification{},
+		&CouponTemplate{},
+		&UserCoupon{},
+		&CheckinReward{},
+		&UserCheckinRecord{},
 	}
 
 	for _, model := range businessModels {
@@ -222,6 +226,11 @@ func InitDB() (err error) {
 		return err
 	}
 	logger.SysLog("database migration completed")
+
+	// 初始化优惠券系统
+	if err := InitCouponSystem(); err != nil {
+		logger.SysError("初始化优惠券系统失败: " + err.Error())
+	}
 
 	// 创建root账号
 	return createRootAccountIfNeed()

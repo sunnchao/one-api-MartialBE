@@ -32,6 +32,10 @@ const SystemInfo = Loadable(lazy(() => import('views/SystemInfo')));
 const ClaudeCode = Loadable(lazy(() => import('views/ClaudeCode')));
 const ClaudeCodeSubscription = Loadable(lazy(() => import('views/ClaudeCode/Subscription')));
 const ClaudeCodeAdmin = Loadable(lazy(() => import('views/ClaudeCode/Admin')));
+const CouponManagement = Loadable(lazy(() => import('views/Coupon')));
+const UserCoupon = Loadable(lazy(() => import('views/User/Coupon')));
+const EnhancedCouponManagement = Loadable(lazy(() => import('views/Coupon/Enhanced')));
+const EnhancedUserCoupon = Loadable(lazy(() => import('views/User/EnhancedCoupon')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -146,6 +150,22 @@ const MainRoutes = {
     {
       path: 'claude-code-admin',
       element: <ClaudeCodeAdmin />
+    },
+    {
+      path: 'coupon',
+      element: <CouponManagement />
+    },
+    {
+      path: 'coupon/enhanced',
+      element: <EnhancedCouponManagement />
+    },
+    {
+      path: 'user/coupon',
+      element: <UserCoupon />
+    },
+    {
+      path: 'user/coupon/enhanced',
+      element: <EnhancedUserCoupon />
     }
   ]
 };

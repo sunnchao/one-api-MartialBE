@@ -37,7 +37,7 @@ const Calendar = ({ checkinDates = [] }) => {
   const isCheckedIn = (day) => {
     if (!day) return false;
     const currentDate = dayjs().set('date', day);
-    return checkinDates.some((date) => dayjs(date.created_time).isSame(currentDate, 'date'));
+    return checkinDates?.some?.((date) => dayjs(date.created_time).isSame(currentDate, 'date'));
   };
 
   const isToday = (day) => {
@@ -213,7 +213,9 @@ const Checked = () => {
       label={
         <Stack direction="row" alignItems="center" justifyContent={'center'} gap={0.5}>
           <CheckCircle sx={{ color: theme.palette.success.main, fontSize: 14 }} />
-          <Typography sx={{ color: theme.palette.success.main, fontSize: 12, fontWeight: 500, display: { xs: 'none', sm: 'block' } }}>已签到</Typography>
+          <Typography sx={{ color: theme.palette.success.main, fontSize: 12, fontWeight: 500, display: { xs: 'none', sm: 'block' } }}>
+            已签到
+          </Typography>
         </Stack>
       }
       sx={{
@@ -235,7 +237,9 @@ const UnChecked = () => {
       label={
         <Stack direction="row" alignItems="center" justifyContent={'center'} gap={0.5}>
           <CloseOutlined sx={{ color: theme.palette.error.main, fontSize: 14 }} />
-          <Typography sx={{ color: theme.palette.error.main, fontSize: 12, fontWeight: 500, display: { xs: 'none', sm: 'block' } }}>未签到</Typography>
+          <Typography sx={{ color: theme.palette.error.main, fontSize: 12, fontWeight: 500, display: { xs: 'none', sm: 'block' } }}>
+            未签到
+          </Typography>
         </Stack>
       }
       sx={{
@@ -258,7 +262,9 @@ const PendingCheck = () => {
       label={
         <Stack direction="row" alignItems="center" justifyContent={'center'} gap={0.5}>
           <Circle sx={{ color: theme.palette.warning.main, fontSize: 14 }} />
-          <Typography sx={{ color: theme.palette.warning.main, fontSize: 12, fontWeight: 500, display: { xs: 'none', sm: 'block' } }}>待签到</Typography>
+          <Typography sx={{ color: theme.palette.warning.main, fontSize: 12, fontWeight: 500, display: { xs: 'none', sm: 'block' } }}>
+            待签到
+          </Typography>
         </Stack>
       }
       sx={{

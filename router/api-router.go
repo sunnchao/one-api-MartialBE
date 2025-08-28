@@ -78,6 +78,12 @@ func SetApiRouter(router *gin.Engine) {
 				selfRoute.POST("/checkin", middleware.TurnstileCheck(), controller.UserOperationCheckIn)
 				selfRoute.GET("/notifications", controller.GetUserNotifications)
 				selfRoute.PUT("/notifications", controller.UpdateUserNotifications)
+				
+				// 优惠券相关路由
+				selfRoute.GET("/coupons", controller.GetUserCoupons)
+				selfRoute.GET("/coupons/available", controller.GetAvailableCoupons)
+				selfRoute.GET("/coupons/validate", controller.ValidateCoupon)
+				selfRoute.POST("/coupons/apply", controller.ApplyCoupon)
 
 			}
 
@@ -259,6 +265,29 @@ func SetApiRouter(router *gin.Engine) {
 		taskRoute := apiRouter.Group("/task")
 		taskRoute.GET("/self", middleware.UserAuth(), controller.GetUserAllTask)
 		taskRoute.GET("/", middleware.AdminAuth(), controller.GetAllTask)
+
+		// 优惠券管理路由
+		couponRoute := apiRouter.Group("/coupon")
+		{
+			// 公开接口
+			couponRoute.GET("/checkin_rewards", controller.GetCheckinRewards)
+			
+			// 管理员接口
+			adminCouponRoute := couponRoute.Group("/admin")
+			adminCouponRoute.Use(middleware.AdminAuth())
+			{
+				// 优惠券模板管理
+				adminCouponRoute.GET("/templates", controller.GetCouponTemplates)
+				adminCouponRoute.POST("/templates", controller.CreateCouponTemplate)
+				adminCouponRoute.PUT("/templates/:id", controller.UpdateCouponTemplate)
+				adminCouponRoute.DELETE("/templates/:id", controller.DeleteCouponTemplate)
+				adminCouponRoute.POST("/batch_issue", controller.BatchIssueCoupons)
+				
+				// 签到奖励配置管理
+				adminCouponRoute.POST("/checkin_rewards", controller.CreateCheckinReward)
+				adminCouponRoute.PUT("/checkin_rewards/:id", controller.UpdateCheckinReward)
+			}
+		}
 	}
 
 	sseRouter := router.Group("/api/sse")

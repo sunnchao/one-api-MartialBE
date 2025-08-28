@@ -3,7 +3,6 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	"one-api/common"
 	"one-api/common/logger"
 	"one-api/common/utils"
 	"one-api/model"
@@ -11,12 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// UserCheckIn
+// UserCheckIn - 升级版签到，支持多种奖励类型
 func UserOperationCheckIn(c *gin.Context) {
-	// 是否已经签到
 	id := c.GetInt("id")
 	user, err := model.GetUserById(id, true)
-
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -24,24 +21,19 @@ func UserOperationCheckIn(c *gin.Context) {
 		})
 		return
 	}
-	// 打印用户信息
-	fmt.Println(user, "user")
 
-	// 检查是否已经签到
-	checkInTime, lastDayUsed, err := model.IsCheckInToday(user.Id)
+	// 检查今日是否已签到
+	hasCheckedIn, err := model.HasUserCheckedInToday(user.Id)
 	if err != nil {
-		logger.SysLog(fmt.Sprintf("IsCheckInToday: %s", err.Error()))
-	}
-	if checkInTime == -1 {
-		// 无法获取统计信息
+		logger.SysError(fmt.Sprintf("检查签到状态失败: %s", err.Error()))
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "无法获取统计信息.",
+			"message": "系统错误，请稍后重试",
 		})
 		return
 	}
-	if checkInTime > 1 {
-		// 已签到
+
+	if hasCheckedIn {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": "今日已签到",
@@ -49,22 +41,49 @@ func UserOperationCheckIn(c *gin.Context) {
 		return
 	}
 
-	// 插入一条数据
-	quota, err := model.InsertOperationCheckIn(user.Id, lastDayUsed, utils.GetRequestIP(c))
+	// 获取连续签到天数
+	consecutiveDays, err := model.GetUserConsecutiveCheckinDays(user.Id)
 	if err != nil {
-		// 签到失败
-		c.JSON(http.StatusBadRequest, gin.H{
+		logger.SysError(fmt.Sprintf("获取连续签到天数失败: %s", err.Error()))
+		consecutiveDays = 0
+	}
+	
+	// 明天的连续签到天数
+	nextDay := consecutiveDays + 1
+
+	// 执行签到并获得奖励
+	record, err := model.ExecuteCheckin(user.Id, nextDay, utils.GetRequestIP(c))
+	if err != nil {
+		logger.SysError(fmt.Sprintf("执行签到失败: %s", err.Error()))
+		c.JSON(http.StatusOK, gin.H{
 			"success": false,
-			"message": "签到失败",
+			"message": "签到失败，请稍后重试",
 		})
 		return
 	}
-	// 签到成功
+
+	// 构建返回消息
+	responseData := gin.H{
+		"consecutive_days": nextDay,
+		"reward_type":      record.RewardType,
+		"description":      record.Description,
+	}
+
+	switch record.RewardType {
+	case "quota":
+		responseData["quota_reward"] = record.QuotaReward
+	case "coupon":
+		responseData["coupon_code"] = record.CouponCode
+	case "multiplier":
+		responseData["multiplier_val"] = record.MultiplierVal
+		responseData["multiplier_day"] = record.MultiplierDay
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": fmt.Sprintf("签到成功, 获得额度 %v", common.LogQuota(quota)),
+		"message": "签到成功！" + record.Description,
+		"data":    responseData,
 	})
-
 }
 
 // 获取签到列表
@@ -78,8 +97,9 @@ func UserOperationCheckInList(c *gin.Context) {
 		})
 		return
 	}
-	// 获取签到列表
-	checkInList, err := model.GetOperationCheckInList(user.Id)
+
+	// 获取新的签到记录列表
+	checkInList, err := model.GetUserCheckinRecords(user.Id, 30) // 获取最近30条记录
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -87,8 +107,19 @@ func UserOperationCheckInList(c *gin.Context) {
 		})
 		return
 	}
+
+	// 获取连续签到天数
+	consecutiveDays, _ := model.GetUserConsecutiveCheckinDays(user.Id)
+	
+	// 检查今日是否已签到
+	hasCheckedInToday, _ := model.HasUserCheckedInToday(user.Id)
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"data":    checkInList,
+		"data": gin.H{
+			"records":             checkInList,
+			"consecutive_days":    consecutiveDays,
+			"has_checked_today":   hasCheckedInToday,
+		},
 	})
 }
