@@ -16,6 +16,7 @@ import QuickStartCard from './component/QuickStartCard';
 import RPM from './component/RPM';
 import dayjs from 'dayjs';
 import StatusPanel from './component/StatusPanel';
+import CheckinService from 'services/checkinService';
 import { useSelector } from 'react-redux';
 
 // TabPanel component for tab content
@@ -72,11 +73,12 @@ const Dashboard = () => {
   };
 
   const loadCheckInList = async () => {
-    let res = await API.get('/api/user/checkin/list');
-    const { success, message, data } = res.data;
-    if (success) {
-      setCheckInList(data);
-    }
+    const checkinList = await CheckinService.getCheckinList();
+    setCheckInList(checkinList);
+    
+    // 获取签到统计信息用于显示
+    const stats = CheckinService.getCheckinStats(checkinList);
+    console.log('签到统计:', stats);
   };
 
   useEffect(() => {

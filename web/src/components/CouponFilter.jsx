@@ -19,13 +19,13 @@ import {
   Switch,
   FormControlLabel,
   Autocomplete,
-  DatePicker,
   Divider,
   Badge,
   useTheme
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import {
   Search as SearchIcon,
   FilterList as FilterIcon,
@@ -35,9 +35,9 @@ import {
   Sort as SortIcon,
   ViewList as ViewListIcon,
   ViewModule as ViewModuleIcon,
-  TuneIcon
+  Tune as TuneIcon
 } from '@mui/icons-material';
-import { zhCN } from 'date-fns/locale';
+import 'dayjs/locale/zh-cn';
 
 const CouponFilter = ({ onFilterChange, onSortChange, onViewModeChange, totalCount = 0, filteredCount = 0, initialFilters = {} }) => {
   const theme = useTheme();
@@ -157,7 +157,7 @@ const CouponFilter = ({ onFilterChange, onSortChange, onViewModeChange, totalCou
   const activeFiltersCount = getActiveFiltersCount();
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={zhCN}>
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="zh-cn">
       <Card sx={{ mb: 3 }}>
         <CardContent sx={{ pb: 2 }}>
           {/* 主要搜索和操作栏 */}

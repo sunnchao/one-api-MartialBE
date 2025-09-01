@@ -112,7 +112,7 @@ search:
   searxng:
     url: "" # searxng 地址 关键词请用{query}， 例如 "http://127.0.0.1:8080/search?category_general=1&safesearch=2&q={query}&format=json&engines=bing,google"
   tavily:
-    key: "" # tavily 密钥
+    key: "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" # tavily 密钥
 
 mcp:
   enable: false # 开启mcp服务

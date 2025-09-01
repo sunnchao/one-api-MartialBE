@@ -48,6 +48,7 @@ import {
 // 导入增强组件
 import EnhancedCouponCard from 'components/EnhancedCouponCard';
 import CouponFilter from 'components/CouponFilter';
+import CheckinService from 'services/checkinService';
 import { API } from 'utils/api';
 import { showError, showSuccess, showInfo } from 'utils/common';
 
@@ -335,10 +336,13 @@ const EnhancedUserCoupon = () => {
   // 获取签到数据
   const fetchCheckinData = async () => {
     try {
-      const res = await API.get('/api/user/checkin/list');
-      if (res.data.success) {
-        setCheckinData(res.data.data);
-      }
+      const checkinList = await CheckinService.getCheckinList();
+      setCheckinData(checkinList);
+      
+      // 获取签到统计和奖励信息
+      const rewardInfo = CheckinService.generateCouponRewards(checkinList);
+      console.log('签到奖励信息:', rewardInfo);
+      
     } catch (error) {
       showError('获取签到记录失败');
     }
