@@ -226,15 +226,15 @@ const EnhancedCouponManagement = () => {
     const dataToExport = selectedItems.length > 0 ? templates.filter((t) => selectedItems.includes(t.id)) : filteredTemplates;
 
     const csvData = dataToExport.map((template) => ({
-      名称: template.name,
-      类型: template.type,
-      值: template.value,
-      最低金额: template.min_amount,
-      最大折扣: template.max_discount,
-      有效天数: template.valid_days,
-      发放数量: template.issued_count,
-      使用数量: template.used_count,
-      状态: template.is_active ? '启用' : '禁用'
+      name: template.name,
+      type: template.type,
+      value: template.value,
+      minAmount: template.min_amount,
+      maxDiscount: template.max_discount,
+      validDays: template.valid_days,
+      issuedCount: template.issued_count,
+      usedCount: template.used_count,
+      status: template.is_active ? '启用' : '禁用'
     }));
 
     // 简单的CSV导出
