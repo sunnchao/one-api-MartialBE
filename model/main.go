@@ -168,6 +168,7 @@ func InitDB() (err error) {
 		&Midjourney{},
 		&ModelOwnedBy{},
 		&ChannelKey{},
+		&WebAuthnCredential{},
 	}
 
 	errChan := make(chan error, len(dependentModels))

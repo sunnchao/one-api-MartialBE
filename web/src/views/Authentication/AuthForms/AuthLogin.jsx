@@ -37,12 +37,14 @@ import Github from 'assets/images/icons/github.svg';
 import Wechat from 'assets/images/icons/wechat.svg';
 import Lark from 'assets/images/icons/lark.svg';
 import Oidc from 'assets/images/icons/oidc.svg';
+import Webauthn from 'assets/images/icons/webauthn.svg';
 import LinuxDo from 'assets/images/icons/linux_do.svg';
 import {
   onGitHubOAuthClicked,
   onLarkOAuthClicked,
   onOIDCAuthClicked,
   onLinuxDoOAuthClicked,
+  onWebAuthnClicked,
   showError
 } from 'utils/common';
 import { useTranslation } from 'react-i18next';
@@ -268,7 +270,7 @@ const LoginForm = ({ ...others }) => {
           setSubmitting(false);
         }}
       >
-        {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
+        {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values, setErrors, setStatus }) => (
           <form noValidate onSubmit={handleSubmit} {...others}>
             <FormControl fullWidth error={Boolean(touched.username && errors.username)} sx={{ ...theme.typography.customInput }}>
               <InputLabel htmlFor="outlined-adornment-username-login">{t('login.usernameOrEmail')}</InputLabel>
@@ -350,6 +352,31 @@ const LoginForm = ({ ...others }) => {
               <AnimateButton>
                 <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="primary">
                   {t('menu.login')}
+                </Button>
+              </AnimateButton>
+            </Box>
+
+            <Box sx={{ mt: 2 }}>
+              <AnimateButton>
+                <Button
+                  disableElevation
+                  fullWidth
+                  onClick={() => onWebAuthnClicked(
+                    values.username,
+                    (msg) => setErrors({ submit: msg }),
+                    (msg) => setStatus({ success: true, message: msg }),
+                    () => {}
+                  )}
+                  size="large"
+                  variant="outlined"
+                  sx={{
+                    ...theme.typography.LoginButton
+                  }}
+                >
+                  <Box sx={{ mr: { xs: 1, sm: 2, width: 20 }, display: 'flex', alignItems: 'center' }}>
+                    <img src={Webauthn} alt="WebAuthn" width={25} height={25} style={{ marginRight: matchDownSM ? 8 : 16 }} />
+                  </Box>
+                  WebAuthn
                 </Button>
               </AnimateButton>
             </Box>
