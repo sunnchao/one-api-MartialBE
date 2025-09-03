@@ -452,7 +452,7 @@ func GetUserCheckinRecords(userId int, limit int) ([]*UserCheckinRecord, error) 
 	return records, err
 }
 
-// 获取用户连续签到天数
+// GetUserConsecutiveCheckinDays 获取用户连续签到天数
 func GetUserConsecutiveCheckinDays(userId int) (int, error) {
 	now := time.Now()
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
@@ -465,8 +465,8 @@ func GetUserConsecutiveCheckinDays(userId int) (int, error) {
 		dayEnd := currentDay.Add(24 * time.Hour).UnixMilli()
 
 		var count int64
-		DB.Model(&UserCheckinRecord{}).Where("user_id = ? AND created_time >= ? AND created_time < ?",
-			userId, dayStart, dayEnd).Count(&count)
+		DB.Model(&UserOperation{}).Where("user_id = ? AND type = ? AND created_time >= ? AND created_time < ?",
+			userId, 1, dayStart, dayEnd).Count(&count)
 
 		if count > 0 {
 			consecutiveDays++
@@ -479,7 +479,7 @@ func GetUserConsecutiveCheckinDays(userId int) (int, error) {
 	return consecutiveDays, nil
 }
 
-// 检查用户今日是否已签到
+// HasUserCheckedInToday 检查用户今日是否已签到
 func HasUserCheckedInToday(userId int) (bool, error) {
 	now := time.Now()
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
@@ -487,8 +487,8 @@ func HasUserCheckedInToday(userId int) (bool, error) {
 	todayEnd := today.Add(24 * time.Hour).UnixMilli()
 
 	var count int64
-	err := DB.Model(&UserCheckinRecord{}).Where("user_id = ? AND created_time >= ? AND created_time < ?",
-		userId, todayStart, todayEnd).Count(&count).Error
+	err := DB.Model(&UserOperation{}).Where("user_id = ? AND type = ? AND created_time >= ? AND created_time < ?",
+		userId, 1, todayStart, todayEnd).Count(&count).Error
 
 	return count > 0, err
 }

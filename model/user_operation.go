@@ -6,7 +6,6 @@ import (
 	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/utils"
-	"strings"
 	"time"
 )
 
@@ -18,134 +17,157 @@ type UserOperation struct {
 	Remark      string `json:"remark"`
 }
 
-// GetOperationCheckInByUserId 获取用户今日的UserOperation
-func GetOperationCheckInByUserId(userId int) (userOperation UserOperation, err error) {
-	//  使用Find()获取最近一条记录
-	err = DB.Model(&UserOperation{}).
-		Where("user_id = ? AND type = ?", userId, 1).Order("id desc").First(&userOperation).Error
-
-	return userOperation, err
+// GetLatestCheckInOperation 获取用户最新的签到记录
+func GetLatestCheckInOperation(userId int) (*UserOperation, error) {
+	var userOperation UserOperation
+	err := DB.Model(&UserOperation{}).
+		Where("user_id = ? AND type = ?", userId, 1).
+		Order("id desc").
+		First(&userOperation).Error
+	if err != nil {
+		return nil, err
+	}
+	return &userOperation, nil
 }
 
-// 插入一条 UserOperation
-func insertOperation(user_operation UserOperation) (err error) {
-	err = DB.Model(&UserOperation{}).Create(&user_operation).Error
-	return err
+// createOperation 创建用户操作记录
+func createOperation(operation *UserOperation) error {
+	return DB.Create(operation).Error
 }
 
-// InsertOperationCheckIn 插入一条
-func InsertOperationCheckIn(userId int, lastDayUsed int64, requestIP string) (quota int, err error) {
-	rand.Seed(time.Now().UnixNano())
+const (
+	CheckInType      = 1
+	MinCheckInQuota  = 5000
+	BaseCoefficient  = 0.18
+	BonusCoefficient = 0.03
+	TopBonusCoefficient = 0.06
+)
 
-	// 生成一个 0-100 的随机数来决定概率区间
-	probability := rand.Float64()        // Generate a random number between 0 and 1
-	coefficient := rand.Float64() * 0.18 // Base random value (0 to 0.18)
-
-	switch {
-	case probability >= 0.75 && probability < 0.95: // 20% chance
-		coefficient += 0.03 // Shift to 0.18 - 0.26
-	case probability >= 0.95: // 5% chance
-		coefficient += 0.06 // Shift to 0.18 - 0.36
-	}
-
-	// 计算最终额度
-	quota = int(coefficient * float64(lastDayUsed))
-	fmt.Printf("coefficient %v", coefficient)
-	fmt.Printf("probability %v", probability)
-	// 至少获得5000额度
-	if quota < 5000 {
-		quota = 5000
-	}
-
-	// 查询用户现有额度
+// ProcessCheckIn 处理用户签到
+func ProcessCheckIn(userId int, lastDayUsed int64, requestIP string) (int, error) {
+	// 计算签到奖励额度
+	quota := calculateCheckInQuota(lastDayUsed)
+	
+	// 检查用户现有额度并调整奖励
 	userQuota, err := GetUserQuota(userId)
-
-	// 如果现有额度小于等于0, 减少签到奖励
+	if err != nil {
+		return 0, fmt.Errorf("failed to get user quota: %w", err)
+	}
+	
 	if userQuota <= 0 {
 		quota = quota / 10
 	}
 
-	operationRemark := []string{"签到", ", ", fmt.Sprintf("获得额度 %v", common.LogQuota(quota))}
-
 	// 更新用户额度
-	err = increaseUserQuota(userId, quota)
-	if err != nil {
-		return 0, err
+	if err := increaseUserQuota(userId, quota); err != nil {
+		return 0, fmt.Errorf("failed to increase user quota: %w", err)
 	}
 
-	RecordLogWithRequestIP(userId, LogTypeUserQuoteIncrease, strings.Join(operationRemark, ""), requestIP)
-	err = insertOperation(UserOperation{
+	// 创建操作记录
+	remark := fmt.Sprintf("签到, 获得额度 %v", common.LogQuota(quota))
+	operation := &UserOperation{
 		UserId:      userId,
-		Type:        1,
-		Remark:      strings.Join(operationRemark, ""),
+		Type:        CheckInType,
+		Remark:      remark,
 		CreatedTime: time.Now().UnixMilli(),
-	})
-	return
+	}
+	
+	if err := createOperation(operation); err != nil {
+		return 0, fmt.Errorf("failed to create operation record: %w", err)
+	}
+
+	RecordLogWithRequestIP(userId, LogTypeUserQuoteIncrease, remark, requestIP)
+	return quota, nil
 }
 
-// 判断是否已经签到
-func IsCheckInToday(userId int) (checkInTime int64, lastDayUsed int64, err error) {
-	var userOperation UserOperation
-	userOperation, err = GetOperationCheckInByUserId(userId)
-
-	// 获取当前地区的当天零点时间
-	localZeroTime := utils.GetLocalZeroTime()
-
-	if err != nil {
-		// 获取昨日的累计使用额度
-		// lastDayUsed, err := GetUserQuotaUsedByPeriod(userId, localZeroTime)
-		// return -1, lastDayUsed, err
+// calculateCheckInQuota 计算签到奖励额度
+func calculateCheckInQuota(lastDayUsed int64) int {
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+	
+	probability := rng.Float64()
+	coefficient := rng.Float64() * BaseCoefficient
+	
+	switch {
+	case probability >= 0.75 && probability < 0.95:
+		coefficient += BonusCoefficient
+	case probability >= 0.95:
+		coefficient += TopBonusCoefficient
 	}
-	fmt.Printf("localZeroTime %v", localZeroTime.UnixMilli())
+	
+	quota := int(coefficient * float64(lastDayUsed))
+	if quota < MinCheckInQuota {
+		quota = MinCheckInQuota
+	}
+	
+	return quota
+}
 
-	// 比较签到时间是否晚于北京时间的今日零点
+// IsCheckInToday 判断用户是否已签到
+func IsCheckInToday(userId int) (int64, int64, error) {
+	userOperation, err := GetLatestCheckInOperation(userId)
+	localZeroTime := utils.GetLocalZeroTime()
+	
+	if err != nil {
+		// 没有找到签到记录，返回昨日使用量
+		lastDayUsed, err := GetUserQuotaUsedByPeriod(userId, localZeroTime)
+		return -1, lastDayUsed, err
+	}
+	
+	// 比较签到时间是否在今日零点之后
 	if userOperation.CreatedTime >= localZeroTime.UnixMilli() {
 		// 已签到
-		return userOperation.CreatedTime, -1, err
-	} else {
-		// 获取昨日的累计使用额度
-		lastDayUsed, err := GetUserQuotaUsedByPeriod(userId, localZeroTime)
-		return 1, lastDayUsed, err
+		return userOperation.CreatedTime, -1, nil
 	}
+	
+	// 未签到，获取昨日使用量
+	lastDayUsed, err := GetUserQuotaUsedByPeriod(userId, localZeroTime)
+	return 1, lastDayUsed, err
 }
 
-// 获取昨日的累计使用额度
-func GetUserQuotaUsedByPeriod(userId int, zeroTime time.Time) (used int64, err error) {
+// GetUserQuotaUsedByPeriod 获取昨日的累计使用额度
+func GetUserQuotaUsedByPeriod(userId int, zeroTime time.Time) (int64, error) {
 	now := time.Now()
-	toDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	endOfDay := toDay.Add(-time.Second).Add(time.Hour * 24).Format("2006-01-02")
-	startOfDay := toDay.AddDate(0, 0, -1).Format("2006-01-02")
-
-	dashboards, err := GetUserModelStatisticsByPeriod(userId, startOfDay, endOfDay)
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	
+	// 获取昨日的开始和结束时间
+	startOfYesterday := today.AddDate(0, 0, -1).Format("2006-01-02")
+	endOfYesterday := today.Add(-time.Second).Format("2006-01-02")
+	
+	dashboards, err := GetUserModelStatisticsByPeriod(userId, startOfYesterday, endOfYesterday)
 	if err != nil {
-		return -1, err
+		return 0, fmt.Errorf("failed to get user statistics: %w", err)
 	}
-	// dashboards 是个数组, 循环获取每个Quota, 接下来获取昨日的累计使用额度
-	if len(dashboards) > 0 {
-		for _, v := range dashboards {
-			used += v.Quota
-		}
-	} else {
-		used = 0
+	
+	// 计算总使用量
+	var used int64
+	for _, dashboard := range dashboards {
+		used += dashboard.Quota
 	}
-
-	// 保底值
-	if float64(used) < (config.QuotaPerUnit * 0.25) {
-		used = int64(config.QuotaPerUnit * 0.25)
+	
+	// 设置保底值
+	minQuota := int64(config.QuotaPerUnit * 0.25)
+	if used < minQuota {
+		used = minQuota
 	}
-	return used, err
+	
+	return used, nil
 }
 
-// GetOperationCheckInList 获取签到列表（仅返回本月和上个月的记录）
-func GetOperationCheckInList(userId int) (checkInList []UserOperation, err error) {
+// GetCheckInList 获取签到列表（仅返回本月和上个月的记录）
+func GetCheckInList(userId int) ([]UserOperation, error) {
 	now := time.Now()
 	// 获取上个月第一天
 	firstDayOfLastMonth := time.Date(now.Year(), now.Month()-1, 1, 0, 0, 0, 0, now.Location())
-
-	err = DB.Model(&UserOperation{}).
-		Where("user_id = ? AND created_time >= ?", userId, firstDayOfLastMonth.Unix()).
+	
+	var checkInList []UserOperation
+	err := DB.Model(&UserOperation{}).
+		Where("user_id = ? AND type = ? AND created_time >= ?", userId, CheckInType, firstDayOfLastMonth.Unix()).
 		Order("id desc").
 		Find(&checkInList).Error
-
-	return checkInList, err
+	
+	if err != nil {
+		return nil, fmt.Errorf("failed to get check-in list: %w", err)
+	}
+	
+	return checkInList, nil
 }

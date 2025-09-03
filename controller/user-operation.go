@@ -50,7 +50,7 @@ func UserOperationCheckIn(c *gin.Context) {
   }
 
   // 插入一条数据
-  quota, err := model.InsertOperationCheckIn(user.Id, lastDayUsed, utils.GetRequestIP(c))
+  quota, err := model.ProcessCheckIn(user.Id, lastDayUsed, utils.GetRequestIP(c))
   if err != nil {
     // 签到失败
     c.JSON(http.StatusBadRequest, gin.H{
@@ -80,7 +80,7 @@ func UserOperationCheckInList(c *gin.Context) {
   }
 
   // 获取新的签到记录列表
-  checkInList, err := model.GetOperationCheckInList(user.Id) // 获取最近30条记录
+  checkInList, err := model.GetCheckInList(user.Id) // 获取最近30条记录
   if err != nil {
     c.JSON(http.StatusOK, gin.H{
       "success": false,
