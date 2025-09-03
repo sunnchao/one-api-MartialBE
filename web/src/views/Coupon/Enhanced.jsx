@@ -127,12 +127,12 @@ const EnhancedCouponManagement = () => {
 
   const fetchCheckinRewards = async () => {
     try {
-      const res = await API.get('/api/coupon/checkin_rewards');
+      const res = await API.get('/api/user/checkin/list');
       if (res.data.success) {
         setCheckinRewards(res.data.data || []);
       }
     } catch (error) {
-      showSnackbar('获取签到奖励失败', 'error');
+      showSnackbar('获取签到数据失败', 'error');
     }
   };
 

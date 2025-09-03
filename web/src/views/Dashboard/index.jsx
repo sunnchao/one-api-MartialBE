@@ -73,11 +73,11 @@ const Dashboard = () => {
   };
 
   const loadCheckInList = async () => {
-    const checkinList = await CheckinService.getCheckinList();
-    setCheckInList(checkinList);
-    
+    const checkin = await CheckinService.getCheckinList();
+    setCheckInList(checkin.records);
+
     // 获取签到统计信息用于显示
-    const stats = CheckinService.getCheckinStats(checkinList);
+    const stats = CheckinService.getCheckinStats(checkin.records);
     console.log('签到统计:', stats);
   };
 
