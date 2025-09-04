@@ -144,6 +144,9 @@ var MemoryCacheEnabled = false
 
 var LogConsumeEnabled = true
 
+// 签到优惠券奖励开关
+var CheckinCouponEnabled = false
+
 var SMTPServer = ""
 var SMTPPort = 587
 var SMTPAccount = ""

@@ -50,7 +50,7 @@ func UserOperationCheckIn(c *gin.Context) {
   }
 
   // 插入一条数据
-  quota, err := model.ProcessCheckIn(user.Id, utils.GetRequestIP(c))
+  result, err := model.ProcessCheckIn(user.Id, utils.GetRequestIP(c))
   if err != nil {
     // 签到失败
     c.JSON(http.StatusBadRequest, gin.H{
@@ -59,10 +59,21 @@ func UserOperationCheckIn(c *gin.Context) {
     })
     return
   }
+  
+  // 构建返回消息
+  message := fmt.Sprintf("签到成功, 获得额度 %v", common.LogQuota(result.Quota))
+  if result.Coupon != nil {
+    message += fmt.Sprintf(", 额外获得优惠券: %s", result.Coupon.Name)
+  }
+  
   // 签到成功
   c.JSON(http.StatusOK, gin.H{
     "success": true,
-    "message": fmt.Sprintf("签到成功, 获得额度 %v", common.LogQuota(quota)),
+    "message": message,
+    "data": gin.H{
+      "quota": result.Quota,
+      "coupon": result.Coupon,
+    },
   })
 
 }

@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"one-api/common"
 	"one-api/common/config"
+	"one-api/common/logger"
 	"one-api/common/utils"
 	"time"
 )
@@ -44,17 +45,24 @@ const (
 	BonusRatio          = 0.25  // 额外奖励比例 0.25
 	BonusProbability    = 0.1   // 额外奖励概率 10%
 	HighRatioProbability = 0.75  // 获得高额度(>0.2)的概率 75%
+	CouponProbability   = 0.05   // 获得优惠券的概率 5%
 )
 
+// 签到奖励结果
+type CheckInRewardResult struct {
+	Quota  int         `json:"quota"`
+	Coupon *UserCoupon `json:"coupon,omitempty"`
+}
+
 // ProcessCheckIn 处理用户签到
-func ProcessCheckIn(userId int, requestIP string) (int, error) {
+func ProcessCheckIn(userId int, requestIP string) (*CheckInRewardResult, error) {
 	// 计算签到奖励额度
 	quota := calculateCheckInQuota()
 	
 	// 检查用户现有额度并调整奖励
 	userQuota, err := GetUserQuota(userId)
 	if err != nil {
-		return 0, fmt.Errorf("failed to get user quota: %w", err)
+		return nil, fmt.Errorf("failed to get user quota: %w", err)
 	}
 	
 	if userQuota <= 0 {
@@ -63,7 +71,7 @@ func ProcessCheckIn(userId int, requestIP string) (int, error) {
 
 	// 更新用户额度
 	if err := increaseUserQuota(userId, quota); err != nil {
-		return 0, fmt.Errorf("failed to increase user quota: %w", err)
+		return nil, fmt.Errorf("failed to increase user quota: %w", err)
 	}
 
 	// 创建操作记录
@@ -76,11 +84,34 @@ func ProcessCheckIn(userId int, requestIP string) (int, error) {
 	}
 	
 	if err := createOperation(operation); err != nil {
-		return 0, fmt.Errorf("failed to create operation record: %w", err)
+		return nil, fmt.Errorf("failed to create operation record: %w", err)
+	}
+
+	// 尝试获得优惠券奖励（检查全局开关）
+	var coupon *UserCoupon
+	if isCouponRewardEnabled() {
+		couponReward := calculateCouponReward()
+		if couponReward != nil {
+			issuedCoupon, err := IssueCouponToUser(userId, couponReward.TemplateId, CouponSourceCheckin)
+			if err != nil {
+				// 优惠券发放失败，记录日志但不影响签到成功
+				logger.SysError(fmt.Sprintf("Failed to issue coupon to user %d: %v", userId, err))
+			} else {
+				coupon = issuedCoupon
+				// 更新签到记录，添加优惠券信息
+				remark += fmt.Sprintf(", 获得优惠券: %s", coupon.Name)
+				operation.Remark = remark
+				DB.Save(operation)
+			}
+		}
 	}
 
 	RecordLogWithRequestIP(userId, LogTypeUserQuoteIncrease, remark, requestIP)
-	return quota, nil
+	
+	return &CheckInRewardResult{
+		Quota:  quota,
+		Coupon: coupon,
+	}, nil
 }
 
 // 计算签到奖励额度
@@ -163,4 +194,37 @@ func GetCheckInList(userId int) ([]UserOperation, error) {
 	}
 	
 	return checkInList, nil
+}
+
+// 优惠券奖励信息
+type CouponRewardInfo struct {
+	TemplateId int `json:"template_id"`
+}
+
+// 预定义的签到优惠券模板ID（需要在数据库中预先创建这些模板）
+var CheckInCouponTemplates = []int{
+	1, // 10%折扣券
+	2, // 固定5元减免券
+	3, // 充值20%奖励券
+}
+
+// 计算优惠券奖励
+func calculateCouponReward() *CouponRewardInfo {
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+	
+	// 5%概率获得优惠券
+	if rng.Float64() < CouponProbability {
+		// 随机选择一个优惠券模板
+		templateIndex := rng.Intn(len(CheckInCouponTemplates))
+		return &CouponRewardInfo{
+			TemplateId: CheckInCouponTemplates[templateIndex],
+		}
+	}
+	
+	return nil
+}
+
+// 检查优惠券奖励是否启用
+func isCouponRewardEnabled() bool {
+	return config.CheckinCouponEnabled
 }
