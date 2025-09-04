@@ -28,7 +28,7 @@ func UserOperationCheckIn(c *gin.Context) {
   fmt.Println(user, "user")
 
   // 检查是否已经签到
-  checkInTime, lastDayUsed, err := model.IsCheckInToday(user.Id)
+  checkInTime, err := model.IsCheckInToday(user.Id)
   if err != nil {
     logger.SysLog(fmt.Sprintf("IsCheckInToday: %s", err.Error()))
   }
@@ -50,7 +50,7 @@ func UserOperationCheckIn(c *gin.Context) {
   }
 
   // 插入一条数据
-  quota, err := model.ProcessCheckIn(user.Id, lastDayUsed, utils.GetRequestIP(c))
+  quota, err := model.ProcessCheckIn(user.Id, utils.GetRequestIP(c))
   if err != nil {
     // 签到失败
     c.JSON(http.StatusBadRequest, gin.H{
