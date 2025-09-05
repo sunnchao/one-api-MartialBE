@@ -6,7 +6,7 @@ import { showError } from 'utils/common';
 import CheckInModal from 'ui-component/CheckInModal';
 import dayjs from 'dayjs';
 
-const Calendar = ({ checkinDates = [] }) => {
+const Calendar = ({ checkinDates = [], refreshCoupons }) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const [calendar, setCalendar] = useState([]);
@@ -199,7 +199,11 @@ const Calendar = ({ checkinDates = [] }) => {
           ))}
         </Grid>
       </Box>
-      <CheckInModal visible={checkInModalOpen} onClose={() => setCheckInModalOpen(false)} />
+      <CheckInModal 
+        visible={checkInModalOpen} 
+        onClose={() => setCheckInModalOpen(false)} 
+        refreshCoupons={refreshCoupons}
+      />
     </Paper>
   );
 };

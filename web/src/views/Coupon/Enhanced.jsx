@@ -30,7 +30,19 @@ import {
   ListItemIcon,
   IconButton,
   Tooltip,
-  useTheme
+  useTheme,
+  Chip,
+  Avatar,
+  Pagination,
+  Paper,
+  Stack,
+  Divider,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -40,7 +52,12 @@ import {
   Settings as SettingsIcon,
   Refresh as RefreshIcon,
   Delete as DeleteIcon,
-  Edit as EditIcon
+  Edit as EditIcon,
+  History as HistoryIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Schedule as ScheduleIcon,
+  Person as PersonIcon
 } from '@mui/icons-material';
 
 // 导入新组件
@@ -68,6 +85,14 @@ const EnhancedCouponManagement = () => {
   const [userCoupons, setUserCoupons] = useState([]);
   const [checkinRewards, setCheckinRewards] = useState([]);
   const [loading, setLoading] = useState(false);
+  
+  // 用户优惠券历史状态
+  const [couponHistory, setCouponHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyFilter, setHistoryFilter] = useState('all'); // all, unused, used, expired
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const pageSize = 10;
 
   // UI状态
   const [selectedItems, setSelectedItems] = useState([]);
@@ -116,12 +141,40 @@ const EnhancedCouponManagement = () => {
 
   const fetchUserCoupons = async () => {
     try {
-      const res = await API.get('/api/coupon/admin/user_coupons');
+      const res = await API.get('/api/user/coupons');
       if (res.data.success) {
         setUserCoupons(res.data.data || []);
       }
     } catch (error) {
       showSnackbar('获取用户优惠券失败', 'error');
+    }
+  };
+
+  // 获取用户优惠券历史记录
+  const fetchCouponHistory = async (page = 1, filter = 'all') => {
+    setHistoryLoading(true);
+    try {
+      const statusParam = filter === 'all' ? '' : `&status=${getStatusCode(filter)}`;
+      const res = await API.get(`/api/user/coupons?page=${page}&limit=${pageSize}${statusParam}`);
+      if (res.data.success) {
+        const data = res.data.data || [];
+        setCouponHistory(Array.isArray(data) ? data : data.records || []);
+        setTotalPages(Math.ceil((data.total || data.length) / pageSize));
+      }
+    } catch (error) {
+      showSnackbar('获取优惠券历史记录失败', 'error');
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  // 状态码转换
+  const getStatusCode = (filter) => {
+    switch (filter) {
+      case 'unused': return 1;
+      case 'used': return 2;
+      case 'expired': return 3;
+      default: return '';
     }
   };
 
@@ -133,6 +186,7 @@ const EnhancedCouponManagement = () => {
       }
     } catch (error) {
       showSnackbar('获取签到数据失败', 'error');
+      console.error(error);
     }
   };
 
@@ -285,6 +339,43 @@ const EnhancedCouponManagement = () => {
     fetchCheckinRewards();
   }, []);
 
+  // 当切换到用户优惠券标签页时，加载历史记录
+  useEffect(() => {
+    if (tabValue === 2) {
+      fetchCouponHistory(currentPage, historyFilter);
+    }
+  }, [tabValue, currentPage, historyFilter]);
+
+  // 获取优惠券状态显示
+  const getCouponStatusDisplay = (status) => {
+    switch (status) {
+      case 1:
+        return { text: '未使用', color: 'success', icon: <CheckCircleIcon /> };
+      case 2:
+        return { text: '已使用', color: 'default', icon: <CheckCircleIcon /> };
+      case 3:
+        return { text: '已过期', color: 'error', icon: <CancelIcon /> };
+      default:
+        return { text: '未知', color: 'default', icon: <ScheduleIcon /> };
+    }
+  };
+
+  // 格式化日期
+  const formatDate = (timestamp) => {
+    return new Date(timestamp).toLocaleString('zh-CN');
+  };
+
+  // 处理页面变化
+  const handlePageChange = (event, page) => {
+    setCurrentPage(page);
+  };
+
+  // 处理优惠券历史过滤器变化
+  const handleHistoryFilterChange = (event) => {
+    setHistoryFilter(event.target.value);
+    setCurrentPage(1);
+  };
+
   return (
     <Box sx={{ width: '100%', position: 'relative' }}>
       {/* 页面标题 */}
@@ -434,10 +525,129 @@ const EnhancedCouponManagement = () => {
 
       {/* 用户优惠券 */}
       <TabPanel value={tabValue} index={2}>
-        <Typography variant="h6" gutterBottom>
-          用户优惠券管理
-        </Typography>
-        <Typography color="text.secondary">此功能正在开发中，敬请期待...</Typography>
+        <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography variant="h6" gutterBottom>
+            用户优惠券管理
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel>状态筛选</InputLabel>
+              <Select
+                value={historyFilter}
+                label="状态筛选"
+                onChange={handleHistoryFilterChange}
+              >
+                <MenuItem value="all">全部</MenuItem>
+                <MenuItem value="unused">未使用</MenuItem>
+                <MenuItem value="used">已使用</MenuItem>
+                <MenuItem value="expired">已过期</MenuItem>
+              </Select>
+            </FormControl>
+            <Button
+              variant="outlined"
+              startIcon={<RefreshIcon />}
+              onClick={() => fetchCouponHistory(currentPage, historyFilter)}
+              disabled={historyLoading}
+            >
+              刷新
+            </Button>
+          </Box>
+        </Box>
+
+        {historyLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <Typography>加载中...</Typography>
+          </Box>
+        ) : couponHistory.length === 0 ? (
+          <Card>
+            <CardContent sx={{ textAlign: 'center', py: 6 }}>
+              <PersonIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+              <Typography variant="h6" color="text.secondary">
+                暂无优惠券记录
+              </Typography>
+              <Typography color="text.secondary" sx={{ mt: 1 }}>
+                完成签到或参与活动即可获得优惠券
+              </Typography>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>优惠券名称</TableCell>
+                    <TableCell>类型</TableCell>
+                    <TableCell>面额/折扣</TableCell>
+                    <TableCell>最低消费</TableCell>
+                    <TableCell>状态</TableCell>
+                    <TableCell>获得时间</TableCell>
+                    <TableCell>过期时间</TableCell>
+                    <TableCell>使用时间</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {couponHistory.map((coupon) => {
+                    const statusInfo = getCouponStatusDisplay(coupon.status);
+                    return (
+                      <TableRow key={coupon.id}>
+                        <TableCell>{coupon.name}</TableCell>
+                        <TableCell>
+                          <Chip
+                            size="small"
+                            label={
+                              coupon.type === 'percentage' ? '百分比' :
+                              coupon.type === 'fixed' ? '固定金额' : '充值奖励'
+                            }
+                            color={
+                              coupon.type === 'percentage' ? 'primary' :
+                              coupon.type === 'fixed' ? 'secondary' : 'success'
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          {coupon.type === 'percentage' 
+                            ? `${coupon.value * 100}%` 
+                            : `¥${coupon.value}`}
+                        </TableCell>
+                        <TableCell>
+                          {coupon.min_amount > 0 ? `¥${coupon.min_amount}` : '无限制'}
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            size="small"
+                            icon={statusInfo.icon}
+                            label={statusInfo.text}
+                            color={statusInfo.color}
+                            variant={coupon.status === 1 ? 'filled' : 'outlined'}
+                          />
+                        </TableCell>
+                        <TableCell>{formatDate(coupon.created_time)}</TableCell>
+                        <TableCell>
+                          {coupon.expire_time ? formatDate(coupon.expire_time) : '永久有效'}
+                        </TableCell>
+                        <TableCell>
+                          {coupon.used_time ? formatDate(coupon.used_time) : '-'}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {totalPages > 1 && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                <Pagination
+                  count={totalPages}
+                  page={currentPage}
+                  onChange={handlePageChange}
+                  color="primary"
+                />
+              </Box>
+            )}
+          </>
+        )}
       </TabPanel>
 
       {/* 浮动操作按钮 */}

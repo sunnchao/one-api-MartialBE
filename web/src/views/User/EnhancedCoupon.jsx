@@ -338,13 +338,13 @@ const EnhancedUserCoupon = () => {
     try {
       const checkinList = await CheckinService.getCheckinList();
       setCheckinData(checkinList);
-      
+
       // 获取签到统计和奖励信息
-      const rewardInfo = CheckinService.generateCouponRewards(checkinList);
+      const rewardInfo = CheckinService.generateCouponRewards(checkinList.records);
       console.log('签到奖励信息:', rewardInfo);
-      
     } catch (error) {
       showError('获取签到记录失败');
+      console.error(error);
     }
   };
 
@@ -356,9 +356,8 @@ const EnhancedUserCoupon = () => {
       if (res.data.success) {
         showSuccess(res.data.message);
         fetchCheckinData();
-        if (res.data.data.reward_type === 'coupon') {
-          fetchCoupons();
-        }
+        // 签到成功后总是刷新优惠券列表，因为可能获得新的优惠券
+        fetchCoupons();
       } else {
         showError(res.data.message);
       }
@@ -539,9 +538,9 @@ const EnhancedUserCoupon = () => {
               <Typography color="text.secondary" sx={{ mb: 3 }}>
                 完成签到或参与活动可获得优惠券
               </Typography>
-              <Button variant="contained" startIcon={<CheckinIcon />} onClick={() => setTabValue(1)}>
+              {/* <Button variant="contained" startIcon={<CheckinIcon />} onClick={() => setTabValue(1)}>
                 去签到
-              </Button>
+              </Button> */}
             </CardContent>
           </Card>
         ) : (
@@ -580,17 +579,14 @@ const EnhancedUserCoupon = () => {
                     {checkinData.records.slice(0, 10).map((record, index) => (
                       <ListItem key={record.id} divider={index < 9}>
                         <ListItemIcon>
-                          <Avatar sx={{ bgcolor: 'primary.light', color: 'primary.main' }}>{record.consecutive_days}</Avatar>
+                          <Avatar sx={{ bgcolor: 'primary.light', color: 'primary.main' }}>📅</Avatar>
                         </ListItemIcon>
                         <ListItemText
-                          primary={`第${record.consecutive_days}天签到`}
+                          primary={`签到时间: ${new Date(record.created_time).toLocaleString()}`}
                           secondary={
                             <Box>
                               <Typography variant="body2" color="text.secondary">
                                 {record.description}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {new Date(record.created_time).toLocaleString()}
                               </Typography>
                             </Box>
                           }

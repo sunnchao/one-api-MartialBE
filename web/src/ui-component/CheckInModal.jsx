@@ -51,6 +51,10 @@ export default function CheckInModal(props) {
         if (props.loadUser) {
           props.loadUser();
         }
+        // 刷新优惠券列表
+        if (props.refreshCoupons) {
+          props.refreshCoupons();
+        }
       } else {
         showError(message);
       }

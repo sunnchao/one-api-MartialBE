@@ -112,10 +112,8 @@ const UserCoupon = () => {
         showSuccess(res.data.message);
         // 更新签到数据
         fetchCheckinData();
-        // 如果获得了优惠券，刷新优惠券列表
-        if (res.data.data.reward_type === 'coupon') {
-          fetchCoupons();
-        }
+        // 签到成功后总是刷新优惠券列表，因为可能获得新的优惠券
+        fetchCoupons();
       } else {
         showError(res.data.message);
       }

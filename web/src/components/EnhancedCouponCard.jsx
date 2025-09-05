@@ -151,7 +151,7 @@ const EnhancedCouponCard = ({
   onCopy,
   onShare,
   onUse,
-  showActions = true,
+  showActions = false,
   variant = 'default', // default, compact, featured
   animated = true,
   ...props

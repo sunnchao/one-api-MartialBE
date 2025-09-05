@@ -14,7 +14,8 @@ import {
   ListItemAvatar,
   Divider,
   useTheme,
-  alpha
+  alpha,
+  Alert
 } from '@mui/material';
 import {
   TrendingUp as TrendingUpIcon,
@@ -26,44 +27,208 @@ import {
   Star as StarIcon,
   Schedule as ScheduleIcon
 } from '@mui/icons-material';
+import { API } from 'utils/api';
+import { showError } from 'utils/common';
 
-// 模拟数据生成函数
-const generateMockData = () => {
-  return {
-    overview: {
-      totalCoupons: 1247,
-      activeCoupons: 856,
-      usedCoupons: 391,
-      totalSavings: 15420.5,
-      conversionRate: 68.5,
-      popularityTrend: 12.3
-    },
-    typeDistribution: [
-      { type: 'percentage', name: '百分比折扣', count: 520, percentage: 41.7, savings: 8900.2 },
-      { type: 'fixed', name: '固定金额', count: 387, percentage: 31.0, savings: 4520.8 },
-      { type: 'recharge', name: '充值奖励', count: 340, percentage: 27.3, savings: 2000.5 }
-    ],
-    usageStats: [
-      { period: '今日', issued: 45, used: 23, rate: 51.1 },
-      { period: '本周', issued: 312, used: 198, rate: 63.5 },
-      { period: '本月', issued: 1247, used: 856, rate: 68.6 },
-      { period: '总计', issued: 5420, used: 3780, rate: 69.7 }
-    ],
-    topPerformers: [
-      { name: '新用户专享券', used: 156, savings: 2340.5, rate: 89.2 },
-      { name: '月末大促销', used: 134, savings: 1980.3, rate: 76.8 },
-      { name: '充值奖励券', used: 98, savings: 1560.0, rate: 72.1 },
-      { name: '会员专属券', used: 87, savings: 1340.2, rate: 68.9 },
-      { name: '限时折扣券', used: 76, savings: 1120.8, rate: 65.4 }
-    ],
-    recentActivities: [
-      { type: 'created', name: '春节特惠券', time: '2小时前', user: '管理员' },
-      { type: 'used', name: '新用户专享券', time: '3小时前', user: 'user123' },
-      { type: 'expired', name: '限时折扣券', time: '5小时前', user: 'system' },
-      { type: 'issued', name: '充值奖励券', time: '1天前', user: '系统发放' },
-      { type: 'used', name: '月末大促销', time: '1天前', user: 'user456' }
-    ]
-  };
+// 获取优惠券统计数据
+const fetchCouponAnalytics = async () => {
+  try {
+    // 并行调用多个API获取数据
+    const [templatesRes, userCouponsRes] = await Promise.all([
+      API.get('/api/admin/coupons/templates').catch(() => ({ data: { success: false, data: [] } })),
+      API.get('/api/admin/coupons/user_coupons').catch(() => ({ data: { success: false, data: [] } }))
+    ]);
+
+    // 处理数据，如果管理员API不存在，降级使用用户API
+    let templates = [];
+    let userCoupons = [];
+
+    if (templatesRes.data.success) {
+      templates = templatesRes.data.data;
+    }
+
+    if (userCouponsRes.data.success) {
+      userCoupons = userCouponsRes.data.data;
+    } else {
+      // 如果管理员API不存在，使用用户API获取当前用户的优惠券作为样本
+      const userApiRes = await API.get('/api/user/coupons').catch(() => ({ data: { success: false, data: [] } }));
+      if (userApiRes.data.success) {
+        userCoupons = userApiRes.data.data;
+      }
+    }
+
+    // 如果没有数据，返回空的统计结果
+    if (userCoupons.length === 0) {
+      return {
+        overview: {
+          totalCoupons: 0,
+          activeCoupons: 0,
+          usedCoupons: 0,
+          totalSavings: 0,
+          conversionRate: 0,
+          popularityTrend: 0
+        },
+        typeDistribution: [],
+        usageStats: [
+          { period: '今日', issued: 0, used: 0, rate: 0 },
+          { period: '本周', issued: 0, used: 0, rate: 0 },
+          { period: '本月', issued: 0, used: 0, rate: 0 },
+          { period: '总计', issued: 0, used: 0, rate: 0 }
+        ],
+        topPerformers: [],
+        recentActivities: []
+      };
+    }
+
+    // 计算统计数据
+    const totalCoupons = userCoupons.length;
+    const usedCoupons = userCoupons.filter(c => c.status === 2).length;
+    const activeCoupons = userCoupons.filter(c => c.status === 1).length;
+    const expiredCoupons = userCoupons.filter(c => c.status === 3).length;
+    
+    // 计算节省总金额
+    const totalSavings = userCoupons
+      .filter(c => c.status === 2 && c.saved_amount)
+      .reduce((sum, c) => sum + (parseFloat(c.saved_amount) || 0), 0);
+
+    // 计算转化率
+    const conversionRate = totalCoupons > 0 ? (usedCoupons / totalCoupons) * 100 : 0;
+
+    // 按类型统计
+    const typeStats = {};
+    userCoupons.forEach(coupon => {
+      const type = coupon.type || 'unknown';
+      if (!typeStats[type]) {
+        typeStats[type] = { count: 0, savings: 0 };
+      }
+      typeStats[type].count++;
+      if (coupon.status === 2 && coupon.saved_amount) {
+        typeStats[type].savings += parseFloat(coupon.saved_amount) || 0;
+      }
+    });
+
+    const typeDistribution = Object.entries(typeStats).map(([type, data]) => ({
+      type,
+      name: type === 'percentage' ? '百分比折扣' : 
+            type === 'fixed' ? '固定金额' : 
+            type === 'recharge' ? '充值奖励' : '其他',
+      count: data.count,
+      percentage: totalCoupons > 0 ? (data.count / totalCoupons) * 100 : 0,
+      savings: data.savings
+    }));
+
+    // 计算时间段统计
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekStart = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    const getTodayCoupons = (coupons) => coupons.filter(c => new Date(c.created_time) >= today);
+    const getWeekCoupons = (coupons) => coupons.filter(c => new Date(c.created_time) >= weekStart);
+    const getMonthCoupons = (coupons) => coupons.filter(c => new Date(c.created_time) >= monthStart);
+
+    const todayCoupons = getTodayCoupons(userCoupons);
+    const weekCoupons = getWeekCoupons(userCoupons);
+    const monthCoupons = getMonthCoupons(userCoupons);
+
+    const usageStats = [
+      {
+        period: '今日',
+        issued: todayCoupons.length,
+        used: todayCoupons.filter(c => c.status === 2).length,
+        rate: todayCoupons.length > 0 ? (todayCoupons.filter(c => c.status === 2).length / todayCoupons.length) * 100 : 0
+      },
+      {
+        period: '本周',
+        issued: weekCoupons.length,
+        used: weekCoupons.filter(c => c.status === 2).length,
+        rate: weekCoupons.length > 0 ? (weekCoupons.filter(c => c.status === 2).length / weekCoupons.length) * 100 : 0
+      },
+      {
+        period: '本月',
+        issued: monthCoupons.length,
+        used: monthCoupons.filter(c => c.status === 2).length,
+        rate: monthCoupons.length > 0 ? (monthCoupons.filter(c => c.status === 2).length / monthCoupons.length) * 100 : 0
+      },
+      {
+        period: '总计',
+        issued: totalCoupons,
+        used: usedCoupons,
+        rate: conversionRate
+      }
+    ];
+
+    // 计算热门优惠券（按使用次数排序）
+    const couponUsage = {};
+    userCoupons
+      .filter(c => c.status === 2)
+      .forEach(coupon => {
+        const name = coupon.name || `优惠券${coupon.template_id}`;
+        if (!couponUsage[name]) {
+          couponUsage[name] = { used: 0, savings: 0 };
+        }
+        couponUsage[name].used++;
+        couponUsage[name].savings += parseFloat(coupon.saved_amount) || 0;
+      });
+
+    const topPerformers = Object.entries(couponUsage)
+      .map(([name, data]) => ({
+        name,
+        used: data.used,
+        savings: data.savings,
+        rate: 0 // 需要更复杂的计算来获得准确的转化率
+      }))
+      .sort((a, b) => b.used - a.used)
+      .slice(0, 5);
+
+    // 最近活动（简化版本，基于用户优惠券的状态变化）
+    const recentActivities = userCoupons
+      .sort((a, b) => new Date(b.created_time) - new Date(a.created_time))
+      .slice(0, 5)
+      .map(coupon => ({
+        type: coupon.status === 2 ? 'used' : coupon.status === 3 ? 'expired' : 'issued',
+        name: coupon.name || `优惠券${coupon.id}`,
+        time: getTimeAgo(coupon.created_time),
+        user: coupon.status === 2 && coupon.used_time ? '用户' : '系统'
+      }));
+
+    return {
+      overview: {
+        totalCoupons,
+        activeCoupons,
+        usedCoupons,
+        totalSavings,
+        conversionRate: parseFloat(conversionRate.toFixed(1)),
+        popularityTrend: 0 // 需要历史数据来计算趋势
+      },
+      typeDistribution,
+      usageStats,
+      topPerformers,
+      recentActivities
+    };
+
+  } catch (error) {
+    console.error('获取优惠券分析数据失败:', error);
+    throw error;
+  }
+};
+
+// 计算时间差
+const getTimeAgo = (timestamp) => {
+  const now = new Date();
+  const time = new Date(timestamp);
+  const diffMs = now - time;
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMins < 60) {
+    return `${diffMins}分钟前`;
+  } else if (diffHours < 24) {
+    return `${diffHours}小时前`;
+  } else {
+    return `${diffDays}天前`;
+  }
 };
 
 const StatCard = ({ title, value, subtitle, trend, icon, color = 'primary' }) => {
@@ -156,15 +321,23 @@ const CouponAnalytics = () => {
   const theme = useTheme();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // 模拟API调用
+    // 获取真实数据
     const fetchData = async () => {
       setLoading(true);
-      // 模拟网络延迟
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setData(generateMockData());
-      setLoading(false);
+      setError(null);
+      try {
+        const analyticsData = await fetchCouponAnalytics();
+        setData(analyticsData);
+      } catch (err) {
+        console.error('获取优惠券分析数据失败:', err);
+        setError('获取数据失败，请稍后重试');
+        showError('获取优惠券分析数据失败');
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
@@ -174,7 +347,10 @@ const CouponAnalytics = () => {
     return (
       <Box sx={{ p: 3 }}>
         <Typography variant="h5" gutterBottom>
-          数据分析仪表板
+          📊 优惠券数据分析仪表板
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          正在加载数据...
         </Typography>
         <Grid container spacing={3}>
           {[1, 2, 3, 4].map((i) => (
@@ -187,6 +363,32 @@ const CouponAnalytics = () => {
             </Grid>
           ))}
         </Grid>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h5" gutterBottom>
+          📊 优惠券数据分析仪表板
+        </Typography>
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      </Box>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h5" gutterBottom>
+          📊 优惠券数据分析仪表板
+        </Typography>
+        <Alert severity="info" sx={{ mt: 2 }}>
+          暂无数据
+        </Alert>
       </Box>
     );
   }

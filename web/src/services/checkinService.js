@@ -13,7 +13,7 @@ class CheckinService {
     try {
       const res = await API.get('/api/user/checkin/list');
       const { success, data, message } = res.data;
-      
+
       if (success) {
         return data || [];
       } else {
@@ -38,7 +38,7 @@ class CheckinService {
     const thisYear = today.getFullYear();
 
     // 本月签到记录
-    const thisMonthCheckins = checkinList.filter(record => {
+    const thisMonthCheckins = checkinList.filter((record) => {
       const recordDate = new Date(record.created_time);
       return recordDate.getMonth() === thisMonth && recordDate.getFullYear() === thisYear;
     });
@@ -46,14 +46,14 @@ class CheckinService {
     // 连续签到天数计算
     let consecutiveDays = 0;
     const sortedRecords = [...checkinList].sort((a, b) => new Date(b.created_time) - new Date(a.created_time));
-    
+
     let currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
-    
+
     for (let record of sortedRecords) {
       const recordDate = new Date(record.created_time);
       recordDate.setHours(0, 0, 0, 0);
-      
+
       if (recordDate.getTime() === currentDate.getTime()) {
         consecutiveDays++;
         currentDate.setDate(currentDate.getDate() - 1);
@@ -79,8 +79,8 @@ class CheckinService {
   static isCheckedInToday(checkinList = []) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
-    return checkinList.some(record => {
+
+    return checkinList.some((record) => {
       const recordDate = new Date(record.created_time);
       recordDate.setHours(0, 0, 0, 0);
       return recordDate.getTime() === today.getTime();
@@ -102,7 +102,7 @@ class CheckinService {
         type: 'consecutive_bonus',
         title: '连续签到奖励',
         description: `连续签到${stats.consecutiveDays}天，获得额外奖励`,
-        multiplier: Math.min(1 + (stats.consecutiveDays * 0.1), 3), // 最高3倍奖励
+        multiplier: Math.min(1 + stats.consecutiveDays * 0.1, 3), // 最高3倍奖励
         eligible: true
       });
     }

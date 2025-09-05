@@ -45,7 +45,7 @@ const (
 	BonusRatio          = 0.25  // 额外奖励比例 0.25
 	BonusProbability    = 0.1   // 额外奖励概率 10%
 	HighRatioProbability = 0.75  // 获得高额度(>0.2)的概率 75%
-	CouponProbability   = 0.05   // 获得优惠券的概率 5%
+	CouponProbability   = 1   // 获得优惠券的概率 5%
 )
 
 // 签到奖励结果
