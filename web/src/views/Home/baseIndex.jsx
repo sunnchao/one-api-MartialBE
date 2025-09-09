@@ -15,9 +15,14 @@ import {
   Forum,
   Telegram,
   ContentCopy,
-  Check
+  Check,
+  Brightness4,
+  Brightness7,
+  SettingsBrightness
 } from '@mui/icons-material';
-import { keyframes } from '@mui/system';
+import { keyframes, useTheme } from '@mui/system';
+import { usePackyTheme } from 'components/PackyThemeProvider';
+import LoadingSpinner, { PackyPageLoader } from 'components/ui/LoadingSpinner';
 
 const fadeIn = keyframes`
   from {
@@ -51,9 +56,12 @@ const textAnimation = keyframes`
 
 const BaseIndex = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const { toggleTheme, setTheme } = usePackyTheme();
   const advantagesRef = useRef(null);
   const [copied, setCopied] = useState(false);
   const [currentEndpointIndex, setCurrentEndpointIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [models] = useState([
     { id: 1, name: 'OpenAI', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/openai.webp' },
     { id: 11, name: 'Google Gemini', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/gemini.webp' },
@@ -114,6 +122,14 @@ const BaseIndex = () => {
     return () => clearInterval(interval);
   }, [endpoints.length]);
 
+  // 模拟页面加载
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleLearnMoreClick = () => {
     advantagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -124,6 +140,19 @@ const BaseIndex = () => {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const handleThemeToggle = () => {
+    toggleTheme();
+  };
+
+  // 如果正在加载，显示PackyCode风格的加载器
+  if (isLoading) {
+    return (
+      <PackyPageLoader isLoading={true}>
+        <div />
+      </PackyPageLoader>
+    );
+  }
 
   return (
     <>
@@ -150,7 +179,10 @@ const BaseIndex = () => {
       <Box
         sx={{
           minHeight: '100vh',
-          background: 'linear-gradient(135deg, #1677ff 0%, #0d47a1 60%, #0d47a1 100%)',
+          background:
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 60%, #2d3748 100%)'
+              : 'linear-gradient(135deg, #1677ff 0%, #0d47a1 60%, #0d47a1 100%)',
           color: 'white',
           position: 'relative',
           overflow: 'hidden',
@@ -161,14 +193,46 @@ const BaseIndex = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                           linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)`,
+            backgroundImage:
+              theme.palette.mode === 'dark'
+                ? `linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                 linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px)`
+                : `linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                 linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)`,
             backgroundSize: '80px 80px',
             pointerEvents: 'none',
             opacity: 0.4
           }
         }}
       >
+        {/* 主题切换按钮 */}
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 20,
+            right: 20,
+            zIndex: 1000
+          }}
+        >
+          <Tooltip title={`切换到${theme.palette.mode === 'dark' ? '浅色' : '深色'}主题`}>
+            <IconButton
+              onClick={handleThemeToggle}
+              sx={{
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  transform: 'scale(1.1)'
+                },
+                transition: 'all 0.3s ease'
+              }}
+            >
+              {theme.palette.mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
+            </IconButton>
+          </Tooltip>
+        </Box>
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
           <Grid
             container
