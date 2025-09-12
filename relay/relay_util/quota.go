@@ -17,22 +17,24 @@ import (
 )
 
 type Quota struct {
-  modelName        string
-  promptTokens     int
-  price            model.Price
-  groupName        string
-  groupRatio       float64
-  inputRatio       float64
-  outputRatio      float64
+	modelName        string
+	promptTokens     int
+	price            model.Price
+	groupName        string
+	isBackupGroup    bool // 新增字段记录是否使用备用分组
+	backupGroupName  string
+	groupRatio       float64
+	inputRatio       float64
+	outputRatio      float64
   isSearch         bool
   searchRatio      float64
   searchPrice      model.Price
-  preConsumedQuota int
-  cacheQuota       int
-  userId           int
-  channelId        int
-  tokenId          int
-  HandelStatus     bool
+	preConsumedQuota int
+	cacheQuota       int
+	userId           int
+	channelId        int
+	tokenId          int
+	HandelStatus     bool
 
   startTime         time.Time
   firstResponseTime time.Time
@@ -40,35 +42,33 @@ type Quota struct {
 }
 
 func NewQuota(c *gin.Context, modelName string, promptTokens int) *Quota {
-  quota := &Quota{
-    modelName:    modelName,
-    promptTokens: promptTokens,
-    userId:       c.GetInt("id"),
-    channelId:    c.GetInt("channel_id"),
-    tokenId:      c.GetInt("token_id"),
+	isBackupGroup := c.GetBool("is_backupGroup")
+
+	quota := &Quota{
+		modelName:     modelName,
+		promptTokens:  promptTokens,
+		userId:        c.GetInt("id"),
+		channelId:     c.GetInt("channel_id"),
+		tokenId:       c.GetInt("token_id"),
+		HandelStatus:  false,
     isSearch:     modelName == "search",
-    HandelStatus: false,
-  }
+    isBackupGroup: isBackupGroup, // 记录是否使用备用分组
+	}
 
-  quota.price = *model.PricingInstance.GetPrice(quota.modelName)
-  // 获取分组倍率 map[string]float64
-  groupRatioList, exists := c.Get("group_ratio")
-  if !exists {
-    groupRatioList = make(map[string]float64)
-  }
-  quota.groupName = c.GetString("token_group")
-
-  quota.groupRatio = groupRatioList.(map[string]float64)[quota.groupName]
-
+	quota.price = *model.PricingInstance.GetPrice(quota.modelName)
+	quota.groupName = c.GetString("token_group")
+	quota.backupGroupName = c.GetString("token_backup_group")
+	quota.groupRatio = c.GetFloat64("group_ratio") // 这里的倍率已经在 common.go 中正确设置了
   if quota.isSearch {
     quota.channelId = 0
     quota.groupRatio = 1
     quota.groupName = ""
   }
-  quota.inputRatio = quota.price.GetInput() * quota.groupRatio
-  quota.outputRatio = quota.price.GetOutput() * quota.groupRatio
+	quota.inputRatio = quota.price.GetInput() * quota.groupRatio
+	quota.outputRatio = quota.price.GetOutput() * quota.groupRatio
 
-  return quota
+	return quota
+
 }
 
 func (q *Quota) PreQuotaConsumption() *types.OpenAIErrorWithStatusCode {
@@ -236,12 +236,14 @@ func (q *Quota) GetInputRatio() float64 {
 }
 
 func (q *Quota) GetLogMeta(usage *types.Usage) map[string]any {
-  meta := map[string]any{
-    "group_name":   q.groupName,
-    "price_type":   q.price.Type,
-    "group_ratio":  q.groupRatio,
-    "input_ratio":  q.price.GetInput(),
-    "output_ratio": q.price.GetOutput(),
+	meta := map[string]any{
+		"group_name":        q.groupName,
+		"backup_group_name": q.backupGroupName,
+		"is_backup_group":   q.isBackupGroup, // 添加是否使用备用分组的标识
+		"price_type":        q.price.Type,
+		"group_ratio":       q.groupRatio,
+		"input_ratio":       q.price.GetInput(),
+		"output_ratio":      q.price.GetOutput(),
     "is_search":    q.isSearch,
   }
 

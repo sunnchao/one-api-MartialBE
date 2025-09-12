@@ -113,20 +113,26 @@ func AddToken(c *gin.Context) {
     return
   }
 
-  if token.Group == "" {
-    token.Group = "default"
-  }
-  groups := strings.Split(token.Group, ",")
-  for _, group := range groups {
-    err = validateTokenGroup(group, userId)
-    if err != nil {
-      c.JSON(http.StatusOK, gin.H{
-        "success": false,
-        "message": err.Error(),
-      })
-      return
-    }
-  }
+	if token.Group != "" {
+		err = validateTokenGroup(token.Group, userId)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+	}
+	if token.BackupGroup != "" {
+		err = validateTokenGroup(token.BackupGroup, userId)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+	}
 
   setting := token.Setting.Data()
   err = validateTokenSetting(&setting)
@@ -135,37 +141,36 @@ func AddToken(c *gin.Context) {
     return
   }
 
-  cleanToken := model.Token{
-    UserId:             userId,
-    Name:               token.Name,
-    CreatedTime:        utils.GetTimestamp(),
-    AccessedTime:       utils.GetTimestamp(),
-    ExpiredTime:        token.ExpiredTime,
-    RemainQuota:        token.RemainQuota,
-    UnlimitedQuota:     token.UnlimitedQuota,
-    Group:              token.Group,
+	cleanToken := model.Token{
+		UserId: userId,
+		Name:   token.Name,
+		// Key:            utils.GenerateKey(),
+		CreatedTime:    utils.GetTimestamp(),
+		AccessedTime:   utils.GetTimestamp(),
+		ExpiredTime:    token.ExpiredTime,
+		RemainQuota:    token.RemainQuota,
+		UnlimitedQuota: token.UnlimitedQuota,
+		Group:          token.Group,
+		BackupGroup:    token.BackupGroup,
     ModelLimits:        token.ModelLimits,
     ModelLimitsEnabled: token.ModelLimitsEnabled,
     AllowIps:           token.AllowIps,
     AllowIpsEnabled:    token.AllowIpsEnabled,
     BillingType:        token.BillingType,
-    Setting:            token.Setting,
-  }
-  if token.Group == "" {
-    token.Group = "default"
-  }
-  err = cleanToken.Insert()
-  if err != nil {
-    c.JSON(http.StatusOK, gin.H{
-      "success": false,
-      "message": err.Error(),
-    })
-    return
-  }
-  c.JSON(http.StatusOK, gin.H{
-    "success": true,
-    "message": "",
-  })
+		Setting:        token.Setting,
+	}
+	err = cleanToken.Insert()
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+	})
 }
 
 func DeleteToken(c *gin.Context) {
@@ -237,52 +242,57 @@ func UpdateToken(c *gin.Context) {
     }
   }
 
-  if cleanToken.Group != token.Group {
-    if token.Group == "" {
-      token.Group = "default"
-    }
-    groups := strings.Split(token.Group, ",")
-    for _, group := range groups {
-      err = validateTokenGroup(group, userId)
-      if err != nil {
-        c.JSON(http.StatusOK, gin.H{
-          "success": false,
-          "message": err.Error(),
-        })
-        return
-      }
-    }
-  }
+	if cleanToken.Group != token.Group && token.Group != "" {
+		err = validateTokenGroup(token.Group, userId)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+	}
+	if cleanToken.BackupGroup != token.BackupGroup && token.BackupGroup != "" {
+		err = validateTokenGroup(token.BackupGroup, userId)
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+	}
 
-  if statusOnly != "" {
-    cleanToken.Status = token.Status
-  } else {
-    // If you add more fields, please also update token.Update()
-    cleanToken.Name = token.Name
-    cleanToken.ExpiredTime = token.ExpiredTime
-    cleanToken.RemainQuota = token.RemainQuota
-    cleanToken.UnlimitedQuota = token.UnlimitedQuota
-    cleanToken.Group = token.Group
+	if statusOnly != "" {
+		cleanToken.Status = token.Status
+	} else {
+		// If you add more fields, please also update token.Update()
+		cleanToken.Name = token.Name
+		cleanToken.ExpiredTime = token.ExpiredTime
+		cleanToken.RemainQuota = token.RemainQuota
+		cleanToken.UnlimitedQuota = token.UnlimitedQuota
+		cleanToken.Group = token.Group
+		cleanToken.BackupGroup = token.BackupGroup
     cleanToken.ModelLimits = token.ModelLimits
     cleanToken.ModelLimitsEnabled = token.ModelLimitsEnabled
     cleanToken.AllowIps = token.AllowIps
     cleanToken.AllowIpsEnabled = token.AllowIpsEnabled
     cleanToken.BillingType = token.BillingType
-    cleanToken.Setting = token.Setting
-  }
-  err = cleanToken.Update()
-  if err != nil {
-    c.JSON(http.StatusOK, gin.H{
-      "success": false,
-      "message": err.Error(),
-    })
-    return
-  }
-  c.JSON(http.StatusOK, gin.H{
-    "success": true,
-    "message": "",
-    "data":    cleanToken,
-  })
+		cleanToken.Setting = token.Setting
+	}
+	err = cleanToken.Update()
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data":    cleanToken,
+	})
 }
 
 func validateTokenGroup(tokenGroup string, userId int) error {

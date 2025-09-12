@@ -8,38 +8,62 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GroupDistributor 统一分组分发逻辑
+type GroupDistributor struct {
+	context *gin.Context
+}
+
+// NewGroupDistributor 创建分组分发器
+func NewGroupDistributor(c *gin.Context) *GroupDistributor {
+	return &GroupDistributor{context: c}
+}
+
+// SetupGroups 设置用户分组和令牌分组
+func (gd *GroupDistributor) SetupGroups() error {
+	userId := gd.context.GetInt("id")
+	userGroup, _ := model.CacheGetUserGroup(userId)
+	gd.context.Set("group", userGroup)
+
+	tokenGroup := gd.context.GetString("token_group")
+	backupGroup := gd.context.GetString("token_backup_group")
+
+	// 统一分组优先级逻辑
+	effectiveGroup := gd.determineEffectiveGroup(tokenGroup, backupGroup, userGroup)
+	gd.context.Set("token_group", effectiveGroup)
+
+	// 设置分组比例
+	return gd.setGroupRatio(effectiveGroup)
+}
+
+// determineEffectiveGroup 确定有效的分组
+func (gd *GroupDistributor) determineEffectiveGroup(tokenGroup, backupGroup, userGroup string) string {
+	if tokenGroup != "" {
+		return tokenGroup
+	}
+	if backupGroup != "" {
+		return backupGroup
+	}
+	return userGroup
+}
+
+// setGroupRatio 设置分组倍率
+func (gd *GroupDistributor) setGroupRatio(group string) error {
+	groupRatio := model.GlobalUserGroupRatio.GetBySymbol(group)
+	if groupRatio == nil {
+		abortWithMessage(gd.context, http.StatusForbidden, fmt.Sprintf("分组 %s 不存在", group))
+		return fmt.Errorf("分组 %s 不存在", group)
+	}
+
+	gd.context.Set("group_ratio", groupRatio.Ratio)
+	return nil
+}
+
 func Distribute() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		userId := c.GetInt("id")
-		userGroup, _ := model.CacheGetUserGroup(userId)
-		c.Set("group", userGroup)
-
-		tokenGroup := c.GetString("token_group")
-		tokenGroupList := c.GetStringSlice("token_group_list")
-
-		var groupRatioList []*model.UserGroup
-		if len(tokenGroupList) > 1 {
-			for _, group := range tokenGroupList {
-				groupRatio := model.GlobalUserGroupRatio.GetBySymbol(group)
-				groupRatioList = append(groupRatioList, groupRatio)
-			}
-		} else {
-			groupRatio := model.GlobalUserGroupRatio.GetBySymbol(tokenGroup)
-			groupRatioList = append(groupRatioList, groupRatio)
-		}
-
-		// 如果 groupRatioList 为空，则返回 403
-		if len(groupRatioList) == 0 {
-			abortWithMessage(c, http.StatusForbidden, fmt.Sprintf("分组 %s 不存在", tokenGroup))
+		distributor := NewGroupDistributor(c)
+		if err := distributor.SetupGroups(); err != nil {
 			return
 		}
-
-		// 将 groupRatioList 转换为 map[string]float64
-		groupRatioMap := make(map[string]float64)
-		for _, groupRatio := range groupRatioList {
-			groupRatioMap[groupRatio.Symbol] = groupRatio.Ratio
-		}
-		c.Set("group_ratio", groupRatioMap)
 		c.Next()
 	}
 }

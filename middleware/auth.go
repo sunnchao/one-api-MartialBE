@@ -134,29 +134,17 @@ func tokenAuth(c *gin.Context, key string) {
 	c.Set("token_id", token.Id)
 	c.Set("token_name", token.Name)
 	c.Set("token_group", token.Group)
-  c.Set("token_setting", utils.GetPointer(token.Setting.Data()))
+	c.Set("token_backup_group", token.BackupGroup)
+	c.Set("token_setting", utils.GetPointer(token.Setting.Data()))
 
-	if token.Group != "" {
-		if len(strings.Split(token.Group, ",")) > 1 {
-			c.Set("token_group_list", strings.Split(token.Group, ","))
-			c.Set("token_group", strings.Split(token.Group, ",")[0])
-		} else {
-			c.Set("token_group", token.Group)
-			c.Set("token_group_list", []string{token.Group})
-		}
-	} else {
-		c.Set("token_group", "default")
-		c.Set("token_group_list", []string{"default"})
-	}
-	c.Set("token_billing_type", token.BillingType)
+  c.Set("token_billing_type", token.BillingType)
 
-	if token.ModelLimitsEnabled {
-		c.Set("token_model_limit_enabled", true)
-		c.Set("token_model_limit", token.GetModelLimitsMap())
-	} else {
-		c.Set("token_model_limit_enabled", false)
-	}
-
+  if token.ModelLimitsEnabled {
+    c.Set("token_model_limit_enabled", true)
+    c.Set("token_model_limit", token.GetModelLimitsMap())
+  } else {
+    c.Set("token_model_limit_enabled", false)
+  }
 	if len(parts) > 1 {
 		if model.IsAdmin(token.UserId) {
 			if token.ModelLimitsEnabled {

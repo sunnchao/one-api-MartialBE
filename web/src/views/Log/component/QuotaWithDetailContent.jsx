@@ -33,7 +33,8 @@ export function calculatePrice(ratio, groupDiscount, isTimes) {
 }
 
 // QuotaWithDetailContent is responsible for rendering the detailed content
-export default function QuotaWithDetailContent({ item, totalInputTokens, totalOutputTokens }) {
+export default function QuotaWithDetailContent({ item, userGroup, totalInputTokens, totalOutputTokens }) {
+  console.log(item);
   const { t } = useTranslation();
   // Calculate the original quota based on the formula
   const originalQuota = calculateOriginalQuota(item);
@@ -184,8 +185,11 @@ export default function QuotaWithDetailContent({ item, totalInputTokens, totalOu
             <PercentIcon sx={{ fontSize: 20, mr: 1, color: (theme) => theme.palette.info.main }} />
             <Typography sx={{ fontWeight: 600, fontSize: 12 }}>{t('logPage.quotaDetail.groupRatio')}</Typography>
           </Box>
-          <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
-            {t('logPage.groupLabel')}: {item.metadata?.group_name}
+          <Typography sx={{ fontSize: 13, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
+            {t('logPage.groupLabel')}:{' '}
+            {!item?.metadata?.is_backup_group
+              ? userGroup[item?.metadata?.group_name]?.name
+              : `${userGroup[item?.metadata?.group_name].name}→${userGroup[item?.metadata.backup_group_name].name}`}
           </Typography>
           <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
             {t('logPage.quotaDetail.groupRatioValue')}: {groupRatio}
@@ -307,6 +311,8 @@ QuotaWithDetailContent.propTypes = {
       output_ratio: PropTypes.number,
       group_ratio: PropTypes.number,
       group_name: PropTypes.string,
+      backup_group_name: PropTypes.string,
+      is_backup_group: PropTypes.bool,
       input_price: PropTypes.string,
       output_price: PropTypes.string,
       original_quota: PropTypes.number,
@@ -316,5 +322,6 @@ QuotaWithDetailContent.propTypes = {
     })
   }).isRequired,
   totalInputTokens: PropTypes.number.isRequired,
-  totalOutputTokens: PropTypes.number.isRequired
+  totalOutputTokens: PropTypes.number.isRequired,
+  userGroup: PropTypes.object
 };
