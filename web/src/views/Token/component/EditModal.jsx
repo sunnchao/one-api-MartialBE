@@ -25,7 +25,8 @@ import {
   Stack,
   IconButton,
   Typography,
-  Grid
+  Grid,
+  Box
 } from '@mui/material';
 import { Icon } from '@iconify/react';
 
@@ -52,7 +53,8 @@ const validationSchema = Yup.object().shape({
   model_limits: Yup.string(),
   model_limits_enabled: Yup.boolean(),
   billing_type: Yup.string().required('计费类型 不能为空'),
-  group: Yup.array().of(Yup.string()).required('分组 不能为空'),
+  group: Yup.string().required('分组 不能为空'),
+  backup_group: Yup.array().of(Yup.string()),
   setting: Yup.object().shape({
     heartbeat: Yup.object().shape({
       enabled: Yup.boolean(),
@@ -71,11 +73,11 @@ const originInputs = {
   remain_quota: 0,
   expired_time: -1,
   unlimited_quota: true,
-  group: ['default'],
+  group: 'default',
   model_limits: '',
   model_limits_enabled: false,
   billing_type: 'tokens',
-  backup_group: '',
+  backup_group: [],
   setting: {
     heartbeat: {
       enabled: false,
@@ -137,19 +139,26 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
     setSubmitting(true);
     values.remain_quota = parseInt(values.remain_quota);
     values.setting.heartbeat.timeout_seconds = parseInt(values.setting.heartbeat.timeout_seconds);
+
+    // 将备用分组数组转换为逗号分隔的字符串，过滤空值
+    const backupGroupString = Array.isArray(values.backup_group)
+      ? values.backup_group.filter(group => group && group.trim() !== '').join(',')
+      : '';
+
     let res;
     try {
-      // values.group 可能包含空字符串 或者重复，需要过滤掉
       if (values.is_edit) {
         res = await API.put(`/api/token/`, {
           ...values,
           id: parseInt(tokenId),
-          group: Array.from(new Set(values.group.filter((group) => group !== ''))).join(',')
+          group: values.group || '',
+          backup_group: backupGroupString
         });
       } else {
         res = await API.post(`/api/token/`, {
           ...values,
-          group: Array.from(new Set(values.group.filter((group) => group !== ''))).join(',')
+          group: values.group || '',
+          backup_group: backupGroupString
         });
       }
       const { success, message } = res.data;
@@ -180,7 +189,17 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
         if (!data.setting) data.setting = originInputs.setting;
         if (!data.setting.limits) data.setting.limits = originInputs.setting.limits;
         if (!data.setting.limits.models) data.setting.limits.models = [];
-        data.group = data.group.split(',');
+
+        // 主分组保持为字符串，不需要分割
+        // data.group 应该已经是字符串格式
+
+        // 处理备用分组：将字符串转换为数组
+        if (data.backup_group && typeof data.backup_group === 'string') {
+          data.backup_group = data.backup_group.split(',').map(g => g.trim()).filter(g => g !== '');
+        } else {
+          data.backup_group = [];
+        }
+
         setInputs(data);
       } else {
         showError(message);
@@ -374,9 +393,6 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
                       onChange={(e) => {
                         const value = e.target.value === '-1' ? '' : e.target.value;
                         setFieldValue('group', value);
-                        if (values.backup_group === value && value !== '') {
-                          setFieldValue('backup_group', '');
-                        }
                       }}
                       variant={'outlined'}
                     >
@@ -389,27 +405,93 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12} md={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>{t('token_index.userBackupGroup')}</InputLabel>
-                    <Select
-                      label={t('token_index.userBackupGroup')}
-                      name="backup_group"
-                      value={values.backup_group || '-1'}
-                      onChange={(e) => {
-                        const value = e.target.value === '-1' ? '' : e.target.value;
-                        setFieldValue('backup_group', value);
-                      }}
-                      variant={'outlined'}
-                    >
-                      <MenuItem value="-1">无备用分组</MenuItem>
-                      {userGroupOptions.map((option) => (
-                        <MenuItem key={option.value} value={option.value} disabled={values.group === option.value && values.group !== ''}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                <Grid item xs={12}>
+                  <Typography variant="h6" sx={{ mb: 1 }}>
+                    {t('token_index.userBackupGroup')}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
+                    {t('token_index.backupGroupHelperText')}
+                  </Typography>
+
+                  {/* 备用分组下拉框列表 */}
+                  {values.backup_group && values.backup_group.length > 0 ? (
+                    values.backup_group.map((group, index) => (
+                      <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Typography variant="body2" sx={{ minWidth: 60 }}>
+                          备用{index + 1}:
+                        </Typography>
+                        <FormControl fullWidth size="small">
+                          <Select
+                            value={group || ''}
+                            onChange={(e) => {
+                              const newBackupGroups = [...values.backup_group];
+                              newBackupGroups[index] = e.target.value;
+                              setFieldValue('backup_group', newBackupGroups);
+                            }}
+                            displayEmpty
+                          >
+                            <MenuItem value="">
+                              <em>请选择备用分组</em>
+                            </MenuItem>
+                            {userGroupOptions.map((option) => {
+                              // 检查该分组是否已被选中（包括主分组和其他备用分组）
+                              const isMainGroup = values.group === option.value;
+                              const isSelectedInOtherBackup = values.backup_group.some((g, i) => i !== index && g === option.value);
+                              const isDisabled = isMainGroup || isSelectedInOtherBackup;
+
+                              return (
+                                <MenuItem
+                                  key={option.value}
+                                  value={option.value}
+                                  disabled={isDisabled}
+                                >
+                                  {option.label}
+                                  {isMainGroup && ' (主分组)'}
+                                  {isSelectedInOtherBackup && ' (已选择)'}
+                                </MenuItem>
+                              );
+                            })}
+                          </Select>
+                        </FormControl>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            const newBackupGroups = values.backup_group.filter((_, i) => i !== index);
+                            setFieldValue('backup_group', newBackupGroups);
+                          }}
+                          color="error"
+                        >
+                          <Icon icon="solar:trash-bin-minimalistic-line-duotone" />
+                        </IconButton>
+                      </Box>
+                    ))
+                  ) : (
+                    <Box sx={{ textAlign: 'center', py: 2, color: 'text.secondary' }}>
+                      <Typography variant="body2">
+                        点击下方按钮添加备用分组
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {/* 添加备用分组按钮 */}
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => {
+                      const newBackupGroups = [...(values.backup_group || []), ''];
+                      setFieldValue('backup_group', newBackupGroups);
+                    }}
+                    startIcon={<Icon icon="solar:add-circle-line-duotone" />}
+                    sx={{ mt: 1 }}
+                  >
+                    添加备用分组
+                  </Button>
+
+                  {touched.backup_group && errors.backup_group && (
+                    <FormHelperText error sx={{ mt: 1 }}>
+                      {errors.backup_group}
+                    </FormHelperText>
+                  )}
                 </Grid>
               </Grid>
 

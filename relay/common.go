@@ -161,16 +161,38 @@ func fetchChannelById(channelId int) (*model.Channel, error) {
 
 // GroupManager 统一管理分组逻辑
 type GroupManager struct {
-	primaryGroup string
-	backupGroup  string
-	context      *gin.Context
+	primaryGroup  string
+	backupGroup   string
+	backupGroups  []string
+	context       *gin.Context
+}
+
+// parseBackupGroups 解析备用分组字符串，支持逗号分隔的多个分组
+func parseBackupGroups(backupGroupStr string) []string {
+	if backupGroupStr == "" {
+		return nil
+	}
+
+	groups := strings.Split(backupGroupStr, ",")
+	var result []string
+	for _, group := range groups {
+		group = strings.TrimSpace(group)
+		if group != "" {
+			result = append(result, group)
+		}
+	}
+	return result
 }
 
 // NewGroupManager 创建分组管理器
 func NewGroupManager(c *gin.Context) *GroupManager {
+	backupGroupStr := c.GetString("token_backup_group")
+	backupGroups := parseBackupGroups(backupGroupStr)
+
 	return &GroupManager{
 		primaryGroup: c.GetString("token_group"),
-		backupGroup:  c.GetString("token_backup_group"),
+		backupGroup:  backupGroupStr, // 保持原有字段不变
+		backupGroups: backupGroups,   // 新增解析后的分组列表
 		context:      c,
 	}
 }
@@ -186,7 +208,38 @@ func (gm *GroupManager) TryWithGroups(modelName string, filters []model.Channels
 		logger.LogError(gm.context.Request.Context(), fmt.Sprintf("主分组 %s 失败: %v", gm.primaryGroup, err))
 	}
 
-	// 如果主分组失败，尝试备用分组
+	// 如果主分组失败，按顺序尝试所有备用分组
+	if len(gm.backupGroups) > 0 {
+		for i, backupGroup := range gm.backupGroups {
+			// 跳过与主分组相同的分组
+			if backupGroup == gm.primaryGroup {
+				continue
+			}
+
+			logger.LogInfo(gm.context.Request.Context(), fmt.Sprintf("尝试使用备用分组 %d: %s", i+1, backupGroup))
+			channel, err := gm.tryGroup(backupGroup, modelName, filters, operation)
+			if err == nil {
+				// 更新上下文中的分组信息
+				gm.context.Set("is_backupGroup", true)
+				gm.context.Set("current_backup_group", backupGroup)
+				gm.context.Set("backup_group_index", i+1)
+
+				if err := gm.setGroupRatio(backupGroup); err != nil {
+					logger.LogError(gm.context.Request.Context(), fmt.Sprintf("设置备用分组 %s 倍率失败: %v", backupGroup, err))
+					// 继续尝试下一个备用分组
+					continue
+				}
+				return channel, nil
+			}
+			logger.LogError(gm.context.Request.Context(), fmt.Sprintf("备用分组 %s 失败: %v", backupGroup, err))
+		}
+
+		// 所有备用分组都失败了
+		lastBackupGroup := gm.backupGroups[len(gm.backupGroups)-1]
+		return nil, gm.createGroupError(lastBackupGroup, modelName, nil)
+	}
+
+	// 兼容原有单备用分组逻辑（当没有解析到多个备用分组时）
 	if gm.backupGroup != "" && gm.backupGroup != gm.primaryGroup {
 		logger.LogInfo(gm.context.Request.Context(), fmt.Sprintf("尝试使用备用分组: %s", gm.backupGroup))
 		channel, err := gm.tryGroup(gm.backupGroup, modelName, filters, operation)
@@ -199,8 +252,9 @@ func (gm *GroupManager) TryWithGroups(modelName string, filters []model.Channels
 			return channel, nil
 		}
 		logger.LogError(gm.context.Request.Context(), fmt.Sprintf("备用分组 %s 也失败: %v", gm.backupGroup, err))
-		return nil, gm.createGroupError(gm.backupGroup, modelName, channel)
+		return nil, gm.createGroupError(gm.backupGroup, modelName, nil)
 	}
+
 	return nil, gm.createGroupError(gm.primaryGroup, modelName, nil)
 }
 

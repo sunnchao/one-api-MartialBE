@@ -1290,6 +1290,7 @@
     "selectGroupInfo": "使用したいチャネルグループを選択してください。チャネルグループが利用できない場合はバックアップチャネルが使用されます",
     "userGroup": "グループ",
     "userBackupGroup": "バックアップグループ",
+    "backupGroupHelperText": "追加ボタンをクリックして複数のバックアップグループを追加できます。プライマリグループが利用できない場合、追加した順番でバックアップグループが試行されます",
     "apiRate": "",
     "apiRateTip": "",
     "heartbeat": "心拍設定（実験的）",
@@ -1300,7 +1301,7 @@
     "limits_info": "設定後、トークンに制限をかけることができます",
     "limits_switch": "制限を有効にする",
     "limit_models": "モデルの制限",
-    "limit_models_info": "このトークンが使用できるモデルを選択します。選択しない場合は、すべてのモデルが許可されます"
+    "limit_models_info": "このトークンが使用できるモデルを選択します。選択しない場合は、すべてのモデルが許可されます",
     "modelLimitsEnabled": "モデル制限を有効にする",
     "modelLimits": "モデル制限",
     "billingType": {

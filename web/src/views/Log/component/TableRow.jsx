@@ -137,14 +137,14 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
                 </Label>
                 <ArrowForward sx={{ fontSize: 16, color: 'text.secondary' }} />
                 <Label color="warning" variant="soft">
-                  {userGroup[item.metadata.backup_group_name]?.name || '备份分组'}
+                  {userGroup[item?.metadata?.backup_group_name]?.name || item?.metadata?.backup_group_name || '备份分组'}
                 </Label>
               </Stack>
             ) : (
               // 正常显示分组
               item?.metadata?.group_name || item?.metadata?.backup_group_name ? (
                 <Label color="default" variant="soft">
-                  {userGroup[item.metadata.group_name || item.metadata.backup_group_name]?.name || '跟随用户'}
+                  {userGroup[item?.metadata?.group_name || item?.metadata?.backup_group_name]?.name || item?.metadata?.group_name || item?.metadata?.backup_group_name || '跟随用户'}
                 </Label>
               ) : (
                 ''

@@ -188,8 +188,8 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
           <Typography sx={{ fontSize: 13, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
             {t('logPage.groupLabel')}:{' '}
             {!item?.metadata?.is_backup_group
-              ? userGroup[item?.metadata?.group_name]?.name
-              : `${userGroup[item?.metadata?.group_name].name}→${userGroup[item?.metadata.backup_group_name].name}`}
+              ? userGroup[item?.metadata?.group_name]?.name || item?.metadata?.group_name || '未知分组'
+              : `${userGroup[item?.metadata?.group_name]?.name || item?.metadata?.group_name || '未知分组'}→${userGroup[item?.metadata?.backup_group_name]?.name || item?.metadata?.backup_group_name || '未知备用分组'}`}
           </Typography>
           <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
             {t('logPage.quotaDetail.groupRatioValue')}: {groupRatio}

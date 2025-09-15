@@ -345,6 +345,7 @@
     "selectGroupInfo": "在这里选择你想要使用的渠道分组，当渠道分组不可用时，将会使用备用渠道",
     "userGroup": "分组",
     "userBackupGroup": "备用分组",
+    "backupGroupHelperText": "点击添加按钮可添加多个备用分组，当主分组不可用时将按添加顺序依次尝试备用分组",
     "cancel": "取消",
     "submit": "提交",
     "heartbeat": "心跳设置(实验性)",

@@ -57,7 +57,13 @@ func NewQuota(c *gin.Context, modelName string, promptTokens int) *Quota {
 
 	quota.price = *model.PricingInstance.GetPrice(quota.modelName)
 	quota.groupName = c.GetString("token_group")
-	quota.backupGroupName = c.GetString("token_backup_group")
+
+	// 优先使用当前实际使用的备用分组，如果没有则使用原始备用分组配置
+	quota.backupGroupName = c.GetString("current_backup_group")
+	if quota.backupGroupName == "" {
+		quota.backupGroupName = c.GetString("token_backup_group")
+	}
+
 	quota.groupRatio = c.GetFloat64("group_ratio") // 这里的倍率已经在 common.go 中正确设置了
   if quota.isSearch {
     quota.channelId = 0

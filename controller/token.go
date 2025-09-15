@@ -1,19 +1,19 @@
 package controller
 
 import (
-	"errors"
-	"fmt"
-	"net/http"
-	"one-api/common"
-	"one-api/common/config"
-	"one-api/common/database"
-	"one-api/common/utils"
-	"one-api/model"
-	"strconv"
-	"strings"
+  "errors"
+  "fmt"
+  "net/http"
+  "one-api/common"
+  "one-api/common/config"
+  "one-api/common/database"
+  "one-api/common/utils"
+  "one-api/model"
+  "strconv"
+  "strings"
 
-	"github.com/gin-gonic/gin"
-	"gorm.io/datatypes"
+  "github.com/gin-gonic/gin"
+  "gorm.io/datatypes"
 )
 
 func GetUserTokensList(c *gin.Context) {
@@ -113,26 +113,26 @@ func AddToken(c *gin.Context) {
     return
   }
 
-	if token.Group != "" {
-		err = validateTokenGroup(token.Group, userId)
-		if err != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": err.Error(),
-			})
-			return
-		}
-	}
-	if token.BackupGroup != "" {
-		err = validateTokenGroup(token.BackupGroup, userId)
-		if err != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": err.Error(),
-			})
-			return
-		}
-	}
+  if token.Group != "" {
+    err = validateTokenGroup(token.Group, userId)
+    if err != nil {
+      c.JSON(http.StatusOK, gin.H{
+        "success": false,
+        "message": err.Error(),
+      })
+      return
+    }
+  }
+  if token.BackupGroup != "" {
+    err = validateBackupGroups(token.BackupGroup, userId)
+    if err != nil {
+      c.JSON(http.StatusOK, gin.H{
+        "success": false,
+        "message": err.Error(),
+      })
+      return
+    }
+  }
 
   setting := token.Setting.Data()
   err = validateTokenSetting(&setting)
@@ -141,36 +141,36 @@ func AddToken(c *gin.Context) {
     return
   }
 
-	cleanToken := model.Token{
-		UserId: userId,
-		Name:   token.Name,
-		// Key:            utils.GenerateKey(),
-		CreatedTime:    utils.GetTimestamp(),
-		AccessedTime:   utils.GetTimestamp(),
-		ExpiredTime:    token.ExpiredTime,
-		RemainQuota:    token.RemainQuota,
-		UnlimitedQuota: token.UnlimitedQuota,
-		Group:          token.Group,
-		BackupGroup:    token.BackupGroup,
+  cleanToken := model.Token{
+    UserId: userId,
+    Name:   token.Name,
+    // Key:            utils.GenerateKey(),
+    CreatedTime:        utils.GetTimestamp(),
+    AccessedTime:       utils.GetTimestamp(),
+    ExpiredTime:        token.ExpiredTime,
+    RemainQuota:        token.RemainQuota,
+    UnlimitedQuota:     token.UnlimitedQuota,
+    Group:              token.Group,
+    BackupGroup:        token.BackupGroup,
     ModelLimits:        token.ModelLimits,
     ModelLimitsEnabled: token.ModelLimitsEnabled,
     AllowIps:           token.AllowIps,
     AllowIpsEnabled:    token.AllowIpsEnabled,
     BillingType:        token.BillingType,
-		Setting:        token.Setting,
-	}
-	err = cleanToken.Insert()
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "",
-	})
+    Setting:            token.Setting,
+  }
+  err = cleanToken.Insert()
+  if err != nil {
+    c.JSON(http.StatusOK, gin.H{
+      "success": false,
+      "message": err.Error(),
+    })
+    return
+  }
+  c.JSON(http.StatusOK, gin.H{
+    "success": true,
+    "message": "",
+  })
 }
 
 func DeleteToken(c *gin.Context) {
@@ -242,57 +242,57 @@ func UpdateToken(c *gin.Context) {
     }
   }
 
-	if cleanToken.Group != token.Group && token.Group != "" {
-		err = validateTokenGroup(token.Group, userId)
-		if err != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": err.Error(),
-			})
-			return
-		}
-	}
-	if cleanToken.BackupGroup != token.BackupGroup && token.BackupGroup != "" {
-		err = validateTokenGroup(token.BackupGroup, userId)
-		if err != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"success": false,
-				"message": err.Error(),
-			})
-			return
-		}
-	}
+  if cleanToken.Group != token.Group && token.Group != "" {
+    err = validateTokenGroup(token.Group, userId)
+    if err != nil {
+      c.JSON(http.StatusOK, gin.H{
+        "success": false,
+        "message": err.Error(),
+      })
+      return
+    }
+  }
+  if cleanToken.BackupGroup != token.BackupGroup && token.BackupGroup != "" {
+    err = validateBackupGroups(token.BackupGroup, userId)
+    if err != nil {
+      c.JSON(http.StatusOK, gin.H{
+        "success": false,
+        "message": err.Error(),
+      })
+      return
+    }
+  }
 
-	if statusOnly != "" {
-		cleanToken.Status = token.Status
-	} else {
-		// If you add more fields, please also update token.Update()
-		cleanToken.Name = token.Name
-		cleanToken.ExpiredTime = token.ExpiredTime
-		cleanToken.RemainQuota = token.RemainQuota
-		cleanToken.UnlimitedQuota = token.UnlimitedQuota
-		cleanToken.Group = token.Group
-		cleanToken.BackupGroup = token.BackupGroup
+  if statusOnly != "" {
+    cleanToken.Status = token.Status
+  } else {
+    // If you add more fields, please also update token.Update()
+    cleanToken.Name = token.Name
+    cleanToken.ExpiredTime = token.ExpiredTime
+    cleanToken.RemainQuota = token.RemainQuota
+    cleanToken.UnlimitedQuota = token.UnlimitedQuota
+    cleanToken.Group = token.Group
+    cleanToken.BackupGroup = token.BackupGroup
     cleanToken.ModelLimits = token.ModelLimits
     cleanToken.ModelLimitsEnabled = token.ModelLimitsEnabled
     cleanToken.AllowIps = token.AllowIps
     cleanToken.AllowIpsEnabled = token.AllowIpsEnabled
     cleanToken.BillingType = token.BillingType
-		cleanToken.Setting = token.Setting
-	}
-	err = cleanToken.Update()
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "",
-		"data":    cleanToken,
-	})
+    cleanToken.Setting = token.Setting
+  }
+  err = cleanToken.Update()
+  if err != nil {
+    c.JSON(http.StatusOK, gin.H{
+      "success": false,
+      "message": err.Error(),
+    })
+    return
+  }
+  c.JSON(http.StatusOK, gin.H{
+    "success": true,
+    "message": "",
+    "data":    cleanToken,
+  })
 }
 
 func validateTokenGroup(tokenGroup string, userId int) error {
@@ -308,6 +308,30 @@ func validateTokenGroup(tokenGroup string, userId int) error {
 
   if !groupRatio.Public && userGroup != tokenGroup {
     return errors.New(fmt.Sprintf("当前用户组无权使用指定的分组: %s", tokenGroup))
+  }
+
+  return nil
+}
+
+// validateBackupGroups 验证备用分组（支持逗号分隔的多个分组）
+func validateBackupGroups(backupGroups string, userId int) error {
+  if backupGroups == "" {
+    return nil // 空值是允许的
+  }
+
+  // 分割逗号分隔的分组
+  groups := strings.Split(backupGroups, ",")
+  for _, group := range groups {
+    group = strings.TrimSpace(group)
+    if group == "" {
+      continue // 跳过空分组
+    }
+
+    // 验证每个分组
+    err := validateTokenGroup(group, userId)
+    if err != nil {
+      return err
+    }
   }
 
   return nil

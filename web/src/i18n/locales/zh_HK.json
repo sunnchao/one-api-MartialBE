@@ -1291,6 +1291,7 @@
     "selectGroupInfo": "在這裡選擇你想要使用的渠道分組，當渠道分組不可用時，將會使用備用渠道",
     "userGroup": "分組",
     "userBackupGroup": "備用分組",
+    "backupGroupHelperText": "點擊添加按鈕可添加多個備用分組，當主分組不可用時，將按添加順序依次嘗試備用分組",
     "apiRate": "API速率",
     "apiRateTip": "每分鐘允許的請求數,當速率小於60時，使用計數器限制器，當速率大於等於60時，使用令牌桶限制器，僅在啟用Redis時有效",
     "heartbeat": "心跳設置(實驗性)",

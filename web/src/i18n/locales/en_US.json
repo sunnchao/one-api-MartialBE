@@ -1304,6 +1304,7 @@
     "selectGroupInfo": "Select the channel group you want to use here. When the channel group is unavailable, backup channels will be used",
     "userGroup": "Group",
     "userBackupGroup": "Backup group",
+    "backupGroupHelperText": "Click the add button to add multiple backup groups. When the primary group is unavailable, backup groups will be tried in the order they were added",
     "apiRate": "",
     "apiRateTip": "",
     "heartbeat": "Heartbeat setting (Experimental)",
@@ -1314,7 +1315,7 @@
     "limits_info": "After setting, you can impose restrictions on the token.",
     "limits_switch": "Enable Limits",
     "limit_models": "Model Limits",
-    "limit_models_info": "Select the models that this token is allowed to use. If no models are selected, all models are permitted."
+    "limit_models_info": "Select the models that this token is allowed to use. If no models are selected, all models are permitted.",
     "modelLimitsEnabled": "Enable model limits",
     "modelLimits": "Model limits",
     "billingType": {
