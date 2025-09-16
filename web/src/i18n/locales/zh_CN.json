@@ -464,6 +464,7 @@
       "outputPrice": "输出价格",
       "groupRatio": "分组倍率",
       "groupRatioValue": "分组倍率",
+      "cachedReadRatio": "缓存读取倍率",
       "actualPrice": "实际价格",
       "input": "输入价格",
       "output": "输出价格",

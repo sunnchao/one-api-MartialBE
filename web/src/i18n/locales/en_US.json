@@ -542,6 +542,7 @@
       "outputPrice": "Output Price",
       "groupRatio": "Group Ratio",
       "groupRatioValue": "Group Ratio",
+      "cachedReadRatio": "Cached Read Ratio",
       "actualPrice": "Actual Price",
       "input": "Input",
       "output": "Output",
