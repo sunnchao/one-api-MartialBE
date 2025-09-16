@@ -95,7 +95,7 @@ func (p *ClaudeProvider) getChatRequest(claudeRequest *ClaudeRequest) (*http.Req
 		return nil, common.ErrorWrapperLocal(nil, "invalid_claude_config", http.StatusInternalServerError)
 	}
 
-	headers := p.GetRequestHeaders()
+	headers := p.GetOriginalRequestHeaders()
 	if claudeRequest.Stream {
 		headers["Accept"] = "text/event-stream"
 	}
@@ -143,7 +143,7 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 
 	systemMessage := ""
 	mgsLen := len(request.Messages) - 1
-  isThink := (request.OneOtherArg == "thinking" || request.Reasoning != nil)
+	isThink := (request.OneOtherArg == "thinking" || request.Reasoning != nil)
 
 	for index, msg := range request.Messages {
 		if isThink && index == mgsLen && (msg.Role == types.ChatMessageRoleAssistant || msg.Role == types.ChatMessageRoleSystem) {
@@ -186,7 +186,7 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*ClaudeRequest
 	}
 
 	// 如果是3-7 默认开启thinking
-  if request.OneOtherArg == "thinking" || request.Reasoning != nil {
+	if request.OneOtherArg == "thinking" || request.Reasoning != nil {
 		var opErr *types.OpenAIErrorWithStatusCode
 		claudeRequest.MaxTokens, claudeRequest.Thinking, opErr = getThinking(claudeRequest.MaxTokens, request.Reasoning)
 

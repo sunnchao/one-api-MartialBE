@@ -78,6 +78,35 @@ func (p *ClaudeProvider) GetRequestHeaders() (headers map[string]string) {
 	return headers
 }
 
+// 获取原始请求的header头
+func (p *ClaudeProvider) GetOriginalRequestHeaders() (headers map[string]string) {
+	headers = make(map[string]string)
+
+	hasAuthorization := false
+	if p.Context != nil && p.Context.Request != nil {
+		// 复制原始请求的所有header头
+		for key, values := range p.Context.Request.Header {
+			if len(values) > 0 {
+				headers[key] = values[0] // 取第一个值
+				// 检查是否包含Authorization头
+				if strings.ToLower(key) == "authorization" {
+					hasAuthorization = true
+				}
+			}
+		}
+	}
+	p.CommonRequestHeaders(headers)
+
+	// 如果原始header中没有Authorization，则添加Authorization头
+	if hasAuthorization {
+		headers["Authorization"] = "Bearer " + p.Channel.Key
+	} else {
+		headers["x-api-key"] = p.Channel.Key
+	}
+
+	return headers
+}
+
 func (p *ClaudeProvider) GetFullRequestURL(requestURL string) string {
 	baseURL := strings.TrimSuffix(p.GetBaseURL(), "/")
 	if strings.HasPrefix(baseURL, "https://gateway.ai.cloudflare.com") {

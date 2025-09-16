@@ -25,6 +25,12 @@ func (p *ClaudeProvider) CreateClaudeChat(request *ClaudeRequest) (*ClaudeRespon
 	}
 	defer req.Body.Close()
 
+	// 将ClaudeProvider的p对象中的原始请求header请求头赋值给req
+	headers := p.GetOriginalRequestHeaders()
+	for key, value := range headers {
+		req.Header.Set(key, value)
+	}
+
 	claudeResponse := &ClaudeResponse{}
 	// 发送请求
 	_, errWithCode = p.Requester.SendRequest(req, claudeResponse, false)
@@ -49,6 +55,12 @@ func (p *ClaudeProvider) CreateClaudeChatStream(request *ClaudeRequest) (request
 		return nil, errWithCode
 	}
 	defer req.Body.Close()
+
+	// 将ClaudeProvider的p对象中的原始请求header请求头赋值给req
+	headers := p.GetOriginalRequestHeaders()
+	for key, value := range headers {
+		req.Header.Set(key, value)
+	}
 
 	chatHandler := &ClaudeRelayStreamHandler{
 		Usage:     p.Usage,
