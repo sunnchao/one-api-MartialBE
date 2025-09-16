@@ -180,16 +180,17 @@ export default function TokensTableRow({ item, manageToken, handleOpenModal, set
         <TableCell>{item.name}</TableCell>
         <TableCell sx={{ maxWidth: 200 }}>
           <Stack direction="column" spacing={0.5}>
-            {item.group.split(',').map((group, idx, arr) => (
-              <Stack key={`group-row-${idx}`} direction="row" alignItems="center" spacing={0.5}>
-                <Label color={userGroup[group]?.color} size="small">
-                  {renderGroup(userGroupOptions, group)}
-                </Label>
-                {idx < arr.length - 1 && (
-                  <Icon icon="mdi:arrow-down" width={16} height={16} />
-                )}
-              </Stack>
-            ))}
+            {`${item.group},${item.backup_group}`
+              .split(',')
+              .filter((group) => group !== '')
+              .map((group, idx, arr) => (
+                <Stack key={`group-row-${idx}`} direction="row" alignItems="center" spacing={0.5}>
+                  <Label color={userGroup[group]?.color} size="small">
+                    {renderGroup(userGroupOptions, group)}
+                  </Label>
+                  {idx < arr.length - 1 && <Icon icon="mdi:arrow-down" width={16} height={16} />}
+                </Stack>
+              ))}
           </Stack>
         </TableCell>
 
