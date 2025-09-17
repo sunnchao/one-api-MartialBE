@@ -198,14 +198,14 @@ const CodexConfigTutorial = () => (
       </Typography>
       <Box sx={{ backgroundColor: 'grey.100', p: 2, borderRadius: 1, fontFamily: 'monospace' }}>
         <Typography variant="body2">
-          {`model_provider = "wochirou"
+          {`model_provider = "maijik"
 model = "gpt-5"
 model_reasoning_effort = "high"
 disable_response_storage = true
 
-[model_providers.wochirou]
-name = "wochirou"
-base_url = "https://api.wochirou.com/v1"
+[model_providers.maijik]
+name = "maijik"
+base_url = "https://api.maijik.com/v1"
 wire_api = "responses"`}
         </Typography>
       </Box>
@@ -238,12 +238,12 @@ wire_api = "responses"`}
         <Typography variant="body2">
           # 临时设置
           <br />
-          export wochirou="your-api-key-here"
+          export maijik="your-api-key-here"
           <br />
           <br />
           # 永久设置（添加到 ~/.bashrc 或 ~/.zshrc）
           <br />
-          echo 'export wochirou="your-api-key-here"' &gt;&gt; ~/.bashrc
+          echo 'export maijik="your-api-key-here"' &gt;&gt; ~/.bashrc
           <br />
           source ~/.bashrc
         </Typography>

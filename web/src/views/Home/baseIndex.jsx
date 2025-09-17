@@ -54,6 +54,17 @@ const textAnimation = keyframes`
   }
 `;
 
+const starTwinkle = keyframes`
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+`;
+
 const BaseIndex = () => {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -135,7 +146,7 @@ const BaseIndex = () => {
   };
 
   const handleCopy = () => {
-    const textToCopy = `https://api.wochirou.com${endpoints[currentEndpointIndex]}`;
+    const textToCopy = `https://api.maijik.com${endpoints[currentEndpointIndex]}`;
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -157,21 +168,21 @@ const BaseIndex = () => {
   return (
     <>
       <Helmet>
-        <title>Chirou API - 企业级AI接口调用平台</title>
+        <title>✨ Maijik API - 让AI如魔法般为您服务</title>
         <meta
           name="description"
-          content="Chirou API，企业级AI接口调用平台，专为企业级需求打造，提供高性能、高并发、高可用的服务，一站式处理大规模数据和复杂任务。我们的稳定高并发处理能力和高可用性保证您的业务流畅运行，结合OpenAI, ClaudeAI, GeminiAI, Meta LLama, API等AI接口和专业的技术支持，为您的企业快速部署和实现AI接口应用，释放商业价值"
+          content="Maijik API，让AI如魔法般为您服务。专为现代开发者打造的神奇AI接口平台，提供魔法般的响应速度、星级稳定性保障和无限扩展魔力。支持OpenAI, ClaudeAI, GeminiAI等所有主流AI模型，让您的应用拥有真正的魔法力量。"
         />
-        <meta name="keywords" content="Chirou API,OpenAI,Claude,Midjourney,Claude Code,高并发,高可用,高性能,企业级AI接口调用平台" />
+        <meta name="keywords" content="Maijik API,魔法AI,OpenAI,Claude,Midjourney,AI魔法接口,神奇响应,星级稳定,无限扩展" />
         <script type="application/ld+json">
           {`
             {
               "@context": "https://schema.org",
               "@type": "Organization",
-              "name": "Chirou API",
-              "url": "https://www.wochirou.com",
-              "logo": "https://www.wochirou.com/logo.png",
-              "description": "企业级AI接口调用平台，提供高性能、高并发、高可用的AI接口服务。"
+              "name": "Maijik API",
+              "url": "https://www.maijik.com",
+              "logo": "https://www.maijik.com/logo.png",
+              "description": "让AI如魔法般为您服务的神奇接口平台，提供魔法般的响应速度和星级稳定性保障。"
             }
           `}
         </script>
@@ -181,8 +192,8 @@ const BaseIndex = () => {
           minHeight: '100vh',
           background:
             theme.palette.mode === 'dark'
-              ? 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 60%, #2d3748 100%)'
-              : 'linear-gradient(135deg, #1677ff 0%, #0d47a1 60%, #0d47a1 100%)',
+              ? 'linear-gradient(135deg, #0a0a0a 0%, #0d1421 30%, #1677ff 60%, #0d47a1 100%)'
+              : 'linear-gradient(135deg, #1677ff 0%, #0d47a1 30%, #1565c0 60%, #0d47a1 100%)',
           color: 'white',
           position: 'relative',
           overflow: 'hidden',
@@ -195,11 +206,35 @@ const BaseIndex = () => {
             bottom: 0,
             backgroundImage:
               theme.palette.mode === 'dark'
-                ? `linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                ? `radial-gradient(2px 2px at 20px 30px, #1677ff, transparent),
+                 radial-gradient(2px 2px at 40px 70px, #42a5f5, transparent),
+                 radial-gradient(1px 1px at 90px 40px, #90caf9, transparent),
+                 radial-gradient(1px 1px at 130px 80px, #1677ff, transparent),
+                 radial-gradient(2px 2px at 160px 30px, #42a5f5, transparent),
+                 linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
                  linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px)`
-                : `linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                 linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)`,
-            backgroundSize: '80px 80px',
+                : `radial-gradient(2px 2px at 25px 35px, #1677ff, transparent),
+                 radial-gradient(2px 2px at 45px 75px, #64b5f6, transparent),
+                 radial-gradient(1px 1px at 95px 45px, #90caf9, transparent),
+                 radial-gradient(1px 1px at 135px 85px, #1677ff, transparent),
+                 radial-gradient(2px 2px at 165px 35px, #64b5f6, transparent),
+                 linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                 linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)`,
+            backgroundSize: '200px 200px, 200px 200px, 200px 200px, 200px 200px, 200px 200px, 80px 80px, 80px 80px',
+            animation: `${starTwinkle} 3s ease-in-out infinite alternate`,
+            pointerEvents: 'none',
+            opacity: 0.6
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: `radial-gradient(circle at 20% 80%, rgba(22, 119, 255, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(66, 165, 245, 0.2) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(144, 202, 249, 0.2) 0%, transparent 50%)`,
             pointerEvents: 'none',
             opacity: 0.4
           }
@@ -284,11 +319,11 @@ const BaseIndex = () => {
                         width: 8,
                         height: 8,
                         borderRadius: '50%',
-                        background: '#4fc3f7',
+                        background: 'linear-gradient(45deg, #1677ff, #42a5f5)',
                         display: 'inline-block'
                       }}
                     />
-                    全天候稳定运行 · 企业级可靠性
+                    全时魔法守护 · 星级可靠性
                   </Typography>
                 </Box>
 
@@ -317,7 +352,7 @@ const BaseIndex = () => {
                     }
                   }}
                 >
-                  专业的AI大模型接口调用服务平台
+                  让AI如魔法般为您服务
                 </Typography>
                 <Typography
                   variant="h4"
@@ -331,7 +366,7 @@ const BaseIndex = () => {
                     fontWeight: 400
                   }}
                 >
-                  致力于提供高性能、高并发、高可用AI大模型接口调用服务平台，为个人和企业提供一站式AI解决方案
+                  专为现代开发者打造的AI接口平台，拥有卓越的响应速度、稳定性保障和无限扩展能力，让您的应用获得真正的魔法力量
                 </Typography>
                 <Box
                   sx={{
@@ -353,7 +388,7 @@ const BaseIndex = () => {
                   }}
                 >
                   <Typography variant="body1" sx={{ fontFamily: 'monospace', color: '#fff', mr: 2 }}>
-                    https://api.wochirou.com
+                    https://api.maijik.com
                   </Typography>
                   <Box sx={{ position: 'relative', width: { xs: '200px', sm: '250px' }, height: '21px', overflow: 'hidden' }}>
                     {endpoints.map((endpoint, index) => (
@@ -397,7 +432,7 @@ const BaseIndex = () => {
                       color: '#1a237e',
                       px: 4,
                       py: 2,
-                      borderRadius: '14px',
+                      borderRadius: '12px',
                       fontSize: '1.1rem',
                       fontWeight: 600,
                       boxShadow: '0 10px 30px rgba(144,202,249,0.3)',
@@ -424,7 +459,7 @@ const BaseIndex = () => {
                       borderColor: 'rgba(255,255,255,0.3)',
                       px: 4,
                       py: 2,
-                      borderRadius: '14px',
+                      borderRadius: '12px',
                       fontSize: '1.1rem',
                       fontWeight: 600,
                       backdropFilter: 'blur(10px)',
@@ -452,9 +487,9 @@ const BaseIndex = () => {
                   }}
                 >
                   {[
-                    // { count: '100万+', label: '日调用次数' },
-                    { count: '99.99%', label: '服务可用性' },
-                    { count: '24/7', label: '全天候稳定运行' }
+                    { count: '∞', label: '无限可能' },
+                    { count: '99.99%', label: '服务可靠' },
+                    { count: '24/7', label: '全时守护' }
                   ].map((stat, index) => (
                     <Box key={index} sx={{ textAlign: 'center' }}>
                       <Typography
@@ -501,7 +536,7 @@ const BaseIndex = () => {
                   textShadow: '0 2px 10px rgba(0,0,0,0.2)'
                 }}
               >
-                支持众多的大模型供应商
+                支持众多AI模型供应商
               </Typography>
               <Box
                 sx={{
@@ -579,7 +614,7 @@ const BaseIndex = () => {
               variant="body1"
               align="center"
               sx={{
-                color: 'rgba(255,255,255,0.7)',
+                color: 'rgba(255,255,255,0.8)',
                 maxWidth: '650px',
                 mx: 'auto',
                 mb: 10,
@@ -587,45 +622,45 @@ const BaseIndex = () => {
                 fontSize: '1.1rem'
               }}
             >
-              我们提供企业级性能保障，确保您的AI应用高效稳定地运行
+              我们为您的AI应用提供企业级性能保障，确保每一次调用都稳定高效
             </Typography>
 
             <Grid container spacing={{ xs: 5, md: 6 }}>
               {[
                 {
-                  icon: <Bolt sx={{ fontSize: 36, color: '#90caf9' }} />,
-                  title: '企业级卓越性能',
-                  features: ['高并发架构，稳定可靠', '千万级每日调用处理能力', '智能负载均衡，确保服务稳定', '超一年稳定运行验证']
+                  icon: <Bolt sx={{ fontSize: 36, color: '#fff' }} />,
+                  title: '极速响应',
+                  features: ['毫秒级API响应时间', '千万级并发处理能力', '智能负载均衡系统', '超两年稳定运行验证']
                 },
                 {
-                  icon: <Cloud sx={{ fontSize: 36, color: '#90caf9' }} />,
-                  title: '全球高速网络',
-                  features: ['全球多区域节点部署', 'CN2 GIA 专线接入，延迟更低', '全球70+高速中转节点', '智能路由，自动选择最优线路']
+                  icon: <Cloud sx={{ fontSize: 36, color: '#fff' }} />,
+                  title: '全球网络',
+                  features: ['全球多区域节点部署', 'CN2 GIA专线接入', '全球70+高速中转节点', '智能路由优化']
                 },
                 {
-                  icon: <Security sx={{ fontSize: 36, color: '#90caf9' }} />,
-                  title: '透明化计费',
-                  features: ['官方标准计费，公开透明', '无任何隐藏费用', '按需使用，成本可控', '账户余额，永不过期']
+                  icon: <Security sx={{ fontSize: 36, color: '#fff' }} />,
+                  title: '透明计费',
+                  features: ['官方标准计费模式', '无任何隐藏费用', '按需使用成本可控', '账户余额永不过期']
                 },
                 {
-                  icon: <SyncAlt sx={{ fontSize: 36, color: '#90caf9' }} />,
-                  title: '全面的模型支持',
+                  icon: <SyncAlt sx={{ fontSize: 36, color: '#fff' }} />,
+                  title: '全面兼容',
                   features: [
-                    '完美兼容 OpenAI, Claude, Gemini 等官方接口',
+                    '完美兼容OpenAI, Claude, Gemini等官方接口',
                     '支持全球所有主流大语言模型',
-                    '轻松集成至现有应用与工作流',
+                    '轻松集成现有应用工作流',
                     '模型库与功能持续更新'
                   ]
                 },
                 {
-                  icon: <Shield sx={{ fontSize: 36, color: '#90caf9' }} />,
-                  title: '全方位服务保障',
-                  features: ['7x24 小时全天候在线服务', '便捷的在线自助充值', '详尽的消费日志与余额查询', '专业工程师团队在线支持']
+                  icon: <Shield sx={{ fontSize: 36, color: '#fff' }} />,
+                  title: '服务保障',
+                  features: ['7x24小时在线服务', '便捷的在线自助充值', '详尽的消费日志查询', '专业工程师技术支持']
                 },
                 {
-                  icon: <Brush sx={{ fontSize: 36, color: '#90caf9' }} />,
-                  title: '强大的 Midjourney 功能',
-                  features: ['内置提示词中文优化', '高速稳定的反向代理', '同步支持 Midjourney 最新版本', '高并发任务处理，无需等待']
+                  icon: <Brush sx={{ fontSize: 36, color: '#fff' }} />,
+                  title: 'Midjourney支持',
+                  features: ['内置提示词中文优化', '高速稳定的反向代理', '同步支持最新版本', '高并发任务处理']
                 }
               ].map((feature, index) => (
                 <Grid item xs={12} md={4} key={index}>
@@ -633,17 +668,16 @@ const BaseIndex = () => {
                     sx={{
                       height: '100%',
                       transform: 'translateY(0)',
-                      transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                      transition: 'all 0.3s ease',
                       '&:hover': {
-                        transform: 'translateY(-10px)',
+                        transform: 'translateY(-5px)',
                         '& .feature-icon': {
-                          transform: 'scale(1.1)',
-                          background: 'rgba(25,118,210,0.2)'
+                          transform: 'scale(1.05)',
+                          backgroundColor: 'rgba(22,119,255,0.25)'
                         },
                         '& .feature-card': {
-                          boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
-                          background: 'linear-gradient(145deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
-                          borderColor: 'rgba(144,202,249,0.3)'
+                          boxShadow: '0 15px 35px rgba(22,119,255,0.2)',
+                          borderColor: 'rgba(100,181,246,0.4)'
                         }
                       }
                     }}
@@ -824,49 +858,33 @@ const BaseIndex = () => {
                 <Grid item xs={12} sm={4} key={index}>
                   <Box
                     sx={{
-                      p: 5,
-                      background: 'linear-gradient(145deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)',
-                      backdropFilter: 'blur(10px)',
-                      borderRadius: '24px',
-                      border: '1px solid rgba(255,255,255,0.08)',
+                      p: 4,
+                      background: 'linear-gradient(145deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.08) 100%)',
+                      backdropFilter: 'blur(12px)',
+                      borderRadius: '20px',
+                      border: '1px solid rgba(100,181,246,0.2)',
                       textAlign: 'center',
-                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                      transition: 'all 0.3s ease',
                       height: '100%',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'center',
                       position: 'relative',
                       overflow: 'hidden',
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                      boxShadow: '0 8px 25px rgba(22,119,255,0.15)',
                       '&:hover': {
-                        transform: 'translateY(-10px)',
-                        boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
-                        background: 'linear-gradient(145deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
-                        borderColor: 'rgba(144,202,249,0.3)',
-                        '& .contact-icon': {
-                          transform: 'scale(1.2) rotate(10deg)'
-                        }
-                      },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        background: 'radial-gradient(circle at top right, rgba(144,202,249,0.1), transparent 70%)',
-                        zIndex: -1
+                        transform: 'translateY(-5px)',
+                        boxShadow: '0 15px 35px rgba(22,119,255,0.2)',
+                        borderColor: 'rgba(100,181,246,0.4)'
                       }
                     }}
                   >
                     <Box
-                      className="contact-icon"
                       sx={{
-                        fontSize: '3rem',
+                        fontSize: '2.5rem',
                         mb: 3,
-                        transition: 'transform 0.5s ease',
-                        filter: 'drop-shadow(0 5px 15px rgba(0,0,0,0.2))',
-                        color: '#90caf9'
+                        color: '#fff',
+                        transition: 'transform 0.3s ease'
                       }}
                     >
                       {item.icon}
@@ -876,8 +894,10 @@ const BaseIndex = () => {
                       sx={{
                         mb: 3,
                         fontWeight: 700,
-                        color: '#90caf9',
-                        fontSize: { xs: '1.35rem', md: '1.5rem' }
+                        background: '#fff',
+                        backgroundClip: 'text',
+                        textFillColor: 'transparent',
+                        fontSize: { xs: '1.3rem', md: '1.4rem' }
                       }}
                     >
                       {item.label}
