@@ -15,7 +15,7 @@ func APIEnabled(types string) gin.HandlerFunc {
 				c.JSON(http.StatusForbidden, gin.H{
 					"error": gin.H{
 						"code":    500,
-						"status":  "chirou_api_error",
+						"status":  "maijik_api_error",
 						"message": "Gemini API is not supported",
 					},
 				})
@@ -25,7 +25,7 @@ func APIEnabled(types string) gin.HandlerFunc {
 		case "claude":
 			if !config.ClaudeAPIEnabled {
 				c.JSON(http.StatusForbidden, gin.H{
-					"type": "chirou_api_error",
+					"type": "maijik_api_error",
 					"error": gin.H{
 						"type":    "api_not_supported",
 						"message": "Claude API is not supported",

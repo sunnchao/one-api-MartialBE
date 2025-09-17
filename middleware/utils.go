@@ -12,7 +12,7 @@ func abortWithMessage(c *gin.Context, statusCode int, message string) {
 	c.JSON(statusCode, gin.H{
 		"error": gin.H{
 			"message": utils.MessageWithRequestId(message, c.GetString(logger.RequestIdKey)),
-			"type":    "chirou_api_error",
+			"type":    "maijik_api_error",
 		},
 	})
 	c.Abort()
@@ -22,7 +22,7 @@ func abortWithMessage(c *gin.Context, statusCode int, message string) {
 func midjourneyAbortWithMessage(c *gin.Context, code int, description string) {
 	c.JSON(http.StatusBadRequest, gin.H{
 		"description": description,
-		"type":        "chirou_api_error",
+		"type":        "maijik_api_error",
 		"code":        code,
 	})
 

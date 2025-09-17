@@ -141,6 +141,9 @@ const BaseIndex = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // 强制使用深色主题 - 只在初始化时执行一次
+  useEffect(() => {}, []); // 空依赖数组，只执行一次
+
   const handleLearnMoreClick = () => {
     advantagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -193,7 +196,7 @@ const BaseIndex = () => {
           background:
             theme.palette.mode === 'dark'
               ? 'linear-gradient(135deg, #0a0a0a 0%, #0d1421 30%, #1677ff 60%, #0d47a1 100%)'
-              : 'linear-gradient(135deg, #1677ff 0%, #0d47a1 30%, #1565c0 60%, #0d47a1 100%)',
+              : 'linear-gradient(135deg, #0a0a0a 0%, #0d1421 30%, #1565c0 60%, #0d47a1 100%)',
           color: 'white',
           position: 'relative',
           overflow: 'hidden',
@@ -240,34 +243,36 @@ const BaseIndex = () => {
           }
         }}
       >
-        {/* 主题切换按钮 */}
-        <Box
-          sx={{
-            position: 'fixed',
-            top: 20,
-            right: 20,
-            zIndex: 1000
-          }}
-        >
-          <Tooltip title={`切换到${theme.palette.mode === 'dark' ? '浅色' : '深色'}主题`}>
-            <IconButton
-              onClick={handleThemeToggle}
-              sx={{
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                color: 'white',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  transform: 'scale(1.1)'
-                },
-                transition: 'all 0.3s ease'
-              }}
-            >
-              {theme.palette.mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
-            </IconButton>
-          </Tooltip>
-        </Box>
+        {/* 主题切换按钮 - 隐藏，固定使用深色主题 */}
+        {false && (
+          <Box
+            sx={{
+              position: 'fixed',
+              top: 20,
+              right: 20,
+              zIndex: 1000
+            }}
+          >
+            <Tooltip title={`切换到${theme.palette.mode === 'dark' ? '浅色' : '深色'}主题`}>
+              <IconButton
+                onClick={handleThemeToggle}
+                sx={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    transform: 'scale(1.1)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                {theme.palette.mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
+              </IconButton>
+            </Tooltip>
+          </Box>
+        )}
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
           <Grid
             container
@@ -352,7 +357,7 @@ const BaseIndex = () => {
                     }
                   }}
                 >
-                  让AI如魔法般为您服务
+                  AI时代，Maijik API 为您而来
                 </Typography>
                 <Typography
                   variant="h4"
@@ -366,7 +371,7 @@ const BaseIndex = () => {
                     fontWeight: 400
                   }}
                 >
-                  专为现代开发者打造的AI接口平台，拥有卓越的响应速度、稳定性保障和无限扩展能力，让您的应用获得真正的魔法力量
+                  致力于提供高性能、高并发、高可用AI大模型接口调用服务平台，为个人和企业提供一站式AI解决方案
                 </Typography>
                 <Box
                   sx={{

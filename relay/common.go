@@ -638,7 +638,7 @@ func FilterOpenAIErr(c *gin.Context, err *types.OpenAIErrorWithStatusCode) (errW
 	requestId := c.GetString(logger.RequestIdKey)
 	newErr.OpenAIError.Message = utils.MessageWithRequestId(newErr.OpenAIError.Message, requestId)
 
-	if !newErr.LocalError && newErr.OpenAIError.Type != "chirou_api_error" && (newErr.OpenAIError.Type == "one_hub_error" || strings.HasSuffix(newErr.OpenAIError.Type, "_api_error")) {
+	if !newErr.LocalError && newErr.OpenAIError.Type != "maijik_api_error" && (newErr.OpenAIError.Type == "one_hub_error" || strings.HasSuffix(newErr.OpenAIError.Type, "_api_error")) {
 		newErr.OpenAIError.Type = "system_error"
 		// 如果是 无可用渠道 则不显示具体的分组 只显示模型
 		if groupAndModelKeywords.MatchString(newErr.Message) {
