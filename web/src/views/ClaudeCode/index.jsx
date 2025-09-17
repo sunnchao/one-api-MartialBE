@@ -111,13 +111,13 @@ const ClaudeCodeTutorialPage = () => {
   };
 
   useEffect(() => {
-    checkSubscription();
+    // checkSubscription();
   }, []);
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* 订阅状态提醒 */}
-      {!loading && (
+      {/* {!loading && (
         <Box sx={{ mb: 3 }}>
           {subscription && subscription.status === 'active' ? (
             <Alert
@@ -146,7 +146,7 @@ const ClaudeCodeTutorialPage = () => {
             </Alert>
           )}
         </Box>
-      )}
+      )} */}
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={value} onChange={handleChange} aria-label="Claude Code Tabs" centered>

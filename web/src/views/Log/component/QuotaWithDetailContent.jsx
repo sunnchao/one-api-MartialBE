@@ -57,20 +57,14 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
     item.metadata?.input_price || (item.metadata?.input_ratio ? `$${calculatePrice(item.metadata.input_ratio, groupRatio, false)} ` : '$0');
   //
   const cachedWritePrice =
-    item.metadata?.input_price ||
-    (item.metadata?.cached_write_tokens_ratio
-      ? `$${calculatePrice(item.metadata.input_ratio, item.metadata.cached_write_tokens_ratio, false)} `
-      : '$0');
+    item.metadata?.cached_write_tokens_price ||
+    (item.metadata?.cached_write_tokens_ratio ? `$${calculatePrice(item.metadata.cached_write_tokens_ratio, groupRatio, false)} ` : '$0');
   const cachedReadPrice =
-    item.metadata?.input_price ||
-    (item.metadata?.cached_read_token_ratio
-      ? `$${calculatePrice(item.metadata.input_ratio, item.metadata.cached_read_token_ratio, false)} `
-      : '$0');
+    item.metadata?.cached_read_token_price ||
+    (item.metadata?.cached_read_token_ratio ? `$${calculatePrice(item.metadata.cached_read_token_ratio, groupRatio, false)} ` : '$0');
   const reasoningPrice =
-    item.metadata?.input_price ||
-    (item.metadata?.reasoning_tokens_ratio
-      ? `$${calculatePrice(item.metadata.input_ratio, item.metadata.reasoning_tokens_ratio, false)} `
-      : '$0');
+    item.metadata?.reasoning_tokens_price ||
+    (item.metadata?.reasoning_tokens_ratio ? `$${calculatePrice(item.metadata.reasoning_tokens_ratio, groupRatio, false)} ` : '$0');
   const outputPrice =
     item.metadata?.output_price ||
     (item.metadata?.output_ratio ? `$${calculatePrice(item.metadata.output_ratio, groupRatio, false)}` : '$0');

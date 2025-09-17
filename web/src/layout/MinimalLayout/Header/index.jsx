@@ -13,7 +13,9 @@ import {
   ListItemText,
   Typography,
   Divider,
-  ClickAwayListener
+  ClickAwayListener,
+  Menu,
+  MenuItem
 } from '@mui/material';
 import LogoSection from 'layout/MainLayout/LogoSection';
 import { Link } from 'react-router-dom';
@@ -35,6 +37,7 @@ const Header = () => {
   const { pathname } = useLocation();
   const account = useSelector((state) => state.account);
   const [open, setOpen] = useState(null);
+  const [codeMenuAnchor, setCodeMenuAnchor] = useState(null);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { t } = useTranslation();
   const siteInfo = useSelector((state) => state.siteInfo);
@@ -44,6 +47,14 @@ const Header = () => {
 
   const handleCloseMenu = () => {
     setOpen(null);
+  };
+
+  const handleOpenCodeMenu = (event) => {
+    setCodeMenuAnchor(event.currentTarget);
+  };
+
+  const handleCloseCodeMenu = () => {
+    setCodeMenuAnchor(null);
   };
 
   return (
@@ -141,20 +152,44 @@ const Header = () => {
             >
               {t('menu.about')}
             </Button>
-            {/* Claude Code 介绍 */}
+            {/* AI Code 二级菜单 */}
             <Button
-              component={Link}
               variant="text"
-              to="/claude-code"
-              color={pathname === '/claude-code' ? 'primary' : 'inherit'}
+              onClick={handleOpenCodeMenu}
+              color={pathname.startsWith('/claude-code') || pathname.startsWith('/codex-code') ? 'primary' : 'inherit'}
               sx={{
                 fontSize: '0.875rem',
                 fontWeight: 500,
                 textTransform: 'none'
               }}
             >
-              {t('menu.claude-code')}
+              AI Code
             </Button>
+            <Menu
+              anchorEl={codeMenuAnchor}
+              open={Boolean(codeMenuAnchor)}
+              onClose={handleCloseCodeMenu}
+              MenuListProps={{
+                'aria-labelledby': 'basic-button',
+              }}
+            >
+              <MenuItem
+                component={Link}
+                to="/claude-code"
+                onClick={handleCloseCodeMenu}
+                selected={pathname === '/claude-code'}
+              >
+                Claude Code
+              </MenuItem>
+              <MenuItem
+                component={Link}
+                to="/codex-code"
+                onClick={handleCloseCodeMenu}
+                selected={pathname === '/codex-code'}
+              >
+                Codex Code
+              </MenuItem>
+            </Menu>
 
             {siteInfo.UptimeEnabled && (
               <Button
@@ -338,7 +373,7 @@ const Header = () => {
                         }
                       />
                     </ListItemButton>
-                    {/* Claude Code 介绍页 */}
+                    {/* AI Code 二级菜单 */}
                     <ListItemButton component={Link} to="/claude-code" selected={pathname === '/claude-code'}>
                       <ListItemText
                         primary={
@@ -350,7 +385,23 @@ const Header = () => {
                               color: pathname === '/claude-code' ? theme.palette.primary.main : theme.palette.text.primary
                             }}
                           >
-                            {t('menu.claude-code')}
+                            Claude Code
+                          </Typography>
+                        }
+                      />
+                    </ListItemButton>
+                    <ListItemButton component={Link} to="/codex-code" selected={pathname === '/codex-code'}>
+                      <ListItemText
+                        primary={
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              fontWeight: pathname === '/codex-code' ? 500 : 400,
+                              textAlign: 'center',
+                              color: pathname === '/codex-code' ? theme.palette.primary.main : theme.palette.text.primary
+                            }}
+                          >
+                            Codex Code
                           </Typography>
                         }
                       />
