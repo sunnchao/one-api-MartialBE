@@ -171,12 +171,15 @@ const BaseIndex = () => {
   return (
     <>
       <Helmet>
-        <title>✨ Chirou API - 让AI如魔法般为您服务</title>
+        <title>✨ Chirou API - 让AI为您服务</title>
         <meta
           name="description"
-          content="Chirou API，让AI如魔法般为您服务。专为现代开发者打造的神奇AI接口平台，提供魔法般的响应速度、星级稳定性保障和无限扩展魔力。支持OpenAI, ClaudeAI, GeminiAI等所有主流AI模型，让您的应用拥有真正的魔法力量。"
+          content="Chirou API，让AI为您服务。专为现代开发者打造的神奇AI接口平台，提供魔法般的响应速度、星级稳定性保障和无限扩展魔力。支持OpenAI, ClaudeAI, GeminiAI等所有主流AI模型，让您的应用拥有真正的魔法力量。"
         />
-        <meta name="keywords" content="Chirou API,魔法AI,OpenAI,Claude,Midjourney,AI魔法接口,神奇响应,星级稳定,无限扩展" />
+        <meta
+          name="keywords"
+          content="Chirou API,魔法AI, Magic AI, Claude Code, Codex Code, Claude, Gemini, Midjourney,AI代理接口,神奇响应,星级稳定,无限扩展"
+        />
         <script type="application/ld+json">
           {`
             {
@@ -185,7 +188,7 @@ const BaseIndex = () => {
               "name": "Chirou API",
               "url": "https://www.maijik.com",
               "logo": "https://www.maijik.com/logo.png",
-              "description": "让AI如魔法般为您服务的神奇接口平台，提供魔法般的响应速度和星级稳定性保障。"
+              "description": "让AI为您服务的接口平台，提供魔法般的响应速度和星级稳定性保障。"
             }
           `}
         </script>
@@ -328,7 +331,7 @@ const BaseIndex = () => {
                         display: 'inline-block'
                       }}
                     />
-                    全时魔法守护 · 星级可靠性
+                    全时守护 · 星级可靠性
                   </Typography>
                 </Box>
 
