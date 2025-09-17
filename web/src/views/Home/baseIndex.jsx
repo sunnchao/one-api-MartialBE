@@ -149,7 +149,7 @@ const BaseIndex = () => {
   };
 
   const handleCopy = () => {
-    const textToCopy = `https://api.maijik.com${endpoints[currentEndpointIndex]}`;
+    const textToCopy = `https://api.wochirou.com${endpoints[currentEndpointIndex]}`;
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -171,18 +171,18 @@ const BaseIndex = () => {
   return (
     <>
       <Helmet>
-        <title>✨ Maijik API - 让AI如魔法般为您服务</title>
+        <title>✨ Chirou API - 让AI如魔法般为您服务</title>
         <meta
           name="description"
-          content="Maijik API，让AI如魔法般为您服务。专为现代开发者打造的神奇AI接口平台，提供魔法般的响应速度、星级稳定性保障和无限扩展魔力。支持OpenAI, ClaudeAI, GeminiAI等所有主流AI模型，让您的应用拥有真正的魔法力量。"
+          content="Chirou API，让AI如魔法般为您服务。专为现代开发者打造的神奇AI接口平台，提供魔法般的响应速度、星级稳定性保障和无限扩展魔力。支持OpenAI, ClaudeAI, GeminiAI等所有主流AI模型，让您的应用拥有真正的魔法力量。"
         />
-        <meta name="keywords" content="Maijik API,魔法AI,OpenAI,Claude,Midjourney,AI魔法接口,神奇响应,星级稳定,无限扩展" />
+        <meta name="keywords" content="Chirou API,魔法AI,OpenAI,Claude,Midjourney,AI魔法接口,神奇响应,星级稳定,无限扩展" />
         <script type="application/ld+json">
           {`
             {
               "@context": "https://schema.org",
               "@type": "Organization",
-              "name": "Maijik API",
+              "name": "Chirou API",
               "url": "https://www.maijik.com",
               "logo": "https://www.maijik.com/logo.png",
               "description": "让AI如魔法般为您服务的神奇接口平台，提供魔法般的响应速度和星级稳定性保障。"
@@ -357,7 +357,7 @@ const BaseIndex = () => {
                     }
                   }}
                 >
-                  AI时代，Maijik API 为您而来
+                  AI时代，Chirou API 为您而来
                 </Typography>
                 <Typography
                   variant="h4"
@@ -393,7 +393,7 @@ const BaseIndex = () => {
                   }}
                 >
                   <Typography variant="body1" sx={{ fontFamily: 'monospace', color: '#fff', mr: 2 }}>
-                    https://api.maijik.com
+                    https://api.wochirou.com
                   </Typography>
                   <Box sx={{ position: 'relative', width: { xs: '200px', sm: '250px' }, height: '21px', overflow: 'hidden' }}>
                     {endpoints.map((endpoint, index) => (

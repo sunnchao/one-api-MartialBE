@@ -9,7 +9,7 @@ import (
 
 func StringErrorWrapper(err string, code string, statusCode int, localError bool) *ClaudeErrorWithStatusCode {
 	claudeError := ClaudeError{
-		Type: "maijik_api_error",
+		Type: "chirou_api_error",
 		ErrorInfo: ClaudeErrorInfo{
 			Type:    code,
 			Message: err,
@@ -57,7 +57,7 @@ func ErrorToClaudeErr(err error) *ClaudeError {
 		return nil
 	}
 	return &ClaudeError{
-		Type: "maijik_api_error",
+		Type: "chirou_api_error",
 		ErrorInfo: ClaudeErrorInfo{
 			Type:    "internal_error",
 			Message: err.Error(),

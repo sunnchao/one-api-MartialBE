@@ -40,7 +40,7 @@
 
     <!-- Magic text (larger, on top) -->
     <text x="295" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="160" font-weight="bold" fill="url(#shimmerGradient)">
-        Maijik
+        Chirou
         <!-- Gentle floating animation -->
         <animateTransform attributeName="transform"
             type="translate"

@@ -32,7 +32,7 @@ func Relay(c *gin.Context) {
 	applyPreMappingBeforeRequest(c)
 
 	if err := relay.setRequest(); err != nil {
-		openaiErr := common.StringErrorWrapperLocal(err.Error(), "maijik_api_error", http.StatusBadRequest)
+		openaiErr := common.StringErrorWrapperLocal(err.Error(), "chirou_api_error", http.StatusBadRequest)
 		relay.HandleJsonError(openaiErr)
 		go func() {
 			model.RecordConsumeErrorLog(
@@ -52,7 +52,7 @@ func Relay(c *gin.Context) {
 
 	c.Set("is_stream", relay.IsStream())
 	if err := relay.setProvider(relay.getOriginalModel()); err != nil {
-		openaiErr := common.StringErrorWrapperLocal(err.Error(), "maijik_api_error", http.StatusServiceUnavailable)
+		openaiErr := common.StringErrorWrapperLocal(err.Error(), "chirou_api_error", http.StatusServiceUnavailable)
 		relay.HandleJsonError(openaiErr)
 		go func() {
 			model.RecordConsumeErrorLog(
