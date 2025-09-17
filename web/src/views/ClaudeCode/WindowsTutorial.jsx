@@ -151,7 +151,7 @@ const WindowsTutorial = () => {
             <Typography variant="body2" component="pre" fontFamily="monospace" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
               {`{
  "env": {
-   "ANTHROPIC_BASE_URL": "https://api.maijik.com/claude",
+   "ANTHROPIC_BASE_URL": "https://api.wochirou.com/claude",
    "ANTHROPIC_AUTH_TOKEN": "sk-xxxxx",
    "ANTHROPIC_MODEL": "claude-3-7-sonnet-20250219"
  }

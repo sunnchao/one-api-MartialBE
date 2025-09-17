@@ -205,7 +205,7 @@ disable_response_storage = true
 
 [model_providers.maijik]
 name = "maijik"
-base_url = "https://api.maijik.com/v1"
+base_url = "https://api.wochirou.com/v1"
 wire_api = "responses"`}
         </Typography>
       </Box>
