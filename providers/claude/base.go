@@ -83,6 +83,7 @@ func (p *ClaudeProvider) GetOriginalRequestHeaders() (headers map[string]string)
 	headers = make(map[string]string)
 
 	hasAuthorization := false
+	hasXApiKey := false
 	if p.Context != nil && p.Context.Request != nil {
 		// 复制原始请求的所有header头
 		for key, values := range p.Context.Request.Header {
@@ -92,6 +93,9 @@ func (p *ClaudeProvider) GetOriginalRequestHeaders() (headers map[string]string)
 				if strings.ToLower(key) == "authorization" {
 					hasAuthorization = true
 				}
+				if strings.ToLower(key) == "x-api-key" {
+					hasXApiKey = true
+				}
 			}
 		}
 	}
@@ -100,10 +104,15 @@ func (p *ClaudeProvider) GetOriginalRequestHeaders() (headers map[string]string)
 	// 如果原始header中没有Authorization，则添加Authorization头
 	if hasAuthorization {
 		headers["Authorization"] = "Bearer " + p.Channel.Key
+	} else if hasXApiKey {
+		headers["x-api-key"] = p.Channel.Key
+		delete(headers, "X-Api-Key")
 	} else {
 		headers["x-api-key"] = p.Channel.Key
+		// 删除 X-Api-Key 头
+		delete(headers, "X-Api-Key")
 	}
-
+	
 	return headers
 }
 
