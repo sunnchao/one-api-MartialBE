@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
+	"time"
 
 	"one-api/common"
 	"one-api/common/config"
@@ -26,6 +27,41 @@ type OrderRequest struct {
 type OrderResponse struct {
 	TradeNo string `json:"trade_no"`
 	*types.PayRequest
+}
+
+// 检查是否在国庆活动期间
+func isNationalDayPromoActive() bool {
+	if !config.NationalDayPromoEnabled {
+		return false
+	}
+
+	now := time.Now()
+
+	// 解析配置的开始和结束时间
+	startDate, err := time.Parse("2006-01-02", config.NationalDayPromoStartDate)
+	if err != nil {
+		return false
+	}
+
+	endDate, err := time.Parse("2006-01-02", config.NationalDayPromoEndDate)
+	if err != nil {
+		return false
+	}
+
+	// 设置为当天的开始和结束时间
+	startDate = time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, time.Local)
+	endDate = time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 59, 59, 0, time.Local)
+
+	return now.After(startDate.Add(-time.Second)) && now.Before(endDate.Add(time.Second))
+}
+
+// 计算国庆活动的额外奖励
+func calculateNationalDayBonus(baseQuota int) int {
+	if !isNationalDayPromoActive() {
+		return 0
+	}
+	// 使用配置的奖励率，向下取整
+	return int(float64(baseQuota) * config.NationalDayPromoRate / 100.0)
 }
 
 // CreateOrder
@@ -168,13 +204,36 @@ func PaymentCallback(c *gin.Context) {
 		return
 	}
 
+	// 检查国庆活动期间，发放额外奖励
+	nationalDayBonus := calculateNationalDayBonus(order.Quota)
+	var totalActualQuota = order.Quota
+	if nationalDayBonus > 0 {
+		err = model.IncreaseUserQuota(order.UserId, nationalDayBonus)
+		if err != nil {
+			logger.SysError(fmt.Sprintf("gateway callback failed to increase national day bonus, trade_no: %s, bonus: %d", payNotify.TradeNo, nationalDayBonus))
+		} else {
+			totalActualQuota += nationalDayBonus
+			// 记录国庆奖励日志
+			model.RecordQuotaLog(order.UserId, model.LogTypeTopup, nationalDayBonus, c.ClientIP(), fmt.Sprintf("国庆活动额外奖励，基础充值: %d，奖励积分: %d", order.Quota, nationalDayBonus))
+		}
+	}
+
 	// Try to upgrade user group based on cumulative recharge amount
 	err = model.CheckAndUpgradeUserGroup(order.UserId, order.Quota)
 	if err != nil {
 		logger.SysError(fmt.Sprintf("failed to check and upgrade user group, trade_no: %s, error: %s", payNotify.TradeNo, err.Error()))
 	}
 
-	model.RecordQuotaLog(order.UserId, model.LogTypeTopup, order.Quota, c.ClientIP(), fmt.Sprintf("在线充值成功，充值积分: %d，支付金额：%.2f %s", order.Quota, order.OrderAmount, order.OrderCurrency))
+	model.RecordQuotaLog(order.UserId, model.LogTypeTopup, order.Quota, c.ClientIP(), fmt.Sprintf("在线充值成功，充值积分: %d，支付金额：%.2f %s%s",
+		totalActualQuota,
+		order.OrderAmount,
+		order.OrderCurrency,
+		func() string {
+			if nationalDayBonus > 0 {
+				return fmt.Sprintf("，国庆活动奖励: %d", nationalDayBonus)
+			}
+			return ""
+		}()))
 
 }
 

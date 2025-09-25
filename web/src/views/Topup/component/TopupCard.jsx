@@ -11,7 +11,10 @@ import {
   Box,
   Grid,
   Divider,
-  Badge
+  Badge,
+  Alert,
+  AlertTitle,
+  Chip
 } from '@mui/material';
 import { IconBuildingBank } from '@tabler/icons-react';
 import { useTheme } from '@mui/material/styles';
@@ -39,6 +42,7 @@ const TopupCard = () => {
   const [discountTotal, setDiscountTotal] = useState(0);
   const [open, setOpen] = useState(false);
   const [disabledPay, setDisabledPay] = useState(false);
+  const [showNationalDayPromo, setShowNationalDayPromo] = useState(false);
   const matchDownSM = useMediaQuery(theme.breakpoints.down('md'));
   const siteInfo = useSelector((state) => state.siteInfo);
   const RechargeDiscount = useMemo(() => {
@@ -51,6 +55,47 @@ const TopupCard = () => {
       return {};
     }
   }, [siteInfo.RechargeDiscount]);
+
+  // 检查是否在国庆活动期间
+  const checkNationalDayPromo = () => {
+    // 检查活动开关
+    if (!siteInfo.NationalDayPromoEnabled) return false;
+
+    const now = new Date();
+
+    // 解析配置的开始和结束时间
+    try {
+      const startDate = new Date(siteInfo.NationalDayPromoStartDate);
+      const endDate = new Date(siteInfo.NationalDayPromoEndDate + 'T23:59:59');
+
+      return now >= startDate && now <= endDate;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // 计算国庆活动的额外奖励金额
+  const calculateNationalDayBonus = (baseAmount) => {
+    if (!showNationalDayPromo) return 0;
+    const promoRate = siteInfo.NationalDayPromoRate || 1.0;
+    return Math.floor(baseAmount * promoRate / 100); // 使用配置的奖励率
+  };
+
+  // 获取活动时间显示文本
+  const getPromoDateText = () => {
+    if (!siteInfo.NationalDayPromoStartDate || !siteInfo.NationalDayPromoEndDate) {
+      return '活动期间';
+    }
+
+    const startDate = new Date(siteInfo.NationalDayPromoStartDate);
+    const endDate = new Date(siteInfo.NationalDayPromoEndDate);
+
+    const formatDate = (date) => {
+      return `${date.getMonth() + 1}月${date.getDate()}日`;
+    };
+
+    return `活动期间（${formatDate(startDate)}-${formatDate(endDate)}）`;
+  };
   const topUp = async () => {
     if (redemptionCode === '') {
       showInfo(t('topupCard.inputPlaceholder'));
@@ -199,6 +244,7 @@ const TopupCard = () => {
   useEffect(() => {
     getPayment().then();
     getUserQuota().then();
+    setShowNationalDayPromo(checkNationalDayPromo());
   }, []);
 
   return (
@@ -208,6 +254,44 @@ const TopupCard = () => {
         <Typography variant="h4">{t('topupCard.currentQuota')}</Typography>
         <Typography variant="h4">{renderQuota(userQuota)}</Typography>
       </Stack>
+
+      {/* 国庆活动横幅 */}
+      {showNationalDayPromo && (
+        <Alert
+          severity="success"
+          sx={{
+            mt: 2,
+            mb: 2,
+            borderRadius: 2,
+            background: 'linear-gradient(135deg, #ff4444 0%, #ffaa00 100%)',
+            color: 'white',
+            '& .MuiAlert-icon': {
+              color: 'white'
+            }
+          }}
+        >
+          <AlertTitle sx={{ color: 'white', fontWeight: 'bold' }}>
+            🎉 国庆七天乐，充值有惊喜！
+          </AlertTitle>
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 1 }}>
+            <Typography variant="body2" sx={{ color: 'white' }}>
+              {getPromoDateText()}每次充值额外获得
+            </Typography>
+            <Chip
+              label={`${siteInfo.NationalDayPromoRate || 1}% 奖励`}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(255,255,255,0.9)',
+                color: '#ff4444',
+                fontWeight: 'bold'
+              }}
+            />
+          </Stack>
+          <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)', mt: 0.5 }}>
+            例如：充值 $100 = 获得 ${100 + Math.floor(100 * (siteInfo.NationalDayPromoRate || 1) / 100)} 额度
+          </Typography>
+        </Alert>
+      )}
 
       {payment.length > 0 && (
         <SubCard
@@ -295,6 +379,20 @@ const TopupCard = () => {
                   </Grid>
                   <Grid item xs={6} md={3}>
                     ${calculateFee()}
+                  </Grid>
+                </>
+              )}
+              {showNationalDayPromo && amount > 0 && (
+                <>
+                  <Grid item xs={6} md={9}>
+                    <Typography variant="h6" style={{ textAlign: 'right', fontSize: '0.875rem', color: theme.palette.success.main }}>
+                      🎉 国庆奖励:{' '}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6} md={3}>
+                    <Typography variant="body2" sx={{ color: theme.palette.success.main, fontWeight: 'bold' }}>
+                      +${calculateNationalDayBonus(amount)}
+                    </Typography>
                   </Grid>
                 </>
               )}

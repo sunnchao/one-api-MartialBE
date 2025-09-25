@@ -41,6 +41,13 @@ func InitOptionMap() {
 	config.GlobalOption.RegisterBool("LogConsumeEnabled", &config.LogConsumeEnabled)
 	config.GlobalOption.RegisterBool("CheckinCouponEnabled", &config.CheckinCouponEnabled)
 	config.GlobalOption.RegisterBool("DisplayInCurrencyEnabled", &config.DisplayInCurrencyEnabled)
+
+	// 国庆活动配置
+	config.GlobalOption.RegisterBool("NationalDayPromoEnabled", &config.NationalDayPromoEnabled)
+	config.GlobalOption.RegisterFloat("NationalDayPromoRate", &config.NationalDayPromoRate)
+	config.GlobalOption.RegisterString("NationalDayPromoStartDate", &config.NationalDayPromoStartDate)
+	config.GlobalOption.RegisterString("NationalDayPromoEndDate", &config.NationalDayPromoEndDate)
+
 	config.GlobalOption.RegisterFloat("ChannelDisableThreshold", &config.ChannelDisableThreshold)
 	config.GlobalOption.RegisterBool("EmailDomainRestrictionEnabled", &config.EmailDomainRestrictionEnabled)
 

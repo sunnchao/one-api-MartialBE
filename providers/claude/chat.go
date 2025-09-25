@@ -97,16 +97,16 @@ func (p *ClaudeProvider) getChatRequest(claudeRequest *ClaudeRequest) (*http.Req
 
 	headers := p.GetOriginalRequestHeaders()
 	if claudeRequest.Stream {
-		headers["Accept"] = "text/event-stream"
+		//headers["Accept"] = "text/event-stream"
 	}
 
-	if strings.HasPrefix(claudeRequest.Model, "claude-3-5-sonnet") {
-		headers["anthropic-beta"] = "max-tokens-3-5-sonnet-2024-07-15"
-	}
-
-	if strings.HasPrefix(claudeRequest.Model, "claude-3-7-sonnet") {
-		headers["anthropic-beta"] = "output-128k-2025-02-19"
-	}
+	//if strings.HasPrefix(claudeRequest.Model, "claude-3-5-sonnet") {
+	//	headers["anthropic-beta"] = "max-tokens-3-5-sonnet-2024-07-15"
+	//}
+	//
+	//if strings.HasPrefix(claudeRequest.Model, "claude-3-7-sonnet") {
+	//	headers["anthropic-beta"] = "output-128k-2025-02-19"
+	//}
 
 	// 创建请求
 	req, err := p.Requester.NewRequest(http.MethodPost, fullRequestURL, p.Requester.WithBody(claudeRequest), p.Requester.WithHeader(headers))

@@ -763,6 +763,37 @@ func TopUp(c *gin.Context) {
 		})
 		return
 	}
+
+	// 检查国庆活动期间，发放额外奖励
+	nationalDayBonus := 0
+	if config.NationalDayPromoEnabled {
+		now := time.Now()
+
+		// 解析配置的开始和结束时间
+		startDate, err := time.Parse("2006-01-02", config.NationalDayPromoStartDate)
+		if err == nil {
+			endDate, err := time.Parse("2006-01-02", config.NationalDayPromoEndDate)
+			if err == nil {
+				// 设置为当天的开始和结束时间
+				startDate = time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, time.Local)
+				endDate = time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 59, 59, 0, time.Local)
+
+				if now.After(startDate.Add(-time.Second)) && now.Before(endDate.Add(time.Second)) {
+					// 使用配置的奖励率，向下取整
+					nationalDayBonus = int(float64(quota) * config.NationalDayPromoRate / 100.0)
+					if nationalDayBonus > 0 {
+						err = model.IncreaseUserQuota(id, nationalDayBonus)
+						if err == nil {
+							quota += nationalDayBonus
+							// 记录国庆奖励日志
+							model.RecordQuotaLog(id, model.LogTypeTopup, nationalDayBonus, c.ClientIP(), fmt.Sprintf("兑换码充值国庆活动额外奖励，奖励积分: %d", nationalDayBonus))
+						}
+					}
+				}
+			}
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
