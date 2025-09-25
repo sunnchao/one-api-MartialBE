@@ -42,7 +42,7 @@ const TopupCard = () => {
   const [discountTotal, setDiscountTotal] = useState(0);
   const [open, setOpen] = useState(false);
   const [disabledPay, setDisabledPay] = useState(false);
-  const [showNationalDayPromo, setShowNationalDayPromo] = useState(false);
+  const [showNationalDayPromo, setShowNationalDayPromo] = useState(false); // 国庆活动显示控制
   const matchDownSM = useMediaQuery(theme.breakpoints.down('md'));
   const siteInfo = useSelector((state) => state.siteInfo);
   const RechargeDiscount = useMemo(() => {
@@ -262,32 +262,32 @@ const TopupCard = () => {
           sx={{
             mt: 2,
             mb: 2,
-            borderRadius: 2,
-            background: 'linear-gradient(135deg, #ff4444 0%, #ffaa00 100%)',
-            color: 'white',
+            borderRadius: 0,
+            background: 'linear-gradient(135deg, #ff8a80 0%, #ffcc80 100%)',
+            color: '#333',
             '& .MuiAlert-icon': {
-              color: 'white'
+              color: '#d84315'
             }
           }}
         >
-          <AlertTitle sx={{ color: 'white', fontWeight: 'bold' }}>
+          <AlertTitle sx={{ color: '#d84315', fontWeight: 'bold' }}>
             🎉 国庆七天乐，充值有惊喜！
           </AlertTitle>
           <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 1 }}>
-            <Typography variant="body2" sx={{ color: 'white' }}>
+            <Typography variant="body2" sx={{ color: '#fff' }}>
               {getPromoDateText()}每次充值额外获得
             </Typography>
             <Chip
               label={`${siteInfo.NationalDayPromoRate || 1}% 奖励`}
               size="small"
               sx={{
-                bgcolor: 'rgba(255,255,255,0.9)',
-                color: '#ff4444',
+                bgcolor: '#d84315',
+                color: 'white',
                 fontWeight: 'bold'
               }}
             />
           </Stack>
-          <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)', mt: 0.5 }}>
+          <Typography variant="body2" sx={{ color: '#666', mt: 0.5 }}>
             例如：充值 $100 = 获得 ${100 + Math.floor(100 * (siteInfo.NationalDayPromoRate || 1) / 100)} 额度
           </Typography>
         </Alert>
