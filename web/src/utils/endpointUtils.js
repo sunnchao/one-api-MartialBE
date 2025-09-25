@@ -31,7 +31,17 @@ export function getSupportedEndpoints(endPoints) {
   )];
 
   // 如果没有找到任何匹配的端点类型，返回默认类型
-  return supportedTypes.length > 0 ? supportedTypes : [DEFAULT_ENDPOINT];
+  if (supportedTypes.length === 0) {
+    return [DEFAULT_ENDPOINT];
+  }
+
+  // 如果包含 Anthropic 或者 Gemini，那么追加 OpenAI（如果还没有的话）
+  if ((supportedTypes.includes('Anthropic') || supportedTypes.includes('Gemini')) &&
+      !supportedTypes.includes('OpenAI')) {
+    supportedTypes.push('OpenAI');
+  }
+
+  return supportedTypes;
 }
 
 /**
@@ -53,16 +63,16 @@ export function supportsEndpoint(endPoints, endpointType) {
 export function getEndpointColor(endpointType) {
   const colorMap = {
     'OpenAI': {
-      backgroundColor: 'rgba(16, 185, 129, 0.1)',
-      color: 'rgb(16, 185, 129)'
+      backgroundColor: 'rgba(52, 211, 153, 0.1)',
+      color: 'rgb(52, 211, 153)'
     },
     'Anthropic': {
       backgroundColor: 'rgba(205, 130, 88, 0.1)',
       color: 'rgb(205, 130, 88)'
     },
     'Gemini': {
-      backgroundColor: 'rgba(99, 102, 241, 0.1)',
-      color: 'rgb(99, 102, 241)'
+      backgroundColor: 'rgba(66, 133, 244, 0.1)',
+      color: 'rgb(66, 133, 244)'
     }
   };
 
