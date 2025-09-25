@@ -5,6 +5,7 @@ import { Card, Stack, Typography, Tabs, Tab, InputBase, Avatar, Box, Chip, Grid,
 import { Icon } from '@iconify/react';
 import { API } from 'utils/api';
 import { showError, ValueFormatter } from 'utils/common';
+import { getSupportedEndpoints, getEndpointColor } from 'utils/endpointUtils';
 import { useTheme } from '@mui/material/styles';
 import { useIsAdmin } from 'utils/common';
 import { alpha } from '@mui/material/styles';
@@ -105,6 +106,7 @@ export default function ModelPrice() {
           model: modelName,
           provider: model.owned_by,
           userGroup: model.groups,
+          endPoints: model.end_points,
           type: model.price.type,
           originalInput: formatPrice(originalPrice.input, model.price.type),
           originalOutput: formatPrice(originalPrice.output, model.price.type),
@@ -603,6 +605,34 @@ export default function ModelPrice() {
                       </Box>
                     )}
                   </Box>
+
+                  {/* 支持的端点信息 */}
+                  {row.endPoints && row.endPoints.length > 0 && (
+                    <Box>
+                      <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontSize: '0.75rem' }}>
+                        支持端点:
+                      </Typography>
+                      <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+                        {getSupportedEndpoints(row.endPoints).map((endpointType) => {
+                          const colorConfig = getEndpointColor(endpointType);
+                          return (
+                            <Chip
+                              key={endpointType}
+                              label={endpointType}
+                              size="small"
+                              sx={{
+                                backgroundColor: colorConfig.backgroundColor,
+                                color: colorConfig.color,
+                                fontWeight: 500,
+                                fontSize: '0.75rem',
+                                height: 24
+                              }}
+                            />
+                          );
+                        })}
+                      </Stack>
+                    </Box>
+                  )}
                 </CardContent>
 
                 {/* <CardActions sx={{ px: 3, pb: 3, pt: 0 }}>

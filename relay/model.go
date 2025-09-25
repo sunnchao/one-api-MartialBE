@@ -1,22 +1,22 @@
 package relay
 
 import (
-  "fmt"
-  "net/http"
-  "one-api/common"
-  "one-api/common/config"
-  "one-api/common/utils"
-  "one-api/model"
-  "one-api/providers/claude"
-  "one-api/providers/gemini"
-  "one-api/types"
-  "sort"
-  "strings"
+	"fmt"
+	"net/http"
+	"one-api/common"
+	"one-api/common/config"
+	"one-api/common/utils"
+	"one-api/model"
+	"one-api/providers/claude"
+	"one-api/providers/gemini"
+	"one-api/types"
+	"sort"
+	"strings"
 
-  "golang.org/x/text/cases"
-  "golang.org/x/text/language"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
-  "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 )
 
 // https://platform.openai.com/docs/api-reference/models/list
@@ -299,6 +299,7 @@ type ModelPrice struct {
 
 type AvailableModelResponse struct {
   Groups    []string     `json:"groups"`
+  EndPoints    []int     `json:"end_points"`
   OwnedBy   string       `json:"owned_by"`
   Price     *model.Price `json:"price"`
   OwnedById int          `json:"owned_by_id"`
@@ -320,6 +321,7 @@ func GetAvailableModels(groupName string) map[string]*AvailableModelResponse {
 
 func getAvailableModels(groupName string) map[string]*AvailableModelResponse {
   publicModels := model.ChannelGroup.GetModelsGroups()
+  modelEndPoints := model.ChannelGroup.GetModelsEndPoints()
   publicGroups := model.GlobalUserGroupRatio.GetPublicGroupList()
   if groupName != "" && !utils.Contains(groupName, publicGroups) {
     publicGroups = append(publicGroups, groupName)
@@ -329,9 +331,15 @@ func getAvailableModels(groupName string) map[string]*AvailableModelResponse {
 
   for modelName, group := range publicModels {
     groups := []string{}
+    endPoints := []int{}
     for _, publicGroup := range publicGroups {
       if group[publicGroup] {
         groups = append(groups, publicGroup)
+      }
+    }
+    if _, ok := modelEndPoints[modelName]; ok {
+      for endPoint := range modelEndPoints[modelName] {
+        endPoints = append(endPoints, endPoint)
       }
     }
 
@@ -343,6 +351,7 @@ func getAvailableModels(groupName string) map[string]*AvailableModelResponse {
       price := model.PricingInstance.GetPrice(modelName)
       availableModels[modelName] = &AvailableModelResponse{
         Groups:    groups,
+        EndPoints: endPoints,
         OwnedBy:   *getModelOwnedBy(price.ChannelType),
         OwnedById: price.ChannelType,
         Price:     price,
