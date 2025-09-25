@@ -134,7 +134,7 @@ const OtherSetting = () => {
           showError('无法获取最新版本信息');
           return;
         }
-        const { name : tag_name } = res.data[0];
+        const { name: tag_name } = res.data[0];
         if (tag_name === import.meta.env.VITE_APP_VERSION) {
           showSuccess(`已是最新版本：${tag_name}`);
         } else {

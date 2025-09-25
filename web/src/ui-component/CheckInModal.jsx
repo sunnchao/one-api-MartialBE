@@ -5,7 +5,7 @@ import { API } from 'utils/api';
 import { Typography, Dialog, Button, Stack, CircularProgress, DialogContent, DialogTitle, DialogActions } from '@mui/material';
 
 import { showError, showSuccess, showInfo } from 'utils/common';
-import LoadingButton from "@mui/lab/LoadingButton";
+import LoadingButton from '@mui/lab/LoadingButton';
 
 export default function CheckInModal(props) {
   const siteInfo = useSelector((state) => state.siteInfo);
@@ -75,10 +75,7 @@ export default function CheckInModal(props) {
   }
 
   return (
-    <Dialog
-      open={props.visible}
-      onClose={handleClose}
-    >
+    <Dialog open={props.visible} onClose={handleClose}>
       <DialogTitle>
         <Typography heading={4}>正在检查用户环境</Typography>
       </DialogTitle>
@@ -112,7 +109,6 @@ export default function CheckInModal(props) {
           onClick={() => handleUserOperationCheckIn()}
           type="primary"
           variant="contained"
-
         >
           立即签到
         </LoadingButton>

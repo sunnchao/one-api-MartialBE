@@ -170,23 +170,13 @@ const Header = () => {
               open={Boolean(codeMenuAnchor)}
               onClose={handleCloseCodeMenu}
               MenuListProps={{
-                'aria-labelledby': 'basic-button',
+                'aria-labelledby': 'basic-button'
               }}
             >
-              <MenuItem
-                component={Link}
-                to="/claude-code"
-                onClick={handleCloseCodeMenu}
-                selected={pathname === '/claude-code'}
-              >
+              <MenuItem component={Link} to="/claude-code" onClick={handleCloseCodeMenu} selected={pathname === '/claude-code'}>
                 Claude Code
               </MenuItem>
-              <MenuItem
-                component={Link}
-                to="/codex-code"
-                onClick={handleCloseCodeMenu}
-                selected={pathname === '/codex-code'}
-              >
+              <MenuItem component={Link} to="/codex-code" onClick={handleCloseCodeMenu} selected={pathname === '/codex-code'}>
                 Codex Code
               </MenuItem>
             </Menu>
@@ -407,12 +397,7 @@ const Header = () => {
                       />
                     </ListItemButton>
                     {siteInfo.UptimeEnabled && (
-                      <ListItemButton
-                        component="a"
-                        href={siteInfo.UptimeDomain}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+                      <ListItemButton component="a" href={siteInfo.UptimeDomain} target="_blank" rel="noopener noreferrer">
                         <ListItemText
                           primary={
                             <Typography

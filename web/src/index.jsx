@@ -10,6 +10,7 @@ import App from 'App';
 import { store } from 'store';
 
 // style + assets
+import 'antd/dist/reset.css'; // Ant Design styles
 import 'assets/scss/style.scss';
 import config from './config';
 import reportWebVitals from 'reportWebVitals';

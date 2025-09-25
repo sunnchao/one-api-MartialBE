@@ -107,9 +107,9 @@ const MenuCard = () => {
     <CardStyle>
       <CardContent sx={{ p: 1.5, pb: '8px !important' }}>
         <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-          <Box 
+          <Box
             component="div"
-            sx={{ 
+            sx={{
               cursor: 'pointer',
               position: 'relative',
               width: '38px',
@@ -126,7 +126,7 @@ const MenuCard = () => {
               backgroundSize: '300% 300%',
               animation: `${gradientAnimation} 3s ease infinite`,
               '&:hover': {
-                animation: `${gradientAnimation} 1.5s ease infinite`,
+                animation: `${gradientAnimation} 1.5s ease infinite`
               }
             }}
             onClick={() => navigate('/panel/profile')}
@@ -202,7 +202,6 @@ const MenuCard = () => {
             </Tooltip>
           </Stack>
 
-
           <Box sx={{ position: 'relative' }}>
             <ProgressBarWrapper>
               <LinearProgress
@@ -230,7 +229,6 @@ const MenuCard = () => {
             </Typography>
           </Box>
 
-
           {/* 最后登录时间 */}
           <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', width: '100%', flexDirection: 'column' }}>
             <Typography variant="body2" color="text.secondary">
@@ -245,9 +243,7 @@ const MenuCard = () => {
             <Typography variant="body2" color="text.secondary">
               {t('sidebar.lastLoginIp')}
             </Typography>
-            <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.7rem' }}>
-              {user?.last_login_ip || t('dashboard_index.unknown')}
-            </div>
+            <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.7rem' }}>{user?.last_login_ip || t('dashboard_index.unknown')}</div>
           </Box>
         </Box>
       </CardContent>

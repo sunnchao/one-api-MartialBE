@@ -26,7 +26,15 @@ import SubCard from 'ui-component/cards/SubCard';
 import { IconBrandWechat, IconBrandGithub, IconMail, IconBrandTelegram, IconBrandOauth } from '@tabler/icons-react';
 import Label from 'ui-component/Label';
 import { API } from 'utils/api';
-import { showError, showSuccess, onGitHubOAuthClicked, copy, trims, onLarkOAuthClicked, onLinuxDoOAuthClicked,   onWebAuthnRegister,
+import {
+  showError,
+  showSuccess,
+  onGitHubOAuthClicked,
+  copy,
+  trims,
+  onLarkOAuthClicked,
+  onLinuxDoOAuthClicked,
+  onWebAuthnRegister,
   getWebAuthnCredentials,
   deleteWebAuthnCredential
 } from 'utils/common';

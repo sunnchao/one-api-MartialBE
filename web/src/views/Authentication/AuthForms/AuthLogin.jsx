@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
@@ -48,7 +48,7 @@ import {
   showError
 } from 'utils/common';
 import { useTranslation } from 'react-i18next';
-import Turnstile from "react-turnstile";
+import Turnstile from 'react-turnstile';
 
 // ============================|| FIREBASE - LOGIN ||============================ //
 
@@ -66,7 +66,6 @@ const LoginForm = ({ ...others }) => {
   const [turnstileEnabled, setTurnstileEnabled] = useState(false);
   const [turnstileSiteKey, setTurnstileSiteKey] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
-
 
   let tripartiteLogin = false;
   if (siteInfo.github_oauth || siteInfo.wechat_login || siteInfo.lark_client_id || siteInfo.oidc_auth || siteInfo.linux_do_oauth) {

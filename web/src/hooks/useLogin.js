@@ -14,7 +14,7 @@ const useLogin = () => {
     try {
       const res = await API.post(`/api/user/login?turnstile=${turnstileToken}`, {
         username,
-        password,
+        password
       });
       const { success, message } = res.data;
       if (success) {

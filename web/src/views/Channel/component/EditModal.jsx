@@ -825,11 +825,7 @@ const EditModal = ({ open, channelId, onCancel, onOk, groupOptions, isTag, model
                         <span>{customizeT(inputPrompt.key)}</span>
                         {channelId === 0 && (
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Switch 
-                              size="small"
-                              checked={Boolean(batchAdd)} 
-                              onChange={(e) => setBatchAdd(e.target.checked)} 
-                            />
+                            <Switch size="small" checked={Boolean(batchAdd)} onChange={(e) => setBatchAdd(e.target.checked)} />
                             <Typography variant="body2">{t('channel_edit.batchAdd')}</Typography>
                           </Box>
                         )}

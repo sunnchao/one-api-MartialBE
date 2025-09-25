@@ -23,7 +23,7 @@ const Header = ({ handleLeftDrawerToggle, toggleProfileDrawer }) => {
   const theme = useTheme();
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const location = useLocation();
-  
+
   // 检查当前路径是否为面板/控制台页面
   const isConsoleRoute = location.pathname.startsWith('/panel');
 

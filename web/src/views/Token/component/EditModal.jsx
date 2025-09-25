@@ -4,7 +4,7 @@ import { Formik } from 'formik'; // 1. 导入 useFormikContext
 import { useTheme } from '@mui/material/styles';
 import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
-import  ModelLimitSelector from './ModelLimitSelector';
+import ModelLimitSelector from './ModelLimitSelector';
 import {
   Dialog,
   DialogTitle,
@@ -142,7 +142,7 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
 
     // 将备用分组数组转换为逗号分隔的字符串，过滤空值
     const backupGroupString = Array.isArray(values.backup_group)
-      ? values.backup_group.filter(group => group && group.trim() !== '').join(',')
+      ? values.backup_group.filter((group) => group && group.trim() !== '').join(',')
       : '';
 
     let res;
@@ -195,7 +195,10 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
 
         // 处理备用分组：将字符串转换为数组
         if (data.backup_group && typeof data.backup_group === 'string') {
-          data.backup_group = data.backup_group.split(',').map(g => g.trim()).filter(g => g !== '');
+          data.backup_group = data.backup_group
+            .split(',')
+            .map((g) => g.trim())
+            .filter((g) => g !== '');
         } else {
           data.backup_group = [];
         }
@@ -440,11 +443,7 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
                               const isDisabled = isMainGroup || isSelectedInOtherBackup;
 
                               return (
-                                <MenuItem
-                                  key={option.value}
-                                  value={option.value}
-                                  disabled={isDisabled}
-                                >
+                                <MenuItem key={option.value} value={option.value} disabled={isDisabled}>
                                   {option.label}
                                   {isMainGroup && ' (主分组)'}
                                   {isSelectedInOtherBackup && ' (已选择)'}
@@ -467,9 +466,7 @@ const EditModal = ({ open, tokenId, onCancel, onOk, userGroupOptions }) => {
                     ))
                   ) : (
                     <Box sx={{ textAlign: 'center', py: 2, color: 'text.secondary' }}>
-                      <Typography variant="body2">
-                        点击下方按钮添加备用分组
-                      </Typography>
+                      <Typography variant="body2">点击下方按钮添加备用分组</Typography>
                     </Box>
                   )}
 

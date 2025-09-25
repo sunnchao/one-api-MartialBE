@@ -140,15 +140,16 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
                   {userGroup[item?.metadata?.backup_group_name]?.name || item?.metadata?.backup_group_name || '备份分组'}
                 </Label>
               </Stack>
+            ) : // 正常显示分组
+            item?.metadata?.group_name || item?.metadata?.backup_group_name ? (
+              <Label color="default" variant="soft">
+                {userGroup[item?.metadata?.group_name || item?.metadata?.backup_group_name]?.name ||
+                  item?.metadata?.group_name ||
+                  item?.metadata?.backup_group_name ||
+                  '跟随用户'}
+              </Label>
             ) : (
-              // 正常显示分组
-              item?.metadata?.group_name || item?.metadata?.backup_group_name ? (
-                <Label color="default" variant="soft">
-                  {userGroup[item?.metadata?.group_name || item?.metadata?.backup_group_name]?.name || item?.metadata?.group_name || item?.metadata?.backup_group_name || '跟随用户'}
-                </Label>
-              ) : (
-                ''
-              )
+              ''
             )}
           </TableCell>
         )}

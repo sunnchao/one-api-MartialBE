@@ -12,7 +12,23 @@ import Button from '@mui/material/Button';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Divider from '@mui/material/Divider';
-import { Grid, Card, Stack, Container, Typography, Box, Menu, MenuItem, Checkbox, ListItemText, Tabs, Tab, Tooltip, Fade, CircularProgress } from '@mui/material';
+import {
+  Grid,
+  Card,
+  Stack,
+  Container,
+  Typography,
+  Box,
+  Menu,
+  MenuItem,
+  Checkbox,
+  ListItemText,
+  Tabs,
+  Tab,
+  Tooltip,
+  Fade,
+  CircularProgress
+} from '@mui/material';
 import LogTableRow from './component/TableRow';
 import KeywordTableHead from 'ui-component/TableHead';
 import TableToolBar from './component/TableToolBar';
@@ -154,7 +170,7 @@ export default function Log() {
     // 检查是否首次搜索或有变化
     const isFirstSearch = deepEqual(searchKeyword, originalKeyword);
     const hasChanged = !deepEqual(toolBarValue, searchKeyword);
-    
+
     // 开发环境调试信息
     if (process.env.NODE_ENV === 'development') {
       console.log('日志搜索状态:', {
@@ -165,9 +181,9 @@ export default function Log() {
         originalKeyword
       });
     }
-    
+
     setPage(0);
-    
+
     if (hasChanged) {
       // 如果搜索条件有变化，更新搜索关键字
       setSearchKeyword(toolBarValue);
@@ -183,7 +199,7 @@ export default function Log() {
   const handleToolBarValue = (event) => {
     const newValue = { ...toolBarValue, [event.target.name]: event.target.value };
     setToolBarValue(newValue);
-    
+
     // 检查搜索条件是否有变化
     const hasChanged = !deepEqual(newValue, searchKeyword);
     setHasSearchChanges(hasChanged);
@@ -270,7 +286,7 @@ export default function Log() {
   useEffect(() => {
     const hasChanged = !deepEqual(toolBarValue, searchKeyword);
     setHasSearchChanges(hasChanged);
-    
+
     // 开发环境调试
     if (process.env.NODE_ENV === 'development') {
       console.log('日志搜索条件变化检测:', {
@@ -471,54 +487,55 @@ export default function Log() {
             <Stack
               direction={{ xs: 'column', md: 'row' }}
               spacing={2}
-              justifyContent="space-between" 
+              justifyContent="space-between"
               alignItems={{ xs: 'stretch', md: 'center' }}
             >
               {/* 左侧：搜索和重置按钮 */}
               <Stack direction="row" spacing={1} alignItems="center">
-                <Tooltip 
-                  title={hasSearchChanges ? "执行搜索以应用新的筛选条件" : "刷新数据获取最新日志"}
-                  placement="top"
-                >
-                  <Button 
-                    variant={hasSearchChanges ? "contained" : "outlined"}
-                    color={hasSearchChanges ? "primary" : "primary"}
-                    onClick={searchLogs} 
+                <Tooltip title={hasSearchChanges ? '执行搜索以应用新的筛选条件' : '刷新数据获取最新日志'} placement="top">
+                  <Button
+                    variant={hasSearchChanges ? 'contained' : 'outlined'}
+                    color={hasSearchChanges ? 'primary' : 'primary'}
+                    onClick={searchLogs}
                     disabled={searching}
-                    startIcon={searching ? 
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <CircularProgress size={16} color="inherit" />
-                      </Box> : 
-                      <Icon icon="solar:magnifer-bold-duotone" width={18} />
+                    startIcon={
+                      searching ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <CircularProgress size={16} color="inherit" />
+                        </Box>
+                      ) : (
+                        <Icon icon="solar:magnifer-bold-duotone" width={18} />
+                      )
                     }
-                    sx={{ 
-                      borderRadius: 2, 
-                      textTransform: 'none', 
+                    sx={{
+                      borderRadius: 2,
+                      textTransform: 'none',
                       fontWeight: 600,
                       position: 'relative',
                       minWidth: 120, // 固定最小宽度，防止文字变化时按钮跳动
-                      ...(hasSearchChanges && !searching && {
-                        '&::after': {
-                          content: '""',
-                          position: 'absolute',
-                          top: -2,
-                          right: -2,
-                          width: 8,
-                          height: 8,
-                          borderRadius: '50%',
-                          bgcolor: 'warning.main',
-                          animation: 'pulse 2s infinite'
-                        }
-                      })
+                      ...(hasSearchChanges &&
+                        !searching && {
+                          '&::after': {
+                            content: '""',
+                            position: 'absolute',
+                            top: -2,
+                            right: -2,
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            bgcolor: 'warning.main',
+                            animation: 'pulse 2s infinite'
+                          }
+                        })
                     }}
                   >
-                    {searching ? '查询中...' : (hasSearchChanges ? '执行搜索' : '搜索/刷新')}
+                    {searching ? '查询中...' : hasSearchChanges ? '执行搜索' : '搜索/刷新'}
                   </Button>
                 </Tooltip>
                 <Tooltip title="清空所有筛选条件并重新加载数据" placement="top">
-                  <Button 
+                  <Button
                     variant="outlined"
-                    onClick={() => handleRefresh(true)} 
+                    onClick={() => handleRefresh(true)}
                     startIcon={<Icon icon="solar:refresh-circle-bold-duotone" width={18} />}
                     sx={{ borderRadius: 2, textTransform: 'none' }}
                   >
@@ -537,9 +554,9 @@ export default function Log() {
               {/* 右侧：管理操作按钮 */}
               <Stack direction="row" spacing={1} sx={{ justifyContent: { xs: 'center', md: 'flex-end' } }}>
                 <Tooltip title="列显示设置" placement="top">
-                  <Button 
+                  <Button
                     variant="outlined"
-                    onClick={handleColumnMenuOpen} 
+                    onClick={handleColumnMenuOpen}
                     startIcon={<Icon icon="solar:settings-bold-duotone" width={18} />}
                     sx={{ borderRadius: 2, textTransform: 'none' }}
                   >

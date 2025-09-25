@@ -65,7 +65,7 @@ export default function UserCard({ children }) {
           backgroundSize: '300% 300%',
           animation: `${gradientAnimation} 5s ease infinite`,
           '&:hover': {
-            animation: `${gradientAnimation} 5s ease infinite`,
+            animation: `${gradientAnimation} 5s ease infinite`
           }
         }}
       >

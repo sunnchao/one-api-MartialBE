@@ -24,11 +24,11 @@ export function getSupportedEndpoints(endPoints) {
   }
 
   // 获取所有匹配的端点类型，去重
-  const supportedTypes = [...new Set(
-    endPoints
-      .map(id => ENDPOINT_MAPPING[id])
-      .filter(Boolean) // 过滤掉 undefined
-  )];
+  const supportedTypes = [
+    ...new Set(
+      endPoints.map((id) => ENDPOINT_MAPPING[id]).filter(Boolean) // 过滤掉 undefined
+    )
+  ];
 
   // 如果没有找到任何匹配的端点类型，返回默认类型
   if (supportedTypes.length === 0) {
@@ -36,8 +36,7 @@ export function getSupportedEndpoints(endPoints) {
   }
 
   // 如果包含 Anthropic 或者 Gemini，那么追加 OpenAI（如果还没有的话）
-  if ((supportedTypes.includes('Anthropic') || supportedTypes.includes('Gemini')) &&
-      !supportedTypes.includes('OpenAI')) {
+  if ((supportedTypes.includes('Anthropic') || supportedTypes.includes('Gemini')) && !supportedTypes.includes('OpenAI')) {
     supportedTypes.push('OpenAI');
   }
 
@@ -62,22 +61,24 @@ export function supportsEndpoint(endPoints, endpointType) {
  */
 export function getEndpointColor(endpointType) {
   const colorMap = {
-    'OpenAI': {
+    OpenAI: {
       backgroundColor: 'rgba(52, 211, 153, 0.1)',
       color: 'rgb(52, 211, 153)'
     },
-    'Anthropic': {
+    Anthropic: {
       backgroundColor: 'rgba(205, 130, 88, 0.1)',
       color: 'rgb(205, 130, 88)'
     },
-    'Gemini': {
+    Gemini: {
       backgroundColor: 'rgba(66, 133, 244, 0.1)',
       color: 'rgb(66, 133, 244)'
     }
   };
 
-  return colorMap[endpointType] || {
-    backgroundColor: 'rgba(107, 114, 128, 0.1)',
-    color: 'rgb(107, 114, 128)'
-  };
+  return (
+    colorMap[endpointType] || {
+      backgroundColor: 'rgba(107, 114, 128, 0.1)',
+      color: 'rgb(107, 114, 128)'
+    }
+  );
 }

@@ -35,7 +35,6 @@ const WithMargins = ({ children }) => (
 );
 const LinuxDOAuth = Loadable(lazy(() => import('views/Authentication/Auth/LinuxDoOAuth')));
 
-
 // ==============================|| AUTHENTICATION ROUTING ||============================== //
 
 const OtherRoutes = {
@@ -109,7 +108,7 @@ const OtherRoutes = {
     {
       path: '/codex-code',
       element: <CodexCode />
-    },
+    }
   ]
 };
 

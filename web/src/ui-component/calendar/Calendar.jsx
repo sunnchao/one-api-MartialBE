@@ -199,11 +199,7 @@ const Calendar = ({ checkinDates = [], refreshCoupons }) => {
           ))}
         </Grid>
       </Box>
-      <CheckInModal 
-        visible={checkInModalOpen} 
-        onClose={() => setCheckInModalOpen(false)} 
-        refreshCoupons={refreshCoupons}
-      />
+      <CheckInModal visible={checkInModalOpen} onClose={() => setCheckInModalOpen(false)} refreshCoupons={refreshCoupons} />
     </Paper>
   );
 };

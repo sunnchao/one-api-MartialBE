@@ -433,11 +433,7 @@ export default function ChannelTableRow({ item, manageChannel, onRefresh, groupO
         <TableCell align="center" sx={{ minWidth: 100 }}>
           {!item.tag && (
             <Stack direction="column" alignItems="center" spacing={0.5}>
-              <Switch 
-                checked={Boolean(item.auto_ban)} 
-                onChange={(event) => handleAutoBan(event.target.checked ? 1 : 0)}
-                size="small" 
-              />
+              <Switch checked={Boolean(item.auto_ban)} onChange={(event) => handleAutoBan(event.target.checked ? 1 : 0)} size="small" />
               <Typography
                 variant="caption"
                 sx={{

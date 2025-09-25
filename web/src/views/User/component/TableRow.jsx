@@ -19,7 +19,7 @@ import {
   InputAdornment,
   Table,
   TableHead,
-  TableRow as TableRowMui,
+  TableRow as TableRowMui
 } from '@mui/material';
 
 import Label from 'ui-component/Label';
@@ -105,20 +105,22 @@ export default function UsersTableRow({ item, manageUser, handleOpenModal, setMo
 
   const handleTokenInfoOpen = () => {
     setTokenListLoading(true);
-    API.get(`/api/user/token/${item.id}`).then((res) => {
-      const { success, message, data } = res.data;
-      if (success) {
-        setTokenList(data);
-      } else {
-        showError(message);
-      }
-      setOpenTokenInfo(true);
-
-    }).catch((err) => {
-      showError(err.response.data.message);
-    }).finally(() => {
-      setTokenListLoading(false);
-    });
+    API.get(`/api/user/token/${item.id}`)
+      .then((res) => {
+        const { success, message, data } = res.data;
+        if (success) {
+          setTokenList(data);
+        } else {
+          showError(message);
+        }
+        setOpenTokenInfo(true);
+      })
+      .catch((err) => {
+        showError(err.response.data.message);
+      })
+      .finally(() => {
+        setTokenListLoading(false);
+      });
   };
 
   const handleTokenInfoClose = () => {
@@ -236,7 +238,7 @@ export default function UsersTableRow({ item, manageUser, handleOpenModal, setMo
           <Icon icon="solar:wallet-money-bold-duotone" style={{ marginRight: '16px' }} />
           {t('userPage.changeQuota')}
         </MenuItem>
-        
+
         {/*  查看令牌信息 */}
         <MenuItem onClick={handleTokenInfoOpen} sx={{ color: 'primary.main' }}>
           <Icon icon="solar:key-bold-duotone" style={{ marginRight: '16px' }} />
@@ -324,22 +326,17 @@ export default function UsersTableRow({ item, manageUser, handleOpenModal, setMo
                 <TableCell>{token.name}</TableCell>
                 <TableCell>{token.group}</TableCell>
                 <TableCell>{token.status === 1 ? t('common.enable') : t('common.disable')}</TableCell>
-                <TableCell>{token.billing_type === 'tokens' ?  
-                  // 按量计费
-                  t('token_index.billingType.tokens')
-                  : 
-                  // 按次数计费
-                  t('token_index.billingType.times')
-                }</TableCell>
+                <TableCell>
+                  {token.billing_type === 'tokens'
+                    ? // 按量计费
+                      t('token_index.billingType.tokens')
+                    : // 按次数计费
+                      t('token_index.billingType.times')}
+                </TableCell>
                 <TableCell>{renderQuota(token.used_quota, 6)}</TableCell>
                 <TableCell>{renderQuota(token.remain_quota, 6)}</TableCell>
                 <TableCell>{timestamp2string(token.created_time)}</TableCell>
-                <TableCell>
-                  {
-                    token.key
-                  }
-                </TableCell>
-                
+                <TableCell>{token.key}</TableCell>
               </TableRow>
             ))}
           </Table>
@@ -347,7 +344,6 @@ export default function UsersTableRow({ item, manageUser, handleOpenModal, setMo
         <DialogActions>
           <Button onClick={handleTokenInfoClose}>{t('common.close')}</Button>
         </DialogActions>
-        
       </Dialog>
     </>
   );

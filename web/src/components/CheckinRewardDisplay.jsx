@@ -91,8 +91,8 @@ const CheckinRewardDisplay = ({ checkinData = [] }) => {
   };
 
   return (
-    <Card 
-      sx={{ 
+    <Card
+      sx={{
         mb: 2,
         background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.success.main, 0.05)} 100%)`,
         border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`
@@ -116,32 +116,10 @@ const CheckinRewardDisplay = ({ checkinData = [] }) => {
         {/* 签到统计 */}
         <Box sx={{ mb: 3 }}>
           <Stack direction="row" spacing={2} flexWrap="wrap">
-            <Chip
-              icon={<CheckIcon />}
-              label={`总签到: ${stats.totalCheckins}天`}
-              color="default"
-              variant="outlined"
-            />
-            <Chip
-              icon={<StarsIcon />}
-              label={`连续签到: ${stats.consecutiveDays}天`}
-              color="primary"
-              variant="outlined"
-            />
-            <Chip
-              icon={<TrendingUpIcon />}
-              label={`本月签到: ${stats.thisMonthCheckins}天`}
-              color="success"
-              variant="outlined"
-            />
-            {stats.isCheckedInToday && (
-              <Chip
-                icon={<CheckIcon />}
-                label="今日已签到"
-                color="success"
-                size="small"
-              />
-            )}
+            <Chip icon={<CheckIcon />} label={`总签到: ${stats.totalCheckins}天`} color="default" variant="outlined" />
+            <Chip icon={<StarsIcon />} label={`连续签到: ${stats.consecutiveDays}天`} color="primary" variant="outlined" />
+            <Chip icon={<TrendingUpIcon />} label={`本月签到: ${stats.thisMonthCheckins}天`} color="success" variant="outlined" />
+            {stats.isCheckedInToday && <Chip icon={<CheckIcon />} label="今日已签到" color="success" size="small" />}
           </Stack>
         </Box>
 
@@ -162,8 +140,8 @@ const CheckinRewardDisplay = ({ checkinData = [] }) => {
                   }}
                 >
                   <ListItemAvatar>
-                    <Avatar 
-                      sx={{ 
+                    <Avatar
+                      sx={{
                         bgcolor: theme.palette[getRewardColor(reward.type)].main,
                         width: 32,
                         height: 32
@@ -175,15 +153,8 @@ const CheckinRewardDisplay = ({ checkinData = [] }) => {
                   <ListItemText
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography fontWeight="bold">
-                          {reward.title}
-                        </Typography>
-                        <Chip
-                          label={`${reward.multiplier}x`}
-                          size="small"
-                          color={getRewardColor(reward.type)}
-                          variant="filled"
-                        />
+                        <Typography fontWeight="bold">{reward.title}</Typography>
+                        <Chip label={`${reward.multiplier}x`} size="small" color={getRewardColor(reward.type)} variant="filled" />
                       </Box>
                     }
                     secondary={reward.description}
@@ -194,9 +165,7 @@ const CheckinRewardDisplay = ({ checkinData = [] }) => {
           </>
         ) : (
           <Alert severity="info" sx={{ mt: 2 }}>
-            <Typography variant="body2">
-              继续签到可获得更多优惠券奖励！连续签到7天可获得额外奖励加成。
-            </Typography>
+            <Typography variant="body2">继续签到可获得更多优惠券奖励！连续签到7天可获得额外奖励加成。</Typography>
           </Alert>
         )}
 

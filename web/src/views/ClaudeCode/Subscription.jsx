@@ -1,11 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Container, Typography, Grid, Card, CardContent, 
-  Button, Box, Chip, LinearProgress, Alert, Dialog,
-  DialogTitle, DialogContent, DialogActions, TextField,
-  Table, TableBody, TableCell, TableContainer, TableHead,
-  TableRow, Paper, IconButton, Tooltip, Stack, Divider,
-  CircularProgress, FormControl, InputLabel, Select, MenuItem
+  Container,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  Box,
+  Chip,
+  LinearProgress,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Tooltip,
+  Stack,
+  Divider,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import {
   Star as StarIcon,
@@ -95,14 +120,14 @@ const ClaudeCodeSubscription = () => {
   // 购买订阅
   const purchaseSubscription = async () => {
     if (!selectedPlan) return;
-    
+
     setLoading(true);
     try {
       const res = await API.post('/api/user/claude-code/purchase', {
         plan_type: selectedPlan.type,
         payment_method: paymentMethod
       });
-      
+
       if (res.data.success) {
         showSuccess('订单创建成功！正在跳转到支付页面...');
         // 跳转到支付页面
@@ -136,7 +161,7 @@ const ClaudeCodeSubscription = () => {
       const res = await API.post('/api/user/claude-code/api-keys', {
         name: newKeyName
       });
-      
+
       if (res.data.success) {
         showSuccess('API Key创建成功！');
         setNewApiKey(res.data.data.key);
@@ -206,11 +231,16 @@ const ClaudeCodeSubscription = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'active': return 'success';
-      case 'expired': return 'error';
-      case 'cancelled': return 'warning';
-      case 'pending': return 'info';
-      default: return 'default';
+      case 'active':
+        return 'success';
+      case 'expired':
+        return 'error';
+      case 'cancelled':
+        return 'warning';
+      case 'pending':
+        return 'info';
+      default:
+        return 'default';
     }
   };
 

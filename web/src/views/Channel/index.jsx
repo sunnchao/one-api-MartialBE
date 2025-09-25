@@ -149,7 +149,7 @@ export default function ChannelList() {
     // 检查是否首次搜索或有变化
     const isFirstSearch = deepEqual(searchKeyword, originalKeyword);
     const hasChanged = !deepEqual(toolBarValue, searchKeyword);
-    
+
     // 开发环境调试信息
     if (process.env.NODE_ENV === 'development') {
       console.log('搜索状态:', {
@@ -160,9 +160,9 @@ export default function ChannelList() {
         originalKeyword
       });
     }
-    
+
     setPage(0);
-    
+
     if (hasChanged) {
       // 如果搜索条件有变化，更新搜索关键字
       setSearchKeyword(toolBarValue);
@@ -178,24 +178,24 @@ export default function ChannelList() {
   // 深度比较两个对象是否相等
   const deepEqual = (obj1, obj2) => {
     if (obj1 === obj2) return true;
-    
+
     if (obj1 == null || obj2 == null) return false;
-    
+
     const keys1 = Object.keys(obj1);
     const keys2 = Object.keys(obj2);
-    
+
     if (keys1.length !== keys2.length) return false;
-    
+
     for (let key of keys1) {
       if (!keys2.includes(key)) return false;
-      
+
       // 统一转换为字符串进行比较，处理数字和字符串的差异
       const val1 = String(obj1[key] ?? '');
       const val2 = String(obj2[key] ?? '');
-      
+
       if (val1 !== val2) return false;
     }
-    
+
     return true;
   };
 
@@ -212,7 +212,7 @@ export default function ChannelList() {
   const handleToolBarValue = (event) => {
     const newValue = { ...toolBarValue, [event.target.name]: event.target.value };
     setToolBarValue(newValue);
-    
+
     // 检查是否有变化
     const hasChanged = !deepEqual(newValue, searchKeyword);
     setHasSearchChanges(hasChanged);
@@ -478,7 +478,7 @@ export default function ChannelList() {
     fetchTags().then();
     fetchModels().then();
     fetchPrices().then();
-    
+
     // 开发环境测试深度比较函数
     if (process.env.NODE_ENV === 'development') {
       testDeepEqual();
@@ -533,57 +533,58 @@ export default function ChannelList() {
             bgcolor: 'background.neutral'
           }}
         >
-          <Stack 
-            direction={{ xs: 'column', md: 'row' }} 
-            spacing={2} 
-            justifyContent="space-between" 
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={2}
+            justifyContent="space-between"
             alignItems={{ xs: 'stretch', md: 'center' }}
           >
             {/* 左侧：搜索和重置按钮 */}
             <Stack direction="row" spacing={1} alignItems="center">
-              <Tooltip 
-                title={hasSearchChanges ? "执行搜索以应用新的筛选条件" : "刷新数据获取最新信息"}
-                placement="top"
-              >
-                <Button 
-                  variant={hasSearchChanges ? "contained" : "outlined"}
-                  color={hasSearchChanges ? "primary" : "primary"}
-                  onClick={searchChannels} 
+              <Tooltip title={hasSearchChanges ? '执行搜索以应用新的筛选条件' : '刷新数据获取最新信息'} placement="top">
+                <Button
+                  variant={hasSearchChanges ? 'contained' : 'outlined'}
+                  color={hasSearchChanges ? 'primary' : 'primary'}
+                  onClick={searchChannels}
                   disabled={searching}
-                  startIcon={searching ? 
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CircularProgress size={16} color="inherit" />
-                    </Box> : 
-                    <Icon icon="solar:magnifer-bold-duotone" width={18} />
+                  startIcon={
+                    searching ? (
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <CircularProgress size={16} color="inherit" />
+                      </Box>
+                    ) : (
+                      <Icon icon="solar:magnifer-bold-duotone" width={18} />
+                    )
                   }
-                  sx={{ 
-                    borderRadius: 2, 
-                    textTransform: 'none', 
+                  sx={{
+                    borderRadius: 2,
+                    textTransform: 'none',
                     fontWeight: 600,
                     position: 'relative',
                     minWidth: 120, // 固定最小宽度，防止文字变化时按钮跳动
-                    ...(hasSearchChanges && !searching && {
-                      '&::after': {
-                        content: '""',
-                        position: 'absolute',
-                        top: -2,
-                        right: -2,
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        bgcolor: 'warning.main',
-                        animation: 'pulse 2s infinite'
-                      }
-                    })
+                    ...(hasSearchChanges &&
+                      !searching && {
+                        '&::after': {
+                          content: '""',
+                          position: 'absolute',
+                          top: -2,
+                          right: -2,
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          bgcolor: 'warning.main',
+                          animation: 'pulse 2s infinite'
+                        }
+                      })
                   }}
                 >
-                  {searching ? '查询中...' : (hasSearchChanges ? '执行搜索' : '搜索/刷新')}
+                  {searching ? '查询中...' : hasSearchChanges ? '执行搜索' : '搜索/刷新'}
                 </Button>
               </Tooltip>
               <Tooltip title="清空所有筛选条件并重新加载数据" placement="top">
-                <Button 
+                <Button
                   variant="outlined"
-                  onClick={() => handleRefresh(true)} 
+                  onClick={() => handleRefresh(true)}
                   startIcon={<Icon icon="solar:refresh-circle-bold-duotone" width={18} />}
                   sx={{ borderRadius: 2, textTransform: 'none' }}
                 >
@@ -613,7 +614,7 @@ export default function ChannelList() {
                     {t('channel_index.testAllChannels')}
                   </Button>
                   <Button
-                    variant="outlined" 
+                    variant="outlined"
                     color="success"
                     onClick={() => handlePopoverOpen(t('channel_index.updateEnabledBalance'), updateAllChannelsBalance)}
                     startIcon={<Icon icon="solar:dollar-minimalistic-bold-duotone" width={18} />}
@@ -634,10 +635,10 @@ export default function ChannelList() {
                 </>
               ) : (
                 <>
-                  <IconButton 
-                    onClick={() => handlePopoverOpen(t('channel_index.testAllChannels'), testAllChannels)} 
-                    sx={{ 
-                      bgcolor: 'info.lighter', 
+                  <IconButton
+                    onClick={() => handlePopoverOpen(t('channel_index.testAllChannels'), testAllChannels)}
+                    sx={{
+                      bgcolor: 'info.lighter',
                       color: 'info.main',
                       '&:hover': { bgcolor: 'info.main', color: 'info.contrastText' }
                     }}
@@ -647,8 +648,8 @@ export default function ChannelList() {
                   <IconButton
                     onClick={() => handlePopoverOpen(t('channel_index.updateEnabledBalance'), updateAllChannelsBalance)}
                     disabled={searching}
-                    sx={{ 
-                      bgcolor: 'success.lighter', 
+                    sx={{
+                      bgcolor: 'success.lighter',
                       color: 'success.main',
                       '&:hover': { bgcolor: 'success.main', color: 'success.contrastText' }
                     }}
@@ -657,8 +658,8 @@ export default function ChannelList() {
                   </IconButton>
                   <IconButton
                     onClick={() => handlePopoverOpen(t('channel_index.deleteDisabledChannels'), deleteAllDisabledChannels)}
-                    sx={{ 
-                      bgcolor: 'error.lighter', 
+                    sx={{
+                      bgcolor: 'error.lighter',
                       color: 'error.main',
                       '&:hover': { bgcolor: 'error.main', color: 'error.contrastText' }
                     }}

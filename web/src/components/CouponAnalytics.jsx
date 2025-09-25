@@ -82,13 +82,13 @@ const fetchCouponAnalytics = async () => {
 
     // 计算统计数据
     const totalCoupons = userCoupons.length;
-    const usedCoupons = userCoupons.filter(c => c.status === 2).length;
-    const activeCoupons = userCoupons.filter(c => c.status === 1).length;
-    const expiredCoupons = userCoupons.filter(c => c.status === 3).length;
-    
+    const usedCoupons = userCoupons.filter((c) => c.status === 2).length;
+    const activeCoupons = userCoupons.filter((c) => c.status === 1).length;
+    const expiredCoupons = userCoupons.filter((c) => c.status === 3).length;
+
     // 计算节省总金额
     const totalSavings = userCoupons
-      .filter(c => c.status === 2 && c.saved_amount)
+      .filter((c) => c.status === 2 && c.saved_amount)
       .reduce((sum, c) => sum + (parseFloat(c.saved_amount) || 0), 0);
 
     // 计算转化率
@@ -96,7 +96,7 @@ const fetchCouponAnalytics = async () => {
 
     // 按类型统计
     const typeStats = {};
-    userCoupons.forEach(coupon => {
+    userCoupons.forEach((coupon) => {
       const type = coupon.type || 'unknown';
       if (!typeStats[type]) {
         typeStats[type] = { count: 0, savings: 0 };
@@ -109,9 +109,7 @@ const fetchCouponAnalytics = async () => {
 
     const typeDistribution = Object.entries(typeStats).map(([type, data]) => ({
       type,
-      name: type === 'percentage' ? '百分比折扣' : 
-            type === 'fixed' ? '固定金额' : 
-            type === 'recharge' ? '充值奖励' : '其他',
+      name: type === 'percentage' ? '百分比折扣' : type === 'fixed' ? '固定金额' : type === 'recharge' ? '充值奖励' : '其他',
       count: data.count,
       percentage: totalCoupons > 0 ? (data.count / totalCoupons) * 100 : 0,
       savings: data.savings
@@ -123,9 +121,9 @@ const fetchCouponAnalytics = async () => {
     const weekStart = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    const getTodayCoupons = (coupons) => coupons.filter(c => new Date(c.created_time) >= today);
-    const getWeekCoupons = (coupons) => coupons.filter(c => new Date(c.created_time) >= weekStart);
-    const getMonthCoupons = (coupons) => coupons.filter(c => new Date(c.created_time) >= monthStart);
+    const getTodayCoupons = (coupons) => coupons.filter((c) => new Date(c.created_time) >= today);
+    const getWeekCoupons = (coupons) => coupons.filter((c) => new Date(c.created_time) >= weekStart);
+    const getMonthCoupons = (coupons) => coupons.filter((c) => new Date(c.created_time) >= monthStart);
 
     const todayCoupons = getTodayCoupons(userCoupons);
     const weekCoupons = getWeekCoupons(userCoupons);
@@ -135,20 +133,20 @@ const fetchCouponAnalytics = async () => {
       {
         period: '今日',
         issued: todayCoupons.length,
-        used: todayCoupons.filter(c => c.status === 2).length,
-        rate: todayCoupons.length > 0 ? (todayCoupons.filter(c => c.status === 2).length / todayCoupons.length) * 100 : 0
+        used: todayCoupons.filter((c) => c.status === 2).length,
+        rate: todayCoupons.length > 0 ? (todayCoupons.filter((c) => c.status === 2).length / todayCoupons.length) * 100 : 0
       },
       {
         period: '本周',
         issued: weekCoupons.length,
-        used: weekCoupons.filter(c => c.status === 2).length,
-        rate: weekCoupons.length > 0 ? (weekCoupons.filter(c => c.status === 2).length / weekCoupons.length) * 100 : 0
+        used: weekCoupons.filter((c) => c.status === 2).length,
+        rate: weekCoupons.length > 0 ? (weekCoupons.filter((c) => c.status === 2).length / weekCoupons.length) * 100 : 0
       },
       {
         period: '本月',
         issued: monthCoupons.length,
-        used: monthCoupons.filter(c => c.status === 2).length,
-        rate: monthCoupons.length > 0 ? (monthCoupons.filter(c => c.status === 2).length / monthCoupons.length) * 100 : 0
+        used: monthCoupons.filter((c) => c.status === 2).length,
+        rate: monthCoupons.length > 0 ? (monthCoupons.filter((c) => c.status === 2).length / monthCoupons.length) * 100 : 0
       },
       {
         period: '总计',
@@ -161,8 +159,8 @@ const fetchCouponAnalytics = async () => {
     // 计算热门优惠券（按使用次数排序）
     const couponUsage = {};
     userCoupons
-      .filter(c => c.status === 2)
-      .forEach(coupon => {
+      .filter((c) => c.status === 2)
+      .forEach((coupon) => {
         const name = coupon.name || `优惠券${coupon.template_id}`;
         if (!couponUsage[name]) {
           couponUsage[name] = { used: 0, savings: 0 };
@@ -185,7 +183,7 @@ const fetchCouponAnalytics = async () => {
     const recentActivities = userCoupons
       .sort((a, b) => new Date(b.created_time) - new Date(a.created_time))
       .slice(0, 5)
-      .map(coupon => ({
+      .map((coupon) => ({
         type: coupon.status === 2 ? 'used' : coupon.status === 3 ? 'expired' : 'issued',
         name: coupon.name || `优惠券${coupon.id}`,
         time: getTimeAgo(coupon.created_time),
@@ -206,7 +204,6 @@ const fetchCouponAnalytics = async () => {
       topPerformers,
       recentActivities
     };
-
   } catch (error) {
     console.error('获取优惠券分析数据失败:', error);
     throw error;

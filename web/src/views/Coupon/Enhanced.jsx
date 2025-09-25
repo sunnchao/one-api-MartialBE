@@ -85,7 +85,7 @@ const EnhancedCouponManagement = () => {
   const [userCoupons, setUserCoupons] = useState([]);
   const [checkinRewards, setCheckinRewards] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+
   // 用户优惠券历史状态
   const [couponHistory, setCouponHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -171,10 +171,14 @@ const EnhancedCouponManagement = () => {
   // 状态码转换
   const getStatusCode = (filter) => {
     switch (filter) {
-      case 'unused': return 1;
-      case 'used': return 2;
-      case 'expired': return 3;
-      default: return '';
+      case 'unused':
+        return 1;
+      case 'used':
+        return 2;
+      case 'expired':
+        return 3;
+      default:
+        return '';
     }
   };
 
@@ -532,11 +536,7 @@ const EnhancedCouponManagement = () => {
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <FormControl size="small" sx={{ minWidth: 120 }}>
               <InputLabel>状态筛选</InputLabel>
-              <Select
-                value={historyFilter}
-                label="状态筛选"
-                onChange={handleHistoryFilterChange}
-              >
+              <Select value={historyFilter} label="状态筛选" onChange={handleHistoryFilterChange}>
                 <MenuItem value="all">全部</MenuItem>
                 <MenuItem value="unused">未使用</MenuItem>
                 <MenuItem value="used">已使用</MenuItem>
@@ -595,24 +595,12 @@ const EnhancedCouponManagement = () => {
                         <TableCell>
                           <Chip
                             size="small"
-                            label={
-                              coupon.type === 'percentage' ? '百分比' :
-                              coupon.type === 'fixed' ? '固定金额' : '充值奖励'
-                            }
-                            color={
-                              coupon.type === 'percentage' ? 'primary' :
-                              coupon.type === 'fixed' ? 'secondary' : 'success'
-                            }
+                            label={coupon.type === 'percentage' ? '百分比' : coupon.type === 'fixed' ? '固定金额' : '充值奖励'}
+                            color={coupon.type === 'percentage' ? 'primary' : coupon.type === 'fixed' ? 'secondary' : 'success'}
                           />
                         </TableCell>
-                        <TableCell>
-                          {coupon.type === 'percentage' 
-                            ? `${coupon.value * 100}%` 
-                            : `¥${coupon.value}`}
-                        </TableCell>
-                        <TableCell>
-                          {coupon.min_amount > 0 ? `¥${coupon.min_amount}` : '无限制'}
-                        </TableCell>
+                        <TableCell>{coupon.type === 'percentage' ? `${coupon.value * 100}%` : `¥${coupon.value}`}</TableCell>
+                        <TableCell>{coupon.min_amount > 0 ? `¥${coupon.min_amount}` : '无限制'}</TableCell>
                         <TableCell>
                           <Chip
                             size="small"
@@ -623,12 +611,8 @@ const EnhancedCouponManagement = () => {
                           />
                         </TableCell>
                         <TableCell>{formatDate(coupon.created_time)}</TableCell>
-                        <TableCell>
-                          {coupon.expire_time ? formatDate(coupon.expire_time) : '永久有效'}
-                        </TableCell>
-                        <TableCell>
-                          {coupon.used_time ? formatDate(coupon.used_time) : '-'}
-                        </TableCell>
+                        <TableCell>{coupon.expire_time ? formatDate(coupon.expire_time) : '永久有效'}</TableCell>
+                        <TableCell>{coupon.used_time ? formatDate(coupon.used_time) : '-'}</TableCell>
                       </TableRow>
                     );
                   })}
@@ -638,12 +622,7 @@ const EnhancedCouponManagement = () => {
 
             {totalPages > 1 && (
               <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                <Pagination
-                  count={totalPages}
-                  page={currentPage}
-                  onChange={handlePageChange}
-                  color="primary"
-                />
+                <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" />
               </Box>
             )}
           </>
