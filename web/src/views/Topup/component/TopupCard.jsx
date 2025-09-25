@@ -11,11 +11,10 @@ import {
   Box,
   Grid,
   Divider,
-  Badge,
-  Alert,
-  AlertTitle,
-  Chip
+  Badge
 } from '@mui/material';
+import { Alert, Space, Tag } from 'antd';
+import { GiftOutlined } from '@ant-design/icons';
 import { IconBuildingBank } from '@tabler/icons-react';
 import { useTheme } from '@mui/material/styles';
 import SubCard from 'ui-component/cards/SubCard';
@@ -42,7 +41,7 @@ const TopupCard = () => {
   const [discountTotal, setDiscountTotal] = useState(0);
   const [open, setOpen] = useState(false);
   const [disabledPay, setDisabledPay] = useState(false);
-  const [showNationalDayPromo, setShowNationalDayPromo] = useState(false); // 国庆活动显示控制
+  const [showNationalDayPromo, setShowNationalDayPromo] = useState(true); // 国庆活动显示控制
   const matchDownSM = useMediaQuery(theme.breakpoints.down('md'));
   const siteInfo = useSelector((state) => state.siteInfo);
   const RechargeDiscount = useMemo(() => {
@@ -244,7 +243,7 @@ const TopupCard = () => {
   useEffect(() => {
     getPayment().then();
     getUserQuota().then();
-    setShowNationalDayPromo(checkNationalDayPromo());
+    // setShowNationalDayPromo(checkNationalDayPromo());
   }, []);
 
   return (
@@ -258,39 +257,38 @@ const TopupCard = () => {
       {/* 国庆活动横幅 */}
       {showNationalDayPromo && (
         <Alert
-          severity="success"
-          sx={{
-            mt: 2,
-            mb: 2,
-            borderRadius: 0,
-            background: 'linear-gradient(135deg, #ff8a80 0%, #ffcc80 100%)',
-            color: '#333',
-            '& .MuiAlert-icon': {
-              color: '#d84315'
-            }
+          message={
+            <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#d4380d' }}>
+                🎉 国庆七天乐，充值有惊喜！
+              </span>
+            </Space>
+          }
+          description={
+            <Space direction="vertical" size={4} style={{ width: '100%' }}>
+              <Space align="center">
+                <Typography variant="body2" style={{ color: '#8c8c8c' }}>
+                  {getPromoDateText()}每次充值额外获得
+                </Typography>
+                <Tag color="volcano" style={{ fontWeight: 'bold', fontSize: '12px' }}>
+                  {siteInfo.NationalDayPromoRate || 1}% 奖励
+                </Tag>
+              </Space>
+              <Typography variant="body2" style={{ color: '#8c8c8c', fontSize: '12px' }}>
+                例如：充值 $100 = 获得 ${100 + Math.floor(100 * (siteInfo.NationalDayPromoRate || 1) / 100)} 额度
+              </Typography>
+            </Space>
+          }
+          type="info"
+          showIcon
+          style={{
+            marginTop: '16px',
+            marginBottom: '16px',
+            backgroundColor: '#fff2e8',
+            border: '1px solid #ffbb96',
+            borderRadius: '8px'
           }}
-        >
-          <AlertTitle sx={{ color: '#d84315', fontWeight: 'bold' }}>
-            🎉 国庆七天乐，充值有惊喜！
-          </AlertTitle>
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 1 }}>
-            <Typography variant="body2" sx={{ color: '#fff' }}>
-              {getPromoDateText()}每次充值额外获得
-            </Typography>
-            <Chip
-              label={`${siteInfo.NationalDayPromoRate || 1}% 奖励`}
-              size="small"
-              sx={{
-                bgcolor: '#d84315',
-                color: 'white',
-                fontWeight: 'bold'
-              }}
-            />
-          </Stack>
-          <Typography variant="body2" sx={{ color: '#666', mt: 0.5 }}>
-            例如：充值 $100 = 获得 ${100 + Math.floor(100 * (siteInfo.NationalDayPromoRate || 1) / 100)} 额度
-          </Typography>
-        </Alert>
+        />
       )}
 
       {payment.length > 0 && (
@@ -385,14 +383,17 @@ const TopupCard = () => {
               {showNationalDayPromo && amount > 0 && (
                 <>
                   <Grid item xs={6} md={9}>
-                    <Typography variant="h6" style={{ textAlign: 'right', fontSize: '0.875rem', color: theme.palette.success.main }}>
-                      🎉 国庆奖励:{' '}
-                    </Typography>
+                    <Space align="center" style={{ justifyContent: 'flex-end', width: '100%' }}>
+                      <GiftOutlined style={{ color: '#fa541c' }} />
+                      <Typography variant="h6" style={{ fontSize: '0.875rem', color: '#fa541c', margin: 0 }}>
+                        国庆奖励:{' '}
+                      </Typography>
+                    </Space>
                   </Grid>
                   <Grid item xs={6} md={3}>
-                    <Typography variant="body2" sx={{ color: theme.palette.success.main, fontWeight: 'bold' }}>
+                    <Tag color="volcano" style={{ fontWeight: 'bold', margin: 0 }}>
                       +${calculateNationalDayBonus(amount)}
-                    </Typography>
+                    </Tag>
                   </Grid>
                 </>
               )}
