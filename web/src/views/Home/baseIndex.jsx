@@ -73,6 +73,13 @@ const BaseIndex = () => {
   const [copied, setCopied] = useState(false);
   const [currentEndpointIndex, setCurrentEndpointIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [countdown, setCountdown] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    milliseconds: 0
+  });
   const [models] = useState([
     { id: 1, name: 'OpenAI', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/openai.webp' },
     { id: 11, name: 'Google Gemini', icon: 'https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/gemini.webp' },
@@ -132,6 +139,30 @@ const BaseIndex = () => {
     }, 3000); // Change endpoint every 3 seconds
     return () => clearInterval(interval);
   }, [endpoints.length]);
+
+  // 倒计时逻辑 - 假设活动截止到国庆节结束 (2024年10月7日23:59:59)
+  useEffect(() => {
+    const targetDate = new Date('2024-10-07T23:59:59').getTime();
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance > 0) {
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        const milliseconds = Math.floor((distance % 1000) / 10); // 显示到厘秒
+
+        setCountdown({ days, hours, minutes, seconds, milliseconds });
+      } else {
+        setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
+      }
+    }, 10); // 每10毫秒更新一次
+
+    return () => clearInterval(interval);
+  }, []);
 
   // 模拟页面加载
   useEffect(() => {
@@ -193,6 +224,66 @@ const BaseIndex = () => {
           `}
         </script>
       </Helmet>
+
+      {/* 全屏宽度活动横幅 */}
+      <Box
+        sx={{
+          width: '100vw',
+          position: 'relative',
+          left: '50%',
+          right: '50%',
+          marginLeft: '-50vw',
+          marginRight: '-50vw',
+          background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+          py: 2,
+          textAlign: 'center',
+          zIndex: 1000,
+          boxShadow: '0 2px 8px rgba(33, 150, 243, 0.15)',
+          borderBottom: '1px solid rgba(33, 150, 243, 0.1)'
+        }}
+      >
+        <Container maxWidth={false}>
+          <Typography
+            variant="h6"
+            sx={{
+              color: '#1976d2',
+              fontWeight: 600,
+              fontSize: { xs: '1rem', md: '1.2rem' },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1
+            }}
+          >
+            <Box
+              component="span"
+              sx={{
+                fontSize: '1.3em'
+              }}
+            >
+              🎊
+            </Box>
+            国庆盛典，充值有惊喜！
+            <Box
+              component="span"
+              sx={{
+                ml: 2,
+                px: 2,
+                py: 0.5,
+                backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                borderRadius: '16px',
+                fontSize: { xs: '12px', md: '14px' },
+                border: '1px solid rgba(25, 118, 210, 0.2)',
+                color: '#1565c0',
+                display: { xs: 'none', sm: 'inline-block' }
+              }}
+            >
+              ⏰ 活动倒计时: {countdown.days}天 {String(countdown.hours).padStart(2, '0')}:{String(countdown.minutes).padStart(2, '0')}:
+              {String(countdown.seconds).padStart(2, '0')}.{String(countdown.milliseconds).padStart(2, '0')}
+            </Box>
+          </Typography>
+        </Container>
+      </Box>
       <Box
         sx={{
           minHeight: '100vh',

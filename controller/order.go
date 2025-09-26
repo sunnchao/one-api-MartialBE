@@ -55,13 +55,31 @@ func isNationalDayPromoActive() bool {
 	return now.After(startDate.Add(-time.Second)) && now.Before(endDate.Add(time.Second))
 }
 
-// 计算国庆活动的额外奖励
+// 计算国庆活动的额外奖励 - 阶梯奖励
 func calculateNationalDayBonus(baseQuota int) int {
 	if !isNationalDayPromoActive() {
 		return 0
 	}
-	// 使用配置的奖励率，向下取整
-	return int(float64(baseQuota) * config.NationalDayPromoRate / 100.0)
+
+	// 将 quota 转换为美元金额进行阶梯计算
+	baseAmount := int(float64(baseQuota) / config.QuotaPerUnit)
+
+	// 阶梯奖励配置：充 10 块送 1，充 50 送 8，充 100 送 18，充 500 送 108
+	var bonusAmount int
+	if baseAmount >= 500 {
+		bonusAmount = 108
+	} else if baseAmount >= 100 {
+		bonusAmount = 18
+	} else if baseAmount >= 50 {
+		bonusAmount = 8
+	} else if baseAmount >= 10 {
+		bonusAmount = 1
+	} else {
+		return 0 // 小于10不赠送
+	}
+
+	// 将奖励金额转换回 quota
+	return int(float64(bonusAmount) * config.QuotaPerUnit)
 }
 
 // CreateOrder

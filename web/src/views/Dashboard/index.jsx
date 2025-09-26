@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Grid, Box, Stack, Typography, Button } from '@mui/material';
+import { Grid, Box, Stack, Typography, Button, Container } from '@mui/material';
 import { gridSpacing } from 'store/constant';
 import StatisticalLineChartCard from './component/StatisticalLineChartCard';
 import Calendar from 'ui-component/calendar/Calendar';
@@ -18,6 +18,7 @@ import dayjs from 'dayjs';
 import StatusPanel from './component/StatusPanel';
 import CheckinService from 'services/checkinService';
 import { useSelector } from 'react-redux';
+import { keyframes } from '@mui/system';
 
 // TabPanel component for tab content
 function TabPanel(props) {
@@ -41,6 +42,13 @@ const Dashboard = () => {
   const { t } = useTranslation();
   const [modelUsageData, setModelUsageData] = useState([]);
   const [currentTab, setCurrentTab] = useState(0);
+  const [countdown, setCountdown] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    milliseconds: 0
+  });
 
   const [dashboardData, setDashboardData] = useState(null);
   const siteInfo = useSelector((state) => state.siteInfo);
@@ -84,6 +92,30 @@ const Dashboard = () => {
   useEffect(() => {
     userDashboard();
     loadCheckInList();
+  }, []);
+
+  // 倒计时逻辑 - 假设活动截止到国庆节结束 (2024年10月7日23:59:59)
+  useEffect(() => {
+    const targetDate = new Date('2024-10-07T23:59:59').getTime();
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance > 0) {
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        const milliseconds = Math.floor((distance % 1000) / 10); // 显示到厘秒
+
+        setCountdown({ days, hours, minutes, seconds, milliseconds });
+      } else {
+        setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
+      }
+    }, 10); // 每10毫秒更新一次
+
+    return () => clearInterval(interval);
   }, []);
 
   // Dashboard content
@@ -166,6 +198,70 @@ const Dashboard = () => {
 
   return (
     <>
+      {/* 全屏宽度活动横幅 */}
+      <Box
+        sx={{
+          width: '100vw',
+          position: 'relative',
+          left: '50%',
+          right: '50%',
+          marginLeft: '-50vw',
+          marginRight: '-50vw',
+          marginBottom: 2,
+          background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+          py: 1.5,
+          textAlign: 'center',
+          zIndex: 1000,
+          boxShadow: '0 2px 8px rgba(33, 150, 243, 0.15)',
+          borderBottom: '1px solid rgba(33, 150, 243, 0.1)'
+        }}
+      >
+        <Container maxWidth={false}>
+          <Typography
+            variant="h6"
+            sx={{
+              color: '#1976d2',
+              fontWeight: 600,
+              fontSize: { xs: '0.9rem', md: '1.1rem' },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1
+            }}
+          >
+            <Box
+              component="span"
+              sx={{
+                fontSize: '1.2em'
+              }}
+            >
+              🎊
+            </Box>
+            国庆盛典，充值有惊喜！
+            <Box
+              component="span"
+              sx={{
+                ml: 2,
+                px: 2,
+                py: 0.5,
+                backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                borderRadius: '16px',
+                fontSize: '0.8em',
+                border: '1px solid rgba(25, 118, 210, 0.2)',
+                color: '#1565c0',
+                display: { xs: 'none', md: 'inline-block' },
+                fontFamily: 'monospace',
+                fontWeight: 'bold'
+              }}
+            >
+              ⏰ 活动倒计时: {countdown.days}天 {countdown.hours.toString().padStart(2, '0')}:
+              {countdown.minutes.toString().padStart(2, '0')}:{countdown.seconds.toString().padStart(2, '0')}.
+              {countdown.milliseconds.toString().padStart(2, '0')}
+            </Box>
+          </Typography>
+        </Container>
+      </Box>
+
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
         <Stack direction="row" alignItems="center" spacing={3}>
           <Stack direction="column" spacing={1}>

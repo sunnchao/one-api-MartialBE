@@ -24,7 +24,7 @@ import { useSelector } from 'react-redux';
 import PayDialog from './PayDialog';
 
 import { API } from 'utils/api';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { showError, showInfo, showSuccess, renderQuota, trims } from 'utils/common';
 import { useTranslation } from 'react-i18next';
 
@@ -42,6 +42,7 @@ const TopupCard = () => {
   const [open, setOpen] = useState(false);
   const [disabledPay, setDisabledPay] = useState(false);
   const [showNationalDayPromo, setShowNationalDayPromo] = useState(true); // 国庆活动显示控制
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 }); // 倒计时状态
   const matchDownSM = useMediaQuery(theme.breakpoints.down('md'));
   const siteInfo = useSelector((state) => state.siteInfo);
   const RechargeDiscount = useMemo(() => {
@@ -73,12 +74,44 @@ const TopupCard = () => {
     }
   };
 
-  // 计算国庆活动的额外奖励金额
+  // 计算国庆活动的额外奖励金额 - 阶梯奖励
   const calculateNationalDayBonus = (baseAmount) => {
     if (!showNationalDayPromo) return 0;
-    const promoRate = siteInfo.NationalDayPromoRate || 1.0;
-    return Math.floor(baseAmount * promoRate / 100); // 使用配置的奖励率
+
+    // 阶梯奖励配置：充 10 块送 1，充 50 送 8，充 100 送 18，充 500 送 108
+    if (baseAmount >= 500) return 108;
+    if (baseAmount >= 100) return 18;
+    if (baseAmount >= 50) return 8;
+    if (baseAmount >= 10) return 1;
+
+    return 0; // 小于10不赠送
   };
+
+  // 计算倒计时
+  const calculateCountdown = useCallback(() => {
+    if (!siteInfo.NationalDayPromoEndDate) return null;
+
+    try {
+      const now = new Date();
+      const endDate = new Date(siteInfo.NationalDayPromoEndDate + 'T23:59:59');
+      const timeDiff = endDate.getTime() - now.getTime();
+
+      if (timeDiff <= 0) {
+        // 活动已结束
+        setShowNationalDayPromo(false);
+        return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+      }
+
+      const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+      return { days, hours, minutes, seconds };
+    } catch (e) {
+      return null;
+    }
+  }, [siteInfo.NationalDayPromoEndDate]);
 
   // 获取活动时间显示文本
   const getPromoDateText = () => {
@@ -243,8 +276,36 @@ const TopupCard = () => {
   useEffect(() => {
     getPayment().then();
     getUserQuota().then();
-    // setShowNationalDayPromo(checkNationalDayPromo());
-  }, []);
+
+    // 等待 siteInfo 加载完成后再检查活动状态
+    if (siteInfo.NationalDayPromoEnabled !== undefined) {
+      setShowNationalDayPromo(checkNationalDayPromo());
+    }
+  }, [siteInfo.NationalDayPromoEnabled, siteInfo.NationalDayPromoStartDate, siteInfo.NationalDayPromoEndDate]);
+
+  // 倒计时定时器
+  useEffect(() => {
+    if (!showNationalDayPromo) return;
+
+    const timer = setInterval(() => {
+      const newCountdown = calculateCountdown();
+      if (newCountdown) {
+        setCountdown(newCountdown);
+        // 检查活动是否结束
+        if (newCountdown.days === 0 && newCountdown.hours === 0 && newCountdown.minutes === 0 && newCountdown.seconds === 0) {
+          setShowNationalDayPromo(false);
+        }
+      }
+    }, 1000);
+
+    // 立即计算一次倒计时
+    const initialCountdown = calculateCountdown();
+    if (initialCountdown) {
+      setCountdown(initialCountdown);
+    }
+
+    return () => clearInterval(timer);
+  }, [showNationalDayPromo, calculateCountdown]);
 
   return (
     <UserCard>
@@ -256,39 +317,121 @@ const TopupCard = () => {
 
       {/* 国庆活动横幅 */}
       {showNationalDayPromo && (
-        <Alert
-          message={
-            <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#d4380d' }}>
-                🎉 国庆七天乐，充值有惊喜！
-              </span>
-            </Space>
-          }
-          description={
-            <Space direction="vertical" size={4} style={{ width: '100%' }}>
-              <Space align="center">
-                <Typography variant="body2" style={{ color: '#8c8c8c' }}>
-                  {getPromoDateText()}每次充值额外获得
-                </Typography>
-                <Tag color="volcano" style={{ fontWeight: 'bold', fontSize: '12px' }}>
-                  {siteInfo.NationalDayPromoRate || 1}% 奖励
-                </Tag>
+        <>
+          {/* 添加CSS动画样式 */}
+          <style jsx>{`
+            @keyframes pulse {
+              0% {
+                transform: scale(1);
+                box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+              }
+              50% {
+                transform: scale(1.02);
+                box-shadow: 0 6px 16px rgba(255, 107, 107, 0.6);
+              }
+              100% {
+                transform: scale(1);
+                box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+              }
+            }
+
+            @keyframes flash {
+              0%,
+              100% {
+                opacity: 1;
+              }
+              50% {
+                opacity: 0.7;
+              }
+            }
+
+            .countdown-timer {
+              animation: pulse 2s infinite;
+            }
+
+            .seconds-flash {
+              animation: flash 1s ease-in-out;
+            }
+          `}</style>
+          <Alert
+            message={
+              <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#d4380d' }}>🎊 国庆盛典，"放价"啦！</span>
+                {/* 倒计时显示 */}
+                <Space
+                  className="countdown-timer"
+                  style={{
+                    background: 'linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%)',
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    boxShadow: '0 4px 12px rgba(255, 107, 107, 0.4)'
+                  }}
+                >
+                  {countdown.days > 0 && (
+                    <>
+                      <span
+                        style={{
+                          color: 'white',
+                          fontSize: '13px',
+                          fontWeight: 'bold',
+                          textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                        }}
+                      >
+                        {countdown.days}天
+                      </span>
+                      <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px', margin: '0 3px' }}>|</span>
+                    </>
+                  )}
+                  <span
+                    style={{
+                      color: 'white',
+                      fontSize: '13px',
+                      fontWeight: 'bold',
+                      textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+                      fontFamily: 'monospace',
+                      letterSpacing: '0.5px'
+                    }}
+                  >
+                    {String(countdown.hours).padStart(2, '0')}:{String(countdown.minutes).padStart(2, '0')}:
+                    <span
+                      className={countdown.seconds % 2 === 0 ? 'seconds-flash' : ''}
+                      style={{
+                        display: 'inline-block',
+                        minWidth: '20px'
+                      }}
+                    >
+                      {String(countdown.seconds).padStart(2, '0')}
+                    </span>
+                  </span>
+                </Space>
               </Space>
-              <Typography variant="body2" style={{ color: '#8c8c8c', fontSize: '12px' }}>
-                例如：充值 $100 = 获得 ${100 + Math.floor(100 * (siteInfo.NationalDayPromoRate || 1) / 100)} 额度
-              </Typography>
-            </Space>
-          }
-          type="info"
-          showIcon
-          style={{
-            marginTop: '16px',
-            marginBottom: '16px',
-            backgroundColor: '#fff2e8',
-            border: '1px solid #ffbb96',
-            borderRadius: '8px'
-          }}
-        />
+            }
+            description={
+              <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                <Space align="center">
+                  <Typography variant="body2" style={{ color: '#8c8c8c' }}>
+                    {getPromoDateText()}阶梯奖励
+                  </Typography>
+                  <Tag color="volcano" style={{ fontWeight: 'bold', fontSize: '12px' }}>
+                    充10送1 充50送8 充100送18 充500送108
+                  </Tag>
+                </Space>
+                <Typography variant="body2" style={{ color: '#8c8c8c', fontSize: '12px' }}>
+                  例如：充值 $100 = 获得 ${100 + calculateNationalDayBonus(100)} 额度
+                </Typography>
+              </Space>
+            }
+            type="success"
+            showIcon={false}
+            style={{
+              marginTop: '16px',
+              marginBottom: '16px',
+              backgroundColor: '#fff2e8',
+              border: '1px solid #ffbb96',
+              borderRadius: '8px'
+            }}
+          />
+        </>
       )}
 
       {payment.length > 0 && (

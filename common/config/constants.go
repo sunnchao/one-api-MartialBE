@@ -150,8 +150,8 @@ var CheckinCouponEnabled = false
 // 国庆活动配置
 var NationalDayPromoEnabled = true
 var NationalDayPromoRate = 1.0 // 1% 奖励率
-var NationalDayPromoStartDate = "2024-09-25"
-var NationalDayPromoEndDate = "2024-10-08"
+var NationalDayPromoStartDate = "2025-09-25"
+var NationalDayPromoEndDate = "2025-10-08"
 
 var SMTPServer = ""
 var SMTPPort = 587

@@ -183,7 +183,7 @@ func Register(c *gin.Context) {
 		})
 		return
 	}
-	go func ()  {
+	go func() {
 		err := createInitialToken(cleanUser.Id)
 		if err != nil {
 			logger.SysError("创建初始令牌失败: " + err.Error())
@@ -764,7 +764,7 @@ func TopUp(c *gin.Context) {
 		return
 	}
 
-	// 检查国庆活动期间，发放额外奖励
+	// 检查国庆活动期间，发放额外奖励 - 阶梯奖励
 	nationalDayBonus := 0
 	if config.NationalDayPromoEnabled {
 		now := time.Now()
@@ -779,14 +779,29 @@ func TopUp(c *gin.Context) {
 				endDate = time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 59, 59, 0, time.Local)
 
 				if now.After(startDate.Add(-time.Second)) && now.Before(endDate.Add(time.Second)) {
-					// 使用配置的奖励率，向下取整
-					nationalDayBonus = int(float64(quota) * config.NationalDayPromoRate / 100.0)
-					if nationalDayBonus > 0 {
+					// 将 quota 转换为美元金额进行阶梯计算
+					baseAmount := int(float64(quota) / config.QuotaPerUnit)
+
+					// 阶梯奖励配置：充 10 块送 1，充 50 送 8，充 100 送 18，充 500 送 108
+					var bonusAmount int
+					if baseAmount >= 500 {
+						bonusAmount = 108
+					} else if baseAmount >= 100 {
+						bonusAmount = 18
+					} else if baseAmount >= 50 {
+						bonusAmount = 8
+					} else if baseAmount >= 10 {
+						bonusAmount = 1
+					}
+
+					if bonusAmount > 0 {
+						// 将奖励金额转换回 quota
+						nationalDayBonus = int(float64(bonusAmount) * config.QuotaPerUnit)
 						err = model.IncreaseUserQuota(id, nationalDayBonus)
 						if err == nil {
 							quota += nationalDayBonus
 							// 记录国庆奖励日志
-							model.RecordQuotaLog(id, model.LogTypeTopup, nationalDayBonus, c.ClientIP(), fmt.Sprintf("兑换码充值国庆活动额外奖励，奖励积分: %d", nationalDayBonus))
+							model.RecordQuotaLog(id, model.LogTypeTopup, nationalDayBonus, c.ClientIP(), fmt.Sprintf("兑换码充值国庆活动额外奖励，充值金额: $%d，奖励积分: %d", baseAmount, nationalDayBonus))
 						}
 					}
 				}
