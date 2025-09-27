@@ -42,7 +42,7 @@ const TopupCard = () => {
   const [open, setOpen] = useState(false);
   const [disabledPay, setDisabledPay] = useState(false);
   const [showNationalDayPromo, setShowNationalDayPromo] = useState(true); // 国庆活动显示控制
-  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 }); // 倒计时状态
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 }); // 倒计时状态
   const matchDownSM = useMediaQuery(theme.breakpoints.down('md'));
   const siteInfo = useSelector((state) => state.siteInfo);
   const RechargeDiscount = useMemo(() => {
@@ -99,15 +99,16 @@ const TopupCard = () => {
       if (timeDiff <= 0) {
         // 活动已结束
         setShowNationalDayPromo(false);
-        return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+        return { days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 };
       }
 
       const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+      const milliseconds = Math.floor((timeDiff % 1000) / 10);
 
-      return { days, hours, minutes, seconds };
+      return { days, hours, minutes, seconds, milliseconds };
     } catch (e) {
       return null;
     }
@@ -296,7 +297,7 @@ const TopupCard = () => {
           setShowNationalDayPromo(false);
         }
       }
-    }, 1000);
+    }, 10);
 
     // 立即计算一次倒计时
     const initialCountdown = calculateCountdown();
@@ -356,54 +357,28 @@ const TopupCard = () => {
           <Alert
             message={
               <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#d4380d' }}>🎊 国庆盛典，"放价"啦！</span>
-                {/* 倒计时显示 */}
-                <Space
-                  className="countdown-timer"
-                  style={{
-                    background: 'linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%)',
-                    padding: '6px 12px',
-                    borderRadius: '20px',
-                    boxShadow: '0 4px 12px rgba(255, 107, 107, 0.4)'
+                <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#d4380d' }}>🎊 国庆盛典，充值有惊喜！</span>
+                {/* 倒计时显示 - 与Dashboard保持一致的样式 */}
+                <Box
+                  component="span"
+                  sx={{
+                    ml: 2,
+                    px: 2,
+                    py: 0.5,
+                    backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                    borderRadius: '16px',
+                    fontSize: '0.8em',
+                    border: '1px solid rgba(25, 118, 210, 0.2)',
+                    color: '#1565c0',
+                    display: { xs: 'none', md: 'inline-block' },
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold'
                   }}
                 >
-                  {countdown.days > 0 && (
-                    <>
-                      <span
-                        style={{
-                          color: 'white',
-                          fontSize: '13px',
-                          fontWeight: 'bold',
-                          textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                        }}
-                      >
-                        {countdown.days}天
-                      </span>
-                      <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px', margin: '0 3px' }}>|</span>
-                    </>
-                  )}
-                  <span
-                    style={{
-                      color: 'white',
-                      fontSize: '13px',
-                      fontWeight: 'bold',
-                      textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
-                      fontFamily: 'monospace',
-                      letterSpacing: '0.5px'
-                    }}
-                  >
-                    {String(countdown.hours).padStart(2, '0')}:{String(countdown.minutes).padStart(2, '0')}:
-                    <span
-                      className={countdown.seconds % 2 === 0 ? 'seconds-flash' : ''}
-                      style={{
-                        display: 'inline-block',
-                        minWidth: '20px'
-                      }}
-                    >
-                      {String(countdown.seconds).padStart(2, '0')}
-                    </span>
-                  </span>
-                </Space>
+                  ⏰ 活动倒计时: {countdown.days}天 {countdown.hours.toString().padStart(2, '0')}:
+                  {countdown.minutes.toString().padStart(2, '0')}:{countdown.seconds.toString().padStart(2, '0')}.
+                  {countdown.milliseconds.toString().padStart(2, '0')}
+                </Box>
               </Space>
             }
             description={
