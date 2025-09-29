@@ -100,7 +100,7 @@ const PayDialog = ({ open, onClose, amount, uuid }) => {
       }
       pollOrderStatus(response.data.data.trade_no);
     });
-  }, [open, onClose, amount, uuid, pollOrderStatus]);
+  }, [open, amount, uuid]);
 
   //打开支付宝
   const handleOpenAlipay = (alipayUrl) => {
