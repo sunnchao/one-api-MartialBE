@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import AuthGuard from 'utils/route-guard/AuthGuard';
 
 // material-ui
@@ -15,6 +15,8 @@ import Sidebar from './Sidebar';
 import navigation from 'menu-items';
 import { drawerWidth } from 'store/constant';
 import { SET_MENU } from 'store/actions';
+import { SeoHelmet } from 'components/Seo';
+import { resolveSeoMeta } from 'constants/seo';
 
 // assets
 import { Icon } from '@iconify/react';
@@ -90,6 +92,9 @@ const MainLayout = () => {
     dispatch({ type: SET_MENU, opened: !leftDrawerOpened });
   };
 
+  const location = useLocation();
+  const seoMeta = resolveSeoMeta(location.pathname);
+
   // Profile drawer state
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
 
@@ -112,6 +117,7 @@ const MainLayout = () => {
         backgroundColor: theme.palette.background.default
       }}
     >
+      <SeoHelmet pathname={location.pathname} {...seoMeta} />
       <CssBaseline />
       {/* header */}
       <AppBar

@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router';
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { Box, Typography, Button, Container, Stack, Tooltip, IconButton } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
 import {
@@ -251,30 +250,6 @@ const BaseIndex = () => {
 
   return (
     <>
-      <Helmet>
-        <title>✨ Chirou API - 让AI为您服务</title>
-        <meta
-          name="description"
-          content="Chirou API，让AI为您服务。专为现代开发者打造的神奇AI接口平台，提供魔法般的响应速度、星级稳定性保障和无限扩展魔力。支持OpenAI, ClaudeAI, GeminiAI等所有主流AI模型，让您的应用拥有真正的魔法力量。"
-        />
-        <meta
-          name="keywords"
-          content="Chirou API,魔法AI, Magic AI, Claude Code, Codex Code, Claude, Gemini, Midjourney,AI代理接口,神奇响应,星级稳定,无限扩展"
-        />
-        <script type="application/ld+json">
-          {`
-            {
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              "name": "Chirou API",
-              "url": "https://www.maijik.com",
-              "logo": "https://www.maijik.com/logo.png",
-              "description": "让AI为您服务的接口平台，提供魔法般的响应速度和星级稳定性保障。"
-            }
-          `}
-        </script>
-      </Helmet>
-
       {/* 全屏宽度活动横幅 - 只在活动期间显示 */}
       {showNationalDayPromo && (
         <Box

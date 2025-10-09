@@ -1,8 +1,10 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import { AppBar, Box, CssBaseline, Toolbar, Container, useMediaQuery } from '@mui/material';
 import Header from './Header';
 import Footer from 'ui-component/Footer';
+import { SeoHelmet } from 'components/Seo';
+import { resolveSeoMeta } from 'constants/seo';
 
 // ==============================|| MINIMAL LAYOUT ||============================== //
 
@@ -10,9 +12,12 @@ const MinimalLayout = () => {
   const theme = useTheme();
   const matchDownSm = useMediaQuery(theme.breakpoints.down('sm'));
   const matchDownMd = useMediaQuery(theme.breakpoints.down('md'));
+  const location = useLocation();
+  const seoMeta = resolveSeoMeta(location.pathname);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <SeoHelmet pathname={location.pathname} {...seoMeta} />
       <CssBaseline />
       <AppBar
         enableColorOnDark
