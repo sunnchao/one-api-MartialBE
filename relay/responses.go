@@ -54,7 +54,7 @@ func (r *relayResponses) send() (err *types.OpenAIErrorWithStatusCode, done bool
 	r.responsesRequest.Model = r.modelName
 	channel := r.provider.GetChannel()
 	responsesProvider, ok := r.provider.(providersBase.ResponsesInterface)
-	if !ok || channel.CompatibleResponse {
+	if !ok || channel.CompatibleResponse || !r.provider.GetSupportedResponse() {
 		// 做一层Chat的兼容
 		chatProvider, ok := r.provider.(providersBase.ChatInterface)
 		if !ok {
