@@ -280,7 +280,8 @@ func (p *OpenAIProvider) GetRequestTextBody(relayMode int, ModelName string, req
   fullRequestURL := p.GetFullRequestURL(url, ModelName)
 
   // 获取请求头
-  headers := p.GetRequestHeaders()
+  //headers := p.GetRequestHeaders()
+  headers := p.GetOriginalRequestHeaders()
 
   // 处理额外参数
   customParams, err := p.CustomParameterHandler()
