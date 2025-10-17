@@ -2,10 +2,13 @@ package openai
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"one-api/common"
 	"one-api/common/config"
+	img "one-api/common/image"
 	"one-api/common/requester"
+	"one-api/common/storage"
 	"one-api/common/utils"
 	"one-api/types"
 	"strings"
@@ -49,6 +52,8 @@ func (p *OpenAIProvider) CreateResponses(request *types.OpenAIResponsesRequest) 
 	*p.Usage = *response.Usage.ToOpenAIUsage()
 
 	getResponsesExtraBilling(response, p.Usage)
+
+	convertResponsesOutputImages(response)
 
 	return response, nil
 }
@@ -101,6 +106,26 @@ func (h *OpenAIResponsesStreamHandler) HandlerResponsesStream(rawLine *[]byte, d
 		return
 	}
 
+	updated := false
+
+	if openaiResponse.Part != nil {
+		if convertContentResponseImage(openaiResponse.Part) {
+			updated = true
+		}
+	}
+
+	if openaiResponse.Item != nil {
+		if convertResponsesStreamItem(openaiResponse.Item) {
+			updated = true
+		}
+	}
+
+	if openaiResponse.Response != nil {
+		if convertResponsesOutputImages(openaiResponse.Response) {
+			updated = true
+		}
+	}
+
 	switch openaiResponse.Type {
 	case "response.created":
 		if len(openaiResponse.Response.Tools) > 0 {
@@ -139,6 +164,15 @@ func (h *OpenAIResponsesStreamHandler) HandlerResponsesStream(rawLine *[]byte, d
 			getResponsesExtraBilling(openaiResponse.Response, h.Usage)
 
 		}
+	}
+
+	if updated {
+		serialized, err := json.Marshal(openaiResponse)
+		if err != nil {
+			errChan <- common.ErrorToOpenAIError(err)
+			return
+		}
+		rawStr = h.Prefix + string(serialized)
 	}
 
 	dataChan <- rawStr
@@ -347,4 +381,195 @@ func getResponsesExtraBilling(response *types.OpenAIResponsesResponses, usage *t
 			}
 		}
 	}
+}
+
+func convertResponsesOutputImages(response *types.OpenAIResponsesResponses) bool {
+	if response == nil {
+		return false
+	}
+
+	modified := false
+	for idx := range response.Output {
+		if convertResponsesStreamItem(&response.Output[idx]) {
+			modified = true
+		}
+	}
+
+	return modified
+}
+
+func convertResponsesStreamItem(item *types.ResponsesOutput) bool {
+	if item == nil {
+		return false
+	}
+
+	modified := false
+	if item.Content != nil {
+		if newContent, changed := convertAnyImageData(item.Content); changed {
+			item.Content = newContent
+			modified = true
+		}
+	}
+	if item.Result != nil {
+		if newResult, changed := convertAnyImageData(item.Result); changed {
+			item.Result = newResult
+			modified = true
+		}
+	}
+	if item.Results != nil {
+		if newResults, changed := convertAnyImageData(item.Results); changed {
+			item.Results = newResults
+			modified = true
+		}
+	}
+	if item.Output != nil {
+		if newOutput, changed := convertAnyImageData(item.Output); changed {
+			item.Output = newOutput
+			modified = true
+		}
+	}
+	if item.Tools != nil {
+		if newTools, changed := convertAnyImageData(item.Tools); changed {
+			item.Tools = newTools
+			modified = true
+		}
+	}
+
+	return modified
+}
+
+func convertContentResponseImage(content *types.ContentResponses) bool {
+	if content == nil {
+		return false
+	}
+
+	modified := false
+	if content.ImageUrl != "" {
+		if newURL := uploadBase64Image(content.ImageUrl); newURL != "" {
+			content.ImageUrl = newURL
+			modified = true
+		}
+	}
+
+	return modified
+}
+
+func convertAnyImageData(data any) (any, bool) {
+	switch v := data.(type) {
+	case map[string]any:
+		return convertMapImageData(v)
+	case []any:
+		return convertSliceImageData(v)
+	default:
+		return data, false
+	}
+}
+
+func convertSliceImageData(items []any) ([]any, bool) {
+	modified := false
+	for idx, item := range items {
+		switch val := item.(type) {
+		case map[string]any:
+			if newMap, changed := convertMapImageData(val); changed {
+				items[idx] = newMap
+				modified = true
+			}
+		case []any:
+			if newSlice, changed := convertSliceImageData(val); changed {
+				items[idx] = newSlice
+				modified = true
+			}
+		}
+	}
+	return items, modified
+}
+
+func convertMapImageData(item map[string]any) (map[string]any, bool) {
+	modified := false
+
+	if raw, ok := item["image_url"]; ok {
+		switch val := raw.(type) {
+		case string:
+			if newURL := uploadBase64Image(val); newURL != "" {
+				item["image_url"] = newURL
+				modified = true
+			}
+		case map[string]any:
+			if url, ok := val["url"].(string); ok {
+				if newURL := uploadBase64Image(url); newURL != "" {
+					val["url"] = newURL
+					item["image_url"] = val
+					modified = true
+				}
+			}
+		}
+	}
+
+	for key, value := range item {
+		switch val := value.(type) {
+		case map[string]any:
+			if newMap, changed := convertMapImageData(val); changed {
+				item[key] = newMap
+				modified = true
+			}
+		case []any:
+			if newSlice, changed := convertSliceImageData(val); changed {
+				item[key] = newSlice
+				modified = true
+			}
+		}
+	}
+
+	return item, modified
+}
+
+func uploadBase64Image(dataURL string) string {
+	if !strings.HasPrefix(dataURL, "data:image/") {
+		return ""
+	}
+
+	mimeType, base64Data, err := img.ParseBase64File(dataURL)
+	if err != nil {
+		return ""
+	}
+
+	decoded, err := base64.StdEncoding.DecodeString(base64Data)
+	if err != nil {
+		return ""
+	}
+
+	fileName := utils.GetUUID() + mimeToExtension(mimeType)
+
+	return storage.Upload(decoded, fileName)
+}
+
+func mimeToExtension(mimeType string) string {
+	if !strings.HasPrefix(mimeType, "image/") {
+		return ".png"
+	}
+
+	subType := strings.TrimPrefix(mimeType, "image/")
+	switch strings.ToLower(subType) {
+	case "jpeg", "jpg":
+		return ".jpg"
+	case "png":
+		return ".png"
+	case "gif":
+		return ".gif"
+	case "webp":
+		return ".webp"
+	case "bmp":
+		return ".bmp"
+	case "svg+xml":
+		return ".svg"
+	}
+
+	if idx := strings.Index(subType, ";"); idx != -1 {
+		subType = subType[:idx]
+	}
+	if subType != "" {
+		return "." + subType
+	}
+
+	return ".png"
 }
