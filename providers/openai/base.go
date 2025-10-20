@@ -193,10 +193,26 @@ func (p *OpenAIProvider) GetOriginalRequestHeaders() (headers map[string]string)
 
   if p.Context != nil && p.Context.Request != nil {
     // 复制原始请求的所有header头
+    skipHeaders := map[string]struct{}{
+      "accept-encoding":   {},
+      "content-length":    {},
+      "transfer-encoding": {},
+      "connection":        {},
+      "proxy-connection":  {},
+      "keep-alive":        {},
+      "host":              {},
+    }
+
     for key, values := range p.Context.Request.Header {
-      if len(values) > 0 {
-        headers[key] = values[0] // 取第一个值
+      if len(values) == 0 {
+        continue
       }
+
+      if _, skip := skipHeaders[strings.ToLower(key)]; skip {
+        continue
+      }
+
+      headers[key] = values[0] // 取第一个值
     }
   }
   p.CommonRequestHeaders(headers)

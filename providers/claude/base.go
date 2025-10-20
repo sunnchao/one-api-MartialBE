@@ -85,17 +85,34 @@ func (p *ClaudeProvider) GetOriginalRequestHeaders() (headers map[string]string)
 	hasAuthorization := false
 	hasXApiKey := false
 	if p.Context != nil && p.Context.Request != nil {
+		skipHeaders := map[string]struct{}{
+			"accept-encoding":   {},
+			"content-length":    {},
+			"transfer-encoding": {},
+			"connection":        {},
+			"proxy-connection":  {},
+			"keep-alive":        {},
+			"host":              {},
+		}
+
 		// 复制原始请求的所有header头
 		for key, values := range p.Context.Request.Header {
-			if len(values) > 0 {
-				headers[key] = values[0] // 取第一个值
-				// 检查是否包含Authorization头
-				if strings.ToLower(key) == "authorization" {
-					hasAuthorization = true
-				}
-				if strings.ToLower(key) == "x-api-key" {
-					hasXApiKey = true
-				}
+			if len(values) == 0 {
+				continue
+			}
+
+			lowerKey := strings.ToLower(key)
+			if _, skip := skipHeaders[lowerKey]; skip {
+				continue
+			}
+
+			headers[key] = values[0] // 取第一个值
+			// 检查是否包含Authorization头
+			if lowerKey == "authorization" {
+				hasAuthorization = true
+			}
+			if lowerKey == "x-api-key" {
+				hasXApiKey = true
 			}
 		}
 	}
@@ -112,7 +129,7 @@ func (p *ClaudeProvider) GetOriginalRequestHeaders() (headers map[string]string)
 		// 删除 X-Api-Key 头
 		delete(headers, "X-Api-Key")
 	}
-	
+
 	return headers
 }
 
