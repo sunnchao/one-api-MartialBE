@@ -7,6 +7,7 @@ import (
 	"one-api/common"
 	"one-api/common/config"
 	"one-api/common/utils"
+	"strconv"
 	"strings"
 
 	"github.com/wneessen/go-mail"
@@ -127,21 +128,49 @@ func SendVerificationCodeEmail(email, code string) error {
 		return err
 	}
 
-	contentTemp := `
-	<p>
-		您正在进行邮箱验证。您的验证码为:
-	</p>
+	systemName := config.SystemName
+	if systemName == "" {
+		systemName = "Chirou API"
+	}
 
-	<p style="text-align: center; font-size: 30px; color: #58a6ff;">
-		<strong>%s</strong>
-	</p>
+	contentTemplate := `
+	<table role="presentation" width="100%" style="border-spacing: 0;">
+		<tr>
+			<td style="padding-bottom: 6px; text-align: center;">
+				<p style="margin: 0; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: #6b7280;">来自 {{systemName}} 的安全通知</p>
+			</td>
+		</tr>
+		<tr>
+			<td style="text-align: center; padding-bottom: 18px;">
+				<p style="margin: 0; font-size: 24px; font-weight: 600; color: #1f2937;">邮箱验证</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<table role="presentation" width="100%" style="border-spacing: 0;">
+					<tr>
+						<td style="padding: 20px; background-color: #f4f8ff; border-radius: 12px; text-align: center; border: 1px solid #e0e7ff;">
+							<p style="margin: 0 0 14px; font-size: 15px; line-height: 1.6; color: #334155;">为了保障您的账户安全，请在 {{minutes}} 分钟内输入以下验证码完成验证：</p>
+							<div style="display: inline-block; padding: 14px 24px; font-size: 32px; letter-spacing: 8px; font-weight: 700; color: #1d4ed8; background-color: #ffffff; border-radius: 10px; border: 1px dashed #93c5fd;">{{code}}</div>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="padding-top: 20px; color: #6b7280; font-size: 13px; line-height: 1.6;">
+				<p style="margin: 0 0 6px;">验证码过期请重新发起验证流程。</p>
+				<p style="margin: 0;">如非本人操作，请忽略此邮件并检查您的账户安全。</p>
+			</td>
+		</tr>
+	</table>`
 
-	<p style="color: #858585; padding-top: 15px;">
-		验证码 %d 分钟内有效，如果不是本人操作，请忽略。
-	</p>`
-
-	subject := fmt.Sprintf("%s邮箱验证邮件", config.SystemName)
-	content := fmt.Sprintf(contentTemp, code, common.VerificationValidMinutes)
+	subject := fmt.Sprintf("%s邮箱验证邮件", systemName)
+	content := strings.NewReplacer(
+		"{{systemName}}", systemName,
+		"{{minutes}}", strconv.Itoa(common.VerificationValidMinutes),
+		"{{code}}", code,
+	).Replace(contentTemplate)
 
 	return stmp.Render(email, subject, content)
 }
