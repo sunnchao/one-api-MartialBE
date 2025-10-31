@@ -104,7 +104,7 @@ func (p *Pricing) Init() error {
 }
 
 // GetPrice returns the price of a model
-var ErrModelPriceNotSet = errors.New("当前模型未设置价格信息")
+var ErrModelPriceNotSet = errors.New("当前模型未设置价格信息, 请联系管理员")
 
 func (p *Pricing) GetPrice(modelName string) (*Price, error) {
 	p.RLock()
