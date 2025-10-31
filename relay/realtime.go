@@ -60,7 +60,12 @@ func ChatRealtime(c *gin.Context) {
 		return
 	}
 
-	relay.quota = relay_util.NewQuota(relay.getContext(), relay.getModelName(), 0)
+	quota, errWithQuota := relay_util.NewQuota(relay.getContext(), relay.getModelName(), 0)
+	if errWithQuota != nil {
+		relay.abortWithMessage(errWithQuota.Message)
+		return
+	}
+	relay.quota = quota
 
 	relay.usage = &types.UsageEvent{}
 

@@ -39,13 +39,13 @@ func createOperation(operation *UserOperation) error {
 const (
 	CheckInType          = 1
 	MinCheckInQuota      = 5000
-	BaseMinRatio         = 0.01 // 基础最小比例 0.01
-	BaseLowMaxRatio      = 0.2  // 低额度最大比例 0.2
-	BaseHighMaxRatio     = 0.25 // 高额度最大比例 0.25
-	BonusRatio           = 0.25 // 额外奖励比例 0.25
-	BonusProbability     = 0.1  // 额外奖励概率 10%
-	HighRatioProbability = 0.75 // 获得高额度(>0.2)的概率 75%
-	CouponProbability    = 0.05 // 获得优惠券的概率 5%
+	BaseMinRatio         = 0.01  // 基础最小比例 0.01
+	BaseLowMaxRatio      = 0.1   // 低额度最大比例 0.2
+	BaseHighMaxRatio     = 0.125 // 高额度最大比例 0.25
+	BonusRatio           = 0.125 // 额外奖励比例 0.25
+	BonusProbability     = 0.1   // 额外奖励概率 10%
+	HighRatioProbability = 0.5   // 获得高额度(>0.2)的概率 75%
+	CouponProbability    = 0.05  // 获得优惠券的概率 5%
 )
 
 // 签到奖励结果

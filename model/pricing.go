@@ -104,25 +104,22 @@ func (p *Pricing) Init() error {
 }
 
 // GetPrice returns the price of a model
-func (p *Pricing) GetPrice(modelName string) *Price {
+var ErrModelPriceNotSet = errors.New("当前模型未设置价格信息")
+
+func (p *Pricing) GetPrice(modelName string) (*Price, error) {
 	p.RLock()
 	defer p.RUnlock()
 
 	if price, ok := p.Prices[modelName]; ok {
-		return price
+		return price, nil
 	}
 
 	matchModel := utils.GetModelsWithMatch(&p.Match, modelName)
 	if price, ok := p.Prices[matchModel]; ok {
-		return price
+		return price, nil
 	}
 
-	return &Price{
-		Type:        TokensPriceType,
-		ChannelType: config.ChannelTypeUnknown,
-		Input:       DefaultPrice,
-		Output:      DefaultPrice,
-	}
+	return nil, ErrModelPriceNotSet
 }
 
 func (p *Pricing) GetAllPrices() map[string]*Price {
@@ -543,11 +540,14 @@ func GetOldPricesList() []*Price {
 
 	var prices []*Price
 	for modelName, oldPrice := range oldData {
-		price := PricingInstance.GetPrice(modelName)
+		channelType := config.ChannelTypeUnknown
+		if price, err := PricingInstance.GetPrice(modelName); err == nil && price != nil {
+			channelType = price.ChannelType
+		}
 		prices = append(prices, &Price{
 			Model:       modelName,
 			Type:        TokensPriceType,
-			ChannelType: price.ChannelType,
+			ChannelType: channelType,
 			Input:       oldPrice[0],
 			Output:      oldPrice[1],
 		})

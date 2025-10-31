@@ -616,7 +616,10 @@ func getMjRequestPath(path string) string {
 func getQuota(c *gin.Context, action string) (*relay_util.Quota, *types.OpenAIErrorWithStatusCode) {
 	model := c.GetString("mj_model")
 	modelName := CoverActionToModelName(action, model)
-	quota := relay_util.NewQuota(c, modelName, 1)
+	quota, errWithQuota := relay_util.NewQuota(c, modelName, 1)
+	if errWithQuota != nil {
+		return nil, errWithQuota
+	}
 	if err := quota.PreQuotaConsumption(); err != nil {
 		return nil, err
 	}

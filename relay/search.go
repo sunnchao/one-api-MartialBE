@@ -157,9 +157,15 @@ func executeQuery(c *gin.Context, chatProvider providersBase.ChatInterface, quer
 		return "", opErr
 	}
 	// 处理配额
-	quota := relay_util.NewQuota(c, model, 0)
+	quota, errWithQuota := relay_util.NewQuota(c, model, 0)
+	if errWithQuota != nil {
+		return "", errWithQuota
+	}
 	// 再处理调用搜索的配额
-	searchQuota := relay_util.NewQuota(c, "search", 1000)
+	searchQuota, errWithSearch := relay_util.NewQuota(c, "search", 1000)
+	if errWithSearch != nil {
+		return "", errWithSearch
+	}
 	if opErr = quota.PreQuotaConsumption(); opErr != nil {
 		return "", opErr
 	}
