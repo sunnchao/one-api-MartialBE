@@ -171,7 +171,6 @@ const ModelUsagePieChart = ({ isLoading, data }) => {
       ) : (
         <MainCard
           sx={{
-            borderRadius: '16px',
             overflow: 'hidden',
             boxShadow: theme.palette.mode === 'dark' ? '0 8px 24px rgba(0,0,0,0.2)' : '0 8px 24px rgba(0,0,0,0.05)'
           }}
@@ -197,7 +196,6 @@ const ModelUsagePieChart = ({ isLoading, data }) => {
                   sx={{
                     bgcolor: 'transparent',
                     position: 'relative',
-                    borderRadius: '12px',
                     overflow: 'hidden',
                     p: 2
                   }}

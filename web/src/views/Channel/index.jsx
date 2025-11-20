@@ -262,6 +262,12 @@ export default function ChannelList() {
             status: value
           });
           break;
+        case 'auto_ban':
+          res = await API.put(url, {
+            ...data,
+            auto_ban: value
+          });
+          break;
         case 'priority':
         case 'weight':
           if (value === '') {

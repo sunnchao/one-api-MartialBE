@@ -117,6 +117,7 @@ export default function ChannelTableRow({ item, manageChannel, onRefresh, groupO
   // const [openDelete, setOpenDelete] = useState(false);
   const [openCheck, setOpenCheck] = useState(false);
   const [statusSwitch, setStatusSwitch] = useState(item.status);
+  const [autoBanSwitch, setAutoBanSwitch] = useState(item.auto_ban);
 
   const [priority, setPriority] = useState(item.priority);
   const [weight, setWeight] = useState(item.weight);
@@ -283,7 +284,7 @@ export default function ChannelTableRow({ item, manageChannel, onRefresh, groupO
   const handleAutoBan = async (value) => {
     const { success } = await manageChannel(item.id, 'auto_ban', value);
     if (success) {
-      item.auto_ban = value;
+      setAutoBanSwitch(value);
     }
   };
 
@@ -323,6 +324,7 @@ export default function ChannelTableRow({ item, manageChannel, onRefresh, groupO
 
   useEffect(() => {
     setStatusSwitch(item.status);
+    setAutoBanSwitch(item.auto_ban);
     setPriority(item.priority);
     setWeight(item.weight);
     setItemBalance(item.balance);
@@ -433,7 +435,7 @@ export default function ChannelTableRow({ item, manageChannel, onRefresh, groupO
         <TableCell align="center" sx={{ minWidth: 100 }}>
           {!item.tag && (
             <Stack direction="column" alignItems="center" spacing={0.5}>
-              <Switch checked={Boolean(item.auto_ban)} onChange={(event) => handleAutoBan(event.target.checked ? 1 : 0)} size="small" />
+              <Switch checked={autoBanSwitch === 1} onChange={(event) => handleAutoBan(event.target.checked ? 1 : 0)} size="small" />
               <Typography
                 variant="caption"
                 sx={{
@@ -441,7 +443,7 @@ export default function ChannelTableRow({ item, manageChannel, onRefresh, groupO
                   color: item.auto_ban ? 'success.main' : 'text.secondary'
                 }}
               >
-                {item.auto_ban ? '启用' : '禁用'}
+                {autoBanSwitch ? '启用' : '禁用'}
               </Typography>
             </Stack>
           )}

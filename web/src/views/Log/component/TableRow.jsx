@@ -122,7 +122,7 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
         {userIsAdmin && columnVisibility.user_id && (
           <TableCell sx={{ p: '10px 8px' }}>
             <Label color="default" variant="outlined" copyText={item.username}>
-              {item.username}
+              {item.username} {item.user_id}
             </Label>
           </TableCell>
         )}

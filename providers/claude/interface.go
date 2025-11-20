@@ -10,4 +10,5 @@ type ClaudeChatInterface interface {
 	base.ProviderInterface
 	CreateClaudeChat(request *ClaudeRequest) (*ClaudeResponse, *types.OpenAIErrorWithStatusCode)
 	CreateClaudeChatStream(request *ClaudeRequest) (requester.StreamReaderInterface[string], *types.OpenAIErrorWithStatusCode)
+	CreateClaudeCountTokens(request *CountTokensRequest) (*CountTokensResponse, *types.OpenAIErrorWithStatusCode)
 }

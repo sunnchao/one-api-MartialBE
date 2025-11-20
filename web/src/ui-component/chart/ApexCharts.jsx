@@ -34,11 +34,11 @@ const ApexCharts = ({ isLoading, chartDatas, title = 'dashboard_index.statistics
             </Grid>
             <Grid item xs={12}>
               {chartDatas?.series ? (
-                <Chart {...chartDatas} />
+                <Chart {...chartDatas} height={500} />
               ) : (
                 <Box
                   sx={{
-                    minHeight: '490px',
+                    height: '500px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'

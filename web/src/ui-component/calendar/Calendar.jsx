@@ -73,13 +73,7 @@ const Calendar = ({ checkinDates = [], refreshCoupons }) => {
         display: 'flex',
         flexDirection: 'column',
         p: 2.5,
-        borderRadius: '12px',
-        boxShadow: theme.palette.mode === 'dark' ? 'none' : '0px 2px 8px rgba(0, 0, 0, 0.08)',
-        transition: 'transform 0.3s, box-shadow 0.3s',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: theme.palette.mode === 'dark' ? '0px 4px 12px rgba(255, 255, 255, 0.1)' : '0px 4px 12px rgba(0, 0, 0, 0.12)'
-        }
+        transition: 'transform 0.3s, box-shadow 0.3s'
       }}
     >
       <Typography
@@ -96,8 +90,7 @@ const Calendar = ({ checkinDates = [], refreshCoupons }) => {
             left: 0,
             width: '40px',
             height: '3px',
-            backgroundColor: theme.palette.primary.main,
-            borderRadius: '2px'
+            backgroundColor: theme.palette.primary.main
           }
         }}
       >
@@ -110,7 +103,6 @@ const Calendar = ({ checkinDates = [], refreshCoupons }) => {
             height: 48,
             mb: 1,
             backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
-            borderRadius: '8px',
             py: 1
           }}
         >

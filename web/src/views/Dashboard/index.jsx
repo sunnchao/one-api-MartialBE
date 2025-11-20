@@ -231,11 +231,11 @@ const Dashboard = () => {
             <QuotaLogWeek data={dashboardData} />
           </Grid>
 
-          <Grid item lg={12} xs={12}>
+          <Grid item lg={6} xs={12}>
             {/* 用户信息 */}
             <ModelUsagePieChart isLoading={isLoading} data={modelUsageData} />
           </Grid>
-          <Grid item lg={12} xs={12}>
+          <Grid item lg={6} xs={12}>
             {/* 7日模型消费统计 */}
             <ApexCharts isLoading={isLoading} chartDatas={statisticalData} title={t('dashboard_index.week_model_statistics')} />
           </Grid>
