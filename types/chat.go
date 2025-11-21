@@ -42,6 +42,7 @@ type ChatCompletionToolCalls struct {
 	Type     string                           `json:"type,omitempty"`
 	Function *ChatCompletionToolCallsFunction `json:"function"`
 	Index    int                              `json:"index"`
+	Metadata map[string]string                `json:"metadata,omitempty"`
 }
 
 type ChatCompletionMessage struct {

@@ -85,8 +85,9 @@ type GeminiPartCodeExecutionResult struct {
 }
 
 type GeminiFunctionCall struct {
-	Name string                 `json:"name,omitempty"`
-	Args map[string]interface{} `json:"args,omitempty"`
+	Name            string                 `json:"name,omitempty"`
+	Args            map[string]interface{} `json:"args,omitempty"`
+	ThoughtSignature string                 `json:"thoughtSignature,omitempty"`
 }
 
 func (candidate *GeminiChatCandidate) ToOpenAIStreamChoice(request *types.ChatCompletionRequest) types.ChatCompletionStreamChoice {
@@ -268,8 +269,9 @@ func (candidate *GeminiChatCandidate) ToOpenAIChoice(request *types.ChatCompleti
 }
 
 type GeminiFunctionResponse struct {
-	Name     string `json:"name,omitempty"`
-	Response any    `json:"response,omitempty"`
+	Name             string `json:"name,omitempty"`
+	Response         any    `json:"response,omitempty"`
+	ThoughtSignature string `json:"thoughtSignature,omitempty"`
 }
 
 type GeminiFunctionResponseContent struct {
@@ -280,7 +282,7 @@ type GeminiFunctionResponseContent struct {
 func (g *GeminiFunctionCall) ToOpenAITool() *types.ChatCompletionToolCalls {
 	args, _ := json.Marshal(g.Args)
 
-	return &types.ChatCompletionToolCalls{
+	toolCall := &types.ChatCompletionToolCalls{
 		Id:    "call_" + utils.GetRandomString(24),
 		Type:  types.ChatMessageRoleFunction,
 		Index: 0,
@@ -289,6 +291,15 @@ func (g *GeminiFunctionCall) ToOpenAITool() *types.ChatCompletionToolCalls {
 			Arguments: string(args),
 		},
 	}
+
+	// Preserve thought_signature in metadata for round-trip conversion
+	if g.ThoughtSignature != "" {
+		toolCall.Metadata = map[string]string{
+			"thought_signature": g.ThoughtSignature,
+		}
+	}
+
+	return toolCall
 }
 
 type GeminiChatContent struct {
@@ -414,6 +425,7 @@ func OpenAIToGeminiChatContent(openaiContents []types.ChatCompletionMessage) ([]
 	// useToolName := ""
 	var systemContent []string
 	toolCallId := make(map[string]string)
+	toolCallThoughtSig := make(map[string]string) // Track thought signatures by tool call ID
 
 	for _, openaiContent := range openaiContents {
 		if openaiContent.IsSystemRole() {
@@ -436,10 +448,21 @@ func OpenAIToGeminiChatContent(openaiContents []types.ChatCompletionMessage) ([]
 					json.Unmarshal([]byte(toolCall.Function.Arguments), &args)
 				}
 
+				// Extract thought_signature from metadata if present
+				thoughtSignature := ""
+				if toolCall.Metadata != nil {
+					if sig, ok := toolCall.Metadata["thought_signature"]; ok {
+						thoughtSignature = sig
+						// Store for later use with function responses
+						toolCallThoughtSig[toolCall.Id] = sig
+					}
+				}
+
 				content.Parts = append(content.Parts, GeminiPart{
 					FunctionCall: &GeminiFunctionCall{
-						Name: toolCall.Function.Name,
-						Args: args,
+						Name:             toolCall.Function.Name,
+						Args:             args,
+						ThoughtSignature: thoughtSignature,
 					},
 				})
 
@@ -455,6 +478,12 @@ func OpenAIToGeminiChatContent(openaiContents []types.ChatCompletionMessage) ([]
 				}
 			}
 
+			// Get thought signature for this function response if available
+			thoughtSignature := ""
+			if sig, exists := toolCallThoughtSig[openaiContent.ToolCallID]; exists {
+				thoughtSignature = sig
+			}
+
 			functionPart := GeminiPart{
 				FunctionResponse: &GeminiFunctionResponse{
 					Name: *openaiContent.Name,
@@ -462,6 +491,7 @@ func OpenAIToGeminiChatContent(openaiContents []types.ChatCompletionMessage) ([]
 						Name:    *openaiContent.Name,
 						Content: openaiContent.StringContent(),
 					},
+					ThoughtSignature: thoughtSignature,
 				},
 			}
 
