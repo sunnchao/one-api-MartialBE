@@ -28,9 +28,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import TerminalIcon from '@mui/icons-material/Terminal';
-import WindowIcon from '@mui/icons-material/Window';
-import AppleIcon from '@mui/icons-material/Apple';
-import { SiLinux } from 'react-icons/si'; // 使用 react-icons 补充一个更形象的 Linux 图标
+import CodeIcon from '@mui/icons-material/Code';
 
 // 导入教程组件和API
 import WindowsTutorial from './WindowsTutorial';
@@ -70,9 +68,9 @@ const features = [
 
 // 支持的平台信息
 const supportedPlatforms = [
-  { icon: <WindowIcon />, name: 'Windows', version: '支持 Windows 10/11' },
-  { icon: <AppleIcon />, name: 'macOS', version: '支持 macOS 10.15+' },
-  { icon: <SiLinux style={{ fontSize: 22 }} />, name: 'Linux', version: '支持主流 Linux 发行版' }
+  { icon: <TerminalIcon style={{ fontSize: 22 }} />, name: 'CLI 工具', version: 'npm 全局安装' },
+  { icon: <CodeIcon style={{ fontSize: 22 }} />, name: 'Claude Sonnet 4.5', version: 'Anthropic 官方模型' },
+  { icon: <SearchIcon style={{ fontSize: 22 }} />, name: '跨平台支持', version: 'Windows/macOS/Linux' }
 ];
 
 // TabPanel 组件
@@ -88,12 +86,17 @@ const TabPanel = (props) => {
 // 主组件
 const ClaudeCodeTutorialPage = () => {
   const [value, setValue] = useState(0);
+  const [osTab, setOsTab] = useState(0);
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
+  };
+
+  const handleOsTabChange = (_, newValue) => {
+    setOsTab(newValue);
   };
 
   // 检查订阅状态
@@ -151,9 +154,9 @@ const ClaudeCodeTutorialPage = () => {
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={value} onChange={handleChange} aria-label="Claude Code Tabs" centered>
           <Tab label="功能介绍" />
-          <Tab label="Windows 教程" />
-          <Tab label="macOS 教程" />
-          <Tab label="Linux 教程" />
+          <Tab label="安装 CLI" />
+          <Tab label="配置密钥" />
+          <Tab label="开始编程" />
         </Tabs>
       </Box>
 
@@ -161,11 +164,16 @@ const ClaudeCodeTutorialPage = () => {
         {/* 顶部标题和介绍 */}
         <Box textAlign="center" mb={6}>
           <Typography variant="h2" component="h1" gutterBottom fontWeight="bold">
-            欢迎使用 Claude Code
+            🚀 Claude Code 快速开始
           </Typography>
           <Typography variant="h5" color="text.secondary">
-            您的下一代AI编程伙伴
+            Anthropic 官方 CLI 工具，Claude Sonnet 4.5 驱动
           </Typography>
+          <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 3 }}>
+            <Chip label="1. 安装 CLI" color="primary" />
+            <Chip label="2. 配置密钥" color="primary" />
+            <Chip label="3. 开始编程" color="primary" />
+          </Stack>
         </Box>
 
         {/* 功能特性网格 */}
@@ -204,7 +212,7 @@ const ClaudeCodeTutorialPage = () => {
 
         {/* 分割线 */}
         <Divider sx={{ my: 6 }}>
-          <Chip label="平台与安装" />
+          <Chip label="快速开始" />
         </Divider>
 
         {/* 支持平台 & 开始使用 */}
@@ -213,10 +221,10 @@ const ClaudeCodeTutorialPage = () => {
           <Grid item xs={12} md={6}>
             <Paper elevation={3} sx={{ p: 3 }}>
               <Typography variant="h5" component="h2" gutterBottom>
-                支持平台
+                核心特性
               </Typography>
               <Typography variant="body2" color="text.secondary" mb={2}>
-                Claude Code 支持多个主流操作系统：
+                Claude Code 提供强大的 AI 编程辅助功能：
               </Typography>
               <List>
                 {supportedPlatforms.map((platform, index) => (
@@ -233,20 +241,20 @@ const ClaudeCodeTutorialPage = () => {
           <Grid item xs={12} md={6}>
             <Box sx={{ p: 3, textAlign: 'center' }}>
               <Typography variant="h5" component="h2" gutterBottom>
-                开始使用
+                三步快速开始
               </Typography>
               <Typography color="text.secondary" mb={3}>
-                请在上方标签页中选择您的操作系统，或通过下方按钮快速跳转。
+                只需三个步骤，即可开始使用 Claude Code 进行 AI 编程
               </Typography>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
-                <Button variant="contained" size="large" onClick={() => setValue(1)}>
-                  Windows 教程
+                <Button variant="contained" size="large" onClick={() => setValue(1)} startIcon={<span>1️⃣</span>}>
+                  安装 CLI
                 </Button>
-                <Button variant="contained" size="large" onClick={() => setValue(2)}>
-                  macOS 教程
+                <Button variant="contained" size="large" onClick={() => setValue(2)} startIcon={<span>2️⃣</span>}>
+                  配置密钥
                 </Button>
-                <Button variant="contained" size="large" onClick={() => setValue(3)}>
-                  Linux 教程
+                <Button variant="contained" size="large" onClick={() => setValue(3)} startIcon={<span>3️⃣</span>}>
+                  开始编程
                 </Button>
               </Stack>
             </Box>
@@ -255,15 +263,58 @@ const ClaudeCodeTutorialPage = () => {
       </TabPanel>
 
       <TabPanel value={value} index={1}>
-        <WindowsTutorial />
+        <Container maxWidth="md">
+          <Typography variant="h4" gutterBottom>
+            Claude Code 安装步骤
+          </Typography>
+          <Alert severity="info" sx={{ mb: 3 }}>
+            <Typography variant="body2">详细的分平台安装指南</Typography>
+          </Alert>
+
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+            <Tabs value={osTab} onChange={handleOsTabChange} aria-label="OS Tabs" centered>
+              <Tab label="Windows" />
+              <Tab label="macOS" />
+              <Tab label="Linux" />
+            </Tabs>
+          </Box>
+
+          {osTab === 0 && <WindowsTutorial />}
+          {osTab === 1 && <MacOSTutorial />}
+          {osTab === 2 && <LinuxTutorial />}
+        </Container>
       </TabPanel>
 
       <TabPanel value={value} index={2}>
-        <MacOSTutorial />
+        <Container maxWidth="md">
+          <Typography variant="h4" gutterBottom>
+            配置密钥
+          </Typography>
+          <Alert severity="info" sx={{ mb: 3 }}>
+            <Typography variant="body2">配置 Chirou API API 密钥以使用 Claude Code</Typography>
+          </Alert>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="body1">
+              请参考"安装 CLI"标签页中对应操作系统的配置步骤完成密钥配置。
+            </Typography>
+          </Paper>
+        </Container>
       </TabPanel>
 
       <TabPanel value={value} index={3}>
-        <LinuxTutorial />
+        <Container maxWidth="md">
+          <Typography variant="h4" gutterBottom>
+            开始编程
+          </Typography>
+          <Alert severity="success" sx={{ mb: 3 }}>
+            <Typography variant="body2">启动 Claude Code 并开始您的 AI 编程之旅</Typography>
+          </Alert>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="body1">
+              请参考"安装 CLI"标签页中对应操作系统的启动步骤完成首次配置。
+            </Typography>
+          </Paper>
+        </Container>
       </TabPanel>
     </Container>
   );

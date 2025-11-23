@@ -24,6 +24,7 @@ import {
   Storage as StorageIcon
 } from '@mui/icons-material';
 import { SiUbuntu, SiCentos, SiArchlinux } from 'react-icons/si';
+import CodeBlock from 'ui-component/CodeBlock';
 
 // 简单的 TabPanel 组件实现
 const TabPanel = ({ children, value, index, ...other }) => {
@@ -62,96 +63,70 @@ const LinuxTutorial = () => {
             <Typography variant="h6" gutterBottom>
               Ubuntu/Debian 系统
             </Typography>
-            <Paper sx={{ p: 2, bgcolor: 'grey.100' }}>
-              <Typography variant="body2" fontFamily="monospace">
-                # 更新包列表
-                <br />
-                sudo apt update
-                <br />
-                <br />
-                # 安装 Node.js
-                <br />
-                curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -<br />
-                sudo apt-get install -y nodejs
-                <br />
-                <br />
-                # 验证安装
-                <br />
-                node --version
-                <br />
-                npm --version
-              </Typography>
-            </Paper>
+            <CodeBlock
+              language="bash"
+              code={`# 更新包列表
+sudo apt update
+
+# 安装 Node.js
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# 验证安装
+node --version
+npm --version`}
+            />
           </TabPanel>
 
           <TabPanel value={distroTab} index={1}>
             <Typography variant="h6" gutterBottom>
               CentOS/RHEL 系统
             </Typography>
-            <Paper sx={{ p: 2, bgcolor: 'grey.100' }}>
-              <Typography variant="body2" fontFamily="monospace">
-                # 安装 Node.js
-                <br />
-                curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -<br />
-                sudo yum install -y nodejs
-                <br />
-                <br />
-                # 验证安装
-                <br />
-                node --version
-                <br />
-                npm --version
-              </Typography>
-            </Paper>
+            <CodeBlock
+              language="bash"
+              code={`# 安装 Node.js
+curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
+sudo yum install -y nodejs
+
+# 验证安装
+node --version
+npm --version`}
+            />
           </TabPanel>
 
           <TabPanel value={distroTab} index={2}>
             <Typography variant="h6" gutterBottom>
               Arch Linux 系统
             </Typography>
-            <Paper sx={{ p: 2, bgcolor: 'grey.100' }}>
-              <Typography variant="body2" fontFamily="monospace">
-                # 安装 Node.js
-                <br />
-                sudo pacman -S nodejs npm
-                <br />
-                <br />
-                # 验证安装
-                <br />
-                node --version
-                <br />
-                npm --version
-              </Typography>
-            </Paper>
+            <CodeBlock
+              language="bash"
+              code={`# 安装 Node.js
+sudo pacman -S nodejs npm
+
+# 验证安装
+node --version
+npm --version`}
+            />
           </TabPanel>
 
           <TabPanel value={distroTab} index={3}>
             <Typography variant="h6" gutterBottom>
               通用方法（适用于所有 Linux 发行版）
             </Typography>
-            <Paper sx={{ p: 2, bgcolor: 'grey.100' }}>
-              <Typography variant="body2" fontFamily="monospace">
-                # 使用 Node Version Manager (NVM)
-                <br />
-                curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-                <br />
-                source ~/.bashrc
-                <br />
-                <br />
-                # 安装 Node.js
-                <br />
-                nvm install 18
-                <br />
-                nvm use 18
-                <br />
-                <br />
-                # 验证安装
-                <br />
-                node --version
-                <br />
-                npm --version
-              </Typography>
-            </Paper>
+            <CodeBlock
+              language="bash"
+              code={`# 使用 Node Version Manager (NVM)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+source ~/.bashrc
+
+# 安装 Node.js
+nvm install 18
+nvm use 18
+
+# 验证安装
+node --version
+npm --version`}
+            />
           </TabPanel>
 
           <Alert severity="info" sx={{ mt: 2 }}>
@@ -169,23 +144,19 @@ const LinuxTutorial = () => {
           <Typography variant="h6" gutterBottom>
             使用 npm 全局安装 Claude Code
           </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              # 全局安装 Claude Code
-              <br />
-              npm install -g @anthropic-ai/claude-code
-            </Typography>
-          </Paper>
+          <CodeBlock
+            language="bash"
+            code={`# 全局安装 Claude Code
+npm install -g @anthropic-ai/claude-code`}
+          />
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
             验证安装
           </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              # 查看是否安装成功
-              <br />
-              claude --version
-            </Typography>
-          </Paper>
+          <CodeBlock
+            language="bash"
+            code={`# 查看是否安装成功
+claude --version`}
+          />
           <Typography variant="body2" color="text.secondary" mb={2}>
             如果安装成功，应该看到类似以下输出：
           </Typography>
@@ -226,17 +197,16 @@ const LinuxTutorial = () => {
           <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
             配置文件内容
           </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" component="pre" fontFamily="monospace" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-              {`{
+          <CodeBlock
+            language="json"
+            code={`{
  "env": {
    "ANTHROPIC_BASE_URL": "https://api.wochirou.com/claude",
    "ANTHROPIC_AUTH_TOKEN": "sk-xxxxx",
    "ANTHROPIC_MODEL": "claude-3-7-sonnet-20250219"
  }
 }`}
-            </Typography>
-          </Paper>
+          />
           <Alert severity="warning" sx={{ mt: 2 }}>
             <Typography variant="body2">
               <strong>重要：</strong> 请将 ANTHROPIC_AUTH_TOKEN 替换为您的实际 API 密钥，ANTHROPIC_MODEL 替换为您需要的模型。模型只能使用
@@ -256,35 +226,26 @@ const LinuxTutorial = () => {
           <Typography variant="body2" color="text.secondary" mb={2}>
             如果不想每个项目都配置 .claude 目录，可以进行全局配置：
           </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              # 创建全局配置目录和文件
-              <br />
-              mkdir -p ~/.claude
-              <br />
-              touch ~/.claude/settings.json
-            </Typography>
-          </Paper>
+          <CodeBlock
+            language="bash"
+            code={`# 创建全局配置目录和文件
+mkdir -p ~/.claude
+touch ~/.claude/settings.json`}
+          />
           <Typography variant="body2" mb={2}>
             然后编辑配置文件，内容与项目配置相同：
           </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              # 使用 vi 编辑器
-              <br />
-              vi ~/.claude/settings.json
-              <br />
-              <br />
-              # 或使用 nano 编辑器
-              <br />
-              nano ~/.claude/settings.json
-              <br />
-              <br />
-              # 或使用 VS Code（如果已安装）
-              <br />
-              code ~/.claude/settings.json
-            </Typography>
-          </Paper>
+          <CodeBlock
+            language="bash"
+            code={`# 使用 vi 编辑器
+vi ~/.claude/settings.json
+
+# 或使用 nano 编辑器
+nano ~/.claude/settings.json
+
+# 或使用 VS Code（如果已安装）
+code ~/.claude/settings.json`}
+          />
           <Alert severity="info" sx={{ mt: 2 }}>
             <Typography variant="body2">
               <strong>提示：</strong> 全局配置完成后，所有项目都可以直接使用 Claude Code
@@ -300,13 +261,11 @@ const LinuxTutorial = () => {
           <Typography variant="h6" gutterBottom>
             启动 Claude Code
           </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              # 在项目根目录下执行
-              <br />
-              claude
-            </Typography>
-          </Paper>
+          <CodeBlock
+            language="bash"
+            code={`# 在项目根目录下执行
+claude`}
+          />
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
               <Card variant="outlined">

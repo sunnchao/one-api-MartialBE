@@ -23,6 +23,7 @@ import {
   Info as InfoIcon,
   Apple as AppleIcon
 } from '@mui/icons-material';
+import CodeBlock from 'ui-component/CodeBlock';
 
 const MacOSTutorial = () => {
   const steps = [
@@ -60,18 +61,14 @@ const MacOSTutorial = () => {
                   <Typography variant="body2" color="text.secondary" mb={2}>
                     使用 Homebrew 包管理器安装
                   </Typography>
-                  <Paper sx={{ p: 2, bgcolor: 'grey.100' }}>
-                    <Typography variant="body2" fontFamily="monospace">
-                      # 安装 Homebrew（如果还没有）
-                      <br />
-                      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-                      <br />
-                      <br />
-                      # 安装 Node.js
-                      <br />
-                      brew install node
-                    </Typography>
-                  </Paper>
+                  <CodeBlock
+                    language="bash"
+                    code={`# 安装 Homebrew（如果还没有）
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# 安装 Node.js
+brew install node`}
+                  />
                 </CardContent>
               </Card>
             </Grid>
@@ -92,23 +89,19 @@ const MacOSTutorial = () => {
           <Typography variant="h6" gutterBottom>
             使用 npm 全局安装 Claude Code
           </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              # 全局安装 Claude Code
-              <br />
-              npm install -g @anthropic-ai/claude-code
-            </Typography>
-          </Paper>
+          <CodeBlock
+            language="bash"
+            code={`# 全局安装 Claude Code
+npm install -g @anthropic-ai/claude-code`}
+          />
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
             验证安装
           </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              # 查看是否安装成功
-              <br />
-              claude --version
-            </Typography>
-          </Paper>
+          <CodeBlock
+            language="bash"
+            code={`# 查看是否安装成功
+claude --version`}
+          />
           <Typography variant="body2" color="text.secondary" mb={2}>
             如果安装成功，应该看到类似以下输出：
           </Typography>
@@ -149,17 +142,16 @@ const MacOSTutorial = () => {
           <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
             配置文件内容
           </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" component="pre" fontFamily="monospace" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-              {`{
+          <CodeBlock
+            language="json"
+            code={`{
  "env": {
    "ANTHROPIC_BASE_URL": "https://api.wochirou.com/claude",
    "ANTHROPIC_AUTH_TOKEN": "sk-xxxxx",
    "ANTHROPIC_MODEL": "claude-3-7-sonnet-20250219"
  }
 }`}
-            </Typography>
-          </Paper>
+          />
           <Alert severity="warning" sx={{ mt: 2 }}>
             <Typography variant="body2">
               <strong>重要：</strong> 请将 ANTHROPIC_AUTH_TOKEN 替换为您的实际 API 密钥，ANTHROPIC_MODEL 替换为您需要的模型。模型只能使用
@@ -179,38 +171,28 @@ const MacOSTutorial = () => {
           <Typography variant="body2" color="text.secondary" mb={2}>
             如果不想每个项目都配置 .claude 目录，可以进行全局配置：
           </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              # 创建全局配置文件
-              <br />
-              touch ~/.claude/settings.json
-              <br />
-              <br />
-              # 如果目录不存在，先创建
-              <br />
-              mkdir -p ~/.claude
-            </Typography>
-          </Paper>
+          <CodeBlock
+            language="bash"
+            code={`# 创建全局配置文件
+touch ~/.claude/settings.json
+
+# 如果目录不存在，先创建
+mkdir -p ~/.claude`}
+          />
           <Typography variant="body2" mb={2}>
             然后编辑配置文件，内容与项目配置相同：
           </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              # 使用 vi 编辑器
-              <br />
-              vi ~/.claude/settings.json
-              <br />
-              <br />
-              # 或使用 VS Code
-              <br />
-              code ~/.claude/settings.json
-              <br />
-              <br />
-              # 或使用 nano 编辑器
-              <br />
-              nano ~/.claude/settings.json
-            </Typography>
-          </Paper>
+          <CodeBlock
+            language="bash"
+            code={`# 使用 vi 编辑器
+vi ~/.claude/settings.json
+
+# 或使用 VS Code
+code ~/.claude/settings.json
+
+# 或使用 nano 编辑器
+nano ~/.claude/settings.json`}
+          />
           <Alert severity="info" sx={{ mt: 2 }}>
             <Typography variant="body2">
               <strong>提示：</strong> 全局配置完成后，所有项目都可以直接使用 Claude Code
@@ -226,13 +208,11 @@ const MacOSTutorial = () => {
           <Typography variant="h6" gutterBottom>
             启动 Claude Code
           </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              # 在项目根目录下执行
-              <br />
-              claude
-            </Typography>
-          </Paper>
+          <CodeBlock
+            language="bash"
+            code={`# 在项目根目录下执行
+claude`}
+          />
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
               <Card variant="outlined">

@@ -21,6 +21,7 @@ const Playground = Loadable(lazy(() => import('views/Playground')));
 const ModelPrice = Loadable(lazy(() => import('views/ModelPrice')));
 const ClaudeCode = Loadable(lazy(() => import('views/ClaudeCode')));
 const CodexCode = Loadable(lazy(() => import('views/CodexCode')));
+const GeminiCode = Loadable(lazy(() => import('views/GeminiCode')));
 
 const WithMargins = ({ children }) => (
   <Box
@@ -108,6 +109,10 @@ const OtherRoutes = {
     {
       path: '/codex-code',
       element: <CodexCode />
+    },
+    {
+      path: '/gemini-code',
+      element: <GeminiCode />
     }
   ]
 };

@@ -22,6 +22,7 @@ import {
   CheckCircle as CheckCircleIcon,
   Info as InfoIcon
 } from '@mui/icons-material';
+import CodeBlock from 'ui-component/CodeBlock';
 
 const WindowsTutorial = () => {
   const steps = [
@@ -59,225 +60,220 @@ const WindowsTutorial = () => {
                   <Typography variant="body2" color="text.secondary" mb={2}>
                     安装完成后验证版本
                   </Typography>
-                  <Paper sx={{ p: 2, bgcolor: 'grey.100' }}>
-                    <Typography variant="body2" fontFamily="monospace">
-                      # 检查 Node.js 版本
-                      <br />
-                      node --version
-                      <br />
-                      <br />
-                      # 检查 npm 版本
-                      <br />
-                      npm --version
-                    </Typography>
-                  </Paper>
+                  <CodeBlock
+                    language="bash"
+                    code={`# 检查 Node.js 版本
+node --version
+
+# 检查 npm 版本
+npm --version`}
+                  />
                 </CardContent>
               </Card>
             </Grid>
           </Grid>
+
+          <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
+            方法一：使用官方安装包（推荐）
+          </Typography>
+          <List dense>
+            <ListItem>
+              <ListItemText primary="访问 https://nodejs.org" />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary="下载 LTS 版本的 Windows Installer (.msi)" />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary="运行安装程序，按默认设置完成安装" />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary="安装程序会自动添加到 PATH 环境变量" />
+            </ListItem>
+          </List>
+
+          <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
+            方法二：使用包管理器
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            使用 Winget（Windows 11 或 Windows 10 自带）：
+          </Typography>
+          <CodeBlock language="powershell" code={`winget install OpenJS.NodeJS.LTS`} />
+
+          <Typography variant="body2" sx={{ mt: 2, mb: 1 }}>
+            使用 Chocolatey：
+          </Typography>
+          <CodeBlock language="powershell" code={`choco install nodejs-lts`} />
+
+          <Typography variant="body2" sx={{ mt: 2, mb: 1 }}>
+            使用 Scoop：
+          </Typography>
+          <CodeBlock language="powershell" code={`scoop install nodejs-lts`} />
+
           <Alert severity="info" sx={{ mt: 2 }}>
             <Typography variant="body2">
-              <strong>系统要求：</strong> Windows 10 版本 1903 或更高版本，Node.js 版本需要 {'>='} 18.0.0
+              <strong>提示：</strong> 建议使用 LTS（长期支持）版本以获得最佳稳定性。安装完成后需重启命令行窗口。
             </Typography>
           </Alert>
         </Box>
       )
     },
     {
-      label: '全局安装 Claude Code',
+      label: '安装 Claude Code CLI',
       content: (
         <Box>
           <Typography variant="h6" gutterBottom>
             使用 npm 全局安装 Claude Code
           </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              # 全局安装 Claude Code
-              <br />
-              npm install -g @anthropic-ai/claude-code
-            </Typography>
-          </Paper>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            打开命令提示符（以管理员身份运行）或 PowerShell，执行以下命令：
+          </Typography>
+          <CodeBlock language="bash" code={`npm install -g @anthropic-ai/claude-code`} />
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
             验证安装
           </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              # 查看是否安装成功
-              <br />
-              claude --version
-            </Typography>
-          </Paper>
-          <Typography variant="body2" color="text.secondary" mb={2}>
-            如果安装成功，应该看到类似以下输出：
-          </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'success.50', border: '1px solid', borderColor: 'success.main' }}>
-            <Typography variant="body2" fontFamily="monospace" color="success.main">
-              Claude Code v1.0.0
-            </Typography>
-          </Paper>
+          <CodeBlock language="bash" code={`claude --version`} />
+
           <Alert severity="warning" sx={{ mt: 2 }}>
             <Typography variant="body2">
-              <strong>注意：</strong> 如果出现权限错误，请以管理员身份运行命令提示符
+              <strong>注意：</strong> 如果遇到权限问题，请确保以管理员身份运行命令提示符。
             </Typography>
           </Alert>
         </Box>
       )
     },
     {
-      label: '项目配置',
+      label: '配置 Chirou API',
       content: (
         <Box>
-          <Typography variant="h6" gutterBottom>
-            在项目中配置 Claude Code
+          <Typography variant="h6" gutterBottom color="primary">
+            3.1 获取 Auth Token
           </Typography>
-          <List>
-            <ListItem>
-              <ListItemIcon>
-                <CheckCircleIcon color="success" />
-              </ListItemIcon>
-              <ListItemText primary="创建 .claude 目录" secondary="在项目根目录下创建 .claude 文件夹" />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <CheckCircleIcon color="success" />
-              </ListItemIcon>
-              <ListItemText primary="创建配置文件" secondary="在 .claude 目录下创建 settings.json 文件" />
-            </ListItem>
-          </List>
-          <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-            配置文件内容
-          </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" component="pre" fontFamily="monospace" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-              {`{
- "env": {
-   "ANTHROPIC_BASE_URL": "https://api.wochirou.com/claude",
-   "ANTHROPIC_AUTH_TOKEN": "sk-xxxxx",
-   "ANTHROPIC_MODEL": "claude-3-7-sonnet-20250219"
- }
-}`}
-            </Typography>
-          </Paper>
-          <Alert severity="warning" sx={{ mt: 2 }}>
-            <Typography variant="body2">
-              <strong>重要：</strong> 请将 ANTHROPIC_AUTH_TOKEN 替换为您的实际 API 密钥，ANTHROPIC_MODEL 替换为您需要的模型。模型只能使用
-              claude 模型或本站的 claude 模型别名。
-            </Typography>
-          </Alert>
-        </Box>
-      )
-    },
-    {
-      label: '全局配置（可选）',
-      content: (
-        <Box>
-          <Typography variant="h6" gutterBottom>
-            Windows 全局配置方法
-          </Typography>
-          <Typography variant="body2" color="text.secondary" mb={2}>
-            如果不想每个项目都配置 .claude 目录，可以进行全局配置：
-          </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              # 进入用户目录下的 .claude 文件夹
-              <br />
-              cd C:\Users\%username%\.claude
-              <br />
-              <br />
-              # 如果目录不存在，先创建
-              <br />
-              mkdir C:\Users\%username%\.claude
-            </Typography>
-          </Paper>
-          <Typography variant="body2" mb={2}>
-            然后在该目录下创建 settings.json 文件，内容与项目配置相同。可以使用以下方式编辑：
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            访问 Chirou API 控制台 进行以下操作：
           </Typography>
           <List dense>
             <ListItem>
               <ListItemIcon>
                 <CheckCircleIcon color="success" />
               </ListItemIcon>
-              <ListItemText primary="使用 VS Code" secondary="code C:\Users\%username%\.claude\settings.json" />
+              <ListItemText primary="点击「添加令牌」" />
             </ListItem>
             <ListItem>
               <ListItemIcon>
                 <CheckCircleIcon color="success" />
               </ListItemIcon>
-              <ListItemText primary="使用记事本" secondary="notepad C:\Users\%username%\.claude\settings.json" />
+              <ListItemText
+                primary="令牌分组请选择：Claude Code专用"
+                secondary="务必选择此分组，否则无法使用"
+              />
+            </ListItem>
+            <ListItem>
+              <ListItemIcon>
+                <CheckCircleIcon color="success" />
+              </ListItemIcon>
+              <ListItemText primary="令牌名称：随意填写" />
+            </ListItem>
+            <ListItem>
+              <ListItemIcon>
+                <CheckCircleIcon color="success" />
+              </ListItemIcon>
+              <ListItemText primary="额度建议：设置为无限额度" />
+            </ListItem>
+            <ListItem>
+              <ListItemIcon>
+                <CheckCircleIcon color="success" />
+              </ListItemIcon>
+              <ListItemText primary="其他选项保持默认" />
             </ListItem>
           </List>
+
+          <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 3 }}>
+            3.2 配置环境变量
+          </Typography>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              <strong>重要提示：</strong> 请将下方的 ANTHROPIC_AUTH_TOKEN 替换为您在 https://api.wochirou.com/panel/token
+              生成的Claude Code专用 API 密钥！
+            </Typography>
+          </Alert>
+
+          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
+            settings.json 配置（推荐，永久生效）
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            配置位置：%USERPROFILE%\.claude\settings.json
+          </Typography>
+          <CodeBlock
+            language="json"
+            code={`{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "粘贴为Claude Code专用分组令牌key",
+    "ANTHROPIC_BASE_URL": "https://api.wochirou.com.com/claude"
+  }
+}`}
+          />
+
           <Alert severity="info" sx={{ mt: 2 }}>
             <Typography variant="body2">
-              <strong>提示：</strong> 全局配置完成后，所有项目都可以直接使用 Claude Code
+              <strong>注意：</strong> 配置文件更加安全且便于管理，需要重启 Claude Code 才生效。
             </Typography>
           </Alert>
         </Box>
       )
     },
     {
-      label: '开始使用',
+      label: '启动 Claude Code',
       content: (
         <Box>
           <Typography variant="h6" gutterBottom>
             启动 Claude Code
           </Typography>
-          <Paper sx={{ p: 2, bgcolor: 'grey.100', mb: 2 }}>
-            <Typography variant="body2" fontFamily="monospace">
-              # 在项目根目录下执行
-              <br />
-              claude
-            </Typography>
-          </Paper>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    <CodeIcon sx={{ mr: 1 }} />
-                    使用提示
-                  </Typography>
-                  <List dense>
-                    <ListItem>
-                      <ListItemIcon>
-                        <InfoIcon color="primary" />
-                      </ListItemIcon>
-                      <ListItemText primary="重新加载配置" secondary="每次修改配置后，需要重新打开终端窗口" />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon>
-                        <InfoIcon color="primary" />
-                      </ListItemIcon>
-                      <ListItemText primary="模型限制" secondary="只支持 Claude 模型及其别名" />
-                    </ListItem>
-                  </List>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    <TerminalIcon sx={{ mr: 1 }} />
-                    常用功能
-                  </Typography>
-                  <List dense>
-                    <ListItem>
-                      <ListItemIcon>
-                        <CheckCircleIcon color="success" />
-                      </ListItemIcon>
-                      <ListItemText primary="智能对话" secondary="与 AI 助手进行编程对话" />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon>
-                        <CheckCircleIcon color="success" />
-                      </ListItemIcon>
-                      <ListItemText primary="代码生成" secondary="根据需求生成代码片段" />
-                    </ListItem>
-                  </List>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            配置完成后，先进入到工程目录：
+          </Typography>
+          <CodeBlock language="bash" code={`cd your-project-folder`} />
+
+          <Typography variant="body1" sx={{ mb: 2, mt: 2 }}>
+            然后，运行以下命令启动：
+          </Typography>
+          <CodeBlock language="bash" code={`claude`} />
+
+          <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
+            首次启动后需要先进行主题的选择等操作：
+          </Typography>
+          <List dense>
+            <ListItem>
+              <ListItemIcon>
+                <CheckCircleIcon color="success" />
+              </ListItemIcon>
+              <ListItemText primary="选择喜欢的主题（回车）" />
+            </ListItem>
+            <ListItem>
+              <ListItemIcon>
+                <CheckCircleIcon color="success" />
+              </ListItemIcon>
+              <ListItemText primary="确认安全须知（回车）" />
+            </ListItem>
+            <ListItem>
+              <ListItemIcon>
+                <CheckCircleIcon color="success" />
+              </ListItemIcon>
+              <ListItemText primary="使用默认 Terminal 配置（回车）" />
+            </ListItem>
+            <ListItem>
+              <ListItemIcon>
+                <CheckCircleIcon color="success" />
+              </ListItemIcon>
+              <ListItemText primary="信任工作目录（回车）" />
+            </ListItem>
+            <ListItem>
+              <ListItemIcon>
+                <CheckCircleIcon color="success" />
+              </ListItemIcon>
+              <ListItemText primary="开始编程！🚀" />
+            </ListItem>
+          </List>
+
           <Alert severity="success" sx={{ mt: 2 }}>
             <Typography variant="body2">
               <strong>恭喜！</strong> Claude Code 已成功配置完成。现在您可以在项目中使用 AI 助手了。
@@ -294,15 +290,35 @@ const WindowsTutorial = () => {
         <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
           Windows 版本教程
         </Typography>
-        <Typography variant="h6" color="text.secondary">
-          在 Windows 10/11 上安装和使用 Claude Code
+        <Typography variant="h6" color="text.secondary" mb={2}>
+          系统要求
         </Typography>
+        <List dense>
+          <ListItem>
+            <ListItemIcon>
+              <InfoIcon color="primary" />
+            </ListItemIcon>
+            <ListItemText primary="• Windows 10 或 Windows 11" />
+          </ListItem>
+          <ListItem>
+            <ListItemIcon>
+              <InfoIcon color="primary" />
+            </ListItemIcon>
+            <ListItemText primary="• Node.js 18+" />
+          </ListItem>
+          <ListItem>
+            <ListItemIcon>
+              <InfoIcon color="primary" />
+            </ListItemIcon>
+            <ListItemText primary="• 网络连接" />
+          </ListItem>
+        </List>
       </Box>
 
       {steps.map((step, index) => (
         <Paper key={index} sx={{ p: 3, mb: 3, borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
           <Typography variant="h5" component="h2" gutterBottom>
-            {`步骤 ${index + 1}: ${step.label}`}
+            {`${index + 1}. ${step.label}`}
           </Typography>
           <Divider sx={{ mb: 2 }} />
           {step.content}

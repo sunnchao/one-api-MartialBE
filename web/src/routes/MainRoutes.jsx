@@ -32,6 +32,8 @@ const SystemInfo = Loadable(lazy(() => import('views/SystemInfo')));
 const ClaudeCode = Loadable(lazy(() => import('views/ClaudeCode')));
 const ClaudeCodeSubscription = Loadable(lazy(() => import('views/ClaudeCode/Subscription')));
 const ClaudeCodeAdmin = Loadable(lazy(() => import('views/ClaudeCode/Admin')));
+const CodexCode = Loadable(lazy(() => import('views/CodexCode')));
+const GeminiCode = Loadable(lazy(() => import('views/GeminiCode')));
 const CouponManagement = Loadable(lazy(() => import('views/Coupon')));
 const UserCoupon = Loadable(lazy(() => import('views/User/Coupon')));
 const EnhancedCouponManagement = Loadable(lazy(() => import('views/Coupon/Enhanced')));
@@ -150,6 +152,14 @@ const MainRoutes = {
     {
       path: 'claude-code-admin',
       element: <ClaudeCodeAdmin />
+    },
+    {
+      path: 'codex-code',
+      element: <CodexCode />
+    },
+    {
+      path: 'gemini-code',
+      element: <GeminiCode />
     },
     {
       path: 'coupon',

@@ -179,6 +179,10 @@ const Header = () => {
               <MenuItem component={Link} to="/codex-code" onClick={handleCloseCodeMenu} selected={pathname === '/codex-code'}>
                 Codex Code
               </MenuItem>
+              <MenuItem component={Link} to="/gemini-code" onClick={handleCloseCodeMenu} selected={pathname === '/gemini-code'}>
+                Gemini Code
+              </MenuItem>
+
             </Menu>
 
             {siteInfo.UptimeEnabled && (
