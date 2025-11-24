@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 
 // Function to calculate price
-export function calculatePrice(ratio, groupDiscount, isTimes) {
+export function calculatePrice(ratio, groupDiscount, isTimes, priceMultiplier = 0.002) {
   // Ensure inputs are valid numbers
   ratio = ratio || 0;
   groupDiscount = groupDiscount || 0;
@@ -22,7 +22,7 @@ export function calculatePrice(ratio, groupDiscount, isTimes) {
   }
 
   // Calculate the price as a Decimal
-  let priceDecimal = discount.mul(0.002);
+  let priceDecimal = discount.mul(priceMultiplier);
 
   // For display purposes, format with 6 decimal places and trim trailing zeros
   let priceString = priceDecimal.toFixed(6);
@@ -46,19 +46,19 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
   // Get input/output prices from metadata with appropriate defaults
   const originalInputPrice =
     item.metadata?.input_price_origin ||
-    (item.metadata?.input_ratio ? `$${calculatePrice(item.metadata.input_ratio, 1, false)} /M` : '$0 /M');
+    (item.metadata?.input_ratio ? `$${calculatePrice(item.metadata.input_ratio, 1, false)}` : '$0');
   const originalOutputPrice =
     item.metadata?.output_price_origin ||
-    (item.metadata?.output_ratio ? `$${calculatePrice(item.metadata.output_ratio, 1, false)} /M` : '$0 /M');
+    (item.metadata?.output_ratio ? `$${calculatePrice(item.metadata.output_ratio, 1, false)}` : '$0');
   const originalCachedWritePrice =
     item.metadata?.cached_write_tokens_price_origin ||
-    (item.metadata?.cached_write_tokens_ratio ? `$${calculatePrice(item.metadata.cached_write_tokens_ratio, 1, false)} /M` : '$0 /M');
+    (item.metadata?.cached_write_tokens_ratio ? `$${calculatePrice(item.metadata.cached_write_tokens_ratio, 1, false, 0.001)}` : '$0');
   const originalCachedReadPrice =
     item.metadata?.cached_read_token_price_origin ||
-    (item.metadata?.cached_read_token_ratio ? `$${calculatePrice(item.metadata.cached_read_token_ratio, 1, false)} /M` : '$0 /M');
+    (item.metadata?.cached_read_token_ratio ? `$${calculatePrice(item.metadata.cached_read_token_ratio, 1, false, 0.001)}` : '$0');
   const originalReasoningPrice =
     item.metadata?.reasoning_tokens_price_origin ||
-    (item.metadata?.reasoning_tokens_ratio ? `$${calculatePrice(item.metadata.reasoning_tokens_ratio, 1, false)} /M` : '$0 /M');
+    (item.metadata?.reasoning_tokens_ratio ? `$${calculatePrice(item.metadata.reasoning_tokens_ratio, 1, false, 0.001)}` : '$0');
 
   // Calculate actual prices based on ratios and group discount
   const groupRatio = item.metadata?.group_ratio || 1;
@@ -67,13 +67,13 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
   //
   const cachedWritePrice =
     item.metadata?.cached_write_tokens_price ||
-    (item.metadata?.cached_write_tokens_ratio ? `$${calculatePrice(item.metadata.cached_write_tokens_ratio, groupRatio, false)} ` : '$0');
+    (item.metadata?.cached_write_tokens_ratio ? `$${calculatePrice(item.metadata.cached_write_tokens_ratio, groupRatio, false, 0.001)} ` : '$0');
   const cachedReadPrice =
     item.metadata?.cached_read_token_price ||
-    (item.metadata?.cached_read_token_ratio ? `$${calculatePrice(item.metadata.cached_read_token_ratio, groupRatio, false)} ` : '$0');
+    (item.metadata?.cached_read_token_ratio ? `$${calculatePrice(item.metadata.cached_read_token_ratio, groupRatio, false, 0.001)} ` : '$0');
   const reasoningPrice =
     item.metadata?.reasoning_tokens_price ||
-    (item.metadata?.reasoning_tokens_ratio ? `$${calculatePrice(item.metadata.reasoning_tokens_ratio, groupRatio, false)} ` : '$0');
+    (item.metadata?.reasoning_tokens_ratio ? `$${calculatePrice(item.metadata.reasoning_tokens_ratio, groupRatio, false, 0.001)} ` : '$0');
   const outputPrice =
     item.metadata?.output_price ||
     (item.metadata?.output_ratio ? `$${calculatePrice(item.metadata.output_ratio, groupRatio, false)}` : '$0');
@@ -161,10 +161,10 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
             <Typography sx={{ fontWeight: 600, fontSize: 12 }}>{t('logPage.quotaDetail.originalPrice')}</Typography>
           </Box>
           <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, mb: 0.5, textAlign: 'left' }}>
-            {t('logPage.quotaDetail.inputPrice')}: {originalInputPrice}
+            {t('logPage.quotaDetail.inputPrice')}: {inputPriceUnit}
           </Typography>
           <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
-            {t('logPage.quotaDetail.outputPrice')}: {originalOutputPrice}
+            {t('logPage.quotaDetail.outputPrice')}: {outputPriceUnit}
           </Typography>
           {item.metadata?.cached_write_tokens > 0 && (
             <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, mt: 0.5, textAlign: 'left' }}>
