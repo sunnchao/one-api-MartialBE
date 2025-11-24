@@ -690,8 +690,8 @@ const EditModal = ({
             onClick={() =>
               submit(inputs, {
                 setErrors,
-                setStatus: () => { },
-                setSubmitting: () => { }
+                setStatus: () => {},
+                setSubmitting: () => {}
               })
             }
             variant="contained"
@@ -734,7 +734,7 @@ const EditModal = ({
 
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               {renderInputField()}
-              {renderCacheInputField()}
+              {/*{renderCacheInputField()}*/}
               {renderOutputField()}
             </Stack>
 

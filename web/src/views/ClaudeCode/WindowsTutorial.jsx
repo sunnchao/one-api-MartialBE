@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Container,
   Typography,
   Box,
   Paper,
@@ -13,270 +12,226 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
-  Grid
+  Grid,
+  Step,
+  StepLabel,
+  Stepper,
+  StepContent,
+  useTheme,
+  alpha,
+  Stack
 } from '@mui/material';
 import {
   Download as DownloadIcon,
   Terminal as TerminalIcon,
-  Code as CodeIcon,
   CheckCircle as CheckCircleIcon,
-  Info as InfoIcon
 } from '@mui/icons-material';
 import CodeBlock from 'ui-component/CodeBlock';
 
 const WindowsTutorial = () => {
+  const theme = useTheme();
+
   const steps = [
     {
-      label: '安装 Node.js',
+      label: '安装 Node.js 环境',
+      description: 'Claude Code 依赖 Node.js 运行环境，我们需要先安装它。',
       content: (
-        <Box>
-          <Typography variant="h6" gutterBottom>
-            安装 Node.js（需要版本 {'>='} 18.0.0）
-          </Typography>
-          <Grid container spacing={2}>
+        <Box sx={{ mt: 2 }}>
+          <Alert severity="info" variant="outlined" sx={{ mb: 3, borderRadius: 0 }}>
+            <Typography variant="body2">
+              <strong>系统要求：</strong> Windows 10 或 Windows 11，Node.js 版本需 {'>='} 18.0.0
+            </Typography>
+          </Alert>
+          
+          <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
-              <Card variant="outlined">
+              <Card variant="outlined" sx={{ height: '100%', borderRadius: 0, borderColor: alpha(theme.palette.primary.main, 0.2) }}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    <DownloadIcon sx={{ mr: 1 }} />
-                    官方下载
+                  <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+                    <DownloadIcon color="primary" />
+                    <Typography variant="h6" fontWeight="bold">
+                      官方安装包 (推荐)
+                    </Typography>
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    访问 Node.js 官网下载 LTS (长期支持) 版本，这是最稳定的选择。
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" mb={2}>
-                    从 Node.js 官网下载最新版本
-                  </Typography>
-                  <Button variant="contained" fullWidth startIcon={<DownloadIcon />} href="https://nodejs.org/en/download" target="_blank">
-                    访问 Node.js 官网
+                  <Button 
+                    variant="contained" 
+                    fullWidth 
+                    startIcon={<DownloadIcon />} 
+                    href="https://nodejs.org/en/download" 
+                    target="_blank"
+                    sx={{ borderRadius: 0, boxShadow: 'none' }}
+                  >
+                    前往下载 Node.js
                   </Button>
                 </CardContent>
               </Card>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Card variant="outlined">
+              <Card variant="outlined" sx={{ height: '100%', borderRadius: 0, borderColor: alpha(theme.palette.secondary.main, 0.2) }}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    <TerminalIcon sx={{ mr: 1 }} />
-                    验证安装
+                  <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+                    <TerminalIcon color="secondary" />
+                    <Typography variant="h6" fontWeight="bold">
+                      包管理器安装
+                    </Typography>
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    如果您习惯使用命令行，可以使用 Winget 快速安装。
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" mb={2}>
-                    安装完成后验证版本
-                  </Typography>
-                  <CodeBlock
-                    language="bash"
-                    code={`# 检查 Node.js 版本
-node --version
-
-# 检查 npm 版本
-npm --version`}
-                  />
+                  <CodeBlock language="powershell" code={`winget install OpenJS.NodeJS.LTS`} />
                 </CardContent>
               </Card>
             </Grid>
           </Grid>
 
-          <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
-            方法一：使用官方安装包（推荐）
-          </Typography>
-          <List dense>
-            <ListItem>
-              <ListItemText primary="访问 https://nodejs.org" />
-            </ListItem>
-            <ListItem>
-              <ListItemText primary="下载 LTS 版本的 Windows Installer (.msi)" />
-            </ListItem>
-            <ListItem>
-              <ListItemText primary="运行安装程序，按默认设置完成安装" />
-            </ListItem>
-            <ListItem>
-              <ListItemText primary="安装程序会自动添加到 PATH 环境变量" />
-            </ListItem>
-          </List>
-
-          <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
-            方法二：使用包管理器
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            使用 Winget（Windows 11 或 Windows 10 自带）：
-          </Typography>
-          <CodeBlock language="powershell" code={`winget install OpenJS.NodeJS.LTS`} />
-
-          <Typography variant="body2" sx={{ mt: 2, mb: 1 }}>
-            使用 Chocolatey：
-          </Typography>
-          <CodeBlock language="powershell" code={`choco install nodejs-lts`} />
-
-          <Typography variant="body2" sx={{ mt: 2, mb: 1 }}>
-            使用 Scoop：
-          </Typography>
-          <CodeBlock language="powershell" code={`scoop install nodejs-lts`} />
-
-          <Alert severity="info" sx={{ mt: 2 }}>
-            <Typography variant="body2">
-              <strong>提示：</strong> 建议使用 LTS（长期支持）版本以获得最佳稳定性。安装完成后需重启命令行窗口。
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+              验证安装：
             </Typography>
-          </Alert>
+            <Typography variant="body2" color="text.secondary" mb={1}>
+              安装完成后，打开 PowerShell 或命令提示符，输入以下命令检查版本：
+            </Typography>
+            <CodeBlock
+              language="bash"
+              code={`node --version
+npm --version`}
+            />
+          </Box>
         </Box>
       )
     },
     {
-      label: '安装 Claude Code CLI',
+      label: '全局安装 Claude Code',
+      description: '使用 npm 包管理器将 Claude Code 安装到您的系统中。',
       content: (
-        <Box>
-          <Typography variant="h6" gutterBottom>
-            使用 npm 全局安装 Claude Code
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            打开命令提示符（以管理员身份运行）或 PowerShell，执行以下命令：
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body2" paragraph>
+            请以<strong>管理员身份</strong>运行 PowerShell 或命令提示符，然后执行以下命令：
           </Typography>
           <CodeBlock language="bash" code={`npm install -g @anthropic-ai/claude-code`} />
-          <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-            验证安装
-          </Typography>
-          <CodeBlock language="bash" code={`claude --version`} />
-
-          <Alert severity="warning" sx={{ mt: 2 }}>
-            <Typography variant="body2">
-              <strong>注意：</strong> 如果遇到权限问题，请确保以管理员身份运行命令提示符。
+          
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+              验证安装：
             </Typography>
-          </Alert>
+            <CodeBlock language="bash" code={`claude --version`} />
+            <Alert severity="success" variant="outlined" icon={<CheckCircleIcon />} sx={{ mt: 2, borderRadius: 0 }}>
+              <Typography variant="body2">
+                如果看到版本号输出（例如 <code>Claude Code 0.2.9</code>），说明安装成功！
+              </Typography>
+            </Alert>
+          </Box>
         </Box>
       )
     },
     {
-      label: '配置 Chirou API',
+      label: '配置 Chirou API 密钥',
+      description: '连接到 Chirou API 服务以使用 Claude 模型。',
       content: (
-        <Box>
-          <Typography variant="h6" gutterBottom color="primary">
-            3.1 获取 Auth Token
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            访问 Chirou API 控制台 进行以下操作：
-          </Typography>
-          <List dense>
-            <ListItem>
-              <ListItemIcon>
-                <CheckCircleIcon color="success" />
-              </ListItemIcon>
-              <ListItemText primary="点击「添加令牌」" />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <CheckCircleIcon color="success" />
-              </ListItemIcon>
-              <ListItemText
-                primary="令牌分组请选择：Claude Code专用"
-                secondary="务必选择此分组，否则无法使用"
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <CheckCircleIcon color="success" />
-              </ListItemIcon>
-              <ListItemText primary="令牌名称：随意填写" />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <CheckCircleIcon color="success" />
-              </ListItemIcon>
-              <ListItemText primary="额度建议：设置为无限额度" />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <CheckCircleIcon color="success" />
-              </ListItemIcon>
-              <ListItemText primary="其他选项保持默认" />
-            </ListItem>
-          </List>
-
-          <Typography variant="h6" gutterBottom color="primary" sx={{ mt: 3 }}>
-            3.2 配置环境变量
-          </Typography>
-          <Alert severity="error" sx={{ mb: 2 }}>
-            <Typography variant="body2">
-              <strong>重要提示：</strong> 请将下方的 ANTHROPIC_AUTH_TOKEN 替换为您在 https://api.wochirou.com/panel/token
-              生成的Claude Code专用 API 密钥！
+        <Box sx={{ mt: 2 }}>
+          <Paper variant="outlined" sx={{ p: 3, borderRadius: 0, bgcolor: alpha(theme.palette.warning.main, 0.05), borderColor: alpha(theme.palette.warning.main, 0.3) }}>
+            <Typography variant="h6" gutterBottom color="warning.main" fontWeight="bold">
+              1. 获取 API 密钥
             </Typography>
-          </Alert>
+            <List dense>
+              <ListItem>
+                <ListItemIcon><CheckCircleIcon color="success" fontSize="small" /></ListItemIcon>
+                <ListItemText primary="访问 Chirou API 控制台 -> 令牌" />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon><CheckCircleIcon color="success" fontSize="small" /></ListItemIcon>
+                <ListItemText 
+                  primary={<Typography variant="body2" fontWeight="bold">添加令牌，分组必须选择：Claude Code专用</Typography>} 
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon><CheckCircleIcon color="success" fontSize="small" /></ListItemIcon>
+                <ListItemText primary="复制生成的令牌 (sk-xxxx)" />
+              </ListItem>
+            </List>
+          </Paper>
 
-          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-            settings.json 配置（推荐，永久生效）
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            配置位置：%USERPROFILE%\.claude\settings.json
-          </Typography>
-          <CodeBlock
-            language="json"
-            code={`{
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="h6" gutterBottom fontWeight="bold">
+              2. 配置环境变量 (推荐)
+            </Typography>
+            <Typography variant="body2" paragraph color="text.secondary">
+              为了永久生效，我们建议创建配置文件。请在 PowerShell 中执行以下命令：
+            </Typography>
+            
+            <CodeBlock
+              language="powershell"
+              code={`# 1. 创建配置目录
+mkdir $env:USERPROFILE\\.claude
+
+# 2. 创建配置文件 (使用记事本打开)
+notepad $env:USERPROFILE\\.claude\\settings.json`}
+            />
+
+            <Typography variant="body2" paragraph sx={{ mt: 2 }}>
+              在打开的记事本中，粘贴以下内容（<strong>请替换您的密钥</strong>）：
+            </Typography>
+
+            <CodeBlock
+              language="json"
+              code={`{
   "env": {
-    "ANTHROPIC_AUTH_TOKEN": "粘贴为Claude Code专用分组令牌key",
-    "ANTHROPIC_BASE_URL": "https://api.wochirou.com.com/claude"
+    "ANTHROPIC_AUTH_TOKEN": "sk-您的Claude-Code专用令牌",
+    "ANTHROPIC_BASE_URL": "https://api.wochirou.com/claude"
   }
 }`}
-          />
-
-          <Alert severity="info" sx={{ mt: 2 }}>
-            <Typography variant="body2">
-              <strong>注意：</strong> 配置文件更加安全且便于管理，需要重启 Claude Code 才生效。
-            </Typography>
-          </Alert>
+            />
+          </Box>
         </Box>
       )
     },
     {
-      label: '启动 Claude Code',
+      label: '启动与使用',
+      description: '一切就绪，开始您的 AI 编程之旅！',
       content: (
-        <Box>
-          <Typography variant="h6" gutterBottom>
-            启动 Claude Code
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body1" paragraph>
+            打开终端，进入您的项目目录，然后运行：
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            配置完成后，先进入到工程目录：
-          </Typography>
-          <CodeBlock language="bash" code={`cd your-project-folder`} />
+          <CodeBlock language="bash" code={`cd your-project-folder
+claude`} />
 
-          <Typography variant="body1" sx={{ mb: 2, mt: 2 }}>
-            然后，运行以下命令启动：
-          </Typography>
-          <CodeBlock language="bash" code={`claude`} />
-
-          <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
-            首次启动后需要先进行主题的选择等操作：
-          </Typography>
-          <List dense>
-            <ListItem>
-              <ListItemIcon>
-                <CheckCircleIcon color="success" />
-              </ListItemIcon>
-              <ListItemText primary="选择喜欢的主题（回车）" />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <CheckCircleIcon color="success" />
-              </ListItemIcon>
-              <ListItemText primary="确认安全须知（回车）" />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <CheckCircleIcon color="success" />
-              </ListItemIcon>
-              <ListItemText primary="使用默认 Terminal 配置（回车）" />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <CheckCircleIcon color="success" />
-              </ListItemIcon>
-              <ListItemText primary="信任工作目录（回车）" />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <CheckCircleIcon color="success" />
-              </ListItemIcon>
-              <ListItemText primary="开始编程！🚀" />
-            </ListItem>
-          </List>
-
-          <Alert severity="success" sx={{ mt: 2 }}>
+          <Paper variant="outlined" sx={{ mt: 3, p: 3, borderRadius: 0 }}>
+            <Typography variant="subtitle1" gutterBottom fontWeight="bold">
+              <TerminalIcon sx={{ verticalAlign: 'middle', mr: 1, fontSize: 20 }} />
+              首次启动向导
+            </Typography>
+            <List>
+              <ListItem>
+                <ListItemText 
+                  primary="1. 选择主题" 
+                  secondary="按回车选择默认 Dark 主题" 
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText 
+                  primary="2. 确认安全须知" 
+                  secondary="阅读并按回车确认" 
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText 
+                  primary="3. 信任工作目录" 
+                  secondary="按回车确认信任当前目录" 
+                />
+              </ListItem>
+            </List>
+          </Paper>
+          
+          <Alert severity="success" variant="outlined" sx={{ mt: 3, borderRadius: 0 }}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              🎉 恭喜！您已成功配置 Claude Code。
+            </Typography>
             <Typography variant="body2">
-              <strong>恭喜！</strong> Claude Code 已成功配置完成。现在您可以在项目中使用 AI 助手了。
+              试着输入 "explain this project" 让它为您讲解项目结构吧！
             </Typography>
           </Alert>
         </Box>
@@ -285,46 +240,27 @@ npm --version`}
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box mb={4}>
-        <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
-          Windows 版本教程
-        </Typography>
-        <Typography variant="h6" color="text.secondary" mb={2}>
-          系统要求
-        </Typography>
-        <List dense>
-          <ListItem>
-            <ListItemIcon>
-              <InfoIcon color="primary" />
-            </ListItemIcon>
-            <ListItemText primary="• Windows 10 或 Windows 11" />
-          </ListItem>
-          <ListItem>
-            <ListItemIcon>
-              <InfoIcon color="primary" />
-            </ListItemIcon>
-            <ListItemText primary="• Node.js 18+" />
-          </ListItem>
-          <ListItem>
-            <ListItemIcon>
-              <InfoIcon color="primary" />
-            </ListItemIcon>
-            <ListItemText primary="• 网络连接" />
-          </ListItem>
-        </List>
-      </Box>
-
-      {steps.map((step, index) => (
-        <Paper key={index} sx={{ p: 3, mb: 3, borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-          <Typography variant="h5" component="h2" gutterBottom>
-            {`${index + 1}. ${step.label}`}
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          {step.content}
-        </Paper>
-      ))}
-    </Container>
+    <Box sx={{ maxWidth: 800, mx: 'auto', py: 4 }}>
+      <Stepper orientation="vertical">
+        {steps.map((step, index) => (
+          <Step key={step.label} active={true}>
+            <StepLabel>
+              <Typography variant="h6" fontWeight="bold">
+                {step.label}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {step.description}
+              </Typography>
+            </StepLabel>
+            <StepContent>
+              <Box sx={{ mb: 4, ml: 1, mt: 1 }}>
+                {step.content}
+              </Box>
+            </StepContent>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>
   );
 };
 

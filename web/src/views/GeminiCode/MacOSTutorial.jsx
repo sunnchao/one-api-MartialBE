@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Container,
   Typography,
   Box,
   Paper,
@@ -8,129 +7,147 @@ import {
   Card,
   CardContent,
   Alert,
-  Grid
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Grid,
+  Step,
+  StepLabel,
+  Stepper,
+  StepContent,
+  useTheme,
+  alpha,
+  Stack
 } from '@mui/material';
 import {
   Download as DownloadIcon,
-  Terminal as TerminalIcon
+  Terminal as TerminalIcon,
+  CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
 import CodeBlock from 'ui-component/CodeBlock';
 
 const MacOSTutorial = () => {
+  const theme = useTheme();
+
+  const steps = [
+    {
+      label: '安装 Node.js 环境',
+      description: 'Gemini CLI 依赖 Node.js 运行环境。',
+      content: (
+        <Box sx={{ mt: 2 }}>
+          <Alert severity="info" variant="outlined" sx={{ mb: 3, borderRadius: 0 }}>
+            <Typography variant="body2">
+              <strong>系统要求：</strong> macOS 10.15 (Catalina) 或更高版本，支持 Intel 和 Apple Silicon
+            </Typography>
+          </Alert>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Card variant="outlined" sx={{ height: '100%', borderRadius: 0, borderColor: alpha(theme.palette.primary.main, 0.2) }}>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+                    <DownloadIcon color="primary" />
+                    <Typography variant="h6" fontWeight="bold">
+                      官方安装包
+                    </Typography>
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    访问 Node.js 官网下载 macOS Installer (.pkg)。
+                  </Typography>
+                  <Button 
+                    variant="contained" 
+                    fullWidth 
+                    startIcon={<DownloadIcon />} 
+                    href="https://nodejs.org/en/download" 
+                    target="_blank"
+                    sx={{ borderRadius: 0, boxShadow: 'none' }}
+                  >
+                    前往下载 Node.js
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Card variant="outlined" sx={{ height: '100%', borderRadius: 0, borderColor: alpha(theme.palette.secondary.main, 0.2) }}>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+                    <TerminalIcon color="secondary" />
+                    <Typography variant="h6" fontWeight="bold">
+                      Homebrew 安装 (推荐)
+                    </Typography>
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    使用 Homebrew 快速安装：
+                  </Typography>
+                  <CodeBlock language="bash" code={`brew install node`} />
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </Box>
+      )
+    },
+    {
+      label: '全局安装 Gemini CLI',
+      description: '使用 npm 全局安装 Gemini 命令行工具。',
+      content: (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body2" paragraph>
+            打开终端，执行以下命令：
+          </Typography>
+          <CodeBlock language="bash" code={`npm install -g @google/gemini-cli`} />
+          
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+              验证安装：
+            </Typography>
+            <CodeBlock language="bash" code={`gemini --version`} />
+          </Box>
+        </Box>
+      )
+    },
+    {
+      label: '下一步',
+      description: '配置密钥并开始使用。',
+      content: (
+        <Box sx={{ mt: 2 }}>
+          <Alert severity="success" variant="outlined" sx={{ borderRadius: 0 }}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              🎉 安装完成！
+            </Typography>
+            <Typography variant="body2">
+              Gemini CLI 已成功安装。请切换到 <strong>"配置密钥"</strong> 标签页，完成 API 密钥配置。
+            </Typography>
+          </Alert>
+        </Box>
+      )
+    }
+  ];
+
   return (
-    <Container maxWidth="md">
-      <Typography variant="h4" gutterBottom>
-        macOS 完整安装教程
-      </Typography>
-      <Alert severity="info" sx={{ mb: 3 }}>
-        <Typography variant="body2">支持 Intel 和 Apple Silicon (M1/M2/M3) 芯片</Typography>
-      </Alert>
-
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom color="primary">
-          第 1 步：安装 Node.js
-        </Typography>
-
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  <DownloadIcon sx={{ mr: 1 }} />
-                  官方下载
-                </Typography>
-                <Typography variant="body2" color="text.secondary" mb={2}>
-                  从 Node.js 官网下载 macOS 版本
-                </Typography>
-                <Button
-                  variant="contained"
-                  fullWidth
-                  startIcon={<DownloadIcon />}
-                  href="https://nodejs.org/en/download"
-                  target="_blank"
-                >
-                  下载 Node.js for macOS
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  <TerminalIcon sx={{ mr: 1 }} />
-                  Homebrew 安装（推荐）
-                </Typography>
-                <Typography variant="body2" color="text.secondary" mb={2}>
-                  使用 Homebrew 包管理器安装
-                </Typography>
-                <CodeBlock
-                  language="bash"
-                  code={`# 安装 Homebrew（如果还没有）
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# 安装 Node.js
-brew install node`}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
-          验证安装
-        </Typography>
-        <CodeBlock
-          language="bash"
-          code={`node --version
-npm --version`}
-        />
-
-        <Alert severity="info" sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            <strong>系统要求：</strong> macOS 10.15 (Catalina) 或更高版本，支持 Intel 和 Apple Silicon 芯片
-          </Typography>
-        </Alert>
-      </Paper>
-
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom color="primary">
-          第 2 步：全局安装 Gemini CLI
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          打开终端，执行以下命令：
-        </Typography>
-        <CodeBlock
-          language="bash"
-          code={`npm install -g @google/gemini-cli`}
-        />
-
-        <Alert severity="warning" sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            <strong>权限问题：</strong> 如果出现权限错误，可以尝试使用 sudo 或配置 npm 全局目录权限
-          </Typography>
-        </Alert>
-      </Paper>
-
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom color="primary">
-          第 3 步：验证安装
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          验证 Gemini CLI 是否正确安装
-        </Typography>
-        <CodeBlock
-          language="bash"
-          code={`gemini --version`}
-        />
-
-        <Alert severity="success" sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            <strong>提示：</strong> 如果看到版本号输出，说明安装成功！接下来请前往"配置密钥"标签页完成配置。
-          </Typography>
-        </Alert>
-      </Paper>
-    </Container>
+    <Box sx={{ maxWidth: 800, mx: 'auto', py: 4 }}>
+      <Stepper orientation="vertical">
+        {steps.map((step, index) => (
+          <Step key={step.label} active={true}>
+            <StepLabel>
+              <Typography variant="h6" fontWeight="bold">
+                {step.label}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {step.description}
+              </Typography>
+            </StepLabel>
+            <StepContent>
+              <Box sx={{ mb: 4, ml: 1, mt: 1 }}>
+                {step.content}
+              </Box>
+            </StepContent>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>
   );
 };
 

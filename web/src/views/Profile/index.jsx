@@ -19,11 +19,31 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
-  TextField
+  TextField,
+  Tabs,
+  Tab,
+  Box,
+  Avatar,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar
 } from '@mui/material';
+import { keyframes } from '@emotion/react';
 import Grid from '@mui/material/Unstable_Grid2';
 import SubCard from 'ui-component/cards/SubCard';
-import { IconBrandWechat, IconBrandGithub, IconMail, IconBrandTelegram, IconBrandOauth } from '@tabler/icons-react';
+import MainCard from 'ui-component/cards/MainCard';
+import {
+  IconBrandWechat,
+  IconBrandGithub,
+  IconMail,
+  IconBrandTelegram,
+  IconBrandOauth,
+  IconSettings,
+  IconLink,
+  IconShieldLock,
+  IconKey
+} from '@tabler/icons-react';
 import Label from 'ui-component/Label';
 import { API } from 'utils/api';
 import {
@@ -45,13 +65,14 @@ import EmailModal from './component/EmailModal';
 import Turnstile from 'react-turnstile';
 import LarkIcon from 'assets/images/icons/lark.svg';
 import { useTheme } from '@mui/material/styles';
-import Monitoring from './component/Monitoring';
+
 const validationSchema = Yup.object().shape({
   username: Yup.string().required('用户名 不能为空').min(3, '用户名 不能小于 3 个字符'),
   display_name: Yup.string(),
   password: Yup.string().test('password', '密码不能小于 8 个字符', (val) => {
     return !val || val.length >= 8;
-  })
+  }),
+  confirm_password: Yup.string().oneOf([Yup.ref('password'), null], '两次输入的密码不一致')
 });
 
 export default function Profile() {
@@ -67,10 +88,31 @@ export default function Profile() {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [credentialToDelete, setCredentialToDelete] = useState(null);
   const [linuxDoLoading, setLinuxDoLoading] = useState(false);
-
+  const [openUnbindDialog, setOpenUnbindDialog] = useState(false);
+  const [unbindType, setUnbindType] = useState('');
+  const [userGroupMap, setUserGroupMap] = useState({});
   const status = useSelector((state) => state.siteInfo);
+  const account = useSelector((state) => state.account);
   const theme = useTheme();
   const matchDownSM = useMediaQuery(theme.breakpoints.down('md'));
+  const [value, setValue] = useState(0);
+
+  // Define the gradient animation
+  const gradientAnimation = keyframes`
+    0% {
+      background-position: 0 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0 50%;
+    }
+  `;
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
 
   const handleWechatOpen = () => {
     setOpenWechat(true);
@@ -91,6 +133,20 @@ export default function Profile() {
       const { success, message, data } = res.data;
       if (success) {
         setInputs(data);
+      } else {
+        showError(message);
+      }
+    } catch (error) {
+      return;
+    }
+  };
+
+  const loadUserGroup = async () => {
+    try {
+      let res = await API.get(`/api/user_group_map`);
+      const { success, message, data } = res.data;
+      if (success) {
+        setUserGroupMap(data);
       } else {
         showError(message);
       }
@@ -179,6 +235,28 @@ export default function Profile() {
     }
   };
 
+  const handleUnbind = (type) => {
+    setUnbindType(type);
+    setOpenUnbindDialog(true);
+  };
+
+  const confirmUnbind = async () => {
+    try {
+      const res = await API.post(`/api/user/unbind`, { type: unbindType });
+      const { success, message } = res.data;
+      if (success) {
+        showSuccess(t('profilePage.unbindSuccess'));
+        await loadUser();
+      } else {
+        showError(message);
+      }
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      setOpenUnbindDialog(false);
+    }
+  };
+
   const generateAccessToken = async () => {
     try {
       const res = await API.get('/api/user/token');
@@ -220,8 +298,17 @@ export default function Profile() {
       }
     }
     loadUser().then();
+    loadUserGroup().then();
     loadWebAuthnCredentials().then();
   }, [status]);
+
+  const getGroupInfo = () => {
+    if (!inputs.group || !userGroupMap[inputs.group]) {
+      return inputs.group || 'default';
+    }
+    const group = userGroupMap[inputs.group];
+    return `${t('profilePage.group')}: ${group.name} (${t('profilePage.rate')}: ${group.ratio} / ${t('profilePage.speed')}: ${group.api_rate})`;
+  };
 
   return (
     <>
@@ -269,6 +356,20 @@ export default function Profile() {
               <Grid container spacing={2}>
                 <Grid xs={12}>
                   <FormControl fullWidth variant="outlined">
+                    <InputLabel htmlFor="display_name">{t('profilePage.displayName')}</InputLabel>
+                    <OutlinedInput
+                      id="display_name"
+                      label={t('profilePage.displayName')}
+                      type="text"
+                      value={inputs.display_name || ''}
+                      onChange={handleInputChange}
+                      name="display_name"
+                      placeholder={t('profilePage.inputDisplayNamePlaceholder')}
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid xs={12}>
+                  <FormControl fullWidth variant="outlined">
                     <InputLabel htmlFor="username">{t('profilePage.username')}</InputLabel>
                     <OutlinedInput
                       id="username"
@@ -298,18 +399,19 @@ export default function Profile() {
                 </Grid>
                 <Grid xs={12}>
                   <FormControl fullWidth variant="outlined">
-                    <InputLabel htmlFor="display_name">{t('profilePage.displayName')}</InputLabel>
+                    <InputLabel htmlFor="confirm_password">{t('profilePage.confirmPassword')}</InputLabel>
                     <OutlinedInput
-                      id="display_name"
-                      label={t('profilePage.displayName')}
-                      type="text"
-                      value={inputs.display_name || ''}
+                      id="confirm_password"
+                      label={t('profilePage.confirmPassword')}
+                      type="password"
+                      value={inputs.confirm_password || ''}
                       onChange={handleInputChange}
-                      name="display_name"
-                      placeholder={t('profilePage.inputDisplayNamePlaceholder')}
+                      name="confirm_password"
+                      placeholder={t('profilePage.inputConfirmPasswordPlaceholder')}
                     />
                   </FormControl>
                 </Grid>
+
                 <Grid xs={12}>
                   <Button variant="contained" color="primary" onClick={submit}>
                     {t('profilePage.submit')}

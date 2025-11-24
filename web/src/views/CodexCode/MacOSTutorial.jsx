@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Container,
   Typography,
   Box,
   Paper,
@@ -10,211 +9,222 @@ import {
   Alert,
   List,
   ListItem,
+  ListItemIcon,
   ListItemText,
-  Grid
+  Divider,
+  Grid,
+  Step,
+  StepLabel,
+  Stepper,
+  StepContent,
+  useTheme,
+  alpha,
+  Stack
 } from '@mui/material';
-import { Download as DownloadIcon, Terminal as TerminalIcon } from '@mui/icons-material';
+import {
+  Download as DownloadIcon,
+  Terminal as TerminalIcon,
+  CheckCircle as CheckCircleIcon,
+} from '@mui/icons-material';
 import CodeBlock from 'ui-component/CodeBlock';
 
 const MacOSTutorial = () => {
-  return (
-    <Container maxWidth="md">
-      <Typography variant="h4" gutterBottom>
-        macOS 完整安装教程
-      </Typography>
+  const theme = useTheme();
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom color="primary">
-          1. 安装 Node.js
-        </Typography>
-
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  <DownloadIcon sx={{ mr: 1 }} />
-                  官方下载
-                </Typography>
-                <Typography variant="body2" color="text.secondary" mb={2}>
-                  从 Node.js 官网下载 macOS 版本
-                </Typography>
-                <Button variant="contained" fullWidth startIcon={<DownloadIcon />} href="https://nodejs.org/en/download" target="_blank">
-                  下载 Node.js for macOS
-                </Button>
-              </CardContent>
-            </Card>
+  const steps = [
+    {
+      label: '安装 Node.js 环境',
+      description: 'CodeX 依赖 Node.js 运行环境。',
+      content: (
+        <Box sx={{ mt: 2 }}>
+          <Alert severity="info" variant="outlined" sx={{ mb: 3, borderRadius: 0 }}>
+            <Typography variant="body2">
+              <strong>系统要求：</strong> macOS 10.15 (Catalina) 或更高版本
+            </Typography>
+          </Alert>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Card variant="outlined" sx={{ height: '100%', borderRadius: 0, borderColor: alpha(theme.palette.primary.main, 0.2) }}>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+                    <DownloadIcon color="primary" />
+                    <Typography variant="h6" fontWeight="bold">
+                      官方安装包
+                    </Typography>
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    访问 Node.js 官网下载 macOS Installer (.pkg)。
+                  </Typography>
+                  <Button 
+                    variant="contained" 
+                    fullWidth 
+                    startIcon={<DownloadIcon />} 
+                    href="https://nodejs.org/en/download" 
+                    target="_blank"
+                    sx={{ borderRadius: 0, boxShadow: 'none' }}
+                  >
+                    前往下载 Node.js
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Card variant="outlined" sx={{ height: '100%', borderRadius: 0, borderColor: alpha(theme.palette.secondary.main, 0.2) }}>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+                    <TerminalIcon color="secondary" />
+                    <Typography variant="h6" fontWeight="bold">
+                      Homebrew 安装 (推荐)
+                    </Typography>
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    使用 Homebrew 快速安装：
+                  </Typography>
+                  <CodeBlock language="bash" code={`brew install node`} />
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
-          <Grid item xs={12} md={6}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  <TerminalIcon sx={{ mr: 1 }} />
-                  Homebrew 安装（推荐）
-                </Typography>
-                <Typography variant="body2" color="text.secondary" mb={2}>
-                  使用 Homebrew 包管理器安装
-                </Typography>
-                <CodeBlock
-                  language="bash"
-                  code={`# 安装 Homebrew（如果还没有）
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# 安装 Node.js
-brew install node`}
+        </Box>
+      )
+    },
+    {
+      label: '安装 CodeX CLI',
+      description: '使用 npm 全局安装 CodeX 命令行工具。',
+      content: (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body2" paragraph>
+            打开终端，执行以下命令：
+          </Typography>
+          <CodeBlock language="bash" code={`npm install -g @openai/codex@latest`} />
+          
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+              验证安装：
+            </Typography>
+            <CodeBlock language="bash" code={`codex --version`} />
+          </Box>
+        </Box>
+      )
+    },
+    {
+      label: '配置 Chirou API API',
+      description: '配置 CodeX 专用 API 密钥。',
+      content: (
+        <Box sx={{ mt: 2 }}>
+          <Paper variant="outlined" sx={{ p: 3, borderRadius: 0, bgcolor: alpha(theme.palette.warning.main, 0.05), borderColor: alpha(theme.palette.warning.main, 0.3) }}>
+            <Typography variant="h6" gutterBottom color="warning.main" fontWeight="bold">
+              1. 获取 API 密钥
+            </Typography>
+            <List dense>
+              <ListItem>
+                <ListItemIcon><CheckCircleIcon color="success" fontSize="small" /></ListItemIcon>
+                <ListItemText primary="访问 Chirou API 控制台 -> 令牌" />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon><CheckCircleIcon color="success" fontSize="small" /></ListItemIcon>
+                <ListItemText 
+                  primary={<Typography variant="body2" fontWeight="bold">添加令牌，分组必须选择：CodeX 专用</Typography>} 
                 />
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+              </ListItem>
+              <ListItem>
+                <ListItemIcon><CheckCircleIcon color="success" fontSize="small" /></ListItemIcon>
+                <ListItemText primary="复制生成的令牌" />
+              </ListItem>
+            </List>
+          </Paper>
 
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
-          验证安装
-        </Typography>
-        <CodeBlock
-          language="bash"
-          code={`node --version
-npm --version`}
-        />
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="h6" gutterBottom fontWeight="bold">
+              2. 创建配置文件
+            </Typography>
+            <Typography variant="body2" paragraph color="text.secondary">
+              创建配置目录和文件：
+            </Typography>
+            
+            <CodeBlock
+              language="bash"
+              code={`mkdir -p ~/.codex
+touch ~/.codex/auth.json
+touch ~/.codex/config.toml`}
+            />
 
-        <Alert severity="info" sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            <strong>系统要求：</strong> macOS 10.15 (Catalina) 或更高版本，支持 Intel 和 Apple Silicon 芯片
-          </Typography>
-        </Alert>
-      </Paper>
+            <Typography variant="body2" paragraph sx={{ mt: 2 }}>
+              编辑 auth.json（<strong>请替换您的密钥</strong>）：
+            </Typography>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom color="primary">
-          2. 安装 CodeX CLI
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          打开终端，执行以下命令：
-        </Typography>
-        <CodeBlock language="bash" code={`npm install -g @openai/codex@latest`} />
-
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
-          验证安装
-        </Typography>
-        <CodeBlock language="bash" code={`codex --version`} />
-
-        <Alert severity="warning" sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            <strong>权限问题：</strong> 如果出现权限错误，可以尝试使用 sudo 或配置 npm 全局目录权限
-          </Typography>
-        </Alert>
-      </Paper>
-
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom color="primary">
-          3. 配置 Chirou API API
-        </Typography>
-
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 2, fontWeight: 'bold' }}>
-          3.1 获取 CodeX 专用 API Token
-        </Typography>
-        <List dense>
-          <ListItem>
-            <ListItemText primary="• 访问 Chirou API 控制台" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• 注册账户或登录现有账户" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary='• 进入 "API 密钥" 页面' />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary='• 点击 "创建新密钥"，选择 CodeX 专用分组' />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• 复制生成的 API Key" />
-          </ListItem>
-        </List>
-
-        <Alert severity="error" sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            <strong>重要：</strong> CodeX 需要使用专门的分组令牌，与 Claude Code 的令牌不同！
-          </Typography>
-        </Alert>
-
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
-          3.2 创建配置文件夹
-        </Typography>
-        <CodeBlock
-          language="bash"
-          code={`mkdir -p ~/.codex
-cd ~/.codex`}
-        />
-
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
-          3.3 创建配置文件
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 1 }}>
-          1. 创建 config.toml 文件：
-        </Typography>
-        <CodeBlock
-          language="toml"
-          code={`model_provider = "wochirou"
+            <CodeBlock
+              language="json"
+              code={`{
+  "OPENAI_API_KEY": "粘贴为CodeX专用分组令牌key"
+}`}
+            />
+            
+            <Typography variant="body2" paragraph sx={{ mt: 2 }}>
+              编辑 config.toml：
+            </Typography>
+            <CodeBlock
+              language="toml"
+              code={`model_provider = "wochirou"
 model = "gpt-5.1-codex"
-model_reasoning_effort = "high"
-network_access = "enabled"
-disable_response_storage = true
 
 [model_providers.wochirou]
 name = "wochirou"
 base_url = "https://api.wochirou.com/v1"
 wire_api = "responses"
 requires_openai_auth = true`}
-        />
+            />
+          </Box>
+        </Box>
+      )
+    },
+    {
+      label: '启动 CodeX',
+      description: '开始使用 CodeX CLI。',
+      content: (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body1" paragraph>
+            进入您的项目目录，运行：
+          </Typography>
+          <CodeBlock language="bash" code={`cd my-project
+codex`} />
+          
+          <Alert severity="success" variant="outlined" sx={{ mt: 3, borderRadius: 0 }}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              🎉 配置完成！
+            </Typography>
+            <Typography variant="body2">
+              现在您可以开始使用 CodeX 进行 AI 辅助编程了。
+            </Typography>
+          </Alert>
+        </Box>
+      )
+    }
+  ];
 
-        <Typography variant="body2" sx={{ mt: 2, mb: 1 }}>
-          2. 创建 auth.json 文件：
-        </Typography>
-        <CodeBlock
-          language="json"
-          code={`{
-  "OPENAI_API_KEY": "粘贴为CodeX专用分组令牌key"
-}`}
-        />
-      </Paper>
-
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom color="primary">
-          4. 启动 CodeX
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          配置完成后，先进入到工程目录：
-        </Typography>
-        <CodeBlock
-          language="bash"
-          code={`mkdir my-codex-project
-cd my-codex-project`}
-        />
-
-        <Typography variant="body1" sx={{ mb: 2, mt: 2 }}>
-          然后，运行以下命令启动：
-        </Typography>
-        <CodeBlock language="bash" code={`codex`} />
-
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
-          首次运行配置：
-        </Typography>
-        <List dense>
-          <ListItem>
-            <ListItemText primary="• 选择您的开发环境配置" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• 配置代码生成偏好" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• 设置 GPT-5 推理等级" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• 开始 AI 辅助编程！🚀" />
-          </ListItem>
-        </List>
-      </Paper>
-    </Container>
+  return (
+    <Box sx={{ maxWidth: 800, mx: 'auto', py: 4 }}>
+      <Stepper orientation="vertical">
+        {steps.map((step, index) => (
+          <Step key={step.label} active={true}>
+            <StepLabel>
+              <Typography variant="h6" fontWeight="bold">
+                {step.label}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {step.description}
+              </Typography>
+            </StepLabel>
+            <StepContent>
+              <Box sx={{ mb: 4, ml: 1, mt: 1 }}>
+                {step.content}
+              </Box>
+            </StepContent>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>
   );
 };
 

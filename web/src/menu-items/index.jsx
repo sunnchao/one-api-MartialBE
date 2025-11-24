@@ -10,7 +10,7 @@ import AICode from './ai-code';
 const menuItems = {
   items: [
     Dashboard,
-    AICode,
+    // AICode,
     //  ClaudeCode,
     // Coupon,
     Setting,

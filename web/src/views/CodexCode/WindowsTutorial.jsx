@@ -1,217 +1,240 @@
 import React from 'react';
 import {
-  Container,
   Typography,
   Box,
   Paper,
+  Button,
+  Card,
+  CardContent,
   Alert,
   List,
   ListItem,
-  ListItemText
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Grid,
+  Step,
+  StepLabel,
+  Stepper,
+  StepContent,
+  useTheme,
+  alpha,
+  Stack
 } from '@mui/material';
+import {
+  Download as DownloadIcon,
+  Terminal as TerminalIcon,
+  CheckCircle as CheckCircleIcon,
+} from '@mui/icons-material';
 import CodeBlock from 'ui-component/CodeBlock';
 
 const WindowsTutorial = () => {
-  return (
-    <Container maxWidth="md">
-      <Typography variant="h4" gutterBottom>
-        Windows 完整安装教程
-      </Typography>
+  const theme = useTheme();
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom color="primary">
-          1. 安装 Node.js
-        </Typography>
+  const steps = [
+    {
+      label: '安装 Node.js 环境',
+      description: 'CodeX 依赖 Node.js 运行环境。',
+      content: (
+        <Box sx={{ mt: 2 }}>
+          <Alert severity="info" variant="outlined" sx={{ mb: 3, borderRadius: 0 }}>
+            <Typography variant="body2">
+              <strong>系统要求：</strong> Windows 10 或 Windows 11，建议使用 LTS 版本
+            </Typography>
+          </Alert>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Card variant="outlined" sx={{ height: '100%', borderRadius: 0, borderColor: alpha(theme.palette.primary.main, 0.2) }}>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+                    <DownloadIcon color="primary" />
+                    <Typography variant="h6" fontWeight="bold">
+                      官方安装包 (推荐)
+                    </Typography>
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    访问 Node.js 官网下载 LTS 版本 Windows Installer (.msi)。
+                  </Typography>
+                  <Button 
+                    variant="contained" 
+                    fullWidth 
+                    startIcon={<DownloadIcon />} 
+                    href="https://nodejs.org/en/download" 
+                    target="_blank"
+                    sx={{ borderRadius: 0, boxShadow: 'none' }}
+                  >
+                    前往下载 Node.js
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Card variant="outlined" sx={{ height: '100%', borderRadius: 0, borderColor: alpha(theme.palette.secondary.main, 0.2) }}>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+                    <TerminalIcon color="secondary" />
+                    <Typography variant="h6" fontWeight="bold">
+                      包管理器安装
+                    </Typography>
+                  </Stack>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    使用 Winget 快速安装：
+                  </Typography>
+                  <CodeBlock language="powershell" code={`winget install OpenJS.NodeJS.LTS`} />
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
 
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 2, fontWeight: 'bold' }}>
-          方法一：使用官方安装包（推荐）
-        </Typography>
-        <List dense>
-          <ListItem>
-            <ListItemText primary="访问 https://nodejs.org" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="下载 LTS 版本的 Windows Installer (.msi)" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="运行安装程序，按默认设置完成安装" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="安装程序会自动添加到 PATH 环境变量" />
-          </ListItem>
-        </List>
-
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
-          方法二：使用包管理器
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 1 }}>
-          使用 Winget（Windows 11 或 Windows 10 自带）：
-        </Typography>
-        <CodeBlock language="powershell" code={`winget install OpenJS.NodeJS.LTS`} />
-
-        <Typography variant="body2" sx={{ mt: 2, mb: 1 }}>
-          使用 Chocolatey：
-        </Typography>
-        <CodeBlock language="powershell" code={`choco install nodejs-lts`} />
-
-        <Typography variant="body2" sx={{ mt: 2, mb: 1 }}>
-          使用 Scoop：
-        </Typography>
-        <CodeBlock language="powershell" code={`scoop install nodejs-lts`} />
-
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
-          验证安装
-        </Typography>
-        <CodeBlock
-          language="bash"
-          code={`node --version
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+              验证安装：
+            </Typography>
+            <CodeBlock
+              language="bash"
+              code={`node --version
 npm --version`}
-        />
-
-        <Alert severity="info" sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            <strong>提示：</strong> 建议使用 LTS（长期支持）版本以获得最佳稳定性。安装完成后需重启命令行窗口。
+            />
+          </Box>
+        </Box>
+      )
+    },
+    {
+      label: '安装 CodeX CLI',
+      description: '使用 npm 全局安装 CodeX 命令行工具。',
+      content: (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body2" paragraph>
+            请以<strong>管理员身份</strong>运行 PowerShell 或命令提示符，然后执行：
           </Typography>
-        </Alert>
-      </Paper>
+          <CodeBlock language="bash" code={`npm install -g @openai/codex@latest`} />
+          
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+              验证安装：
+            </Typography>
+            <CodeBlock language="bash" code={`codex --version`} />
+          </Box>
+        </Box>
+      )
+    },
+    {
+      label: '配置 Chirou API API',
+      description: '配置 CodeX 专用 API 密钥。',
+      content: (
+        <Box sx={{ mt: 2 }}>
+          <Paper variant="outlined" sx={{ p: 3, borderRadius: 0, bgcolor: alpha(theme.palette.warning.main, 0.05), borderColor: alpha(theme.palette.warning.main, 0.3) }}>
+            <Typography variant="h6" gutterBottom color="warning.main" fontWeight="bold">
+              1. 获取 API 密钥
+            </Typography>
+            <List dense>
+              <ListItem>
+                <ListItemIcon><CheckCircleIcon color="success" fontSize="small" /></ListItemIcon>
+                <ListItemText primary="访问 Chirou API 控制台 -> 令牌" />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon><CheckCircleIcon color="success" fontSize="small" /></ListItemIcon>
+                <ListItemText 
+                  primary={<Typography variant="body2" fontWeight="bold">添加令牌，分组必须选择：CodeX 专用</Typography>} 
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon><CheckCircleIcon color="success" fontSize="small" /></ListItemIcon>
+                <ListItemText primary="复制生成的令牌" />
+              </ListItem>
+            </List>
+          </Paper>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom color="primary">
-          2. 安装 CodeX CLI
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          打开命令提示符（以管理员身份运行）或 PowerShell，执行以下命令：
-        </Typography>
-        <CodeBlock language="bash" code={`npm install -g @openai/codex@latest`} />
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="h6" gutterBottom fontWeight="bold">
+              2. 创建配置文件
+            </Typography>
+            <Typography variant="body2" paragraph color="text.secondary">
+              创建配置目录和文件：
+            </Typography>
+            
+            <CodeBlock
+              language="powershell"
+              code={`mkdir $env:USERPROFILE\\.codex
+notepad $env:USERPROFILE\\.codex\\auth.json`}
+            />
 
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
-          验证安装
-        </Typography>
-        <CodeBlock language="bash" code={`codex --version`} />
+            <Typography variant="body2" paragraph sx={{ mt: 2 }}>
+              在 auth.json 中粘贴以下内容（<strong>请替换您的密钥</strong>）：
+            </Typography>
 
-        <Alert severity="warning" sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            <strong>注意：</strong> 如果遇到权限问题，请确保以管理员身份运行命令提示符。
-          </Typography>
-        </Alert>
-      </Paper>
-
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom color="primary">
-          3. 配置 Chirou API API
-        </Typography>
-
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 2, fontWeight: 'bold' }}>
-          3.1 获取 CodeX 专用 API Token
-        </Typography>
-        <List dense>
-          <ListItem>
-            <ListItemText primary="• 访问 Chirou API 控制台" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• 注册账户或登录现有账户" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary='• 进入 "API 密钥" 页面' />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary='• 点击 "创建新密钥"，选择 CodeX 专用分组' />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• 复制生成的 API Key" />
-          </ListItem>
-        </List>
-
-        <Alert severity="error" sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            <strong>重要：</strong> CodeX 需要使用专门的分组令牌，与 Claude Code 的令牌不同！
-          </Typography>
-        </Alert>
-
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
-          3.2 创建配置文件夹
-        </Typography>
-        <CodeBlock
-          language="bash"
-          code={`mkdir %USERPROFILE%\\.codex
-cd %USERPROFILE%\\.codex`}
-        />
-
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
-          3.3 创建配置文件
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 1 }}>
-          1. 创建 config.toml 文件：
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 1 }}>
-          使用记事本或您喜欢的文本编辑器创建 config.toml 文件：
-        </Typography>
-        <CodeBlock
-          language="toml"
-          code={`model_provider = "wochirou"
+            <CodeBlock
+              language="json"
+              code={`{
+  "OPENAI_API_KEY": "粘贴为CodeX专用分组令牌key"
+}`}
+            />
+            
+            <Typography variant="body2" paragraph sx={{ mt: 2 }}>
+              创建 config.toml：
+            </Typography>
+            <CodeBlock
+              language="toml"
+              code={`model_provider = "wochirou"
 model = "gpt-5.1-codex"
-model_reasoning_effort = "high"
-network_access = "enabled"
-disable_response_storage = true
 
 [model_providers.wochirou]
 name = "wochirou"
 base_url = "https://api.wochirou.com/v1"
 wire_api = "responses"
 requires_openai_auth = true`}
-        />
+            />
+          </Box>
+        </Box>
+      )
+    },
+    {
+      label: '启动 CodeX',
+      description: '开始使用 CodeX CLI。',
+      content: (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body1" paragraph>
+            进入您的项目目录，运行：
+          </Typography>
+          <CodeBlock language="bash" code={`cd my-project
+codex`} />
+          
+          <Alert severity="success" variant="outlined" sx={{ mt: 3, borderRadius: 0 }}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              🎉 配置完成！
+            </Typography>
+            <Typography variant="body2">
+              现在您可以开始使用 CodeX 进行 AI 辅助编程了。
+            </Typography>
+          </Alert>
+        </Box>
+      )
+    }
+  ];
 
-        <Typography variant="body2" sx={{ mt: 2, mb: 1 }}>
-          2. 创建 auth.json 文件：
-        </Typography>
-        <Typography variant="body2" sx={{ mb: 1 }}>
-          在同一目录下创建 auth.json 文件：
-        </Typography>
-        <CodeBlock
-          language="json"
-          code={`{
-  "OPENAI_API_KEY": "粘贴为CodeX专用分组令牌key"
-}`}
-        />
-      </Paper>
-
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom color="primary">
-          4. 启动 CodeX
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          配置完成后，先进入到工程目录：
-        </Typography>
-        <CodeBlock
-          language="bash"
-          code={`mkdir my-codex-project
-cd my-codex-project`}
-        />
-
-        <Typography variant="body1" sx={{ mb: 2, mt: 2 }}>
-          然后，运行以下命令启动：
-        </Typography>
-        <CodeBlock language="bash" code={`codex`} />
-
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 3, fontWeight: 'bold' }}>
-          首次运行配置：
-        </Typography>
-        <List dense>
-          <ListItem>
-            <ListItemText primary="• 选择您的开发环境配置" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• 配置代码生成偏好" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• 设置 GPT-5 推理等级" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• 开始 AI 辅助编程！🚀" />
-          </ListItem>
-        </List>
-      </Paper>
-    </Container>
+  return (
+    <Box sx={{ maxWidth: 800, mx: 'auto', py: 4 }}>
+      <Stepper orientation="vertical">
+        {steps.map((step, index) => (
+          <Step key={step.label} active={true}>
+            <StepLabel>
+              <Typography variant="h6" fontWeight="bold">
+                {step.label}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {step.description}
+              </Typography>
+            </StepLabel>
+            <StepContent>
+              <Box sx={{ mb: 4, ml: 1, mt: 1 }}>
+                {step.content}
+              </Box>
+            </StepContent>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>
   );
 };
 

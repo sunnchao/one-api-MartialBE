@@ -1,187 +1,191 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useState } from 'react';
 import {
-  Container,
   Typography,
   Box,
   Paper,
+  Button,
+  Card,
+  CardContent,
   Alert,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Grid,
+  Step,
+  StepLabel,
+  Stepper,
+  StepContent,
+  useTheme,
+  alpha,
   Tabs,
-  Tab
+  Tab,
+  Stack
 } from '@mui/material';
+import {
+  Download as DownloadIcon,
+  Terminal as TerminalIcon,
+  CheckCircle as CheckCircleIcon,
+} from '@mui/icons-material';
+import { SiUbuntu, SiCentos, SiArchlinux } from 'react-icons/si';
 import CodeBlock from 'ui-component/CodeBlock';
 
-// TabPanel 组件
-const TabPanel = (props) => {
-  const { children, value, index, ...other } = props;
+// Simple TabPanel component
+const TabPanel = ({ children, value, index, ...other }) => {
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`linux-tabpanel-${index}`}
-      aria-labelledby={`linux-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
+      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
     </div>
   );
 };
 
-TabPanel.propTypes = {
-  children: PropTypes.node,
-  value: PropTypes.number.isRequired,
-  index: PropTypes.number.isRequired
-};
-
 const LinuxTutorial = () => {
-  const [distroTab, setDistroTab] = React.useState(0);
+  const theme = useTheme();
+  const [distroTab, setDistroTab] = useState(0);
 
-  const handleDistroChange = (_, newValue) => {
+  const handleDistroChange = (event, newValue) => {
     setDistroTab(newValue);
   };
 
-  return (
-    <Container maxWidth="md">
-      <Typography variant="h4" gutterBottom>
-        Linux 完整安装教程
-      </Typography>
-      <Alert severity="info" sx={{ mb: 3 }}>
-        <Typography variant="body2">支持各种 Linux 发行版，包括 Ubuntu、CentOS、Arch Linux 等</Typography>
-      </Alert>
+  const steps = [
+    {
+      label: '安装 Node.js 环境',
+      description: 'Gemini CLI 依赖 Node.js 运行环境。',
+      content: (
+        <Box sx={{ mt: 2 }}>
+          <Alert severity="info" variant="outlined" sx={{ mb: 3, borderRadius: 0 }}>
+            <Typography variant="body2">
+              <strong>系统要求：</strong> Linux 内核 3.10+，glibc 2.17+
+            </Typography>
+          </Alert>
+          
+          <Paper variant="outlined" sx={{ borderRadius: 0, overflow: 'hidden' }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.default' }}>
+              <Tabs 
+                value={distroTab} 
+                onChange={handleDistroChange} 
+                aria-label="Linux distributions"
+                variant="scrollable"
+                scrollButtons="auto"
+              >
+                <Tab label="Ubuntu/Debian" icon={<SiUbuntu />} iconPosition="start" />
+                <Tab label="CentOS/RHEL" icon={<SiCentos />} iconPosition="start" />
+                <Tab label="Arch Linux" icon={<SiArchlinux />} iconPosition="start" />
+                <Tab label="通用 (NVM)" icon={<TerminalIcon />} iconPosition="start" />
+              </Tabs>
+            </Box>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom color="primary">
-          第 1 步：安装 Node.js
-        </Typography>
-
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={distroTab} onChange={handleDistroChange} aria-label="Linux distributions">
-            <Tab label="Ubuntu/Debian" />
-            <Tab label="CentOS/RHEL" />
-            <Tab label="Arch Linux" />
-            <Tab label="通用方法" />
-          </Tabs>
-        </Box>
-
-        <TabPanel value={distroTab} index={0}>
-          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Ubuntu/Debian 系统
-          </Typography>
-          <CodeBlock
-            language="bash"
-            code={`# 更新包列表
+            <Box sx={{ p: 3 }}>
+              <TabPanel value={distroTab} index={0}>
+                <Typography variant="subtitle2" gutterBottom>Ubuntu/Debian 安装命令：</Typography>
+                <CodeBlock
+                  language="bash"
+                  code={`# 1. 更新包列表
 sudo apt update
 
-# 安装 Node.js（推荐使用 NodeSource 仓库）
+# 2. 安装 Node.js 18.x
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt-get install -y nodejs
+sudo apt-get install -y nodejs`}
+                />
+              </TabPanel>
 
-# 验证安装
-node --version
-npm --version`}
-          />
-        </TabPanel>
-
-        <TabPanel value={distroTab} index={1}>
-          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-            CentOS/RHEL 系统
-          </Typography>
-          <CodeBlock
-            language="bash"
-            code={`# 安装 Node.js（使用 NodeSource 仓库）
+              <TabPanel value={distroTab} index={1}>
+                <Typography variant="subtitle2" gutterBottom>CentOS/RHEL 安装命令：</Typography>
+                <CodeBlock
+                  language="bash"
+                  code={`# 安装 Node.js 18.x
 curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
-sudo yum install -y nodejs
+sudo yum install -y nodejs`}
+                />
+              </TabPanel>
 
-# 验证安装
-node --version
-npm --version`}
-          />
-        </TabPanel>
+              <TabPanel value={distroTab} index={2}>
+                <Typography variant="subtitle2" gutterBottom>Arch Linux 安装命令：</Typography>
+                <CodeBlock
+                  language="bash"
+                  code={`sudo pacman -S nodejs npm`}
+                />
+              </TabPanel>
 
-        <TabPanel value={distroTab} index={2}>
-          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Arch Linux 系统
-          </Typography>
-          <CodeBlock
-            language="bash"
-            code={`# 安装 Node.js
-sudo pacman -S nodejs npm
-
-# 验证安装
-node --version
-npm --version`}
-          />
-        </TabPanel>
-
-        <TabPanel value={distroTab} index={3}>
-          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-            通用方法（适用于所有 Linux 发行版）
-          </Typography>
-          <CodeBlock
-            language="bash"
-            code={`# 使用 Node Version Manager (NVM)
+              <TabPanel value={distroTab} index={3}>
+                <Typography variant="subtitle2" gutterBottom>使用 NVM 安装 (推荐)：</Typography>
+                <CodeBlock
+                  language="bash"
+                  code={`# 1. 安装 NVM
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-
-# 重新加载 shell 配置
 source ~/.bashrc
-# 或者如果使用 zsh
-# source ~/.zshrc
 
-# 安装 Node.js
+# 2. 安装并使用 Node.js 18
 nvm install 18
-nvm use 18
-
-# 验证安装
-node --version
-npm --version`}
-          />
-        </TabPanel>
-
-        <Alert severity="info" sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            <strong>系统要求：</strong> Linux 内核 3.10+，glibc 2.17+，支持 x86_64 和 aarch64 架构
+nvm use 18`}
+                />
+              </TabPanel>
+            </Box>
+          </Paper>
+        </Box>
+      )
+    },
+    {
+      label: '全局安装 Gemini CLI',
+      description: '使用 npm 全局安装 Gemini 命令行工具。',
+      content: (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body2" paragraph>
+            在终端中执行以下命令：
           </Typography>
-        </Alert>
-      </Paper>
+          <CodeBlock language="bash" code={`# 可能需要 sudo 权限
+sudo npm install -g @google/gemini-cli`} />
+          
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+              验证安装：
+            </Typography>
+            <CodeBlock language="bash" code={`gemini --version`} />
+          </Box>
+        </Box>
+      )
+    },
+    {
+      label: '下一步',
+      description: '配置密钥并开始使用。',
+      content: (
+        <Box sx={{ mt: 2 }}>
+          <Alert severity="success" variant="outlined" sx={{ borderRadius: 0 }}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              🎉 安装完成！
+            </Typography>
+            <Typography variant="body2">
+              Gemini CLI 已成功安装。请切换到 <strong>"配置密钥"</strong> 标签页，完成 API 密钥配置。
+            </Typography>
+          </Alert>
+        </Box>
+      )
+    }
+  ];
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom color="primary">
-          第 2 步：全局安装 Gemini CLI
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          在终端中执行以下命令：
-        </Typography>
-        <CodeBlock
-          language="bash"
-          code={`npm install -g @google/gemini-cli`}
-        />
-
-        <Alert severity="warning" sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            <strong>权限问题：</strong> 如果出现权限错误，请确保 npm 全局目录有写入权限，或使用 sudo 安装
-          </Typography>
-        </Alert>
-      </Paper>
-
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom color="primary">
-          第 3 步：验证安装
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          验证 Gemini CLI 是否正确安装
-        </Typography>
-        <CodeBlock
-          language="bash"
-          code={`gemini --version`}
-        />
-
-        <Alert severity="success" sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            <strong>提示：</strong> 如果看到版本号输出，说明安装成功！接下来请前往"配置密钥"标签页完成配置。
-          </Typography>
-        </Alert>
-      </Paper>
-    </Container>
+  return (
+    <Box sx={{ maxWidth: 800, mx: 'auto', py: 4 }}>
+      <Stepper orientation="vertical">
+        {steps.map((step, index) => (
+          <Step key={step.label} active={true}>
+            <StepLabel>
+              <Typography variant="h6" fontWeight="bold">
+                {step.label}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {step.description}
+              </Typography>
+            </StepLabel>
+            <StepContent>
+              <Box sx={{ mb: 4, ml: 1, mt: 1 }}>
+                {step.content}
+              </Box>
+            </StepContent>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>
   );
 };
 

@@ -1,12 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Card, Stack, Typography, Tabs, Tab, InputBase, Avatar, Box, Chip, Grid, CardContent, IconButton, Tooltip } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { API } from 'utils/api';
-import { showError, ValueFormatter } from 'utils/common';
+import { showError, ValueFormatter, copy, showSuccess } from 'utils/common';
 import { getSupportedEndpoints, getEndpointColor } from 'utils/endpointUtils';
 import { useTheme } from '@mui/material/styles';
+import CustomToggleButtonGroup from 'ui-component/ToggleButton';
 import { useIsAdmin } from 'utils/common';
 import { alpha } from '@mui/material/styles';
 
@@ -19,10 +20,14 @@ export default function ModelPrice() {
   const [filteredRows, setFilteredRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [availableModels, setAvailableModels] = useState({});
+  const [modelInfoMap, setModelInfoMap] = useState({});
   const [userGroupMap, setUserGroupMap] = useState({});
   const [selectedGroup, setSelectedGroup] = useState('default');
   const [selectedOwnedBy, setSelectedOwnedBy] = useState(1);
+  const [selectedModality, setSelectedModality] = useState('all');
+  const [selectedTag, setSelectedTag] = useState('all');
   const [unit] = useState('K');
+  const [onlyShowAvailable, setOnlyShowAvailable] = useState(false);
   const [hideUnavailable] = useState(false);
   const userIsAdmin = useIsAdmin();
 
@@ -41,12 +46,34 @@ export default function ModelPrice() {
     }
   }, []);
 
+  // 获取模型信息
+  const fetchModelInfo = useCallback(async () => {
+    try {
+      const res = await API.get('/api/model_info/');
+      const { success, message, data } = res.data;
+      if (success) {
+        // 转换为 map 方便查找
+        const infoMap = {};
+        data.forEach((info) => {
+          infoMap[info.model] = info;
+        });
+        setModelInfoMap(infoMap);
+      } else {
+        showError(message);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
+  // 获取用户组
   const fetchUserGroupMap = useCallback(async () => {
     try {
       const res = await API.get(userIsAdmin ? '/api/user_group_map_by_admin' : '/api/user_group_map');
       const { success, message, data } = res.data;
       if (success) {
         setUserGroupMap(data);
+        setSelectedGroup(Object.keys(data)[0]);
       } else {
         showError(message);
       }
@@ -57,8 +84,9 @@ export default function ModelPrice() {
 
   useEffect(() => {
     fetchAvailableModels();
+    fetchModelInfo();
     fetchUserGroupMap();
-  }, [fetchAvailableModels, fetchUserGroupMap]);
+  }, [fetchAvailableModels, fetchModelInfo, fetchUserGroupMap]);
 
   useEffect(() => {
     if (!availableModels || !userGroupMap || !selectedGroup) return;
@@ -105,6 +133,7 @@ export default function ModelPrice() {
           id: index + 1,
           model: modelName,
           provider: model.owned_by,
+          modelInfo: modelInfoMap[modelName],
           userGroup: model.groups,
           endPoints: model.end_points,
           type: model.price.type,
@@ -126,7 +155,7 @@ export default function ModelPrice() {
     }
 
     setFilteredRows(filtered);
-  }, [availableModels, userGroupMap, selectedGroup, selectedOwnedBy, t, unit, searchQuery, hideUnavailable]);
+  }, [availableModels, userGroupMap, selectedGroup, selectedOwnedBy, t, unit, searchQuery, hideUnavailable, modelInfoMap]);
 
   const handleTabChange = (event, newValue) => {
     setSelectedOwnedBy(newValue);
