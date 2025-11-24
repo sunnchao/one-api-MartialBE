@@ -683,3 +683,13 @@ func GetAllUsers() ([]*User, error) {
   err := DB.Find(&users).Error
   return users, err
 }
+
+// GetUserByWebAuthnCredentialId 通过WebAuthn凭据ID获取用户
+func GetUserByWebAuthnCredentialId(credentialId []byte) (*User, error) {
+  var cred WebAuthnCredential
+  err := DB.Where("credential_id = ?", credentialId).First(&cred).Error
+  if err != nil {
+    return nil, err
+  }
+  return GetUserById(cred.UserId, false)
+}

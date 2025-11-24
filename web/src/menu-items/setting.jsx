@@ -14,7 +14,8 @@ const icons = {
   IconCoins: () => <Icon width={20} icon="solar:hand-money-bold-duotone" />,
   IconUsers: () => <Icon width={20} icon="solar:users-group-rounded-bold-duotone" />,
   IconModel: () => <Icon width={20} icon="mingcute:ai-fill" />,
-  IconClaudeCodeAdmin: () => <Icon width={20} icon="solar:code-square-bold-duotone" />
+  IconClaudeCodeAdmin: () => <Icon width={20} icon="solar:code-square-bold-duotone" />,
+  IconInfo: () => <Icon width={20} icon="solar:info-circle-bold-duotone" />
 };
 
 const Setting = {
@@ -80,6 +81,15 @@ const Setting = {
           type: 'item',
           url: '/panel/model_ownedby',
           icon: icons.IconModel,
+          breadcrumbs: false,
+          isAdmin: true
+        },
+        {
+          id: 'model_info',
+          title: '模型详情',
+          type: 'item',
+          url: '/panel/model_info',
+          icon: icons.IconInfo,
           breadcrumbs: false,
           isAdmin: true
         },

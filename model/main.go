@@ -168,6 +168,7 @@ func InitDB() (err error) {
 		&Midjourney{},
 		&ModelOwnedBy{},
 		&ChannelKey{},
+		&ModelInfo{},
 		&WebAuthnCredential{},
 	}
 
