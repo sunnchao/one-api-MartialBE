@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 
 // Function to calculate price
-export function calculatePrice(ratio, groupDiscount, isTimes, priceMultiplier = 0.002) {
+export function calculatePrice(ratio, groupDiscount, isTimes, priceMultiplier = 0.002, cacheRatio) {
   // Ensure inputs are valid numbers
   ratio = ratio || 0;
   groupDiscount = groupDiscount || 0;
@@ -23,6 +23,10 @@ export function calculatePrice(ratio, groupDiscount, isTimes, priceMultiplier = 
 
   // Calculate the price as a Decimal
   let priceDecimal = discount.mul(priceMultiplier);
+
+  if (cacheRatio) {
+    priceDecimal = priceDecimal.mul(cacheRatio);
+  }
 
   // For display purposes, format with 6 decimal places and trim trailing zeros
   let priceString = priceDecimal.toFixed(6);
@@ -45,20 +49,24 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
 
   // Get input/output prices from metadata with appropriate defaults
   const originalInputPrice =
-    item.metadata?.input_price_origin ||
-    (item.metadata?.input_ratio ? `$${calculatePrice(item.metadata.input_ratio, 1, false)}` : '$0');
+    item.metadata?.input_price_origin || (item.metadata?.input_ratio ? `$${calculatePrice(item.metadata.input_ratio, 1, false)}` : '$0');
   const originalOutputPrice =
-    item.metadata?.output_price_origin ||
-    (item.metadata?.output_ratio ? `$${calculatePrice(item.metadata.output_ratio, 1, false)}` : '$0');
+    item.metadata?.output_price_origin || (item.metadata?.output_ratio ? `$${calculatePrice(item.metadata.output_ratio, 1, false)}` : '$0');
   const originalCachedWritePrice =
     item.metadata?.cached_write_tokens_price_origin ||
-    (item.metadata?.cached_write_tokens_ratio ? `$${calculatePrice(item.metadata.cached_write_tokens_ratio, 1, false, 0.001)}` : '$0');
+    (item.metadata?.cached_write_tokens_ratio
+      ? `$${calculatePrice(item.metadata.input_ratio, 1, false, 0.002, item.metadata.cached_write_tokens_ratio)}`
+      : '$0');
   const originalCachedReadPrice =
     item.metadata?.cached_read_token_price_origin ||
-    (item.metadata?.cached_read_token_ratio ? `$${calculatePrice(item.metadata.cached_read_token_ratio, 1, false, 0.001)}` : '$0');
+    (item.metadata?.cached_read_tokens_ratio
+      ? `$${calculatePrice(item.metadata.input_ratio, 1, false, 0.002, item.metadata.cached_read_tokens_ratio)}`
+      : '$0');
   const originalReasoningPrice =
     item.metadata?.reasoning_tokens_price_origin ||
-    (item.metadata?.reasoning_tokens_ratio ? `$${calculatePrice(item.metadata.reasoning_tokens_ratio, 1, false, 0.001)}` : '$0');
+    (item.metadata?.reasoning_tokens_ratio
+      ? `$${calculatePrice(item.metadata.input_ratio, 1, false, 0.002, item.metadata.reasoning_tokens_ratio)}`
+      : '$0');
 
   // Calculate actual prices based on ratios and group discount
   const groupRatio = item.metadata?.group_ratio || 1;
@@ -67,13 +75,19 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
   //
   const cachedWritePrice =
     item.metadata?.cached_write_tokens_price ||
-    (item.metadata?.cached_write_tokens_ratio ? `$${calculatePrice(item.metadata.cached_write_tokens_ratio, groupRatio, false, 0.001)} ` : '$0');
+    (item.metadata?.cached_write_tokens_ratio
+      ? `$${calculatePrice(item.metadata.input_ratio, groupRatio, false, 0.002, item.metadata.cached_write_tokens_ratio)} `
+      : '$0');
   const cachedReadPrice =
-    item.metadata?.cached_read_token_price ||
-    (item.metadata?.cached_read_token_ratio ? `$${calculatePrice(item.metadata.cached_read_token_ratio, groupRatio, false, 0.001)} ` : '$0');
+    item.metadata?.cached_read_tokens_price ||
+    (item.metadata?.cached_read_tokens_ratio
+      ? `$${calculatePrice(item.metadata.input_ratio, groupRatio, false, 0.002, item.metadata.cached_read_tokens_ratio)} `
+      : '$0');
   const reasoningPrice =
     item.metadata?.reasoning_tokens_price ||
-    (item.metadata?.reasoning_tokens_ratio ? `$${calculatePrice(item.metadata.reasoning_tokens_ratio, groupRatio, false, 0.001)} ` : '$0');
+    (item.metadata?.reasoning_tokens_ratio
+      ? `$${calculatePrice(item.metadata.input_ratio, groupRatio, false, 0.002, item.metadata.reasoning_tokens_ratio)} `
+      : '$0');
   const outputPrice =
     item.metadata?.output_price ||
     (item.metadata?.output_ratio ? `$${calculatePrice(item.metadata.output_ratio, groupRatio, false)}` : '$0');
@@ -171,6 +185,11 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
               {t('logPage.quotaDetail.cachedWritePrice')}: {originalCachedWritePriceUnit}
             </Typography>
           )}
+          {item.metadata?.cached_read_tokens > 0 && (
+            <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, mt: 0.5, textAlign: 'left' }}>
+              {t('logPage.quotaDetail.cachedReadPrice')}: {originalCachedReadPriceUnit}
+            </Typography>
+          )}
           {item.metadata?.reasoning_tokens > 0 && (
             <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, mt: 0.5, textAlign: 'left' }}>
               {t('logPage.quotaDetail.reasoningPrice')}: {originalReasoningPriceUnit}
@@ -200,14 +219,6 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
           <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
             {t('logPage.quotaDetail.groupRatioValue')}: {groupRatio}
           </Typography>
-          {
-            // 缓存读取倍率
-            item.metadata?.cached_read_tokens_ratio && (
-              <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
-                {t('logPage.quotaDetail.cachedReadRatio')}: {item.metadata?.cached_read_tokens_ratio}
-              </Typography>
-            )
-          }
         </Box>
         {/* Actual Price */}
         <Box
@@ -232,6 +243,11 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
           {item.metadata?.cached_write_tokens > 0 && (
             <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, mt: 0.5, textAlign: 'left' }}>
               {t('logPage.quotaDetail.cachedWrite')}: {cachedWritePriceUnit}
+            </Typography>
+          )}
+          {item.metadata?.cached_read_tokens > 0 && (
+            <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, mt: 0.5, textAlign: 'left' }}>
+              {t('logPage.quotaDetail.cachedRead')}: {cachedReadPriceUnit}
             </Typography>
           )}
           {item.metadata?.reasoning_tokens > 0 && (
