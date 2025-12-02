@@ -27,7 +27,7 @@ var geminiSafetyCategories = []string{
 
 // isImagePreviewModel 检查是否为 image preview 模型
 func isImagePreviewModel(model string) bool {
-  return strings.Contains(model, "gemini-2.5-flash-image-preview")
+  return strings.HasSuffix(model, "-image-preview")
 }
 
 // createSafetySettings 创建安全设置
