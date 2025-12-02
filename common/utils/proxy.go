@@ -66,6 +66,11 @@ func SetProxy(proxyAddr string, ctx context.Context) context.Context {
 		ctx = context.Background()
 	}
 
+	// 优先使用渠道代理，否则使用全局代理
+	if proxyAddr == "" {
+		proxyAddr = GetOrDefault("global_proxy", "")
+	}
+
 	if proxyAddr == "" {
 		return ctx
 	}
