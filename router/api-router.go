@@ -94,7 +94,7 @@ func SetApiRouter(router *gin.Engine) {
 				selfRoute.POST("/checkin", middleware.TurnstileCheck(), controller.UserOperationCheckIn)
 				selfRoute.GET("/notifications", controller.GetUserNotifications)
 				selfRoute.PUT("/notifications", controller.UpdateUserNotifications)
-				
+
 				// 优惠券相关路由
 				selfRoute.GET("/coupons", controller.GetUserCoupons)
 				selfRoute.GET("/coupons/available", controller.GetAvailableCoupons)
@@ -298,7 +298,7 @@ func SetApiRouter(router *gin.Engine) {
 		{
 			// 公开接口
 			couponRoute.GET("/checkin_rewards", controller.GetCheckinRewards)
-			
+
 			// 管理员接口
 			adminCouponRoute := couponRoute.Group("/admin")
 			adminCouponRoute.Use(middleware.AdminAuth())
@@ -309,7 +309,7 @@ func SetApiRouter(router *gin.Engine) {
 				adminCouponRoute.PUT("/templates/:id", controller.UpdateCouponTemplate)
 				adminCouponRoute.DELETE("/templates/:id", controller.DeleteCouponTemplate)
 				adminCouponRoute.POST("/batch_issue", controller.BatchIssueCoupons)
-				
+
 				// 签到奖励配置管理
 				adminCouponRoute.POST("/checkin_rewards", controller.CreateCheckinReward)
 				adminCouponRoute.PUT("/checkin_rewards/:id", controller.UpdateCheckinReward)
@@ -323,14 +323,6 @@ func SetApiRouter(router *gin.Engine) {
 		sseRouter.POST("/channel/check", middleware.AdminAuth(), controller.CheckChannel)
 	}
 
-	// Claude Code API 代理路由（独立的，不与普通API混合）
-	claudeCodeAPIRouter := router.Group("/claude-code-api")
-	claudeCodeAPIRouter.Use(middleware.ClaudeCodeAuth(), middleware.ClaudeCodeRateLimit())
-	{
-		claudeCodeAPIRouter.POST("/v1/messages", controller.ClaudeCodeProxy)
-		claudeCodeAPIRouter.POST("/v1/chat/completions", controller.ClaudeCodeProxy) // OpenAI格式兼容
-	}
-
 	// Claude Code管理员路由
 	claudeCodeAdminRouter := router.Group("/api/claude-code-admin")
 	claudeCodeAdminRouter.Use(middleware.AdminAuth()) // 使用普通管理员权限
@@ -340,7 +332,7 @@ func SetApiRouter(router *gin.Engine) {
 		claudeCodeAdminRouter.GET("/users/search", controller.AdminSearchUsers)
 		claudeCodeAdminRouter.POST("/grant-subscription", controller.AdminGrantClaudeCodeSubscription)
 		claudeCodeAdminRouter.DELETE("/subscriptions/:id", controller.AdminCancelClaudeCodeSubscription)
-		
+
 		// 套餐管理
 		claudeCodeAdminRouter.GET("/plans", controller.GetClaudeCodePlans)
 		claudeCodeAdminRouter.GET("/plans/:id", controller.GetClaudeCodePlanById)

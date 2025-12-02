@@ -2,15 +2,14 @@ package controller
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"one-api/common/config"
 	"one-api/common/database"
 	"one-api/common/logger"
 	"one-api/common/utils"
 	"one-api/model"
-	"one-api/providers"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +17,12 @@ import (
 
 // 获取所有套餐
 func GetClaudeCodePlans(c *gin.Context) {
-	plans, err := model.GetAllClaudeCodePlans()
+	includeHidden := c.DefaultQuery("include_hidden", "false") == "true"
+	role := c.GetInt("role")
+	if includeHidden && role < config.RoleAdminUser {
+		includeHidden = false
+	}
+	plans, err := model.GetAllClaudeCodePlans(includeHidden)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -37,7 +41,7 @@ func GetClaudeCodePlans(c *gin.Context) {
 func GetClaudeCodeSubscription(c *gin.Context) {
 	userId := c.GetInt("id")
 
-	subscription, err := model.GetUserActiveClaudeCodeSubscription(userId)
+	subscription, err := model.GetUserActiveClaudeCodeSubscription(userId, "claude_code")
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -73,7 +77,7 @@ func PurchaseClaudeCodeSubscription(c *gin.Context) {
 	}
 
 	// 检查是否已有有效订阅
-	existingSubscription, _ := model.GetUserActiveClaudeCodeSubscription(userId)
+	existingSubscription, _ := model.GetUserActiveClaudeCodeSubscription(userId, "claude_code")
 	if existingSubscription != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -91,13 +95,67 @@ func PurchaseClaudeCodeSubscription(c *gin.Context) {
 		})
 		return
 	}
+	if !plan.ShowInPortal {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": "该套餐不可购买",
+		})
+		return
+	}
 
 	// 获取用户信息
-	_, err = model.GetUserById(userId, false)
+	user, err := model.GetUserById(userId, false)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": "用户不存在",
+		})
+		return
+	}
+
+	if req.PaymentMethod == "balance" {
+		costQuota := int(math.Round(plan.Price * config.QuotaPerUnit))
+		if costQuota < 0 {
+			costQuota = 0
+		}
+		if costQuota > 0 && user.Quota < costQuota {
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": "余额不足，请先充值",
+			})
+			return
+		}
+
+		if costQuota > 0 {
+			if err := model.DecreaseUserQuota(userId, costQuota); err != nil {
+				c.JSON(http.StatusOK, gin.H{
+					"success": false,
+					"message": "扣款失败，请稍后重试",
+				})
+				return
+			}
+		}
+
+		subscription, _, err := model.GrantPlanToUser(userId, plan, "balance", false)
+		if err != nil {
+			if costQuota > 0 {
+				_ = model.IncreaseUserQuota(userId, costQuota)
+			}
+			c.JSON(http.StatusOK, gin.H{
+				"success": false,
+				"message": "订阅激活失败，请稍后重试",
+			})
+			return
+		}
+
+		if costQuota > 0 {
+			model.RecordQuotaLog(userId, model.LogTypeConsume, costQuota, c.ClientIP(), fmt.Sprintf("使用余额购买Claude Code套餐：%s", plan.Name))
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"message": "订阅已使用余额支付并激活",
+			"data":    subscription,
 		})
 		return
 	}
@@ -107,7 +165,7 @@ func PurchaseClaudeCodeSubscription(c *gin.Context) {
 
 	// TODO: 实现支付服务调用
 	// 现在先创建一个模拟的支付结果
-	paymentURL := "/panel/claude-code/subscription?success=true"
+	paymentURL := "/panel/subscriptions?success=true"
 
 	// 创建待支付的订阅记录
 	now := utils.GetTimestamp()
@@ -116,23 +174,27 @@ func PurchaseClaudeCodeSubscription(c *gin.Context) {
 		// 无时间限制，设置为很久的未来时间 (100年后)
 		endTime = now + 100*365*24*60*60
 	} else {
-		// 按照套餐设置的月数计算结束时间
-		endTime = now + int64(plan.DurationMonths)*30*24*60*60
+		durationSeconds := plan.DurationSeconds()
+		if durationSeconds <= 0 {
+			durationSeconds = 30 * 24 * 60 * 60
+		}
+		endTime = now + durationSeconds
 	}
 
 	subscription := &model.ClaudeCodeSubscription{
-		UserId:                userId,
-		PlanType:              plan.Type,
-		Status:                "pending", // 待支付状态
-		StartTime:             now,
-		EndTime:               endTime,
-		MaxRequestsPerMonth:   plan.MaxRequestsPerMonth,
-		MaxClientCount:        plan.MaxClientCount,
-		Price:                 plan.Price,
-		Currency:              plan.Currency,
-		PaymentMethod:         req.PaymentMethod,
-		OrderId:               orderId,
-		UsedRequestsThisMonth: 0,
+		UserId:         userId,
+		PlanType:       plan.Type,
+		Status:         "pending", // 待支付状态
+		StartTime:      now,
+		EndTime:        endTime,
+		TotalQuota:     plan.TotalQuota,
+		RemainQuota:    plan.TotalQuota,
+		UsedQuota:      0,
+		MaxClientCount: plan.MaxClientCount,
+		Price:          plan.Price,
+		Currency:       plan.Currency,
+		PaymentMethod:  req.PaymentMethod,
+		OrderId:        orderId,
 	}
 
 	if err := model.CreateClaudeCodeSubscription(subscription); err != nil {
@@ -185,8 +247,12 @@ func activateClaudeCodeSubscription(orderId string) error {
 
 	// 更新订阅状态为激活
 	subscription.Status = "active"
+	duration := subscription.EndTime - subscription.StartTime
+	if duration <= 0 {
+		duration = 30 * 24 * 60 * 60
+	}
 	subscription.StartTime = utils.GetTimestamp()
-	subscription.EndTime = subscription.StartTime + 30*24*60*60 // 30天
+	subscription.EndTime = subscription.StartTime + duration
 
 	return model.UpdateClaudeCodeSubscription(&subscription)
 }
@@ -242,7 +308,7 @@ func CreateClaudeCodeAPIKey(c *gin.Context) {
 	}
 
 	// 检查是否有有效订阅
-	subscription, err := model.GetUserActiveClaudeCodeSubscription(userId)
+	subscription, err := model.GetUserActiveClaudeCodeSubscription(userId, "claude_code")
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -330,141 +396,6 @@ type ClientValidationRequest struct {
 	APIKey     string                  `json:"api_key" binding:"required"`
 }
 
-// Claude Code API 代理
-func ClaudeCodeProxy(c *gin.Context) {
-	// 从Header获取API Key
-	apiKey := c.GetHeader("Authorization")
-	if apiKey == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "缺少API Key",
-		})
-		return
-	}
-
-	// 移除Bearer前缀
-	if strings.HasPrefix(apiKey, "Bearer ") {
-		apiKey = strings.TrimPrefix(apiKey, "Bearer ")
-	}
-
-	// 验证API Key
-	_, subscription, err := model.ValidateClaudeCodeAPIKey(apiKey)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-	// Anthropic-Beta
-	anthropicBeta := c.GetHeader("Anthropic-Beta")
-	if anthropicBeta == "" {
-		c.JSON(http.StatusForbidden, gin.H{
-			"error": "只允许Claude Code客户端访问",
-		})
-		return
-	}
-	// Anthropic-Dangerous-Direct-Browser-Access
-	anthropicDangerousDirectBrowserAccess := c.GetHeader("Anthropic-Dangerous-Direct-Browser-Access")
-	if anthropicDangerousDirectBrowserAccess == "" {
-		c.JSON(http.StatusForbidden, gin.H{
-			"error": "只允许Claude Code客户端访问",
-		})
-		return
-	}
-
-	// 检查User-Agent，必须是Claude Code客户端
-	userAgent := c.GetHeader("User-Agent")
-	if !strings.Contains(userAgent, "claude-cli") {
-		c.JSON(http.StatusForbidden, gin.H{
-			"error": "只允许Claude Code客户端访问",
-		})
-		return
-	}
-
-	// 验证Referer，防止网页端调用
-	referer := c.GetHeader("Referer")
-	if referer != "" && (strings.Contains(referer, "http://") || strings.Contains(referer, "https://")) {
-		c.JSON(http.StatusForbidden, gin.H{
-			"error": "不允许从网页端访问",
-		})
-		return
-	}
-
-	// 获取请求体
-	var proxyReq ClaudeProxyRequest
-	if err := c.ShouldBindJSON(&proxyReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "请求参数错误",
-		})
-		return
-	}
-
-	// 获取Claude渠道
-	channel, err := getAvailableClaudeChannel()
-	if err != nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error": "Claude服务暂时不可用",
-		})
-		return
-	}
-
-	// 创建Claude提供商
-	provider := providers.GetProvider(channel, c)
-	if provider == nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error": "无法创建Claude提供商",
-		})
-		return
-	}
-
-	// 验证provider存在
-	if provider == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "提供商不可用",
-		})
-		return
-	}
-
-	// 记录使用日志
-	go func() {
-		model.UpdateClaudeCodeUsage(subscription.Id, 1)
-
-		usageLog := &model.ClaudeCodeUsageLog{
-			UserId:         subscription.UserId,
-			SubscriptionId: subscription.Id,
-			RequestType:    "chat",
-			TokensUsed:     1,
-			ClientInfo:     anthropicBeta + anthropicDangerousDirectBrowserAccess + userAgent + referer,
-			IpAddress:      c.ClientIP(),
-			UserAgent:      userAgent,
-		}
-		model.CreateClaudeCodeUsageLog(usageLog)
-	}()
-
-	// TODO: 实现Claude API调用
-	// 这里需要实际调用Claude API
-	response := map[string]interface{}{
-		"object": "chat.completion",
-		"model":  proxyReq.Model,
-		"choices": []map[string]interface{}{
-			{
-				"index": 0,
-				"message": map[string]interface{}{
-					"role":    "assistant",
-					"content": "这是一个Claude Code API的测试响应。您的请求已收到并处理。",
-				},
-				"finish_reason": "stop",
-			},
-		},
-		"usage": map[string]interface{}{
-			"prompt_tokens":     100,
-			"completion_tokens": 50,
-			"total_tokens":      150,
-		},
-	}
-
-	c.JSON(http.StatusOK, response)
-}
-
 // 获取可用的Claude渠道
 func getAvailableClaudeChannel() (*model.Channel, error) {
 	// 查找启用的Claude渠道
@@ -512,7 +443,7 @@ func GetClaudeCodeUsageStats(c *gin.Context) {
 func CancelClaudeCodeSubscription(c *gin.Context) {
 	userId := c.GetInt("id")
 
-	subscription, err := model.GetUserActiveClaudeCodeSubscription(userId)
+	subscription, err := model.GetUserActiveClaudeCodeSubscription(userId, "claude_code")
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -594,10 +525,11 @@ func GetAllClaudeCodeSubscriptions(c *gin.Context) {
 
 // 管理员手动发放套餐请求结构
 type AdminGrantSubscriptionRequest struct {
-	UserId   int    `json:"user_id" binding:"required"`
-	PlanType string `json:"plan_type" binding:"required"`
-	Duration int    `json:"duration" binding:"required"` // 订阅时长，单位：月
-	Reason   string `json:"reason"`                      // 发放原因
+	UserId       int    `json:"user_id" binding:"required"`
+	PlanType     string `json:"plan_type" binding:"required"`
+	Duration     int    `json:"duration" binding:"required"` // 订阅时长数值
+	DurationUnit string `json:"duration_unit"`               // day, week, month, quarter
+	Reason       string `json:"reason"`                      // 发放原因
 }
 
 // 管理员手动发放套餐
@@ -634,7 +566,7 @@ func AdminGrantClaudeCodeSubscription(c *gin.Context) {
 	}
 
 	// 检查用户是否已有活跃订阅
-	existingSubscription, _ := model.GetUserActiveClaudeCodeSubscription(req.UserId)
+	existingSubscription, _ := model.GetUserActiveClaudeCodeSubscription(req.UserId, plan.ServiceType)
 	if existingSubscription != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -646,36 +578,58 @@ func AdminGrantClaudeCodeSubscription(c *gin.Context) {
 	// 计算订阅时间
 	now := utils.GetTimestamp()
 	var endTime int64
+	var appliedDurationValue = req.Duration
+	var appliedDurationUnit string
 	if plan.IsUnlimitedTime {
 		// 无时间限制，设置为很久的未来时间 (100年后)
 		endTime = now + 100*365*24*60*60
 	} else {
-		// 按照管理员指定的时长或套餐默认时长
-		duration := req.Duration
-		if duration <= 0 {
-			duration = plan.DurationMonths
+		appliedDurationUnit = plan.DurationUnit
+		if req.DurationUnit != "" {
+			if !model.IsSupportedDurationUnit(req.DurationUnit) {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"success": false,
+					"message": "不支持的订阅时长单位",
+				})
+				return
+			}
+			appliedDurationUnit = model.NormalizeDurationUnit(req.DurationUnit)
 		}
-		endTime = now + int64(duration*30*24*3600)
+		if appliedDurationUnit == "" {
+			appliedDurationUnit = model.DurationUnitMonth
+		}
+		if appliedDurationValue <= 0 {
+			appliedDurationValue = plan.DurationValue
+		}
+		if appliedDurationValue <= 0 {
+			appliedDurationValue = 1
+		}
+		durationSeconds := model.DurationValueToSeconds(appliedDurationUnit, appliedDurationValue)
+		if durationSeconds <= 0 {
+			durationSeconds = 30 * 24 * 60 * 60
+		}
+		endTime = now + durationSeconds
 	}
 
 	// 创建订阅记录
 	subscription := &model.ClaudeCodeSubscription{
-		UserId:                req.UserId,
-		PlanType:              plan.Type,
-		Status:                "active",
-		StartTime:             now,
-		EndTime:               endTime,
-		AutoRenew:             false, // 手动发放的订阅默认不自动续费
-		MaxRequestsPerMonth:   plan.MaxRequestsPerMonth,
-		UsedRequestsThisMonth: 0,
-		MaxClientCount:        plan.MaxClientCount,
-		AllowedClients:        "",
-		Price:                 0, // 管理员发放免费
-		Currency:              plan.Currency,
-		PaymentMethod:         "admin_grant",
-		OrderId:               fmt.Sprintf("admin_grant_%d_%d", req.UserId, now),
-		CreatedTime:           now,
-		UpdatedTime:           now,
+		UserId:         req.UserId,
+		PlanType:       plan.Type,
+		Status:         "active",
+		StartTime:      now,
+		EndTime:        endTime,
+		AutoRenew:      false, // 手动发放的订阅默认不自动续费
+		MaxClientCount: plan.MaxClientCount,
+		AllowedClients: "",
+		Price:          0, // 管理员发放免费
+		Currency:       plan.Currency,
+		PaymentMethod:  "admin_grant",
+		OrderId:        fmt.Sprintf("admin_grant_%d_%d", req.UserId, now),
+		CreatedTime:    now,
+		UpdatedTime:    now,
+		TotalQuota:     plan.TotalQuota,
+		RemainQuota:    plan.TotalQuota,
+		UsedQuota:      0,
 	}
 
 	// 保存订阅
@@ -690,14 +644,34 @@ func AdminGrantClaudeCodeSubscription(c *gin.Context) {
 
 	// 记录管理员操作日志
 	adminId := c.GetInt("id")
-	logger.SysLog(fmt.Sprintf("管理员 %d 为用户 %d 手动发放 %s 套餐，时长 %d 个月，原因: %s",
-		adminId, req.UserId, req.PlanType, req.Duration, req.Reason))
+	durationDesc := "永久"
+	if !plan.IsUnlimitedTime {
+		durationDesc = formatDurationLabel(appliedDurationUnit, appliedDurationValue)
+	}
+	logger.SysLog(fmt.Sprintf("管理员 %d 为用户 %d 手动发放 %s 套餐，时长 %s，原因: %s",
+		adminId, req.UserId, req.PlanType, durationDesc, req.Reason))
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "套餐发放成功",
 		"data":    subscription,
 	})
+}
+
+func formatDurationLabel(unit string, value int) string {
+	if value <= 0 {
+		value = 1
+	}
+	switch unit {
+	case model.DurationUnitDay:
+		return fmt.Sprintf("%d天", value)
+	case model.DurationUnitWeek:
+		return fmt.Sprintf("%d周", value)
+	case model.DurationUnitQuarter:
+		return fmt.Sprintf("%d个季度", value)
+	default:
+		return fmt.Sprintf("%d个月", value)
+	}
 }
 
 // 管理员搜索用户请求结构
@@ -789,33 +763,40 @@ func AdminCancelClaudeCodeSubscription(c *gin.Context) {
 
 // CreatePlanRequest 创建套餐请求结构
 type CreatePlanRequest struct {
-	Name                string                 `json:"name" binding:"required"`
-	Type                string                 `json:"type" binding:"required"`
-	Description         string                 `json:"description"`
-	Price               float64                `json:"price" binding:"required"`
-	Currency            string                 `json:"currency"`
-	MaxRequestsPerMonth int                    `json:"max_requests_per_month" binding:"required"`
-	MaxClientCount      int                    `json:"max_client_count"`
-	IsUnlimitedTime     bool                   `json:"is_unlimited_time"`
-	DurationMonths      int                    `json:"duration_months"`
-	Features            map[string]interface{} `json:"features"`
-	IsActive            bool                   `json:"is_active"`
-	SortOrder           int                    `json:"sort_order"`
+	Name            string                 `json:"name" binding:"required"`
+	Type            string                 `json:"type" binding:"required"`
+	Description     string                 `json:"description"`
+	Price           *float64               `json:"price" binding:"required"`
+	Currency        string                 `json:"currency"`
+	TotalQuota      int                    `json:"total_quota" binding:"required"`
+	MaxClientCount  int                    `json:"max_client_count"`
+	IsUnlimitedTime bool                   `json:"is_unlimited_time"`
+	DurationMonths  int                    `json:"duration_months"`
+	DurationUnit    string                 `json:"duration_unit"`
+	DurationValue   int                    `json:"duration_value"`
+	Features        map[string]interface{} `json:"features"`
+	IsActive        bool                   `json:"is_active"`
+	SortOrder       int                    `json:"sort_order"`
+	ShowInPortal    bool                   `json:"show_in_portal"`
 }
 
 // UpdatePlanRequest 更新套餐请求结构
 type UpdatePlanRequest struct {
-	Name                string                 `json:"name"`
-	Description         string                 `json:"description"`
-	Price               float64                `json:"price"`
-	Currency            string                 `json:"currency"`
-	MaxRequestsPerMonth int                    `json:"max_requests_per_month"`
-	MaxClientCount      int                    `json:"max_client_count"`
-	IsUnlimitedTime     *bool                  `json:"is_unlimited_time"`
-	DurationMonths      int                    `json:"duration_months"`
-	Features            map[string]interface{} `json:"features"`
-	IsActive            *bool                  `json:"is_active"`
-	SortOrder           int                    `json:"sort_order"`
+	Name            string                 `json:"name"`
+	Description     string                 `json:"description"`
+	Price           *float64               `json:"price"`
+	Currency        string                 `json:"currency"`
+	MaxClientCount  int                    `json:"max_client_count"`
+	IsUnlimitedTime *bool                  `json:"is_unlimited_time"`
+	DurationMonths  int                    `json:"duration_months"`
+	DurationUnit    string                 `json:"duration_unit"`
+	DurationValue   int                    `json:"duration_value"`
+	Features        map[string]interface{} `json:"features"`
+	IsActive        *bool                  `json:"is_active"`
+	SortOrder       int                    `json:"sort_order"`
+	ServiceType     string                 `json:"service_type" gorm:"type:varchar(50);index;default:'claude_code'"` // claude_code, codex_code, gemini_code
+	TotalQuota      int                    `json:"total_quota" gorm:"default:0"`                                     // 总额度
+	ShowInPortal    *bool                  `json:"show_in_portal"`
 }
 
 // CreateClaudeCodePlan 创建套餐
@@ -855,26 +836,72 @@ func CreateClaudeCodePlan(c *gin.Context) {
 	if req.MaxClientCount == 0 {
 		req.MaxClientCount = 1
 	}
-	if !req.IsUnlimitedTime && req.DurationMonths == 0 {
-		req.DurationMonths = 1 // 默认1个月
+	var durationUnit = model.DurationUnitMonth
+	if req.DurationUnit != "" {
+		if !model.IsSupportedDurationUnit(req.DurationUnit) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "不支持的订阅时长单位",
+			})
+			return
+		}
+		durationUnit = model.NormalizeDurationUnit(req.DurationUnit)
+	}
+	durationValue := req.DurationValue
+	if req.IsUnlimitedTime {
+		req.DurationMonths = 0
+		durationValue = 0
+	} else {
+		if durationValue <= 0 {
+			if req.DurationMonths > 0 {
+				durationValue = req.DurationMonths
+			} else {
+				durationValue = 1
+			}
+		}
+		switch durationUnit {
+		case model.DurationUnitMonth:
+			req.DurationMonths = durationValue
+		case model.DurationUnitQuarter:
+			req.DurationMonths = durationValue * 3
+		default:
+			if req.DurationMonths == 0 {
+				req.DurationMonths = durationValue
+			}
+		}
+	}
+
+	priceValue := 0.0
+	if req.Price != nil {
+		priceValue = *req.Price
+	}
+	if priceValue < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "价格不能为负数",
+		})
+		return
 	}
 
 	now := utils.GetTimestamp()
 	plan := &model.ClaudeCodePlan{
-		Name:                req.Name,
-		Type:                req.Type,
-		Description:         req.Description,
-		Price:               req.Price,
-		Currency:            req.Currency,
-		MaxRequestsPerMonth: req.MaxRequestsPerMonth,
-		MaxClientCount:      req.MaxClientCount,
-		IsUnlimitedTime:     req.IsUnlimitedTime,
-		DurationMonths:      req.DurationMonths,
-		Features:            database.JSONType[map[string]interface{}]{},
-		IsActive:            req.IsActive,
-		SortOrder:           req.SortOrder,
-		CreatedTime:         now,
-		UpdatedTime:         now,
+		Name:            req.Name,
+		Type:            req.Type,
+		Description:     req.Description,
+		Price:           priceValue,
+		Currency:        req.Currency,
+		TotalQuota:      req.TotalQuota,
+		MaxClientCount:  req.MaxClientCount,
+		IsUnlimitedTime: req.IsUnlimitedTime,
+		DurationMonths:  req.DurationMonths,
+		DurationUnit:    durationUnit,
+		DurationValue:   durationValue,
+		Features:        database.JSONType[map[string]interface{}]{},
+		IsActive:        req.IsActive,
+		ShowInPortal:    req.ShowInPortal,
+		SortOrder:       req.SortOrder,
+		CreatedTime:     now,
+		UpdatedTime:     now,
 	}
 
 	if err := model.CreateClaudeCodePlan(plan); err != nil {
@@ -935,17 +962,24 @@ func UpdateClaudeCodePlan(c *gin.Context) {
 	if req.Name != "" {
 		plan.Name = req.Name
 	}
+	if req.ServiceType != "" {
+		plan.ServiceType = req.ServiceType
+	}
 	if req.Description != "" {
 		plan.Description = req.Description
 	}
-	if req.Price > 0 {
-		plan.Price = req.Price
+	if req.Price != nil {
+		if *req.Price < 0 {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "价格不能为负数",
+			})
+			return
+		}
+		plan.Price = *req.Price
 	}
 	if req.Currency != "" {
 		plan.Currency = req.Currency
-	}
-	if req.MaxRequestsPerMonth > 0 {
-		plan.MaxRequestsPerMonth = req.MaxRequestsPerMonth
 	}
 	if req.MaxClientCount > 0 {
 		plan.MaxClientCount = req.MaxClientCount
@@ -953,12 +987,62 @@ func UpdateClaudeCodePlan(c *gin.Context) {
 	if req.IsUnlimitedTime != nil {
 		plan.IsUnlimitedTime = *req.IsUnlimitedTime
 	}
+	updatedDurationUnit := plan.DurationUnit
+	if req.DurationUnit != "" {
+		if !model.IsSupportedDurationUnit(req.DurationUnit) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "不支持的订阅时长单位",
+			})
+			return
+		}
+		updatedDurationUnit = model.NormalizeDurationUnit(req.DurationUnit)
+	}
+	updatedDurationValue := plan.DurationValue
+	if req.DurationValue > 0 {
+		updatedDurationValue = req.DurationValue
+	}
+	updatedDurationMonths := plan.DurationMonths
 	if req.DurationMonths > 0 {
-		plan.DurationMonths = req.DurationMonths
+		updatedDurationMonths = req.DurationMonths
+		if updatedDurationUnit == model.DurationUnitMonth {
+			updatedDurationValue = req.DurationMonths
+		} else if updatedDurationUnit == model.DurationUnitQuarter {
+			updatedDurationValue = req.DurationMonths / 3
+			if updatedDurationValue == 0 {
+				updatedDurationValue = 1
+			}
+		}
+	}
+	if plan.IsUnlimitedTime {
+		updatedDurationMonths = 0
+		updatedDurationValue = 0
+	} else {
+		switch updatedDurationUnit {
+		case model.DurationUnitMonth:
+			updatedDurationMonths = updatedDurationValue
+		case model.DurationUnitQuarter:
+			updatedDurationMonths = updatedDurationValue * 3
+		}
+		if updatedDurationValue <= 0 {
+			updatedDurationValue = 1
+			if updatedDurationMonths == 0 {
+				updatedDurationMonths = 1
+			}
+		}
+	}
+	plan.DurationUnit = updatedDurationUnit
+	plan.DurationValue = updatedDurationValue
+	plan.DurationMonths = updatedDurationMonths
+	if req.TotalQuota > 0 {
+		plan.TotalQuota = req.TotalQuota
 	}
 	// TODO: Handle features update properly when needed
 	if req.IsActive != nil {
 		plan.IsActive = *req.IsActive
+	}
+	if req.ShowInPortal != nil {
+		plan.ShowInPortal = *req.ShowInPortal
 	}
 	plan.SortOrder = req.SortOrder
 	plan.UpdatedTime = utils.GetTimestamp()

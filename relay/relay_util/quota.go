@@ -39,6 +39,15 @@ type Quota struct {
 	startTime         time.Time
 	firstResponseTime time.Time
 	extraBillingData  map[string]ExtraBillingData
+
+	// ClaudeCode订阅相关字段
+	packageServiceType  string                      // 服务类型 (claude_code, codex_code, gemini_code)
+	subscriptionId      int                         // 使用的订阅ID（第一个成功扣费的订阅）
+	useSubscription     bool                        // 是否使用订阅计费
+	subscriptionQuota   int                         // 从订阅消费的总额度
+	subscriptionHandled bool                        // 订阅是否已处理
+	subscriptionsUsed   []SubscriptionUsageDetail   // 多订阅消费明细
+	quotaFromBalance    int                         // 从普通余额扣除的额度
 }
 
 func NewQuota(c *gin.Context, modelName string, promptTokens int) (*Quota, *types.OpenAIErrorWithStatusCode) {
@@ -80,6 +89,19 @@ func NewQuota(c *gin.Context, modelName string, promptTokens int) (*Quota, *type
 	}
 	quota.inputRatio = quota.price.GetInput() * quota.groupRatio
 	quota.outputRatio = quota.price.GetOutput() * quota.groupRatio
+
+	// 检测服务类型（从 context 获取）
+	packageServiceTypeStr := c.GetString("package_service_type")
+	if packageServiceTypeStr != "" {
+		quota.packageServiceType = packageServiceTypeStr
+
+		// 尝试获取用户可用的订阅
+		subscription, subErr := model.GetUserActiveClaudeCodeSubscription(quota.userId, packageServiceTypeStr)
+		if subErr == nil && subscription != nil && subscription.CanUseService() {
+			quota.useSubscription = true
+			quota.subscriptionId = subscription.Id
+		}
+	}
 
 	return quota, nil
 
@@ -171,6 +193,98 @@ func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, 
 		logger.LogInfo(ctx, "search quota consumption: "+fmt.Sprintf("%d", quota))
 	}
 
+	// 优先使用订阅扣费（仅对 ClaudeCode/CodexCode/GeminiCode 请求）
+	if q.useSubscription && quota > 0 && q.packageServiceType != "" {
+		// 获取用户所有活跃订阅，按到期时间升序排序（优先消耗快到期的）
+		subscriptions, err := model.GetUserActiveClaudeCodeSubscriptions(q.userId, q.packageServiceType)
+		if err == nil && len(subscriptions) > 0 {
+			remainingQuota := quota
+			q.subscriptionsUsed = make([]SubscriptionUsageDetail, 0, len(subscriptions))
+
+			// 依次从订阅中扣费，优先消耗快到期的
+			for i := range subscriptions {
+				if remainingQuota <= 0 {
+					break
+				}
+
+				sub := &subscriptions[i]
+				// 计算本次从该订阅扣除的额度
+				deductQuota := remainingQuota
+				if sub.RemainQuota < deductQuota {
+					deductQuota = sub.RemainQuota
+				}
+
+				// 从该订阅扣费
+				updateErr := model.UpdateClaudeCodeUsage(sub.Id, deductQuota)
+				if updateErr == nil {
+					q.subscriptionQuota += deductQuota
+					remainingQuota -= deductQuota
+
+					// 记录该订阅的消费明细
+					q.subscriptionsUsed = append(q.subscriptionsUsed, SubscriptionUsageDetail{
+						SubscriptionId: sub.Id,
+						PlanType:       sub.PlanType,
+						Quota:          deductQuota,
+						EndTime:        sub.EndTime,
+					})
+
+					// 如果是第一个成功扣费的订阅，记录订阅ID
+					if !q.subscriptionHandled {
+						q.subscriptionId = sub.Id
+						q.subscriptionHandled = true
+					}
+				}
+			}
+
+			// 如果成功从订阅扣费（至少扣了一部分）
+			if q.subscriptionHandled && q.subscriptionQuota > 0 {
+				// 订阅扣费成功，退还预消费的配额
+				if q.preConsumedQuota > 0 {
+					go func() {
+						err := model.PostConsumeTokenQuota(q.tokenId, -q.preConsumedQuota)
+						if err != nil {
+							logger.LogError(ctx, "error refunding pre-consumed quota after subscription: "+err.Error())
+						}
+					}()
+				}
+
+				// 如果订阅完全覆盖了消费，记录日志并返回
+				if remainingQuota <= 0 {
+					// 记录订阅消费日志（完全由订阅覆盖）
+					model.RecordConsumeLog(
+						ctx,
+						q.userId,
+						q.channelId,
+						usage.PromptTokens,
+						usage.CompletionTokens,
+						q.modelName,
+						tokenName,
+						tokenId,
+						q.subscriptionQuota,
+						"resource_package", // 标记为资源包消费
+						q.getRequestTime(),
+						isStream,
+						false,
+						q.getSubscriptionLogMeta(usage),
+						sourceIp,
+					)
+					return nil
+				}
+
+				// 否则，剩余部分需要从普通额度扣费
+				q.quotaFromBalance = remainingQuota
+				quota = remainingQuota
+			}
+		}
+
+		// 如果订阅扣费失败或没有可用订阅，继续使用普通扣费逻辑
+		if !q.subscriptionHandled {
+			logger.LogInfo(ctx, "subscription consumption failed or no available subscription, fallback to normal quota")
+			q.useSubscription = false
+		}
+	}
+
+	// 普通扣费逻辑
 	if quota > 0 {
 		quotaDelta := quota - q.preConsumedQuota
 		err := model.PostConsumeTokenQuota(q.tokenId, quotaDelta)
@@ -182,26 +296,56 @@ func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, 
 			return errors.New("error consuming token remain quota: " + err.Error())
 		}
 		model.UpdateChannelUsedQuota(q.channelId, quota)
+
+		// 如果有订阅消费，记录从余额扣除的额度
+		if q.subscriptionHandled && q.subscriptionQuota > 0 {
+			q.quotaFromBalance = quota
+		}
 	}
 
-	model.RecordConsumeLog(
-		ctx,
-		q.userId,
-		q.channelId,
-		usage.PromptTokens,
-		usage.CompletionTokens,
-		q.modelName,
-		tokenName,
-		tokenId,
-		quota,
-		"",
-		q.getRequestTime(),
-		isStream,
-		false,
-		q.GetLogMeta(usage),
-		sourceIp,
-	)
-	model.UpdateUserUsedQuotaAndRequestCount(q.userId, quota)
+	// 记录消费日志
+	// 如果同时使用了订阅和余额，记录一条包含完整信息的日志
+	if q.subscriptionHandled && q.subscriptionQuota > 0 {
+		totalQuota := q.subscriptionQuota + q.quotaFromBalance
+		model.RecordConsumeLog(
+			ctx,
+			q.userId,
+			q.channelId,
+			usage.PromptTokens,
+			usage.CompletionTokens,
+			q.modelName,
+			tokenName,
+			tokenId,
+			totalQuota,
+			"resource_package", // 标记为资源包消费（即使有部分来自余额）
+			q.getRequestTime(),
+			isStream,
+			false,
+			q.getSubscriptionLogMeta(usage),
+			sourceIp,
+		)
+		model.UpdateUserUsedQuotaAndRequestCount(q.userId, totalQuota)
+	} else {
+		// 纯余额消费，记录普通日志
+		model.RecordConsumeLog(
+			ctx,
+			q.userId,
+			q.channelId,
+			usage.PromptTokens,
+			usage.CompletionTokens,
+			q.modelName,
+			tokenName,
+			tokenId,
+			quota,
+			"",
+			q.getRequestTime(),
+			isStream,
+			false,
+			q.GetLogMeta(usage),
+			sourceIp,
+		)
+		model.UpdateUserUsedQuotaAndRequestCount(q.userId, quota)
+	}
 
 	return nil
 }
@@ -279,6 +423,26 @@ func (q *Quota) GetLogMeta(usage *types.Usage) map[string]any {
 	if q.extraBillingData != nil {
 		meta["extra_billing"] = q.extraBillingData
 	}
+
+	return meta
+}
+
+// getSubscriptionLogMeta 获取订阅消费日志的元数据
+func (q *Quota) getSubscriptionLogMeta(usage *types.Usage) map[string]any {
+	meta := q.GetLogMeta(usage)
+	meta["billing_type"] = "resource_package"
+	meta["resource_package_id"] = q.subscriptionId
+	meta["package_service_type"] = q.packageServiceType
+
+	// 添加多订阅消费明细
+	if len(q.subscriptionsUsed) > 0 {
+		meta["subscriptions_used"] = q.subscriptionsUsed
+	}
+
+	// 添加订阅和余额消费统计
+	meta["quota_from_subscription"] = q.subscriptionQuota
+	meta["quota_from_balance"] = q.quotaFromBalance
+	meta["total_quota"] = q.subscriptionQuota + q.quotaFromBalance
 
 	return meta
 }
@@ -383,6 +547,14 @@ type ExtraBillingData struct {
 	Type      string  `json:"type"`
 	CallCount int     `json:"call_count"`
 	Price     float64 `json:"price"`
+}
+
+// SubscriptionUsageDetail 订阅消费明细
+type SubscriptionUsageDetail struct {
+	SubscriptionId int    `json:"subscription_id"` // 订阅ID
+	PlanType       string `json:"plan_type"`       // 套餐类型
+	Quota          int    `json:"quota"`           // 本次从该订阅扣除的额度
+	EndTime        int64  `json:"end_time"`        // 订阅到期时间
 }
 
 func (q *Quota) GetExtraBillingData(extraBilling map[string]types.ExtraBilling) {

@@ -34,6 +34,7 @@
   "profile": "个人设置",
   "pricing": "模型价格",
   "model_price": "可用模型",
+  "subscriptions": "套餐管理",
   "payment": "支付",
   "setting": "设置",
   "task": "异步任务",
@@ -56,7 +57,7 @@
   },
   "claudeCode": {
     "subscription": {
-      "title": "Claude Code 订阅管理",
+      "title": "订阅管理",
       "currentSubscription": "当前订阅",
       "planType": "套餐类型",
       "subscriptionPeriod": "订阅期间",
@@ -70,6 +71,7 @@
       "selectPlan": "选择订阅套餐",
       "recommended": "推荐",
       "monthlyRequests": "每月 {{count}} 次请求",
+      "monthlyTokens": "每月 {{count}} 额度",
       "maxDevices": "最多 {{count}} 个设备",
       "currentPlan": "当前套餐",
       "selectThisPlan": "选择此套餐",
@@ -99,9 +101,15 @@
         "unknown": "未知"
       },
       "paymentMethods": {
+        "balance": "账户余额",
         "stripe": "Stripe (信用卡)",
         "alipay": "支付宝",
         "wxpay": "微信支付"
+      },
+      "quotaDisplay": {
+        "unlimited": "无时间限制；共 {{count}} 额度",
+        "perDuration": "每{{duration}} {{count}} 额度",
+        "total": "共 {{count}} 额度"
       }
     }
   },

@@ -7,7 +7,11 @@ import (
 	"one-api/common/config"
 	"one-api/common/logger"
 	"one-api/common/utils"
+	"strconv"
+	"strings"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type UserOperation struct {
@@ -20,15 +24,19 @@ type UserOperation struct {
 
 // GetLatestCheckInOperation 获取用户最新的签到记录
 func GetLatestCheckInOperation(userId int) (*UserOperation, error) {
-	var userOperation UserOperation
-	err := DB.Model(&UserOperation{}).
-		Where("user_id = ? AND type = ?", userId, 1).
-		Order("id desc").
-		First(&userOperation).Error
+	operations, err := fetchUserOperationsWithNormalizedTime(
+		DB.Model(&UserOperation{}).
+			Where("user_id = ? AND type = ?", userId, CheckInType).
+			Order("id desc").
+			Limit(1),
+	)
 	if err != nil {
 		return nil, err
 	}
-	return &userOperation, nil
+	if len(operations) == 0 {
+		return nil, gorm.ErrRecordNotFound
+	}
+	return &operations[0], nil
 }
 
 // createOperation 创建用户操作记录
@@ -37,45 +45,70 @@ func createOperation(operation *UserOperation) error {
 }
 
 const (
-	CheckInType          = 1
-	MinCheckInQuota      = 5000
-	BaseMinRatio         = 0.01  // 基础最小比例 0.01
-	BaseLowMaxRatio      = 0.1   // 低额度最大比例 0.2
-	BaseHighMaxRatio     = 0.125 // 高额度最大比例 0.25
-	BonusRatio           = 0.125 // 额外奖励比例 0.25
-	BonusProbability     = 0.1   // 额外奖励概率 10%
-	HighRatioProbability = 0.5   // 获得高额度(>0.2)的概率 75%
-	CouponProbability    = 0.05  // 获得优惠券的概率 5%
+	CheckInType                   = 1
+	MinCheckInQuota               = 5000
+	BaseMinRatio                  = 0.01  // 基础最小比例 0.01
+	BaseLowMaxRatio               = 0.1   // 低额度最大比例 0.2
+	BaseHighMaxRatio              = 0.125 // 高额度最大比例 0.25
+	BonusRatio                    = 0.125 // 额外奖励比例 0.25
+	BonusProbability              = 0.1   // 额外奖励概率 10%
+	HighRatioProbability          = 0.5   // 获得高额度(>0.2)的概率 75%
+	CouponProbability             = 0     // 获得优惠券的概率 5%
+	SubscriptionRewardProbability = 0     // 获得订阅奖励的概率 5%
 )
+
+const checkInSubscriptionRewardSource = "checkin_reward"
 
 // 签到奖励结果
 type CheckInRewardResult struct {
-	Quota  int         `json:"quota"`
-	Coupon *UserCoupon `json:"coupon,omitempty"`
+	Quota                int                     `json:"quota"`
+	Coupon               *UserCoupon             `json:"coupon,omitempty"`
+	Subscription         *ClaudeCodeSubscription `json:"subscription,omitempty"`
+	SubscriptionExtended bool                    `json:"subscription_extended,omitempty"`
 }
 
 // ProcessCheckIn 处理用户签到
 func ProcessCheckIn(userId int, requestIP string) (*CheckInRewardResult, error) {
-	// 计算签到奖励额度
-	quota := calculateCheckInQuota()
+	var (
+		quota                int
+		subscription         *ClaudeCodeSubscription
+		subscriptionExtended bool
+		err                  error
+	)
 
-	// 检查用户现有额度并调整奖励
-	userQuota, err := GetUserQuota(userId)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get user quota: %w", err)
+	if shouldGrantSubscriptionReward() {
+		subscription, subscriptionExtended, err = grantCheckinSubscriptionReward(userId)
+		if err != nil {
+			logger.SysError(fmt.Sprintf("签到赠送订阅失败: %v", err))
+			subscription = nil
+		}
 	}
 
-	if userQuota <= 0 {
-		quota = quota / 10
+	remarkParts := []string{"签到成功"}
+
+	if subscription == nil {
+		quota = calculateCheckInQuota()
+		userQuota, err := GetUserQuota(userId)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get user quota: %w", err)
+		}
+		if userQuota <= 0 {
+			quota = quota / 10
+		}
+		if err := increaseUserQuota(userId, quota); err != nil {
+			return nil, fmt.Errorf("failed to increase user quota: %w", err)
+		}
+		remarkParts = append(remarkParts, fmt.Sprintf("获得额度 %v", common.LogQuota(quota)))
+	} else {
+		expireAt := time.Unix(subscription.EndTime, 0).Format("2006-01-02 15:04")
+		if subscriptionExtended {
+			remarkParts = append(remarkParts, fmt.Sprintf("Claude Code订阅延长至 %s", expireAt))
+		} else {
+			remarkParts = append(remarkParts, fmt.Sprintf("获得Claude Code体验订阅(有效至 %s)", expireAt))
+		}
 	}
 
-	// 更新用户额度
-	if err := increaseUserQuota(userId, quota); err != nil {
-		return nil, fmt.Errorf("failed to increase user quota: %w", err)
-	}
-
-	// 创建操作记录
-	remark := fmt.Sprintf("签到, 获得额度 %v", common.LogQuota(quota))
+	remark := strings.Join(remarkParts, ", ")
 	operation := &UserOperation{
 		UserId:      userId,
 		Type:        CheckInType,
@@ -87,30 +120,29 @@ func ProcessCheckIn(userId int, requestIP string) (*CheckInRewardResult, error) 
 		return nil, fmt.Errorf("failed to create operation record: %w", err)
 	}
 
-	// 尝试获得优惠券奖励（检查全局开关）
+	RecordLogWithRequestIP(userId, LogTypeUserQuoteIncrease, remark, requestIP)
+
 	var coupon *UserCoupon
 	if isCouponRewardEnabled() {
 		couponReward := calculateCouponReward()
 		if couponReward != nil {
 			issuedCoupon, err := IssueCouponToUser(userId, couponReward.TemplateId, CouponSourceCheckin)
 			if err != nil {
-				// 优惠券发放失败，记录日志但不影响签到成功
 				logger.SysError(fmt.Sprintf("Failed to issue coupon to user %d: %v", userId, err))
 			} else {
 				coupon = issuedCoupon
-				// 更新签到记录，添加优惠券信息
-				remark += fmt.Sprintf(", 获得优惠券: %s", coupon.Name)
+				remark = fmt.Sprintf("%s, 获得优惠券: %s", remark, coupon.Name)
 				operation.Remark = remark
 				DB.Save(operation)
 			}
 		}
 	}
 
-	RecordLogWithRequestIP(userId, LogTypeUserQuoteIncrease, remark, requestIP)
-
 	return &CheckInRewardResult{
-		Quota:  quota,
-		Coupon: coupon,
+		Quota:                quota,
+		Coupon:               coupon,
+		Subscription:         subscription,
+		SubscriptionExtended: subscriptionExtended,
 	}, nil
 }
 
@@ -179,20 +211,27 @@ func IsCheckInToday(userId int) (int64, error) {
 // GetCheckInList 获取签到列表（仅返回本月和上个月的记录）
 func GetCheckInList(userId int) ([]UserOperation, error) {
 	now := time.Now()
-	// 获取上个月第一天
 	firstDayOfLastMonth := time.Date(now.Year(), now.Month()-1, 1, 0, 0, 0, 0, now.Location())
 
-	var checkInList []UserOperation
-	err := DB.Model(&UserOperation{}).
-		Where("user_id = ? AND type = ? AND created_time >= ?", userId, CheckInType, firstDayOfLastMonth.Unix()).
-		Order("id desc").
-		Find(&checkInList).Error
-
+	checkInList, err := fetchUserOperationsWithNormalizedTime(
+		DB.Model(&UserOperation{}).
+			Where("user_id = ? AND type = ?", userId, CheckInType).
+			Order("id desc"),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get check-in list: %w", err)
 	}
 
-	return checkInList, nil
+	cutoff := firstDayOfLastMonth.UnixMilli()
+	filtered := make([]UserOperation, 0, len(checkInList))
+	for _, op := range checkInList {
+		if op.CreatedTime < cutoff {
+			break
+		}
+		filtered = append(filtered, op)
+	}
+
+	return filtered, nil
 }
 
 // 优惠券奖励信息
@@ -223,7 +262,98 @@ func calculateCouponReward() *CouponRewardInfo {
 	return nil
 }
 
+func shouldGrantSubscriptionReward() bool {
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return rng.Float64() < SubscriptionRewardProbability
+}
+
+func grantCheckinSubscriptionReward(userId int) (*ClaudeCodeSubscription, bool, error) {
+	plan, err := EnsureCheckinRewardPlan()
+	if err != nil {
+		return nil, false, err
+	}
+	// 签到奖励不允许叠加，如果已有订阅则创建新订阅
+	return GrantPlanToUser(userId, plan, checkInSubscriptionRewardSource, false)
+}
+
 // 检查优惠券奖励是否启用
 func isCouponRewardEnabled() bool {
 	return config.CheckinCouponEnabled
+}
+
+func fetchUserOperationsWithNormalizedTime(query *gorm.DB) ([]UserOperation, error) {
+	rows, err := query.Select("id, user_id, type, remark, created_time").Rows()
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var operations []UserOperation
+	for rows.Next() {
+		var operation UserOperation
+		var createdTime interface{}
+		if err := rows.Scan(&operation.Id, &operation.UserId, &operation.Type, &operation.Remark, &createdTime); err != nil {
+			return nil, err
+		}
+		parsedTime, err := normalizeCreatedTimeValue(createdTime)
+		if err != nil {
+			return nil, err
+		}
+		operation.CreatedTime = parsedTime
+		operations = append(operations, operation)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return operations, nil
+}
+
+func normalizeCreatedTimeValue(value interface{}) (int64, error) {
+	switch v := value.(type) {
+	case int64:
+		return v, nil
+	case int32:
+		return int64(v), nil
+	case float64:
+		return int64(v), nil
+	case float32:
+		return int64(v), nil
+	case []byte:
+		return parseCreatedTimeString(string(v))
+	case string:
+		return parseCreatedTimeString(v)
+	case time.Time:
+		return v.UnixMilli(), nil
+	case nil:
+		return 0, nil
+	default:
+		return 0, fmt.Errorf("unsupported created_time type %T", value)
+	}
+}
+
+func parseCreatedTimeString(value string) (int64, error) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return 0, nil
+	}
+	if num, err := strconv.ParseInt(value, 10, 64); err == nil {
+		if len(value) == 10 {
+			return num * 1000, nil
+		}
+		return num, nil
+	}
+	layouts := []string{
+		time.RFC3339Nano,
+		"2006-01-02 15:04:05.999999-07:00",
+		"2006-01-02 15:04:05-07:00",
+		"2006-01-02 15:04:05",
+	}
+	for _, layout := range layouts {
+		if parsed, err := time.Parse(layout, value); err == nil {
+			return parsed.UnixMilli(), nil
+		}
+	}
+	return 0, fmt.Errorf("failed to parse created_time value %q", value)
 }

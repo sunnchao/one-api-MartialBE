@@ -11,27 +11,52 @@ import (
 	"one-api/common/logger"
 	"one-api/common/utils"
 	"strconv"
+	"strings"
 
 	"gorm.io/gorm"
 )
 
+const (
+	DurationUnitDay     = "day"
+	DurationUnitWeek    = "week"
+	DurationUnitMonth   = "month"
+	DurationUnitQuarter = "quarter"
+)
+
+var durationUnitToSeconds = map[string]int64{
+	DurationUnitDay:     24 * 60 * 60,
+	DurationUnitWeek:    7 * 24 * 60 * 60,
+	DurationUnitMonth:   30 * 24 * 60 * 60,
+	DurationUnitQuarter: 90 * 24 * 60 * 60,
+}
+
+const (
+	CheckinRewardPlanType        = "claude_code_checkin_reward"
+	checkinRewardPlanName        = "Claude Code 签到福利"
+	checkinRewardPlanDescription = "每日签到赠送的体验套餐"
+	checkinRewardPlanQuota       = 200000
+	checkinRewardPlanDuration    = 1
+)
+
 // Claude Code 订阅模型
 type ClaudeCodeSubscription struct {
-	Id                    int     `json:"id" gorm:"primaryKey"`
-	UserId                int     `json:"user_id" gorm:"index"`
-	PlanType              string  `json:"plan_type"`                      // basic, pro, enterprise
-	Status                string  `json:"status" gorm:"default:'active'"` // active, expired, cancelled, pending
-	StartTime             int64   `json:"start_time"`
-	EndTime               int64   `json:"end_time" gorm:"index"`
-	AutoRenew             bool    `json:"auto_renew" gorm:"default:true"`
-	MaxRequestsPerMonth   int     `json:"max_requests_per_month" gorm:"default:1000"`
-	UsedRequestsThisMonth int     `json:"used_requests_this_month" gorm:"default:0"`
-	Price                 float64 `json:"price"`
-	Currency              string  `json:"currency" gorm:"default:'USD'"`
-	PaymentMethod         string  `json:"payment_method"`
-	OrderId               string  `json:"order_id" gorm:"index"` // 关联支付订单
-	CreatedTime           int64   `json:"created_time"`
-	UpdatedTime           int64   `json:"updated_time"`
+	Id            int     `json:"id" gorm:"primaryKey"`
+	UserId        int     `json:"user_id" gorm:"index"`
+	ServiceType   string  `json:"service_type" gorm:"type:varchar(50);index;default:'claude_code'"` // claude_code, codex_code, gemini_code
+	PlanType      string  `json:"plan_type"`                                                        // basic, pro, enterprise
+	Status        string  `json:"status" gorm:"default:'active'"`                                   // active, expired, cancelled, pending
+	StartTime     int64   `json:"start_time"`
+	EndTime       int64   `json:"end_time" gorm:"index"`
+	AutoRenew     bool    `json:"auto_renew" gorm:"default:true"`
+	TotalQuota    int     `json:"total_quota" gorm:"default:0"`  // 总额度
+	RemainQuota   int     `json:"remain_quota" gorm:"default:0"` // 剩余额度
+	UsedQuota     int     `json:"used_quota" gorm:"default:0"`   // 已使用额度
+	Price         float64 `json:"price"`
+	Currency      string  `json:"currency" gorm:"default:'USD'"`
+	PaymentMethod string  `json:"payment_method"`
+	OrderId       string  `json:"order_id" gorm:"index"` // 关联支付订单
+	CreatedTime   int64   `json:"created_time"`
+	UpdatedTime   int64   `json:"updated_time"`
 
 	// 客户端验证相关字段
 	ClientFingerprint string `json:"client_fingerprint" gorm:"index"`   // 客户端指纹
@@ -41,22 +66,204 @@ type ClaudeCodeSubscription struct {
 
 // Claude Code 套餐模型
 type ClaudeCodePlan struct {
-	Id                  int                                       `json:"id" gorm:"primaryKey"`
-	Name                string                                    `json:"name"`
-	Type                string                                    `json:"type" gorm:"unique"`
-	Description         string                                    `json:"description"`
-	Price               float64                                   `json:"price"`
-	Currency            string                                    `json:"currency" gorm:"default:'USD'"`
-	MaxRequestsPerMonth int                                       `json:"max_requests_per_month"`
-	MaxClientCount      int                                       `json:"max_client_count" gorm:"default:3"`
+	Id             int     `json:"id" gorm:"primaryKey"`
+	Name           string  `json:"name"`
+	Type           string  `json:"type" gorm:"unique"`
+	ServiceType    string  `json:"service_type" gorm:"type:varchar(50);index;default:'claude_code'"` // claude_code, codex_code, gemini_code
+	Description    string  `json:"description"`
+	Price          float64 `json:"price"`
+	Currency       string  `json:"currency" gorm:"default:'USD'"`
+	TotalQuota     int     `json:"total_quota" gorm:"default:0"` // 总额度
+	MaxClientCount int     `json:"max_client_count" gorm:"default:3"`
 	// 时间限制设置
-	IsUnlimitedTime     bool  `json:"is_unlimited_time" gorm:"default:false"`          // 是否无时间限制
-	DurationMonths      int   `json:"duration_months" gorm:"default:1"`                // 订阅时长(月)，当 IsUnlimitedTime 为 false 时有效
-	Features            database.JSONType[map[string]interface{}] `json:"features"`
-	IsActive            bool                                      `json:"is_active" gorm:"default:true"`
-	SortOrder           int                                       `json:"sort_order" gorm:"default:0"`
-	CreatedTime         int64                                     `json:"created_time"`
-	UpdatedTime         int64                                     `json:"updated_time"`
+	IsUnlimitedTime bool                                      `json:"is_unlimited_time" gorm:"default:false"` // 是否无时间限制
+	DurationMonths  int                                       `json:"duration_months" gorm:"default:1"`       // 订阅时长(月)，当 IsUnlimitedTime 为 false 时有效（兼容字段）
+	DurationUnit    string                                    `json:"duration_unit" gorm:"type:varchar(20);default:'month'"`
+	DurationValue   int                                       `json:"duration_value" gorm:"default:1"`
+	Features        database.JSONType[map[string]interface{}] `json:"features"`
+	IsActive        bool                                      `json:"is_active" gorm:"default:true"`
+	ShowInPortal    bool                                      `json:"show_in_portal" gorm:"default:true"`
+	SortOrder       int                                       `json:"sort_order" gorm:"default:0"`
+	CreatedTime     int64                                     `json:"created_time"`
+	UpdatedTime     int64                                     `json:"updated_time"`
+}
+
+func NormalizeDurationUnit(unit string) string {
+	normalized := strings.ToLower(strings.TrimSpace(unit))
+	if normalized == "" {
+		normalized = DurationUnitMonth
+	}
+	if _, ok := durationUnitToSeconds[normalized]; !ok {
+		normalized = DurationUnitMonth
+	}
+	return normalized
+}
+
+func IsSupportedDurationUnit(unit string) bool {
+	_, ok := durationUnitToSeconds[strings.ToLower(strings.TrimSpace(unit))]
+	return ok
+}
+
+func (plan *ClaudeCodePlan) NormalizeDurationFields() {
+	if plan == nil {
+		return
+	}
+	plan.DurationUnit = NormalizeDurationUnit(plan.DurationUnit)
+	if plan.DurationValue <= 0 {
+		if plan.DurationMonths > 0 {
+			if plan.DurationUnit == DurationUnitQuarter {
+				plan.DurationValue = plan.DurationMonths / 3
+				if plan.DurationValue == 0 {
+					plan.DurationValue = 1
+				}
+			} else {
+				plan.DurationValue = plan.DurationMonths
+			}
+		} else {
+			plan.DurationValue = 1
+		}
+	}
+	if plan.DurationUnit == DurationUnitMonth && plan.DurationMonths == 0 {
+		plan.DurationMonths = plan.DurationValue
+	}
+	if plan.DurationUnit == DurationUnitQuarter && plan.DurationMonths == 0 {
+		plan.DurationMonths = plan.DurationValue * 3
+	}
+}
+
+func (plan *ClaudeCodePlan) DurationSeconds() int64 {
+	if plan == nil {
+		return 0
+	}
+	plan.NormalizeDurationFields()
+	baseSeconds, ok := durationUnitToSeconds[plan.DurationUnit]
+	if !ok {
+		baseSeconds = durationUnitToSeconds[DurationUnitMonth]
+	}
+	return int64(plan.DurationValue) * baseSeconds
+}
+
+func DurationValueToSeconds(unit string, value int) int64 {
+	normalizedUnit := NormalizeDurationUnit(unit)
+	if value <= 0 {
+		value = 1
+	}
+	baseSeconds := durationUnitToSeconds[normalizedUnit]
+	return int64(value) * baseSeconds
+}
+
+func EnsureCheckinRewardPlan() (*ClaudeCodePlan, error) {
+	plan, err := GetClaudeCodePlanByType(CheckinRewardPlanType)
+	if err == nil {
+		return plan, nil
+	}
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	now := utils.GetTimestamp()
+	plan = &ClaudeCodePlan{
+		Name:            checkinRewardPlanName,
+		Type:            CheckinRewardPlanType,
+		ServiceType:     "claude_code",
+		Description:     checkinRewardPlanDescription,
+		Price:           0,
+		Currency:        "USD",
+		TotalQuota:      checkinRewardPlanQuota,
+		MaxClientCount:  1,
+		IsUnlimitedTime: false,
+		DurationUnit:    DurationUnitDay,
+		DurationValue:   checkinRewardPlanDuration,
+		DurationMonths:  0,
+		Features:        database.JSONType[map[string]interface{}]{},
+		IsActive:        true,
+		ShowInPortal:    false,
+		SortOrder:       100,
+		CreatedTime:     now,
+		UpdatedTime:     now,
+	}
+
+	if err := DB.Create(plan).Error; err != nil {
+		return nil, err
+	}
+
+	return plan, nil
+}
+
+func GrantPlanToUser(userId int, plan *ClaudeCodePlan, source string, allowStack bool) (*ClaudeCodeSubscription, bool, error) {
+	if plan == nil {
+		return nil, false, errors.New("plan is nil")
+	}
+	now := utils.GetTimestamp()
+	durationSeconds := plan.DurationSeconds()
+	if plan.ServiceType == "" {
+		plan.ServiceType = "claude_code"
+	}
+
+	subscription, err := GetUserActiveClaudeCodeSubscription(userId, plan.ServiceType)
+	if err == nil && subscription != nil && allowStack {
+		// 允许叠加：在原有订阅上增加额度和时长
+		updates := map[string]interface{}{
+			"total_quota":  gorm.Expr("total_quota + ?", plan.TotalQuota),
+			"remain_quota": gorm.Expr("remain_quota + ?", plan.TotalQuota),
+			"updated_time": now,
+		}
+		if !plan.IsUnlimitedTime && durationSeconds > 0 {
+			updates["end_time"] = subscription.EndTime + durationSeconds
+		}
+		if plan.IsUnlimitedTime {
+			updates["end_time"] = now + 100*365*24*60*60
+		}
+		if err := DB.Model(&ClaudeCodeSubscription{}).Where("id = ?", subscription.Id).Updates(updates).Error; err != nil {
+			return nil, false, err
+		}
+		subscription.TotalQuota += plan.TotalQuota
+		subscription.RemainQuota += plan.TotalQuota
+		if plan.IsUnlimitedTime {
+			subscription.EndTime = now + 100*365*24*60*60
+		} else if durationSeconds > 0 {
+			subscription.EndTime += durationSeconds
+		}
+		subscription.UpdatedTime = now
+		return subscription, true, nil
+	}
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, false, err
+	}
+
+	endTime := now
+	if plan.IsUnlimitedTime {
+		endTime += 100 * 365 * 24 * 60 * 60
+	} else if durationSeconds > 0 {
+		endTime += durationSeconds
+	} else {
+		endTime += 30 * 24 * 60 * 60
+	}
+
+	newSubscription := &ClaudeCodeSubscription{
+		UserId:         userId,
+		PlanType:       plan.Type,
+		ServiceType:    plan.ServiceType,
+		Status:         "active",
+		StartTime:      now,
+		EndTime:        endTime,
+		AutoRenew:      false,
+		TotalQuota:     plan.TotalQuota,
+		RemainQuota:    plan.TotalQuota,
+		UsedQuota:      0,
+		Price:          plan.Price,
+		Currency:       plan.Currency,
+		PaymentMethod:  source,
+		OrderId:        fmt.Sprintf("%s_%d_%d", source, userId, now),
+		CreatedTime:    now,
+		UpdatedTime:    now,
+		MaxClientCount: plan.MaxClientCount,
+	}
+
+	if err := CreateClaudeCodeSubscription(newSubscription); err != nil {
+		return nil, true, err
+	}
+
+	return newSubscription, true, nil
 }
 
 // Claude Code 使用记录
@@ -113,19 +320,49 @@ var allowedClaudeCodeSubscriptionOrderFields = map[string]bool{
 	"created_time": true,
 }
 
-// 获取用户当前有效订阅
-func GetUserActiveClaudeCodeSubscription(userId int) (*ClaudeCodeSubscription, error) {
+// 获取用户当前有效订阅（按服务类型查询）
+func GetUserActiveClaudeCodeSubscription(userId int, serviceType string) (*ClaudeCodeSubscription, error) {
 	var subscription ClaudeCodeSubscription
 	now := utils.GetTimestamp()
 
-	err := DB.Where("user_id = ? AND status = 'active' AND start_time <= ? AND end_time > ?",
-		userId, now, now).First(&subscription).Error
+	query := DB.Where("user_id = ? AND status = 'active' AND end_time > ?",
+		userId, now)
+
+	// 如果指定了服务类型，添加过滤条件
+	if serviceType != "" {
+		query = query.Where("service_type = ?", serviceType)
+	}
+
+	err := query.First(&subscription).Error
 
 	if err != nil {
 		return nil, err
 	}
 
 	return &subscription, nil
+}
+
+// GetUserActiveClaudeCodeSubscriptions 获取用户所有活跃订阅（按到期时间升序排序，优先返回快过期的）
+func GetUserActiveClaudeCodeSubscriptions(userId int, serviceType string) ([]ClaudeCodeSubscription, error) {
+	var subscriptions []ClaudeCodeSubscription
+	now := utils.GetTimestamp()
+
+	query := DB.Where("user_id = ? AND status = 'active' AND end_time > ? AND remain_quota > 0",
+		userId, now)
+
+	// 如果指定了服务类型，添加过滤条件
+	if serviceType != "" {
+		query = query.Where("service_type = ?", serviceType)
+	}
+
+	// 按到期时间升序排序，优先返回快过期的订阅
+	err := query.Order("end_time ASC").Find(&subscriptions).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return subscriptions, nil
 }
 
 // 根据订阅ID获取订阅
@@ -148,14 +385,37 @@ func UpdateClaudeCodeSubscription(subscription *ClaudeCodeSubscription) error {
 	return DB.Save(subscription).Error
 }
 
-// 更新订阅使用量
-func UpdateClaudeCodeUsage(subscriptionId int, requestCount int) error {
-	return DB.Model(&ClaudeCodeSubscription{}).
-		Where("id = ?", subscriptionId).
+// 更新订阅使用量（改为额度制）
+func UpdateClaudeCodeUsage(subscriptionId int, quotaUsed int) error {
+	result := DB.Model(&ClaudeCodeSubscription{}).
+		Where("id = ? AND remain_quota >= ?", subscriptionId, quotaUsed).
 		Updates(map[string]interface{}{
-			"used_requests_this_month": gorm.Expr("used_requests_this_month + ?", requestCount),
-			"updated_time":             utils.GetTimestamp(),
-		}).Error
+			"remain_quota": gorm.Expr("remain_quota - ?", quotaUsed),
+			"used_quota":   gorm.Expr("used_quota + ?", quotaUsed),
+			"updated_time": utils.GetTimestamp(),
+		})
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return errors.New("订阅额度不足")
+	}
+
+	// 检查额度是否用尽，更新状态
+	go func() {
+		var sub ClaudeCodeSubscription
+		if err := DB.Where("id = ?", subscriptionId).First(&sub).Error; err == nil {
+			if sub.RemainQuota <= 0 {
+				DB.Model(&ClaudeCodeSubscription{}).
+					Where("id = ?", subscriptionId).
+					Update("status", "exhausted")
+			}
+		}
+	}()
+
+	return nil
 }
 
 // 重置月度使用量（定时任务调用）
@@ -174,7 +434,7 @@ func (s *ClaudeCodeSubscription) CanUseService() bool {
 	return s.Status == "active" &&
 		s.StartTime <= now &&
 		s.EndTime > now &&
-		s.UsedRequestsThisMonth < s.MaxRequestsPerMonth
+		s.RemainQuota > 0 // 改为检查剩余额度
 }
 
 // 验证客户端指纹
@@ -312,24 +572,43 @@ func DeleteClaudeCodeAPIKey(id, userId int) error {
 }
 
 // 获取所有套餐
-func GetAllClaudeCodePlans() ([]ClaudeCodePlan, error) {
+
+func GetAllClaudeCodePlans(includeHidden bool) ([]ClaudeCodePlan, error) {
 	var plans []ClaudeCodePlan
-	err := DB.Where("is_active = true").Order("sort_order ASC, price ASC").Find(&plans).Error
-	return plans, err
+	query := DB.Where("is_active = true")
+	if !includeHidden {
+		query = query.Where("show_in_portal = true")
+	}
+	err := query.Order("sort_order ASC, price ASC").Find(&plans).Error
+	if err != nil {
+		return plans, err
+	}
+	for i := range plans {
+		plans[i].NormalizeDurationFields()
+	}
+	return plans, nil
 }
 
 // 根据类型获取套餐
 func GetClaudeCodePlanByType(planType string) (*ClaudeCodePlan, error) {
 	var plan ClaudeCodePlan
 	err := DB.Where("type = ? AND is_active = true", planType).First(&plan).Error
-	return &plan, err
+	if err != nil {
+		return nil, err
+	}
+	plan.NormalizeDurationFields()
+	return &plan, nil
 }
 
 // GetClaudeCodePlanById 根据ID获取套餐
 func GetClaudeCodePlanById(planId int) (*ClaudeCodePlan, error) {
 	var plan ClaudeCodePlan
 	err := DB.Where("id = ?", planId).First(&plan).Error
-	return &plan, err
+	if err != nil {
+		return nil, err
+	}
+	plan.NormalizeDurationFields()
+	return &plan, nil
 }
 
 // CreateClaudeCodePlan 创建套餐
@@ -358,7 +637,7 @@ func CheckClaudeCodePlanHasSubscriptions(planId int) (bool, error) {
 	err := DB.Model(&ClaudeCodeSubscription{}).
 		Where("plan_type = ?", plan.Type).
 		Count(&count).Error
-	
+
 	return count > 0, err
 }
 
@@ -401,52 +680,58 @@ func GetClaudeCodeUsageStats(userId int, startTime, endTime int64) (map[string]i
 func InitClaudeCodePlans() {
 	plans := []ClaudeCodePlan{
 		{
-			Name:                "基础版",
-			Type:                "basic",
-			Description:         "适合个人开发者的基础AI编程助手",
-			Price:               9.99,
-			Currency:            "USD",
-			MaxRequestsPerMonth: 1000,
-			MaxClientCount:      1,
-			IsUnlimitedTime:     false,
-			DurationMonths:      1,
-			Features:            database.JSONType[map[string]interface{}]{},
-			IsActive:            true,
-			SortOrder:           1,
-			CreatedTime:         utils.GetTimestamp(),
-			UpdatedTime:         utils.GetTimestamp(),
+			Name:            "基础版",
+			Type:            "basic",
+			Description:     "适合个人开发者的基础AI编程助手",
+			Price:           9.99,
+			Currency:        "USD",
+			MaxClientCount:  1,
+			IsUnlimitedTime: false,
+			DurationMonths:  1,
+			DurationUnit:    DurationUnitMonth,
+			DurationValue:   1,
+			Features:        database.JSONType[map[string]interface{}]{},
+			IsActive:        true,
+			ShowInPortal:    true,
+			SortOrder:       1,
+			CreatedTime:     utils.GetTimestamp(),
+			UpdatedTime:     utils.GetTimestamp(),
 		},
 		{
-			Name:                "专业版",
-			Type:                "pro",
-			Description:         "适合专业开发团队的完整AI编程解决方案",
-			Price:               29.99,
-			Currency:            "USD",
-			MaxRequestsPerMonth: 5000,
-			MaxClientCount:      3,
-			IsUnlimitedTime:     false,
-			DurationMonths:      1,
-			Features:            database.JSONType[map[string]interface{}]{},
-			IsActive:            true,
-			SortOrder:           2,
-			CreatedTime:         utils.GetTimestamp(),
-			UpdatedTime:         utils.GetTimestamp(),
+			Name:            "专业版",
+			Type:            "pro",
+			Description:     "适合专业开发团队的完整AI编程解决方案",
+			Price:           29.99,
+			Currency:        "USD",
+			MaxClientCount:  3,
+			IsUnlimitedTime: false,
+			DurationMonths:  1,
+			DurationUnit:    DurationUnitMonth,
+			DurationValue:   1,
+			Features:        database.JSONType[map[string]interface{}]{},
+			IsActive:        true,
+			ShowInPortal:    true,
+			SortOrder:       2,
+			CreatedTime:     utils.GetTimestamp(),
+			UpdatedTime:     utils.GetTimestamp(),
 		},
 		{
-			Name:                "企业版",
-			Type:                "enterprise",
-			Description:         "适合大型企业的定制化AI编程服务",
-			Price:               99.99,
-			Currency:            "USD",
-			MaxRequestsPerMonth: 20000,
-			MaxClientCount:      10,
-			IsUnlimitedTime:     true,
-			DurationMonths:      0, // 无时间限制时设为0
-			Features:            database.JSONType[map[string]interface{}]{},
-			IsActive:            true,
-			SortOrder:           3,
-			CreatedTime:         utils.GetTimestamp(),
-			UpdatedTime:         utils.GetTimestamp(),
+			Name:            "企业版",
+			Type:            "enterprise",
+			Description:     "适合大型企业的定制化AI编程服务",
+			Price:           99.99,
+			Currency:        "USD",
+			MaxClientCount:  10,
+			IsUnlimitedTime: true,
+			DurationMonths:  0, // 无时间限制时设为0
+			DurationUnit:    DurationUnitMonth,
+			DurationValue:   0,
+			Features:        database.JSONType[map[string]interface{}]{},
+			IsActive:        true,
+			ShowInPortal:    true,
+			SortOrder:       3,
+			CreatedTime:     utils.GetTimestamp(),
+			UpdatedTime:     utils.GetTimestamp(),
 		},
 	}
 

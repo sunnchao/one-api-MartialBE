@@ -309,6 +309,7 @@
     "calls": "コール回数",
     "model_name": "モデル名",
     "model_price": "現在のモデル価格",
+    "subscriptions": "サブスクリプション",
     "no_data": "データなし",
     "no_data_available": "利用可能データなし",
     "other_models": "他のモデル",
@@ -528,7 +529,7 @@
   },
   "claudeCode": {
     "subscription": {
-      "title": "Claude Code サブスクリプション管理",
+      "title": "サブスクリプション管理",
       "currentSubscription": "現在のサブスクリプション",
       "planType": "プランタイプ",
       "subscriptionPeriod": "サブスクリプション期間",
@@ -571,9 +572,15 @@
         "unknown": "不明"
       },
       "paymentMethods": {
+        "balance": "アカウント残高",
         "stripe": "Stripe (クレジットカード)",
         "alipay": "Alipay",
         "wxpay": "WeChat Pay"
+      },
+      "quotaDisplay": {
+        "unlimited": "時間制限なし・合計 {{count}} クォータ",
+        "perDuration": "毎{{duration}} {{count}} クォータ",
+        "total": "合計 {{count}} クォータ"
       }
     }
   },

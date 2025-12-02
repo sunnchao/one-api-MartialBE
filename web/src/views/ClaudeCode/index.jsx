@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 
 // 导入 Material-UI 组件
 import {
@@ -41,7 +42,6 @@ import { FaWindows, FaApple, FaLinux } from 'react-icons/fa';
 import WindowsTutorial from './WindowsTutorial';
 import MacOSTutorial from './MacOSTutorial';
 import LinuxTutorial from './LinuxTutorial';
-import { API } from 'utils/api';
 import { useNavigate } from 'react-router-dom';
 
 // 主要功能特性
@@ -110,13 +110,17 @@ const TabPanel = (props) => {
   );
 };
 
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  value: PropTypes.number.isRequired,
+  index: PropTypes.number.isRequired
+};
+
 // 主组件
 const ClaudeCodeTutorialPage = () => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
   const [osTab, setOsTab] = useState(0);
-  const [subscription, setSubscription] = useState(null);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const handleChange = (event, newValue) => {
@@ -126,24 +130,6 @@ const ClaudeCodeTutorialPage = () => {
   const handleOsTabChange = (_, newValue) => {
     setOsTab(newValue);
   };
-
-  // 检查订阅状态
-  const checkSubscription = async () => {
-    try {
-      const res = await API.get('/api/user/claude-code/subscription');
-      if (res.data.success) {
-        setSubscription(res.data.data);
-      }
-    } catch (error) {
-      console.error('检查订阅状态失败:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    // checkSubscription();
-  }, []);
 
   return (
     <Box>
@@ -183,14 +169,22 @@ const ClaudeCodeTutorialPage = () => {
                 <Button
                   variant="contained"
                   size="large"
-                  onClick={() => setValue(1)}
+                  onClick={() => navigate('/panel/claude-code/subscription')}
                   endIcon={<ArrowForwardIcon />}
                   sx={{ borderRadius: 0, px: 4, py: 1.5, fontSize: '1.1rem', boxShadow: 'none' }}
+                >
+                  订阅管理
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  onClick={() => setValue(1)}
+                  sx={{ borderRadius: 0, px: 4, py: 1.5, fontSize: '1.1rem' }}
                 >
                   立即开始
                 </Button>
                 <Button
-                  variant="outlined"
+                  variant="text"
                   size="large"
                   onClick={() => window.open('https://docs.anthropic.com/claude/docs', '_blank')}
                   sx={{ borderRadius: 0, px: 4, py: 1.5, fontSize: '1.1rem' }}
@@ -224,13 +218,17 @@ const ClaudeCodeTutorialPage = () => {
                   $ claude
                 </Typography>
                 <Typography variant="body2" sx={{ color: '#fff', mb: 2 }}>
-                  Hello! I'm Claude Code. How can I help you with your project today?
+                  Hello! I&apos;m Claude Code. How can I help you with your project today?
                 </Typography>
                 <Typography variant="body2" sx={{ color: '#a9a9a9' }}>
                   {'>'} Refactor the user authentication module
                 </Typography>
                 <Typography variant="body2" sx={{ color: '#fff', mt: 1 }}>
-                  I'll help you refactor the auth module. First, let me analyze the current implementation in `src/auth`...
+                  I&apos;ll help you refactor the auth module. First, let me analyze the current implementation in{' '}
+                  <Box component="span" sx={{ fontFamily: 'monospace' }}>
+                    src/auth
+                  </Box>
+                  ...
                 </Typography>
               </Paper>
             </Grid>
@@ -498,8 +496,8 @@ const ClaudeCodeTutorialPage = () => {
                 配置说明
               </Typography>
               <Typography variant="body1" paragraph>
-                密钥配置步骤已包含在各平台的安装指南中。请返回 <strong>"安装指南"</strong> 标签页，选择您的操作系统，查看详细的{' '}
-                <strong>"配置 Chirou API"</strong> 部分。
+                密钥配置步骤已包含在各平台的安装指南中。请返回 <strong>&quot;安装指南&quot;</strong> 标签页，选择您的操作系统，查看详细的{' '}
+                <strong>&quot;配置 Chirou API&quot;</strong> 部分。
               </Typography>
               <Button variant="outlined" onClick={() => setValue(1)}>
                 前往安装指南
@@ -528,8 +526,8 @@ const ClaudeCodeTutorialPage = () => {
                 启动说明
               </Typography>
               <Typography variant="body1" paragraph>
-                启动步骤已包含在各平台的安装指南中。请返回 <strong>"安装指南"</strong> 标签页，选择您的操作系统，查看详细的{' '}
-                <strong>"启动 Claude Code"</strong> 部分。
+                启动步骤已包含在各平台的安装指南中。请返回 <strong>&quot;安装指南&quot;</strong> 标签页，选择您的操作系统，查看详细的{' '}
+                <strong>&quot;启动 Claude Code&quot;</strong> 部分。
               </Typography>
               <Button variant="contained" onClick={() => setValue(1)} sx={{ boxShadow: 'none' }}>
                 查看启动命令

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Paper, Grid, Typography, Box, useTheme, Chip, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle, Circle, CloseOutlined } from '@mui/icons-material';
@@ -6,7 +7,7 @@ import { showError } from 'utils/common';
 import CheckInModal from 'ui-component/CheckInModal';
 import dayjs from 'dayjs';
 
-const Calendar = ({ checkinDates = [], refreshCoupons }) => {
+const Calendar = ({ checkinDates = [], refreshCoupons, refreshCheckins }) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const [calendar, setCalendar] = useState([]);
@@ -191,9 +192,20 @@ const Calendar = ({ checkinDates = [], refreshCoupons }) => {
           ))}
         </Grid>
       </Box>
-      <CheckInModal visible={checkInModalOpen} onClose={() => setCheckInModalOpen(false)} refreshCoupons={refreshCoupons} />
+      <CheckInModal
+        visible={checkInModalOpen}
+        onClose={() => setCheckInModalOpen(false)}
+        refreshCoupons={refreshCoupons}
+        refreshCheckins={refreshCheckins}
+      />
     </Paper>
   );
+};
+
+Calendar.propTypes = {
+  checkinDates: PropTypes.arrayOf(PropTypes.object),
+  refreshCoupons: PropTypes.func,
+  refreshCheckins: PropTypes.func
 };
 
 // 已签到

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import Turnstile from 'react-turnstile';
 import { API } from 'utils/api';
@@ -11,7 +12,6 @@ export default function CheckInModal(props) {
   const siteInfo = useSelector((state) => state.siteInfo);
 
   const [turnstileEnabled, setTurnstileEnabled] = useState(false);
-  const [turnstileLoaded, setTurnstileLoaded] = useState(false);
   const [turnstileSiteKey, setTurnstileSiteKey] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
   const [checkinLoading, setCheckinLoading] = useState(false);
@@ -29,7 +29,6 @@ export default function CheckInModal(props) {
     window.turnstile.execute(widgetId);
     // now:
     bound.execute();
-    setTurnstileLoaded(true);
   };
 
   // 签到
@@ -55,6 +54,9 @@ export default function CheckInModal(props) {
         if (props.refreshCoupons) {
           props.refreshCoupons();
         }
+        if (props.refreshCheckins) {
+          props.refreshCheckins();
+        }
       } else {
         showError(message);
       }
@@ -67,11 +69,6 @@ export default function CheckInModal(props) {
 
   function handleClose() {
     props?.onClose?.();
-  }
-
-  function afterClose() {
-    setTurnstileToken('');
-    setCheckinLoading(false);
   }
 
   return (
@@ -116,3 +113,11 @@ export default function CheckInModal(props) {
     </Dialog>
   );
 }
+
+CheckInModal.propTypes = {
+  visible: PropTypes.bool,
+  onClose: PropTypes.func,
+  refreshCoupons: PropTypes.func,
+  refreshCheckins: PropTypes.func,
+  loadUser: PropTypes.func
+};

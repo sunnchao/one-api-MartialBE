@@ -1,8 +1,9 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Chip, Alert } from '@mui/material';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PercentIcon from '@mui/icons-material/Percent';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import CalculateIcon from '@mui/icons-material/Calculate';
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import Decimal from 'decimal.js';
 import { renderQuota } from 'utils/common';
 import { calculateOriginalQuota } from './QuotaWithDetailRow';
@@ -131,6 +132,19 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
   if (originalQuota > 0 && quota > 0 && groupRatio < 1) {
     savePercent = `${t('logPage.quotaDetail.saved')}${((1 - quota / originalQuota) * 100).toFixed(0)}%`;
   }
+
+  // 检查是否为资源包抵扣
+  const isResourcePackage = item?.metadata?.billing_type === 'resource_package';
+  const resourcePackageId = item?.metadata?.resource_package_id;
+  const packageServiceType = item?.metadata?.package_service_type;
+
+  // 服务类型显示名称映射
+  const serviceTypeNames = {
+    claude_code: 'Claude Code',
+    codex_code: 'Codex Code',
+    gemini_code: 'Gemini Code'
+  };
+
   return (
     <Box
       sx={{
@@ -142,6 +156,42 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
         gap: 2
       }}
     >
+      {/* 资源包抵扣提示 */}
+      {isResourcePackage && (
+        <Alert
+          severity="warning"
+          icon={<CardGiftcardIcon fontSize="inherit" />}
+          sx={{
+            borderRadius: 0,
+            '& .MuiAlert-message': {
+              width: '100%'
+            }
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              本次消费已由资源包抵扣
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              {packageServiceType && (
+                <Chip
+                  label={serviceTypeNames[packageServiceType] || packageServiceType}
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                />
+              )}
+              {resourcePackageId && (
+                <Chip label={`资源包 #${resourcePackageId}`} size="small" color="warning" variant="filled" />
+              )}
+            </Box>
+          </Box>
+          <Typography variant="caption" sx={{ mt: 0.5, display: 'block', color: 'text.secondary' }}>
+            此次请求未消耗用户余额，已从资源包中扣除 {renderQuota(quota, 6)}
+          </Typography>
+        </Alert>
+      )}
+
       {/* 上方三栏 */}
       <Box
         sx={{

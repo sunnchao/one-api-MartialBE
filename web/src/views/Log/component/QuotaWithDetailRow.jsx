@@ -33,10 +33,27 @@ export default function QuotaWithDetailRow({ item, open, setOpen }) {
   const originalQuota = calculateOriginalQuota(item);
   // Ensure quota has a fallback value
   const quota = item.quota || 0;
+
+  // 检查是否为资源包抵扣
+  const isResourcePackage = item?.metadata?.billing_type === 'resource_package';
+
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <Box onClick={() => setOpen((o) => !o)} sx={{ display: 'flex', flexDirection: 'column', mr: 1, cursor: 'pointer' }}>
-        {groupRatio < 1 ? (
+        {isResourcePackage ? (
+          // 资源包抵扣样式：显示横线
+          <Typography
+            sx={{
+              color: (theme) => theme.palette.warning.main,
+              fontWeight: 500,
+              fontSize: 13,
+              textDecoration: 'line-through',
+              position: 'relative'
+            }}
+          >
+            {renderQuota(quota, 6)}
+          </Typography>
+        ) : groupRatio < 1 ? (
           <>
             <Typography
               variant="caption"

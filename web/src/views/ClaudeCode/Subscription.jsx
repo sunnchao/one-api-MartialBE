@@ -15,15 +15,6 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
-  Tooltip,
   Stack,
   Divider,
   CircularProgress,
@@ -34,7 +25,6 @@ import {
 } from '@mui/material';
 import {
   Star as StarIcon,
-  Delete as DeleteIcon,
   Add as AddIcon,
   Refresh as RefreshIcon,
   Cancel as CancelIcon,
@@ -43,22 +33,86 @@ import {
   Info as InfoIcon
 } from '@mui/icons-material';
 import { API } from 'utils/api';
-import { showError, showSuccess, showInfo } from 'utils/common';
+import { renderQuota, showError, showSuccess } from 'utils/common';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
+
+const durationDisplayMap = {
+  day: { label: '天', short: '天' },
+  week: { label: '周', short: '周' },
+  month: { label: '月', short: '月' },
+  quarter: { label: '季度', short: '季度' }
+};
+
+const durationUnitTextMap = {
+  day: '天',
+  week: '周',
+  month: '月',
+  quarter: '季度'
+};
+
+const resolvePlanDuration = (plan) => {
+  const unit = plan?.duration_unit || 'month';
+  const value = plan?.duration_value || plan?.duration_months || 1;
+  const display = durationDisplayMap[unit] || durationDisplayMap.month;
+  const safeValue = value > 0 ? value : 1;
+  return {
+    unit,
+    text: `${safeValue}${display.label}`,
+    short: display.short
+  };
+};
+
+const getQuotaDurationText = (plan) => {
+  if (!plan) return '';
+  const unit = plan.duration_unit || 'month';
+  const value = plan.duration_value || plan.duration_months || 1;
+  const unitLabel = durationUnitTextMap[unit] || durationUnitTextMap.month;
+  if (value <= 1) {
+    return unitLabel;
+  }
+  return `${value}${unitLabel}`;
+};
 
 const ClaudeCodeSubscription = () => {
   const { t } = useTranslation();
+  const account = useSelector((state) => state.account);
+  const siteInfo = useSelector((state) => state.siteInfo);
+  const quotaPerUnit = Number(siteInfo?.quota_per_unit) || 500000;
+  const balanceQuota = account?.user?.quota || 0;
   const [subscription, setSubscription] = useState(null);
   const [plans, setPlans] = useState([]);
   const [apiKeys, setApiKeys] = useState([]);
-  const [usageStats, setUsageStats] = useState(null);
   const [loading, setLoading] = useState(false);
   const [createKeyDialog, setCreateKeyDialog] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
   const [purchaseDialog, setPurchaseDialog] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('stripe');
+  const [paymentMethod, setPaymentMethod] = useState('balance');
   const [newApiKey, setNewApiKey] = useState('');
+  const selectedPlanDuration = selectedPlan ? resolvePlanDuration(selectedPlan) : null;
+  const currentPlan = subscription ? plans.find((plan) => plan.type === subscription.plan_type) : null;
+  const currentPlanDuration = currentPlan ? resolvePlanDuration(currentPlan) : null;
+  const formatQuotaCount = (value) => {
+    if (typeof value !== 'number' || Number.isNaN(value)) {
+      return '0';
+    }
+    return Math.max(value, 0).toLocaleString();
+  };
+  const getPlanQuotaValue = (plan) => {
+    if (!plan) return 0;
+    const quota = plan.total_quota ?? plan.max_requests_per_month ?? 0;
+    if (typeof quota !== 'number' || Number.isNaN(quota)) {
+      return 0;
+    }
+    return Math.max(quota, 0);
+  };
+  const calculateBalanceCost = (plan) => {
+    if (!plan) return 0;
+    return Math.max(0, Math.round((plan.price || 0) * quotaPerUnit));
+  };
+  const balanceCost = calculateBalanceCost(selectedPlan);
+  const hasEnoughBalance = paymentMethod !== 'balance' || balanceQuota >= balanceCost;
 
   // 获取用户订阅状态
   const fetchSubscription = async () => {
@@ -105,21 +159,13 @@ const ClaudeCodeSubscription = () => {
     }
   };
 
-  // 获取使用统计
-  const fetchUsageStats = async () => {
-    try {
-      const res = await API.get('/api/user/claude-code/usage-stats');
-      if (res.data.success) {
-        setUsageStats(res.data.data);
-      }
-    } catch (error) {
-      console.error('获取使用统计失败:', error);
-    }
-  };
-
   // 购买订阅
   const purchaseSubscription = async () => {
     if (!selectedPlan) return;
+    if (paymentMethod === 'balance' && balanceCost > balanceQuota) {
+      showError('余额不足，请先充值');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -129,13 +175,17 @@ const ClaudeCodeSubscription = () => {
       });
 
       if (res.data.success) {
+        if (paymentMethod === 'balance') {
+          showSuccess(res.data.message || '订阅已激活');
+          setPurchaseDialog(false);
+          fetchSubscription();
+          return;
+        }
         showSuccess('订单创建成功！正在跳转到支付页面...');
-        // 跳转到支付页面
         if (res.data.payment_url) {
           window.open(res.data.payment_url, '_blank');
         }
         setPurchaseDialog(false);
-        // 延迟刷新，等待用户完成支付
         setTimeout(() => {
           fetchSubscription();
         }, 3000);
@@ -226,7 +276,6 @@ const ClaudeCodeSubscription = () => {
     fetchSubscription();
     fetchPlans();
     fetchApiKeys();
-    fetchUsageStats();
   }, []);
 
   const getStatusColor = (status) => {
@@ -284,7 +333,41 @@ const ClaudeCodeSubscription = () => {
     });
   };
 
-  const usagePercentage = subscription ? (subscription.used_requests_this_month / subscription.max_requests_per_month) * 100 : 0;
+  const totalQuota = subscription ? subscription.total_quota ?? subscription.max_requests_per_month ?? 0 : 0;
+  const fallbackUsedQuota =
+    subscription && typeof subscription?.total_quota === 'number' && typeof subscription?.remain_quota === 'number'
+      ? subscription.total_quota - subscription.remain_quota
+      : subscription?.used_requests_this_month ?? 0;
+  const usedQuota = subscription ? subscription.used_quota ?? fallbackUsedQuota : fallbackUsedQuota;
+  const normalizedTotalQuota =
+    typeof totalQuota === 'number' && totalQuota > 0
+      ? totalQuota
+      : currentPlan
+        ? getPlanQuotaValue(currentPlan)
+        : 0;
+  const normalizedUsedQuota =
+    typeof usedQuota === 'number' && usedQuota > 0
+      ? Math.min(usedQuota, normalizedTotalQuota || usedQuota)
+      : 0;
+  const usagePercentage = normalizedTotalQuota > 0 ? (normalizedUsedQuota / normalizedTotalQuota) * 100 : 0;
+  const isUnlimitedSubscription = Boolean(subscription?.is_unlimited_time ?? currentPlan?.is_unlimited_time);
+  const subscriptionQuotaDescription = (() => {
+    if (!subscription && !currentPlan) {
+      return '';
+    }
+    const quotaCountDisplay = formatQuotaCount(normalizedTotalQuota);
+    if (isUnlimitedSubscription) {
+      return t('claudeCode.subscription.quotaDisplay.unlimited', { count: quotaCountDisplay });
+    }
+    if (currentPlan) {
+      const durationText = getQuotaDurationText(currentPlan) || currentPlanDuration?.text || durationDisplayMap.month.label;
+      return t('claudeCode.subscription.quotaDisplay.perDuration', {
+        duration: durationText,
+        count: quotaCountDisplay
+      });
+    }
+    return t('claudeCode.subscription.quotaDisplay.total', { count: quotaCountDisplay });
+  })();
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -292,17 +375,26 @@ const ClaudeCodeSubscription = () => {
         <Typography variant="h2" gutterBottom>
           {t('claudeCode.subscription.title')}
         </Typography>
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={() => {
-            fetchSubscription();
-            fetchApiKeys();
-            fetchUsageStats();
-          }}
-        >
-          {t('common.refresh')}
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="outlined"
+            startIcon={<RefreshIcon />}
+            onClick={() => {
+              fetchSubscription();
+              fetchApiKeys();
+            }}
+          >
+            {t('common.refresh')}
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setCreateKeyDialog(true)}
+            disabled={!subscription || subscription.status !== 'active'}
+          >
+            {t('claudeCode.subscription.createApiKey')}
+          </Button>
+        </Stack>
       </Stack>
 
       {/* 当前订阅状态 */}
@@ -354,12 +446,11 @@ const ClaudeCodeSubscription = () => {
               <Grid item xs={12} md={6}>
                 <Stack spacing={2}>
                   <Box>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      {t('claudeCode.subscription.monthlyUsage', {
-                        used: subscription.used_requests_this_month,
-                        total: subscription.max_requests_per_month
-                      })}
-                    </Typography>
+                    {subscriptionQuotaDescription && (
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        {subscriptionQuotaDescription}
+                      </Typography>
+                    )}
                     <LinearProgress
                       variant="determinate"
                       value={Math.min(usagePercentage, 100)}
@@ -394,192 +485,137 @@ const ClaudeCodeSubscription = () => {
         </Alert>
       )}
 
-      {/* API Keys 管理 */}
-      {subscription && subscription.status === 'active' && (
-        <Card sx={{ mb: 4 }}>
-          <CardContent>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-              <Typography variant="h5">{t('claudeCode.subscription.apiKeysManagement')}</Typography>
-              <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateKeyDialog(true)}>
-                {t('claudeCode.subscription.createApiKey')}
-              </Button>
-            </Box>
-
-            <TableContainer component={Paper} elevation={0}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('claudeCode.subscription.table.name')}</TableCell>
-                    <TableCell>{t('claudeCode.subscription.table.status')}</TableCell>
-                    <TableCell>{t('claudeCode.subscription.table.usageCount')}</TableCell>
-                    <TableCell>{t('claudeCode.subscription.table.lastUsed')}</TableCell>
-                    <TableCell>{t('claudeCode.subscription.table.createdTime')}</TableCell>
-                    <TableCell align="center">{t('claudeCode.subscription.table.actions')}</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {(apiKeys || []).map((key) => (
-                    <TableRow key={key.id}>
-                      <TableCell>{key.name}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={
-                            key.status === 1 ? t('claudeCode.subscription.status.active') : t('claudeCode.subscription.status.disabled')
-                          }
-                          color={key.status === 1 ? 'success' : 'error'}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>{key.usage_count}</TableCell>
-                      <TableCell>{key.last_used_time ? formatDate(key.last_used_time) : t('claudeCode.subscription.neverUsed')}</TableCell>
-                      <TableCell>{formatDate(key.created_time)}</TableCell>
-                      <TableCell align="center">
-                        <Tooltip title={t('common.delete')}>
-                          <IconButton size="small" color="error" onClick={() => deleteApiKey(key.id)}>
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {(!apiKeys || apiKeys.length === 0) && (
-                    <TableRow>
-                      <TableCell colSpan={6} align="center">
-                        <Typography color="text.secondary">{t('claudeCode.subscription.noApiKeys')}</Typography>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </CardContent>
-        </Card>
-      )}
-
       {/* 可用套餐 */}
       <Typography variant="h4" gutterBottom sx={{ mt: 4 }}>
         {t('claudeCode.subscription.selectPlan')}
       </Typography>
+      <Alert severity="info" sx={{ mb: 3 }}>
+        管理员统一配置以下套餐，可直接使用账户余额或在线支付购买。
+      </Alert>
 
       <Grid container spacing={3}>
-        {(plans || []).map((plan) => (
-          <Grid item xs={12} md={4} key={plan.id}>
-            <Card
-              sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                border: plan.type === 'pro' ? 2 : 1,
-                borderColor: plan.type === 'pro' ? 'primary.main' : 'divider',
-                position: 'relative',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: (theme) => theme.shadows[8]
-                }
-              }}
-            >
-              {plan.type === 'pro' && (
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    top: -10,
-                    right: 16,
-                    zIndex: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    backgroundColor: 'primary.main',
-                    color: 'primary.contrastText',
-                    borderRadius: '12px',
-                    px: 1,
-                    py: 0.5
-                  }}
-                >
-                  <StarIcon sx={{ fontSize: 16, mr: 0.5 }} />
-                  <Typography variant="caption" fontWeight="bold">
-                    {t('claudeCode.subscription.recommended')}
+        {(plans || [])
+          .filter((plan) => plan.show_in_portal !== false)
+          .map((plan) => {
+          const durationInfo = resolvePlanDuration(plan);
+          const planQuotaDescription = plan.is_unlimited_time
+            ? t('claudeCode.subscription.quotaDisplay.unlimited', { count: formatQuotaCount(getPlanQuotaValue(plan)) })
+            : t('claudeCode.subscription.quotaDisplay.perDuration', {
+              duration: getQuotaDurationText(plan) || durationInfo.text,
+              count: formatQuotaCount(getPlanQuotaValue(plan))
+            });
+          return (
+            <Grid item xs={12} md={4} key={plan.id}>
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  border: plan.type === 'pro' ? 2 : 1,
+                  borderColor: plan.type === 'pro' ? 'primary.main' : 'divider',
+                  position: 'relative',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: (theme) => theme.shadows[8]
+                  }
+                }}
+              >
+                {plan.type === 'pro' && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: -10,
+                      right: 16,
+                      zIndex: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      backgroundColor: 'primary.main',
+                      color: 'primary.contrastText',
+                      borderRadius: '12px',
+                      px: 1,
+                      py: 0.5
+                    }}
+                  >
+                    <StarIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                    <Typography variant="caption" fontWeight="bold">
+                      {t('claudeCode.subscription.recommended')}
+                    </Typography>
+                  </Box>
+                )}
+
+                <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                  <Typography variant="h5" gutterBottom align="center">
+                    {plan.name}
                   </Typography>
-                </Box>
-              )}
-
-              <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                <Typography variant="h5" gutterBottom align="center">
-                  {plan.name}
-                </Typography>
-                <Box textAlign="center" mb={2}>
-                  <Typography variant="h3" color="primary" component="span">
-                    ${plan.price}
-                  </Typography>
-                  <Typography variant="h6" color="text.secondary" component="span">
-                    /{plan.currency}/月
-                  </Typography>
-                </Box>
-
-                <Typography variant="body2" color="text.secondary" paragraph align="center">
-                  {plan.description}
-                </Typography>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Stack spacing={1.5}>
-                  <Box display="flex" alignItems="center">
-                    <CheckCircleIcon color="success" sx={{ fontSize: 20, mr: 1 }} />
-                    <Typography variant="body2">
-                      {t('claudeCode.subscription.monthlyRequests', { count: plan.max_requests_per_month.toLocaleString() })}
+                  <Box textAlign="center" mb={2}>
+                    <Typography variant="h3" color="primary" component="span">
+                      ${plan.price}
+                    </Typography>
+                    <Typography variant="h6" color="text.secondary" component="span">
+                      /{plan.currency}/{plan.is_unlimited_time ? '永久' : durationInfo.short}
                     </Typography>
                   </Box>
 
-                  <Box display="flex" alignItems="center">
-                    <CheckCircleIcon color="success" sx={{ fontSize: 20, mr: 1 }} />
-                    <Typography variant="body2">{t('claudeCode.subscription.maxDevices', { count: plan.max_client_count })}</Typography>
-                  </Box>
+                  <Typography variant="body2" color="text.secondary" paragraph align="center">
+                    {plan.description}
+                  </Typography>
 
-                  <Box display="flex" alignItems="center">
-                    <CheckCircleIcon color="success" sx={{ fontSize: 20, mr: 1 }} />
-                    <Typography variant="body2">
-                      {plan.is_unlimited_time ? <strong>无时间限制</strong> : `${plan.duration_months || 1}个月订阅`}
-                    </Typography>
-                  </Box>
+                  <Divider sx={{ my: 2 }} />
 
-                  {/* 功能特性 */}
-                  {plan.features &&
-                    plan.features.Data &&
-                    Object.entries(plan.features.Data).map(
-                      ([key, value]) =>
-                        value === true && (
-                          <Box key={key} display="flex" alignItems="center">
-                            <CheckCircleIcon color="success" sx={{ fontSize: 20, mr: 1 }} />
-                            <Typography variant="body2">{key}</Typography>
-                          </Box>
-                        )
-                    )}
-                </Stack>
-              </CardContent>
+                  <Stack spacing={1.5}>
+                    <Box display="flex" alignItems="center">
+                      <CheckCircleIcon color="success" sx={{ fontSize: 20, mr: 1 }} />
+                      <Typography variant="body2">{planQuotaDescription}</Typography>
+                    </Box>
 
-              <Box sx={{ p: 3, pt: 0 }}>
-                <Button
-                  fullWidth
-                  variant={plan.type === 'pro' ? 'contained' : 'outlined'}
-                  size="large"
-                  disabled={loading || (subscription?.plan_type === plan.type && subscription?.status === 'active')}
-                  onClick={() => {
-                    setSelectedPlan(plan);
-                    setPurchaseDialog(true);
-                  }}
-                  sx={{
-                    py: 1.5,
-                    fontSize: '1rem',
-                    fontWeight: 600
-                  }}
-                >
-                  {subscription?.plan_type === plan.type && subscription?.status === 'active'
-                    ? t('claudeCode.subscription.currentPlan')
-                    : t('claudeCode.subscription.selectThisPlan')}
-                </Button>
-              </Box>
-            </Card>
-          </Grid>
-        ))}
+                    <Box display="flex" alignItems="center">
+                      <CheckCircleIcon color="success" sx={{ fontSize: 20, mr: 1 }} />
+                      <Typography variant="body2">
+                        {plan.is_unlimited_time ? <strong>无时间限制</strong> : `${durationInfo.text}订阅`}
+                      </Typography>
+                    </Box>
+
+                    {/* 功能特性 */}
+                    {plan.features &&
+                      plan.features.Data &&
+                      Object.entries(plan.features.Data).map(
+                        ([key, value]) =>
+                          value === true && (
+                            <Box key={key} display="flex" alignItems="center">
+                              <CheckCircleIcon color="success" sx={{ fontSize: 20, mr: 1 }} />
+                              <Typography variant="body2">{key}</Typography>
+                            </Box>
+                          )
+                      )}
+                  </Stack>
+                </CardContent>
+
+                <Box sx={{ p: 3, pt: 0 }}>
+                  <Button
+                    fullWidth
+                    variant={plan.type === 'pro' ? 'contained' : 'outlined'}
+                    size="large"
+                    disabled={loading || (subscription?.plan_type === plan.type && subscription?.status === 'active')}
+                    onClick={() => {
+                      setSelectedPlan(plan);
+                      setPurchaseDialog(true);
+                    }}
+                    sx={{
+                      py: 1.5,
+                      fontSize: '1rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    {subscription?.plan_type === plan.type && subscription?.status === 'active'
+                      ? t('claudeCode.subscription.currentPlan')
+                      : t('claudeCode.subscription.selectThisPlan')}
+                  </Button>
+                </Box>
+              </Card>
+            </Grid>
+          );
+          })}
       </Grid>
 
       {/* 创建API Key对话框 */}
@@ -621,6 +657,42 @@ const ClaudeCodeSubscription = () => {
               </Typography>
             </Alert>
           )}
+
+          <Divider sx={{ my: 3 }} />
+          <Stack spacing={1.5}>
+            <Typography variant="subtitle2">{t('claudeCode.subscription.apiKeysManagement')}</Typography>
+            {apiKeys.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">
+                {t('claudeCode.subscription.noApiKeys')}
+              </Typography>
+            ) : (
+              apiKeys.map((key) => (
+                <Stack key={key.id} direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
+                  <Box>
+                    <Typography variant="body2">{key.name}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {key.last_used_time ? formatDate(key.last_used_time) : t('claudeCode.subscription.neverUsed')}
+                    </Typography>
+                  </Box>
+                  <Stack direction="row" spacing={1}>
+                    <Chip
+                      label={
+                        key.status === 1
+                          ? t('claudeCode.subscription.status.active')
+                          : t('claudeCode.subscription.status.disabled')
+                      }
+                      size="small"
+                      color={key.status === 1 ? 'success' : 'default'}
+                      variant="outlined"
+                    />
+                    <Button size="small" color="error" onClick={() => deleteApiKey(key.id)}>
+                      {t('common.delete')}
+                    </Button>
+                  </Stack>
+                </Stack>
+              ))
+            )}
+          </Stack>
         </DialogContent>
         <DialogActions>
           <Button
@@ -650,8 +722,13 @@ const ClaudeCodeSubscription = () => {
                 {selectedPlan.name}
               </Typography>
               <Typography variant="body1" gutterBottom>
-                {t('claudeCode.subscription.pricePerMonth', { price: selectedPlan.price, currency: selectedPlan.currency })}
+                价格：${selectedPlan.price} {selectedPlan.currency}/{selectedPlan.is_unlimited_time ? '永久' : selectedPlanDuration?.short}
               </Typography>
+              {!selectedPlan.is_unlimited_time && (
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  订阅周期：{selectedPlanDuration?.text}
+                </Typography>
+              )}
               <Typography variant="body2" color="text.secondary" paragraph>
                 {selectedPlan.description}
               </Typography>
@@ -663,17 +740,26 @@ const ClaudeCodeSubscription = () => {
                   onChange={(e) => setPaymentMethod(e.target.value)}
                   label={t('claudeCode.subscription.paymentMethod')}
                 >
+                  <MenuItem value="balance">{t('claudeCode.subscription.paymentMethods.balance')}</MenuItem>
                   <MenuItem value="stripe">{t('claudeCode.subscription.paymentMethods.stripe')}</MenuItem>
                   <MenuItem value="alipay">{t('claudeCode.subscription.paymentMethods.alipay')}</MenuItem>
                   <MenuItem value="wxpay">{t('claudeCode.subscription.paymentMethods.wxpay')}</MenuItem>
                 </Select>
               </FormControl>
+
+              {paymentMethod === 'balance' && selectedPlan && (
+                <Alert severity={hasEnoughBalance ? 'info' : 'warning'} sx={{ mt: 2 }}>
+                  {hasEnoughBalance
+                    ? `本次将扣除 ${renderQuota(balanceCost, 6)} (约 $${selectedPlan.price})，当前余额 ${renderQuota(balanceQuota, 6)}`
+                    : `余额不足，需 ${renderQuota(balanceCost, 6)}，当前余额 ${renderQuota(balanceQuota, 6)}`}
+                </Alert>
+              )}
             </Box>
           )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setPurchaseDialog(false)}>{t('common.cancel')}</Button>
-          <Button onClick={purchaseSubscription} variant="contained" disabled={loading}>
+          <Button onClick={purchaseSubscription} variant="contained" disabled={loading || !hasEnoughBalance}>
             {loading ? <CircularProgress size={20} /> : t('claudeCode.subscription.confirmPurchase')}
           </Button>
         </DialogActions>

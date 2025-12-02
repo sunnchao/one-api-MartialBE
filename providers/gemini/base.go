@@ -142,3 +142,50 @@ func (p *GeminiProvider) GetRequestHeaders() (headers map[string]string) {
 
 	return headers
 }
+
+// 获取原始请求的header头
+func (p *GeminiProvider) GetOriginalRequestHeaders() (headers map[string]string) {
+	headers = make(map[string]string)
+
+	hasAuthorization := false
+	hasXGoogAPIKey := false
+	if p.Context != nil && p.Context.Request != nil {
+		skipHeaders := map[string]struct{}{
+			"accept-encoding":   {},
+			"content-length":    {},
+			"transfer-encoding": {},
+			"connection":        {},
+			"proxy-connection":  {},
+			"keep-alive":        {},
+			"host":              {},
+		}
+
+		for key, values := range p.Context.Request.Header {
+			if len(values) == 0 {
+				continue
+			}
+
+			lowerKey := strings.ToLower(key)
+			if _, skip := skipHeaders[lowerKey]; skip {
+				continue
+			}
+
+			headers[key] = values[0]
+			if lowerKey == "authorization" {
+				hasAuthorization = true
+			}
+			if lowerKey == "x-goog-api-key" {
+				hasXGoogAPIKey = true
+			}
+		}
+	}
+
+	p.CommonRequestHeaders(headers)
+
+	if !hasAuthorization && !hasXGoogAPIKey {
+		headers["x-goog-api-key"] = p.Channel.Key
+		delete(headers, "X-Goog-Api-Key")
+	}
+
+	return headers
+}

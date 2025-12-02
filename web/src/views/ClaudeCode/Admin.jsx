@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Container,
   Typography,
@@ -23,13 +23,15 @@ import {
   Select,
   MenuItem,
   FormControl,
+  FormControlLabel,
   InputLabel,
   Chip,
   Alert,
   CircularProgress,
   IconButton,
   Tooltip,
-  Grid
+  Grid,
+  Switch
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -40,8 +42,30 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon
 } from '@mui/icons-material';
-import { showError, showSuccess, showWarning, timestamp2string } from 'utils/common';
+import { renderQuota, showError, showSuccess, showWarning, timestamp2string } from 'utils/common';
 import { API } from 'utils/api';
+
+const durationUnitOptions = [
+  { value: 'day', label: '按日', suffix: '天', short: '日' },
+  { value: 'week', label: '按周', suffix: '周', short: '周' },
+  { value: 'month', label: '按月', suffix: '个月', short: '月' },
+  { value: 'quarter', label: '按季度', suffix: '个季度', short: '季度' }
+];
+
+const getDurationSuffix = (unit) => {
+  const option = durationUnitOptions.find((item) => item.value === unit);
+  return option ? option.suffix : '个月';
+};
+
+const getDurationShortLabel = (unit) => {
+  const option = durationUnitOptions.find((item) => item.value === unit);
+  return option ? option.short : '月';
+};
+
+const getDurationLabel = (unit = 'month', value = 1) => {
+  const safeValue = value > 0 ? value : 1;
+  return `${safeValue}${getDurationSuffix(unit)}`;
+};
 
 const ClaudeCodeAdmin = () => {
   const [tabValue, setTabValue] = useState(0);
@@ -66,10 +90,21 @@ const ClaudeCodeAdmin = () => {
   const [grantForm, setGrantForm] = useState({
     planType: 'basic',
     duration: 1,
+    durationUnit: 'month',
     reason: ''
   });
 
   const [plans, setPlans] = useState([]);
+
+  const planNameMap = useMemo(() => {
+    const map = {};
+    plans.forEach((plan) => {
+      if (plan?.type) {
+        map[plan.type] = plan.name || plan.type;
+      }
+    });
+    return map;
+  }, [plans]);
 
   // 套餐管理状态
   const [planDialogOpen, setPlanDialogOpen] = useState(false);
@@ -77,21 +112,29 @@ const ClaudeCodeAdmin = () => {
   const [planForm, setPlanForm] = useState({
     name: '',
     type: '',
+    service_type: 'claude_code',
     description: '',
     price: 0,
     currency: 'USD',
-    max_requests_per_month: 1000,
+    total_quota: 500000,
     max_client_count: 1,
     is_unlimited_time: false,
     duration_months: 1,
+    duration_unit: 'month',
+    duration_value: 1,
     is_active: true,
-    sort_order: 0
+    sort_order: 0,
+    show_in_portal: true
   });
 
   // 获取套餐列表
   const fetchPlans = async () => {
     try {
-      const res = await API.get('/api/claude-code-admin/plans');
+      const res = await API.get('/api/claude-code-admin/plans', {
+        params: {
+          include_hidden: true
+        }
+      });
       if (res.data.success) {
         setPlans(res.data.data || []);
       }
@@ -165,14 +208,15 @@ const ClaudeCodeAdmin = () => {
         user_id: selectedUser.id,
         plan_type: grantForm.planType,
         duration: grantForm.duration,
+        duration_unit: grantForm.durationUnit,
         reason: grantForm.reason
       });
 
       if (res.data.success) {
         showSuccess('套餐发放成功');
-        setGrantDialogOpen(false);
-        setSelectedUser(null);
-        setGrantForm({ planType: 'basic', duration: 1, reason: '' });
+		setGrantDialogOpen(false);
+		setSelectedUser(null);
+		setGrantForm({ planType: 'basic', duration: 1, durationUnit: 'month', reason: '' });
         fetchSubscriptions(); // 刷新订阅列表
       } else {
         showError('发放失败: ' + res.data.message);
@@ -209,9 +253,11 @@ const ClaudeCodeAdmin = () => {
       case 'expired':
         return 'error';
       case 'cancelled':
-        return 'warning';
+        return 'default';
       case 'pending':
         return 'info';
+      case 'exhausted':
+        return 'warning';
       default:
         return 'default';
     }
@@ -228,6 +274,8 @@ const ClaudeCodeAdmin = () => {
         return '已取消';
       case 'pending':
         return '待付款';
+      case 'exhausted':
+        return '额度已用尽';
       default:
         return status;
     }
@@ -239,33 +287,43 @@ const ClaudeCodeAdmin = () => {
     setPlanForm({
       name: '',
       type: '',
+      service_type: 'claude_code',
       description: '',
       price: 0,
       currency: 'USD',
-      max_requests_per_month: 1000,
+      total_quota: 500000,
       max_client_count: 1,
       is_unlimited_time: false,
       duration_months: 1,
+      duration_unit: 'month',
+      duration_value: 1,
       is_active: true,
-      sort_order: 0
+      sort_order: 0,
+      show_in_portal: true
     });
     setPlanDialogOpen(true);
   };
 
   const handleEditPlan = (plan) => {
+    const durationUnit = plan.duration_unit || 'month';
+    const durationValue = plan.duration_value || plan.duration_months || 1;
     setEditingPlan(plan);
     setPlanForm({
       name: plan.name,
       type: plan.type,
+      service_type: plan.service_type || 'claude_code',
       description: plan.description,
       price: plan.price,
       currency: plan.currency,
-      max_requests_per_month: plan.max_requests_per_month,
+      total_quota: plan.total_quota || 500000,
       max_client_count: plan.max_client_count,
       is_unlimited_time: plan.is_unlimited_time || false,
       duration_months: plan.duration_months || 1,
+      duration_unit: durationUnit,
+      duration_value: durationValue,
       is_active: plan.is_active,
-      sort_order: plan.sort_order
+      sort_order: plan.sort_order,
+      show_in_portal: plan.show_in_portal ?? true
     });
     setPlanDialogOpen(true);
   };
@@ -331,19 +389,19 @@ const ClaudeCodeAdmin = () => {
   const handleGrantDialogClose = () => {
     setGrantDialogOpen(false);
     setSelectedUser(null);
-    setGrantForm({ planType: 'basic', duration: 1, reason: '' });
+		setGrantForm({ planType: 'basic', duration: 1, durationUnit: 'month', reason: '' });
   };
 
   return (
     <Container maxWidth="xl">
       <Typography variant="h2" sx={{ mb: 3 }}>
-        Claude Code 管理面板
+        订阅管理面板
       </Typography>
 
       <Card sx={{ mb: 3 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={tabValue} onChange={handleTabChange}>
-            <Tab label="订阅管理" />
+            <Tab label="订阅列表" />
             <Tab label="用户搜索 & 发放套餐" />
             <Tab label="套餐管理" />
           </Tabs>
@@ -364,11 +422,13 @@ const ClaudeCodeAdmin = () => {
                 <TableHead>
                   <TableRow>
                     <TableCell>用户ID</TableCell>
-                    <TableCell>套餐类型</TableCell>
+                    <TableCell>服务类型</TableCell>
+                    <TableCell>套餐名称</TableCell>
                     <TableCell>状态</TableCell>
                     <TableCell>开始时间</TableCell>
                     <TableCell>结束时间</TableCell>
-                    <TableCell>月度额度</TableCell>
+                    <TableCell>总额度</TableCell>
+                    <TableCell>剩余额度</TableCell>
                     <TableCell>已用额度</TableCell>
                     <TableCell>支付方式</TableCell>
                     <TableCell>操作</TableCell>
@@ -377,13 +437,13 @@ const ClaudeCodeAdmin = () => {
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={9} sx={{ textAlign: 'center', py: 3 }}>
+                      <TableCell colSpan={11} sx={{ textAlign: 'center', py: 3 }}>
                         <CircularProgress />
                       </TableCell>
                     </TableRow>
                   ) : subscriptions.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} sx={{ textAlign: 'center', py: 3 }}>
+                      <TableCell colSpan={11} sx={{ textAlign: 'center', py: 3 }}>
                         暂无数据
                       </TableCell>
                     </TableRow>
@@ -391,14 +451,43 @@ const ClaudeCodeAdmin = () => {
                     subscriptions.map((subscription) => (
                       <TableRow key={subscription.id}>
                         <TableCell>{subscription.user_id}</TableCell>
-                        <TableCell>{subscription.plan_type}</TableCell>
                         <TableCell>
-                          <Chip label={getStatusText(subscription.status)} color={getStatusColor(subscription.status)} size="small" />
+                          <Chip
+                            label={
+                              subscription.service_type === 'claude_code'
+                                ? 'Claude Code'
+                                : subscription.service_type === 'codex_code'
+                                  ? 'Codex Code'
+                                  : subscription.service_type === 'gemini_code'
+                                    ? 'Gemini Code'
+                                    : subscription.service_type
+                            }
+                            color={
+                              subscription.service_type === 'claude_code'
+                                ? 'primary'
+                                : subscription.service_type === 'codex_code'
+                                  ? 'secondary'
+                                  : subscription.service_type === 'gemini_code'
+                                    ? 'warning'
+                                    : 'default'
+                            }
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell>{planNameMap[subscription.plan_type] || subscription.plan_type || '-'}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={getStatusText(subscription.status)}
+                            color={getStatusColor(subscription.status)}
+                            size="small"
+                            variant="outlined"
+                          />
                         </TableCell>
                         <TableCell>{timestamp2string(subscription.start_time)}</TableCell>
                         <TableCell>{timestamp2string(subscription.end_time)}</TableCell>
-                        <TableCell>{subscription.max_requests_per_month}</TableCell>
-                        <TableCell>{subscription.used_requests_this_month}</TableCell>
+                        <TableCell>{renderQuota(subscription.total_quota, 6)}</TableCell>
+                        <TableCell>{renderQuota(subscription.remain_quota, 6)}</TableCell>
+                        <TableCell>{renderQuota(subscription.used_quota, 6)}</TableCell>
                         <TableCell>{subscription.payment_method}</TableCell>
                         <TableCell>
                           {subscription.status === 'active' && (
@@ -533,13 +622,15 @@ const ClaudeCodeAdmin = () => {
                 <TableHead>
                   <TableRow>
                     <TableCell>ID</TableCell>
+                    <TableCell>服务类型</TableCell>
                     <TableCell>套餐名称</TableCell>
                     <TableCell>套餐类型</TableCell>
                     <TableCell>价格</TableCell>
                     <TableCell>时间限制</TableCell>
-                    <TableCell>月请求数</TableCell>
+                    <TableCell>总额度</TableCell>
                     <TableCell>设备数</TableCell>
                     <TableCell>状态</TableCell>
+                    <TableCell>前台展示</TableCell>
                     <TableCell>排序</TableCell>
                     <TableCell>操作</TableCell>
                   </TableRow>
@@ -547,7 +638,7 @@ const ClaudeCodeAdmin = () => {
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={10} sx={{ textAlign: 'center', py: 3 }}>
+                      <TableCell colSpan={11} sx={{ textAlign: 'center', py: 3 }}>
                         <CircularProgress />
                       </TableCell>
                     </TableRow>
@@ -555,24 +646,65 @@ const ClaudeCodeAdmin = () => {
                     plans.map((plan) => (
                       <TableRow key={plan.id}>
                         <TableCell>{plan.id}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={
+                              plan.service_type === 'claude_code'
+                                ? 'Claude Code'
+                                : plan.service_type === 'codex_code'
+                                  ? 'Codex Code'
+                                  : plan.service_type === 'gemini_code'
+                                    ? 'Gemini Code'
+                                    : plan.service_type || 'Claude Code'
+                            }
+                            color={
+                              plan.service_type === 'claude_code' || !plan.service_type
+                                ? 'primary'
+                                : plan.service_type === 'codex_code'
+                                  ? 'secondary'
+                                  : plan.service_type === 'gemini_code'
+                                    ? 'warning'
+                                    : 'default'
+                            }
+                            size="small"
+                          />
+                        </TableCell>
                         <TableCell>{plan.name}</TableCell>
                         <TableCell>
-                          <Chip label={plan.type} color="primary" variant="outlined" />
+                          <Chip label={plan.type} color="primary" variant="outlined" size="small" />
                         </TableCell>
                         <TableCell>
                           ${plan.price} {plan.currency}
                         </TableCell>
                         <TableCell>
-                          {plan.is_unlimited_time ? (
-                            <Chip label="无时间限制" color="success" size="small" />
-                          ) : (
-                            <Chip label={`${plan.duration_months || 1}个月`} color="info" size="small" />
-                          )}
+						{plan.is_unlimited_time ? (
+							<Chip label="无时间限制" color="success" size="small" variant="outlined" />
+						) : (
+							<Chip
+								label={getDurationLabel(plan.duration_unit || 'month', plan.duration_value || plan.duration_months || 1)}
+								color="info"
+								size="small"
+								variant="outlined"
+							/>
+						)}
                         </TableCell>
-                        <TableCell>{plan.max_requests_per_month.toLocaleString()}</TableCell>
+                        <TableCell>${(plan.total_quota / 500000).toFixed(2)}</TableCell>
                         <TableCell>{plan.max_client_count}</TableCell>
                         <TableCell>
-                          <Chip label={plan.is_active ? '启用' : '禁用'} color={plan.is_active ? 'success' : 'error'} />
+                          <Chip
+                            label={plan.is_active ? '启用' : '禁用'}
+                            color={plan.is_active ? 'success' : 'default'}
+                            size="small"
+                            variant="outlined"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={plan.show_in_portal ? '展示' : '隐藏'}
+                            color={plan.show_in_portal ? 'primary' : 'default'}
+                            size="small"
+                            variant="outlined"
+                          />
                         </TableCell>
                         <TableCell>{plan.sort_order}</TableCell>
                         <TableCell>
@@ -592,7 +724,7 @@ const ClaudeCodeAdmin = () => {
                   )}
                   {!loading && plans.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={10} align="center">
+                      <TableCell colSpan={11} align="center">
                         <Typography color="text.secondary">暂无套餐，点击上方按钮创建</Typography>
                       </TableCell>
                     </TableRow>
@@ -620,22 +752,44 @@ const ClaudeCodeAdmin = () => {
                 label="套餐类型"
                 onChange={(e) => setGrantForm({ ...grantForm, planType: e.target.value })}
               >
-                {plans.map((plan) => (
-                  <MenuItem key={plan.type} value={plan.type}>
-                    {plan.name} - ${plan.price}/月 ({plan.max_requests_per_month} 次/月)
-                  </MenuItem>
-                ))}
+			    {plans.map((plan) => {
+			      const unit = plan.duration_unit || 'month';
+			      const value = plan.duration_value || plan.duration_months || 1;
+			      return (
+			        <MenuItem key={plan.type} value={plan.type}>
+		          {plan.name} - ${plan.price}/{plan.currency}/
+		          {plan.is_unlimited_time ? '永久' : getDurationShortLabel(unit)} (默认 {plan.is_unlimited_time ? '无时间限制' : getDurationLabel(unit, value)})
+			  {!plan.show_in_portal && '（前台隐藏）'}
+			        </MenuItem>
+			      );
+			    })}
               </Select>
             </FormControl>
 
+			<FormControl fullWidth sx={{ mb: 2 }}>
+			  <InputLabel>时长单位</InputLabel>
+			  <Select
+			    value={grantForm.durationUnit}
+			    label="时长单位"
+			    onChange={(e) => setGrantForm({ ...grantForm, durationUnit: e.target.value })}
+			  >
+			    {durationUnitOptions.map((option) => (
+			      <MenuItem key={option.value} value={option.value}>
+			        {option.label}
+			      </MenuItem>
+			    ))}
+			  </Select>
+			</FormControl>
+
             <TextField
               fullWidth
-              label="订阅时长（月）"
+			  label="订阅时长"
               type="number"
               value={grantForm.duration}
               onChange={(e) => setGrantForm({ ...grantForm, duration: parseInt(e.target.value) || 1 })}
-              inputProps={{ min: 1, max: 12 }}
+			  inputProps={{ min: 1, max: 365 }}
               sx={{ mb: 2 }}
+			  helperText={`当前为 ${getDurationLabel(grantForm.durationUnit, grantForm.duration)}`}
             />
 
             <TextField
@@ -671,6 +825,20 @@ const ClaudeCodeAdmin = () => {
                   onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
                   required
                 />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>服务类型</InputLabel>
+                  <Select
+                    value={planForm.service_type}
+                    onChange={(e) => setPlanForm({ ...planForm, service_type: e.target.value })}
+                    label="服务类型"
+                  >
+                    <MenuItem value="claude_code">Claude Code</MenuItem>
+                    <MenuItem value="codex_code">Codex Code</MenuItem>
+                    <MenuItem value="gemini_code">Gemini Code</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -727,12 +895,13 @@ const ClaudeCodeAdmin = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="月请求数"
+                  label="总额度（USD）"
                   type="number"
-                  value={planForm.max_requests_per_month}
-                  onChange={(e) => setPlanForm({ ...planForm, max_requests_per_month: parseInt(e.target.value) || 1000 })}
+                  value={planForm.total_quota / 500000}
+                  onChange={(e) => setPlanForm({ ...planForm, total_quota: Math.round(parseFloat(e.target.value) * 500000) || 500000 })}
                   required
-                  inputProps={{ min: 1 }}
+                  inputProps={{ min: 0, step: 0.01 }}
+                  helperText="显示金额，实际额度 = 金额 × 500000"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -746,32 +915,74 @@ const ClaudeCodeAdmin = () => {
                   inputProps={{ min: 1 }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel>时间限制类型</InputLabel>
-                  <Select
-                    value={planForm.is_unlimited_time}
-                    onChange={(e) => setPlanForm({ ...planForm, is_unlimited_time: e.target.value })}
-                    label="时间限制类型"
-                  >
-                    <MenuItem value={false}>限制时间</MenuItem>
-                    <MenuItem value={true}>无时间限制</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              {!planForm.is_unlimited_time && (
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="订阅时长(月)"
-                    type="number"
-                    value={planForm.duration_months}
-                    onChange={(e) => setPlanForm({ ...planForm, duration_months: parseInt(e.target.value) || 1 })}
-                    inputProps={{ min: 1, max: 120 }}
-                    helperText="套餐的默认订阅时长"
-                  />
-                </Grid>
-              )}
+		      <Grid item xs={12} sm={6}>
+		        <FormControl fullWidth>
+		          <InputLabel>时间限制类型</InputLabel>
+		          <Select
+		            value={planForm.is_unlimited_time}
+		            onChange={(e) => setPlanForm({ ...planForm, is_unlimited_time: e.target.value })}
+		            label="时间限制类型"
+		          >
+		            <MenuItem value={false}>限制时间</MenuItem>
+		            <MenuItem value={true}>无时间限制</MenuItem>
+		          </Select>
+		        </FormControl>
+		      </Grid>
+		      {!planForm.is_unlimited_time && (
+		        <>
+		          <Grid item xs={12} sm={6}>
+		            <FormControl fullWidth>
+		              <InputLabel>时长单位</InputLabel>
+		              <Select
+		                value={planForm.duration_unit}
+		                label="时长单位"
+		                onChange={(e) => {
+		                  const unit = e.target.value;
+		                  setPlanForm((prev) => ({
+		                    ...prev,
+		                    duration_unit: unit,
+		                    duration_months:
+		                      unit === 'month'
+		                        ? prev.duration_value
+		                        : unit === 'quarter'
+		                          ? prev.duration_value * 3
+		                          : prev.duration_months || prev.duration_value
+		                  }));
+		                }}
+		              >
+		                {durationUnitOptions.map((option) => (
+		                  <MenuItem key={option.value} value={option.value}>
+		                    {option.label}
+		                  </MenuItem>
+		                ))}
+		              </Select>
+		            </FormControl>
+		          </Grid>
+		          <Grid item xs={12} sm={6}>
+		            <TextField
+		              fullWidth
+		              label="订阅时长数值"
+		              type="number"
+		              value={planForm.duration_value}
+		              onChange={(e) => {
+		                const value = parseInt(e.target.value, 10) || 1;
+		                setPlanForm((prev) => ({
+		                  ...prev,
+		                  duration_value: value,
+		                  duration_months:
+		                    prev.duration_unit === 'month'
+		                      ? value
+		                      : prev.duration_unit === 'quarter'
+		                        ? value * 3
+		                        : value
+		                }));
+		              }}
+		              inputProps={{ min: 1, max: 120 }}
+		              helperText="与选择的单位组合成完整时长"
+		            />
+		          </Grid>
+		        </>
+		      )}
               <Grid item xs={12} sm={planForm.is_unlimited_time ? 12 : 6}>
                 <FormControl fullWidth>
                   <InputLabel>状态</InputLabel>
@@ -780,6 +991,18 @@ const ClaudeCodeAdmin = () => {
                     <MenuItem value={false}>禁用</MenuItem>
                   </Select>
                 </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={planForm.is_unlimited_time ? 12 : 6}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={planForm.show_in_portal}
+                      onChange={(e) => setPlanForm({ ...planForm, show_in_portal: e.target.checked })}
+                      color="primary"
+                    />
+                  }
+                  label="前台展示"
+                />
               </Grid>
             </Grid>
           </Box>

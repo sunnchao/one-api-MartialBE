@@ -156,11 +156,11 @@ const MainRoutes = {
       element: <ClaudeCode />
     },
     {
-      path: 'claude-code/subscription',
+      path: 'subscriptions',
       element: <ClaudeCodeSubscription />
     },
     {
-      path: 'claude-code-admin',
+      path: 'operation_subscriptions',
       element: <ClaudeCodeAdmin />
     },
     {

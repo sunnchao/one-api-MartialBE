@@ -246,6 +246,11 @@ func ClaudeAuth() func(c *gin.Context) {
 		if key == "" {
 			key = c.Request.Header.Get("Authorization")
 		}
+
+		// 标记资源包服务类型为 claude_code
+		// 用于资源包优先扣费逻辑
+		c.Set("package_service_type", "claude_code")
+
 		tokenAuth(c, key)
 	}
 }
@@ -261,6 +266,24 @@ func GeminiAuth() func(c *gin.Context) {
 				key = c.Request.Header.Get("Authorization")
 			}
 		}
+
+		// 标记资源包服务类型为 gemini_code
+		c.Set("package_service_type", "gemini_code")
+
+		tokenAuth(c, key)
+	}
+}
+
+func CodexAuth() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		key := c.Request.Header.Get("x-api-key")
+		if key == "" {
+			key = c.Request.Header.Get("Authorization")
+		}
+
+		// 标记资源包服务类型为 codex_code
+		c.Set("package_service_type", "codex_code")
+
 		tokenAuth(c, key)
 	}
 }

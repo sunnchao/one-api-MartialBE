@@ -313,6 +313,7 @@
     "calls": "調用次數",
     "model_name": "模型名稱",
     "model_price": "目前可用模型",
+    "subscriptions": "套餐管理",
     "no_data": "無數據",
     "no_data_available": "暫無數據",
     "other_models": "其他模型",
@@ -532,7 +533,7 @@
   },
   "claudeCode": {
     "subscription": {
-      "title": "Claude Code 訂閱管理",
+      "title": "訂閱管理",
       "currentSubscription": "當前訂閱",
       "planType": "套餐類型",
       "subscriptionPeriod": "訂閱期間",
@@ -575,9 +576,15 @@
         "unknown": "未知"
       },
       "paymentMethods": {
+        "balance": "帳戶餘額",
         "stripe": "Stripe (信用卡)",
         "alipay": "支付寶",
         "wxpay": "微信支付"
+      },
+      "quotaDisplay": {
+        "unlimited": "無時間限制；共 {{count}} 額度",
+        "perDuration": "每{{duration}} {{count}} 額度",
+        "total": "共 {{count}} 額度"
       }
     }
   },

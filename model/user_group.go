@@ -197,16 +197,16 @@ func (cgrm *UserGroupRatio) GetAPILimiter(symbol string) limit.RateLimiter {
 
 // 创建 定时任务
 func SyncUserGroupRatioCache(frequency int) {
-  // 只有 从 服务器端获取数据的时候才会用到
-  // if config.IsMasterNode {
-  //   logger.SysLog("master node does't synchronize the channel")
-  //   return
-  // }
-  for {
-    time.Sleep(time.Duration(frequency) * time.Second)
-    logger.SysLog("sync user group ratio cache")
-    GlobalUserGroupRatio.Load()
-  }
+	// 只有 从 服务器端获取数据的时候才会用到
+	// if config.IsMasterNode {
+	//   logger.SysLog("master node does't synchronize the channel")
+	//   return
+	// }
+	for {
+		time.Sleep(time.Duration(frequency) * time.Second)
+		logger.SysLog("sync user group ratio cache")
+		GlobalUserGroupRatio.Load()
+	}
 }
 
 // CheckAndUpgradeUserGroup checks if a user's cumulative recharge amount falls within any promotion group's range
@@ -222,7 +222,13 @@ func CheckAndUpgradeUserGroup(userId int, rechargeAmount int) error {
 
 	// Calculate cumulative recharge amount
 	cumulativeAmount := user.Quota + user.UsedQuota + rechargeAmount
-	logger.SysError(fmt.Sprintf("use:%f q:%f  cumulative:%f rechargeAmount:%f", (float64)(user.UsedQuota)/config.QuotaPerUnit, (float64)(user.Quota)/config.QuotaPerUnit, cumulativeAmount, rechargeAmount))
+	logger.SysError(fmt.Sprintf(
+		"use:%f q:%f cumulative:%f rechargeAmount:%d",
+		float64(user.UsedQuota)/config.QuotaPerUnit,
+		float64(user.Quota)/config.QuotaPerUnit,
+		float64(cumulativeAmount)/config.QuotaPerUnit,
+		rechargeAmount,
+	))
 	// Get all promotion-enabled user groups
 	var promotionGroups []*UserGroup
 	err = DB.Where("promotion = ? AND enable = ?", true, true).Find(&promotionGroups).Error

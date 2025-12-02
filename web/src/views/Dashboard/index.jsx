@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { Grid, Box, Stack, Typography, Button, Container } from '@mui/material';
 import { gridSpacing } from 'store/constant';
 import StatisticalLineChartCard from './component/StatisticalLineChartCard';
@@ -14,11 +15,9 @@ import InviteCard from './component/InviteCard';
 import QuotaLogWeek from './component/QuotaLogWeek';
 import QuickStartCard from './component/QuickStartCard';
 import RPM from './component/RPM';
-import dayjs from 'dayjs';
 import StatusPanel from './component/StatusPanel';
 import CheckinService from 'services/checkinService';
 import { useSelector } from 'react-redux';
-import { keyframes } from '@mui/system';
 
 // TabPanel component for tab content
 function TabPanel(props) {
@@ -31,13 +30,18 @@ function TabPanel(props) {
   );
 }
 
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  value: PropTypes.number.isRequired,
+  index: PropTypes.number.isRequired
+};
+
 const Dashboard = () => {
   const [isLoading, setLoading] = useState(true);
   const [statisticalData, setStatisticalData] = useState([]);
   const [requestChart, setRequestChart] = useState(null);
   const [quotaChart, setQuotaChart] = useState(null);
   const [tokenChart, setTokenChart] = useState(null);
-  const [users, setUsers] = useState([]);
   const [checkInList, setCheckInList] = useState([]);
   const { t } = useTranslation();
   const [modelUsageData, setModelUsageData] = useState([]);
@@ -55,7 +59,7 @@ const Dashboard = () => {
   const siteInfo = useSelector((state) => state.siteInfo);
 
   // 检查是否在国庆活动期间
-  const checkNationalDayPromo = () => {
+  const checkNationalDayPromo = useCallback(() => {
     if (!siteInfo.NationalDayPromoEnabled) return false;
 
     const now = new Date();
@@ -68,7 +72,7 @@ const Dashboard = () => {
     } catch (e) {
       return false;
     }
-  };
+  }, [siteInfo.NationalDayPromoEnabled, siteInfo.NationalDayPromoStartDate, siteInfo.NationalDayPromoEndDate]);
 
   // 计算倒计时
   const calculateCountdown = useCallback(() => {
@@ -142,7 +146,7 @@ const Dashboard = () => {
     if (siteInfo.NationalDayPromoEnabled !== undefined) {
       setShowNationalDayPromo(checkNationalDayPromo());
     }
-  }, [siteInfo.NationalDayPromoEnabled, siteInfo.NationalDayPromoStartDate, siteInfo.NationalDayPromoEndDate]);
+  }, [siteInfo.NationalDayPromoEnabled, checkNationalDayPromo]);
 
   // 倒计时定时器
   useEffect(() => {
@@ -220,7 +224,7 @@ const Dashboard = () => {
           </Grid>
           {/* 日历插件 */}
           <Grid item lg={6} xs={12}>
-            <Calendar checkinDates={checkInList} />
+            <Calendar checkinDates={checkInList} refreshCheckins={loadCheckInList} />
           </Grid>
           <Grid item lg={6} xs={12}>
             <InviteCard />

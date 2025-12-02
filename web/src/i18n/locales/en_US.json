@@ -65,7 +65,7 @@
   },
   "claudeCode": {
     "subscription": {
-      "title": "Claude Code Subscription Management",
+      "title": "Subscription Management",
       "currentSubscription": "Current Subscription",
       "planType": "Plan Type",
       "subscriptionPeriod": "Subscription Period",
@@ -108,9 +108,15 @@
         "unknown": "Unknown"
       },
       "paymentMethods": {
+        "balance": "Account Balance",
         "stripe": "Stripe (Credit Card)",
         "alipay": "Alipay",
         "wxpay": "WeChat Pay"
+      },
+      "quotaDisplay": {
+        "unlimited": "No time limit; total {{count}} quota",
+        "perDuration": "Every {{duration}} {{count}} quota",
+        "total": "Total {{count}} quota"
       }
     }
   },
@@ -383,6 +389,7 @@
     "calls": "Calls",
     "model_name": "Model Name",
     "model_price": "Available Models",
+    "subscriptions": "Subscriptions",
     "no_data": "No Data",
     "no_data_available": "No data available",
     "other_models": "Other Models",

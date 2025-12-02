@@ -90,7 +90,7 @@ func ClaudeCodeAuth() gin.HandlerFunc {
 // 响应错误的统一格式（符合Claude API错误格式）
 func respondWithError(c *gin.Context, status int, errorType, message string) {
 	c.JSON(status, gin.H{
-		"type":    "error",
+		"type": "error",
 		"error": gin.H{
 			"type":    errorType,
 			"message": message,
@@ -103,11 +103,11 @@ func respondWithError(c *gin.Context, status int, errorType, message string) {
 func isValidAnthropicVersion(version string) bool {
 	validVersions := []string{
 		"2023-06-01",
-		"2023-01-01", 
+		"2023-01-01",
 		"2024-02-01",
 		// 可以根据需要添加更多支持的版本
 	}
-	
+
 	for _, validVersion := range validVersions {
 		if version == validVersion {
 			return true
@@ -127,15 +127,15 @@ func validateBasicClient(c *gin.Context, subscription *model.ClaudeCodeSubscript
 	// 2. 防止明显的浏览器请求
 	referer := c.GetHeader("Referer")
 	origin := c.GetHeader("Origin")
-	
+
 	// 如果同时有Referer和Origin，可能是浏览器请求
 	if referer != "" && origin != "" {
 		return errors.New("Browser requests are not allowed")
 	}
 
 	// 3. 检查是否有可疑的浏览器特征
-	if strings.Contains(strings.ToLower(userAgent), "mozilla") && 
-	   strings.Contains(strings.ToLower(userAgent), "webkit") {
+	if strings.Contains(strings.ToLower(userAgent), "mozilla") &&
+		strings.Contains(strings.ToLower(userAgent), "webkit") {
 		return errors.New("Browser requests are not allowed")
 	}
 
@@ -224,19 +224,19 @@ func validateStrictClient(c *gin.Context, subscription *model.ClaudeCodeSubscrip
 
 // 生成客户端密钥（基于客户端信息和用户ID）
 func generateClientSecret(clientInfo model.ClientFingerprint, userId int) string {
-  data := fmt.Sprintf("%s-%s-%d-%s",
-    clientInfo.MachineId,
-    clientInfo.ProcessName,
-    userId,
-    "claude-code-secret")
+	data := fmt.Sprintf("%s-%s-%d-%s",
+		clientInfo.MachineId,
+		clientInfo.ProcessName,
+		userId,
+		"claude-code-secret")
 
-  return getMD5Hash(data)[:16] // 取前16位作为密钥
+	return getMD5Hash(data)[:16] // 取前16位作为密钥
 }
 
 // MD5哈希函数
 func getMD5Hash(text string) string {
-  hash := md5.Sum([]byte(text))
-  return hex.EncodeToString(hash[:])
+	hash := md5.Sum([]byte(text))
+	return hex.EncodeToString(hash[:])
 }
 
 // 验证请求频率（防止滥用）- 符合Claude API响应格式
@@ -250,20 +250,25 @@ func ClaudeCodeRateLimit() gin.HandlerFunc {
 
 		sub := subscription.(*model.ClaudeCodeSubscription)
 
-		// 检查本月使用量
-		if sub.UsedRequestsThisMonth >= sub.MaxRequestsPerMonth {
-			c.Header("X-RateLimit-Limit", fmt.Sprintf("%d", sub.MaxRequestsPerMonth))
+		limit := sub.TotalQuota
+		if limit <= 0 {
+			c.Next()
+			return
+		}
+
+		if sub.RemainQuota <= 0 {
+			c.Header("X-RateLimit-Limit", fmt.Sprintf("%d", limit))
 			c.Header("X-RateLimit-Remaining", "0")
 			c.Header("X-RateLimit-Reset", fmt.Sprintf("%d", getNextMonthReset()))
-			
+
 			c.JSON(http.StatusTooManyRequests, gin.H{
 				"type": "error",
 				"error": gin.H{
 					"type":    "rate_limit_error",
-					"message": "Monthly usage limit exceeded",
+					"message": "Quota exhausted",
 					"details": gin.H{
-						"limit":     sub.MaxRequestsPerMonth,
-						"used":      sub.UsedRequestsThisMonth,
+						"limit":     limit,
+						"used":      sub.UsedQuota,
 						"remaining": 0,
 						"reset_at":  getNextMonthReset(),
 					},
@@ -273,9 +278,8 @@ func ClaudeCodeRateLimit() gin.HandlerFunc {
 			return
 		}
 
-		// 设置剩余额度头部
-		remaining := sub.MaxRequestsPerMonth - sub.UsedRequestsThisMonth
-		c.Header("X-RateLimit-Limit", fmt.Sprintf("%d", sub.MaxRequestsPerMonth))
+		remaining := sub.RemainQuota
+		c.Header("X-RateLimit-Limit", fmt.Sprintf("%d", limit))
 		c.Header("X-RateLimit-Remaining", fmt.Sprintf("%d", remaining))
 		c.Header("X-RateLimit-Reset", fmt.Sprintf("%d", getNextMonthReset()))
 
@@ -292,27 +296,27 @@ func getNextMonthReset() int64 {
 
 // 管理员权限验证
 func ClaudeCodeAdminAuth() gin.HandlerFunc {
-  return func(c *gin.Context) {
-    userId := c.GetInt("id")
-    if userId == 0 {
-      c.JSON(http.StatusUnauthorized, gin.H{
-        "success": false,
-        "message": "请先登录",
-      })
-      c.Abort()
-      return
-    }
+	return func(c *gin.Context) {
+		userId := c.GetInt("id")
+		if userId == 0 {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"success": false,
+				"message": "请先登录",
+			})
+			c.Abort()
+			return
+		}
 
-    role := c.GetInt("role")
-    if role < config.RoleAdminUser {
-      c.JSON(http.StatusForbidden, gin.H{
-        "success": false,
-        "message": "权限不足",
-      })
-      c.Abort()
-      return
-    }
+		role := c.GetInt("role")
+		if role < config.RoleAdminUser {
+			c.JSON(http.StatusForbidden, gin.H{
+				"success": false,
+				"message": "权限不足",
+			})
+			c.Abort()
+			return
+		}
 
-    c.Next()
-  }
+		c.Next()
+	}
 }

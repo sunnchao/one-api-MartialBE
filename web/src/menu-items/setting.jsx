@@ -15,7 +15,8 @@ const icons = {
   IconUsers: () => <Icon width={20} icon="solar:users-group-rounded-bold-duotone" />,
   IconModel: () => <Icon width={20} icon="mingcute:ai-fill" />,
   IconClaudeCodeAdmin: () => <Icon width={20} icon="solar:code-square-bold-duotone" />,
-  IconInfo: () => <Icon width={20} icon="solar:info-circle-bold-duotone" />
+  IconInfo: () => <Icon width={20} icon="solar:info-circle-bold-duotone" />,
+  IconGift: () => <Icon width={20} icon="solar:gift-bold-duotone" />
 };
 
 const Setting = {
@@ -94,10 +95,10 @@ const Setting = {
           isAdmin: true
         },
         {
-          id: 'claude-code-admin',
-          title: 'Claude Code 管理',
+          id: 'operation_subscriptions',
+          title: '套餐管理',
           type: 'item',
-          url: '/panel/claude-code-admin',
+          url: '/panel/operation_subscriptions',
           icon: icons.IconClaudeCodeAdmin,
           breadcrumbs: false,
           isAdmin: true
