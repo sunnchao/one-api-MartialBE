@@ -147,32 +147,27 @@ func (p *GeminiProvider) GetRequestHeaders() (headers map[string]string) {
 func (p *GeminiProvider) GetOriginalRequestHeaders() (headers map[string]string) {
 	headers = make(map[string]string)
 
-	forwardedIPHeaders := map[string]struct{}{
-		"x-forwarded-for":          {},
-		"x-forwarded":              {},
-		"forwarded":                {},
-		"x-real-ip":                {},
-		"x-client-ip":              {},
-		"x-cluster-client-ip":      {},
-		"true-client-ip":           {},
-		"cf-connecting-ip":         {},
-		"fastly-client-ip":         {},
-		"fly-client-ip":            {},
-		"x-appengine-user-ip":      {},
-		"x-original-forwarded-for": {},
-	}
-
 	hasAuthorization := false
 	hasXGoogAPIKey := false
 	if p.Context != nil && p.Context.Request != nil {
 		skipHeaders := map[string]struct{}{
-			"accept-encoding":   {},
-			"content-length":    {},
-			"transfer-encoding": {},
-			"connection":        {},
-			"proxy-connection":  {},
-			"keep-alive":        {},
-			"host":              {},
+			"accept-encoding":      {},
+			"content-length":       {},
+			"transfer-encoding":    {},
+			"connection":           {},
+			"proxy-connection":     {},
+			"keep-alive":           {},
+			"host":                 {},
+			"x-forwarded-for":      {},
+			"x-real-ip":            {},
+			"x-client-ip":          {},
+			"cf-connecting-ip":     {},
+			"true-client-ip":       {},
+			"x-forwarded":          {},
+			"forwarded":            {},
+			"x-cluster-client-ip":  {},
+			"fastly-client-ip":     {},
+			"x-original-forwarded-for": {},
 		}
 
 		for key, values := range p.Context.Request.Header {
@@ -184,9 +179,6 @@ func (p *GeminiProvider) GetOriginalRequestHeaders() (headers map[string]string)
 			if _, skip := skipHeaders[lowerKey]; skip {
 				continue
 			}
-			if _, drop := forwardedIPHeaders[lowerKey]; drop {
-				continue
-			}
 
 			headers[key] = values[0]
 			if lowerKey == "authorization" {
@@ -196,20 +188,9 @@ func (p *GeminiProvider) GetOriginalRequestHeaders() (headers map[string]string)
 				hasXGoogAPIKey = true
 			}
 		}
-
-		for key := range headers {
-			if _, drop := forwardedIPHeaders[strings.ToLower(key)]; drop {
-				delete(headers, key)
-			}
-		}
 	}
 
 	p.CommonRequestHeaders(headers)
-	for key := range headers {
-		if _, drop := forwardedIPHeaders[strings.ToLower(key)]; drop {
-			delete(headers, key)
-		}
-	}
 
 	//if !hasAuthorization && !hasXGoogAPIKey {
 	//	headers["x-goog-api-key"] = p.Channel.Key
