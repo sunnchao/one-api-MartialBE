@@ -188,10 +188,11 @@ func (p *GeminiProvider) GetOriginalRequestHeaders() (headers map[string]string)
 	//}
 	if hasAuthorization {
 		headers["Authorization"] = "Bearer " + p.Channel.Key
-	}
-	if hasXGoogAPIKey {
+	} else if hasXGoogAPIKey {
 		headers["x-goog-api-key"] = p.Channel.Key
 		delete(headers, "X-Goog-Api-Key")
+	} else {
+		headers["x-goog-api-key"] = p.Channel.Key
 	}
 
 	return headers
