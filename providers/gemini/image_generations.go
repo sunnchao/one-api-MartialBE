@@ -39,7 +39,8 @@ func (p *GeminiProvider) CreateImageGenerations(request *types.ImageRequest) (*t
 	}
 
 	fullRequestURL := p.GetFullRequestURL("predict", request.Model)
-	headers := p.GetRequestHeaders()
+	//headers := p.GetRequestHeaders()
+	headers := p.GetOriginalRequestHeaders()
 
 	req, err := p.Requester.NewRequest(http.MethodPost, fullRequestURL, p.Requester.WithBody(geminiRequest), p.Requester.WithHeader(headers))
 	if err != nil {

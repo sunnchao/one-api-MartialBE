@@ -86,13 +86,23 @@ func (p *ClaudeProvider) GetOriginalRequestHeaders() (headers map[string]string)
 	hasXApiKey := false
 	if p.Context != nil && p.Context.Request != nil {
 		skipHeaders := map[string]struct{}{
-			"accept-encoding":   {},
-			"content-length":    {},
-			"transfer-encoding": {},
-			"connection":        {},
-			"proxy-connection":  {},
-			"keep-alive":        {},
-			"host":              {},
+			"accept-encoding":          {},
+			"content-length":           {},
+			"transfer-encoding":        {},
+			"connection":               {},
+			"proxy-connection":         {},
+			"keep-alive":               {},
+			"host":                     {},
+			"x-forwarded-for":          {},
+			"x-real-ip":                {},
+			"x-client-ip":              {},
+			"cf-connecting-ip":         {},
+			"true-client-ip":           {},
+			"x-forwarded":              {},
+			"forwarded":                {},
+			"x-cluster-client-ip":      {},
+			"fastly-client-ip":         {},
+			"x-original-forwarded-for": {},
 		}
 
 		// 复制原始请求的所有header头

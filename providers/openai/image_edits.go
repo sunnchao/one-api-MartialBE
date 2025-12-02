@@ -51,7 +51,8 @@ func (p *OpenAIProvider) getRequestImageBody(relayMode int, ModelName string, re
 	fullRequestURL := p.GetFullRequestURL(url, ModelName)
 
 	// 获取请求头
-	headers := p.GetRequestHeaders()
+	//headers := p.GetRequestHeaders()
+	headers := p.GetOriginalRequestHeaders()
 	// 创建请求
 	var req *http.Request
 	var err error

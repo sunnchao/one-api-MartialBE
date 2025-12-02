@@ -7,7 +7,8 @@ import (
 
 func (p *ClaudeProvider) GetModelList() ([]string, error) {
 	fullRequestURL := p.GetFullRequestURL(p.Config.ModelList)
-	headers := p.GetRequestHeaders()
+	//headers := p.GetRequestHeaders()
+	headers := p.GetOriginalRequestHeaders()
 
 	req, err := p.Requester.NewRequest(http.MethodGet, fullRequestURL, p.Requester.WithHeader(headers))
 	if err != nil {
