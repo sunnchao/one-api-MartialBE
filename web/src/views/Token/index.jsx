@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useMemo } from 'react';
 import { showError, showSuccess, trims, copy } from 'utils/common';
 
 import Table from '@mui/material/Table';
@@ -15,6 +15,7 @@ import { Button, Card, Box, Stack, Container, Typography } from '@mui/material';
 import TokensTableRow from './component/TableRow';
 import KeywordTableHead from 'ui-component/TableHead';
 import TableToolBar from 'ui-component/TableToolBar';
+import ToggleButtonGroup from 'ui-component/ToggleButton';
 import { API } from 'utils/api';
 import { Icon } from '@iconify/react';
 import EditeModal from './component/EditModal';
@@ -41,6 +42,22 @@ export default function Token() {
   const [editTokenId, setEditTokenId] = useState(0);
   const siteInfo = useSelector((state) => state.siteInfo);
   const { userGroup } = useSelector((state) => state.account);
+  const [selectedProvider, setSelectedProvider] = useState('openai');
+
+  const normalizedBaseAddress = useMemo(() => {
+    const fallbackAddress = 'https://api.wochirou.com';
+    const rawAddress = (siteInfo?.server_address && siteInfo.server_address.trim()) || fallbackAddress;
+    return rawAddress.replace(/\/+$/, '');
+  }, [siteInfo?.server_address]);
+
+  const providerAddressMap = useMemo(
+    () => ({
+      openai: normalizedBaseAddress,
+      gemini: `${normalizedBaseAddress}/gemini`,
+      claude: `${normalizedBaseAddress}/claude`
+    }),
+    [normalizedBaseAddress]
+  );
 
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
@@ -191,27 +208,48 @@ export default function Token() {
       </Stack>
       <Stack mb={5}>
         <Alert severity="info">
-          {t('token_index.replaceApiAddress1')}
-          <Box
-            component="span"
-            sx={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              backgroundColor: 'rgba(0, 0, 0, 0.08)',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              margin: '0 4px',
-              cursor: 'pointer',
-              '&:hover': {
-                backgroundColor: 'rgba(0, 0, 0, 0.12)'
-              }
-            }}
-            onClick={() => copy(siteInfo.server_address, 'API地址')}
-          >
-            <b>{siteInfo.server_address}</b>
-            <Icon icon="solar:copy-line-duotone" style={{ marginLeft: '8px', fontSize: '18px' }} />
-          </Box>
-          {t('token_index.replaceApiAddress2')}
+          <Stack spacing={1}>
+            <Typography variant="body2">
+              {t('token_index.replaceApiAddress1')}
+              {t('token_index.replaceApiAddress2')}
+            </Typography>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                {t('token_index.providerSwitchLabel')}
+              </Typography>
+              <ToggleButtonGroup
+                value={selectedProvider}
+                onChange={(event, value) => setSelectedProvider(value)}
+                options={['openai', 'gemini', 'claude'].map((provider) => ({
+                  value: provider,
+                  label: t(`token_index.providers.${provider}`)
+                }))}
+                aria-label="provider-selector"
+              />
+            </Stack>
+            <Box
+              component="span"
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                backgroundColor: 'rgba(0, 0, 0, 0.08)',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                margin: '0 4px',
+                cursor: 'pointer',
+                maxWidth: '100%',
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.12)'
+                }
+              }}
+              onClick={() => copy(providerAddressMap[selectedProvider] || '', 'API地址')}
+            >
+              <Typography component="span" sx={{ fontWeight: 600, wordBreak: 'break-all' }}>
+                {providerAddressMap[selectedProvider]}
+              </Typography>
+              <Icon icon="solar:copy-line-duotone" style={{ marginLeft: '8px', fontSize: '18px' }} />
+            </Box>
+          </Stack>
         </Alert>
       </Stack>
       <Card>

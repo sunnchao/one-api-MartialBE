@@ -1346,8 +1346,14 @@
     "quotaNote": "Note: The token's quota is only used to limit the maximum usage of the token itself, actual usage is subject to the remaining quota of the account.",
     "refresh": "Refresh",
     "remainingQuota": "Remaining Quota",
-    "replaceApiAddress1": "Replace the OpenAI API base address https://api.openai.com with",
-    "replaceApiAddress2": ", and you can use the key below.",
+    "replaceApiAddress1": "Replace the OpenAI API base address https://api.openai.com with the dedicated endpoint from https://api.wochirou.com, ",
+    "replaceApiAddress2": "then switch between the OpenAI/Gemini/Claude entries below and copy the key to start using it.",
+    "providerSwitchLabel": "Endpoint type",
+    "providers": {
+      "openai": "OpenAI",
+      "gemini": "Gemini",
+      "claude": "Claude"
+    },
     "searchTokenName": "Search for token name...",
     "status": "Status",
     "submit": "Submit",

@@ -1332,8 +1332,14 @@
     "quotaNote": "注意：トークンのクォータは、トークン自体の最大使用量を制限するためのものであり、実際の使用はアカウントの残りクォータによって制限されます。",
     "refresh": "リフレッシュ",
     "remainingQuota": "残りクォータ",
-    "replaceApiAddress1": "OpenAI APIの基本アドレスhttps://api.openai.comを",
-    "replaceApiAddress2": "に置き換え、以下のキーをコピーして使用してください。",
+    "replaceApiAddress1": "OpenAI APIの基本アドレス https://api.openai.com を https://api.wochirou.com の専用エンドポイントに置き換え、",
+    "replaceApiAddress2": "下の OpenAI/Gemini/Claude 切り替えでアドレスを選んでキーをコピーすれば利用できます。",
+    "providerSwitchLabel": "エンドポイント種別",
+    "providers": {
+      "openai": "OpenAI",
+      "gemini": "Gemini",
+      "claude": "Claude"
+    },
     "searchTokenName": "トークン名を検索...",
     "status": "ステータス",
     "submit": "提出する",

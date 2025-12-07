@@ -1334,8 +1334,14 @@
     "quotaNote": "注意，令牌的額度僅用於限制令牌本身的最大額度使用量，實際的使用受帳戶的剩餘額度限制。",
     "refresh": "刷新",
     "remainingQuota": "剩餘額度",
-    "replaceApiAddress1": "將OpenAI API基礎地址https://api.openai.com替換為",
-    "replaceApiAddress2": "，複製下面的密鑰即可使用。",
+    "replaceApiAddress1": "將 OpenAI API 基礎地址 https://api.openai.com 替換為 https://api.wochirou.com 提供的專用地址，",
+    "replaceApiAddress2": "可按需要切換 OpenAI/Gemini/Claude 接入點，複製下面的密鑰即可使用。",
+    "providerSwitchLabel": "接口類型",
+    "providers": {
+      "openai": "OpenAI",
+      "gemini": "Gemini",
+      "claude": "Claude"
+    },
     "searchTokenName": "搜索令牌的名稱...",
     "status": "狀態",
     "submit": "提交",
