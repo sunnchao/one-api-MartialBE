@@ -212,7 +212,7 @@ func ConvertFromChatOpenai(request *types.ChatCompletionRequest) (*GeminiChatReq
 		},
 	}
 
-	if strings.HasPrefix(request.Model, "gemini-2.0-flash-exp") || strings.HasPrefix(request.Model, "gemini-2.5-flash-image-preview") {
+	if strings.HasPrefix(request.Model, "gemini-2.0-flash-exp") || isImagePreviewModel(request.Model) {
 		geminiRequest.GenerationConfig.ResponseModalities = []string{"Text", "Image"}
 	}
 

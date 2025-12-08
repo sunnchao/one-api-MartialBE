@@ -1,6 +1,7 @@
 package gemini
 
 import (
+	"encoding/base64"
 	"math"
 	"net/http"
 	"strconv"
@@ -8,6 +9,7 @@ import (
 
 	"one-api/common"
 	"one-api/common/image"
+	"one-api/common/storage"
 	"one-api/common/utils"
 	"one-api/types"
 )
@@ -83,9 +85,22 @@ func (p *GeminiProvider) CreateImageGenerations(request *types.ImageRequest) (*t
 		perImageTokens := int(math.Ceil(258 * ratio))
 		totalPromptTokens += perImageTokens
 
-		openaiResponse.Data = append(openaiResponse.Data, types.ImageResponseDataInner{
-			B64JSON: prediction.BytesBase64Encoded,
-		})
+		url := ""
+		if request.ResponseFormat == "" || request.ResponseFormat == "url" {
+			body, err := base64.StdEncoding.DecodeString(prediction.BytesBase64Encoded)
+			if err == nil {
+				url = storage.Upload(body, utils.GetUUID()+".png")
+			}
+		}
+
+		data := types.ImageResponseDataInner{}
+		if url != "" {
+			data.URL = url
+		} else {
+			data.B64JSON = prediction.BytesBase64Encoded
+		}
+
+		openaiResponse.Data = append(openaiResponse.Data, data)
 	}
 
 	if totalPromptTokens == 0 {
