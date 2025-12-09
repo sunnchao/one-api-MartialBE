@@ -114,7 +114,6 @@ func setClaudeRouter(router *gin.Engine) {
 	relayV1Router.Use(middleware.APIEnabled("claude"), middleware.RelayCluadePanicRecover(), middleware.ClaudeAuth(), middleware.Distribute(), middleware.DynamicRedisRateLimiter())
 	{
 		relayV1Router.POST("/messages", relay.Relay)
-		relayV1Router.POST("/messages/count_tokens", relay.ClaudeCountTokens)
 		relayV1Router.GET("/models", relay.ListClaudeModelsByToken)
 	}
 }

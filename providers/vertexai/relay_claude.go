@@ -55,23 +55,6 @@ func (p *VertexAIProvider) CreateClaudeChatStream(request *claude.ClaudeRequest)
 	return stream, nil
 }
 
-func (p *VertexAIProvider) CreateClaudeCountTokens(request *claude.CountTokensRequest) (*claude.CountTokensResponse, *types.OpenAIErrorWithStatusCode) {
-	req, errWithCode := p.getClaudeCountTokensRequest(request)
-	if errWithCode != nil {
-		return nil, errWithCode
-	}
-	defer req.Body.Close()
-
-	claudeResponse := &claude.CountTokensResponse{}
-	// 发送请求
-	_, openaiErr := p.Requester.SendRequest(req, claudeResponse, false)
-	if openaiErr != nil {
-		return nil, openaiErr
-	}
-
-	return claudeResponse, nil
-}
-
 func (p *VertexAIProvider) getClaudeRequest(request *claude.ClaudeRequest) (*http.Request, *types.OpenAIErrorWithStatusCode) {
 	var err error
 	p.Category, err = category.GetCategory(request.Model)
@@ -102,51 +85,6 @@ func (p *VertexAIProvider) getClaudeRequest(request *claude.ClaudeRequest) (*htt
 
 	vertexaiRequest := &category.ClaudeRequest{
 		ClaudeRequest:    &copyRequest,
-		AnthropicVersion: category.AnthropicVersion,
-	}
-	vertexaiRequest.Model = ""
-
-	// 错误处理
-	p.Requester.ErrorHandler = RequestErrorHandle(p.Category.ErrorHandler)
-
-	// 创建请求
-	req, err := p.Requester.NewRequest(http.MethodPost, fullRequestURL, p.Requester.WithBody(vertexaiRequest), p.Requester.WithHeader(headers))
-	if err != nil {
-		return nil, common.StringErrorWrapperLocal(err.Error(), "new_request_failed", http.StatusInternalServerError)
-	}
-	return req, nil
-}
-
-func (p *VertexAIProvider) getClaudeCountTokensRequest(request *claude.CountTokensRequest) (*http.Request, *types.OpenAIErrorWithStatusCode) {
-	var err error
-	p.Category, err = category.GetCategory(request.Model)
-	if err != nil || p.Category.Category != "claude" {
-		return nil, common.StringErrorWrapperLocal("vertexAI provider not found", "vertexAI_err", http.StatusInternalServerError)
-	}
-
-	modelName := p.Category.GetModelName(request.Model)
-
-	// 获取请求地址 - count_tokens 使用 countTokens endpoint
-	fullRequestURL := p.GetFullRequestURL(modelName, "countTokens")
-	if fullRequestURL == "" {
-		return nil, common.StringErrorWrapperLocal("vertexAI config error", "invalid_vertexai_config", http.StatusInternalServerError)
-	}
-
-	headers := p.GetRequestHeaders()
-
-	if headers == nil {
-		return nil, common.StringErrorWrapperLocal("vertexAI config error", "invalid_vertexai_config", http.StatusInternalServerError)
-	}
-
-	copyRequest := *request
-
-	vertexaiRequest := &category.ClaudeRequest{
-		ClaudeRequest: &claude.ClaudeRequest{
-			Model:    copyRequest.Model,
-			System:   copyRequest.System,
-			Messages: copyRequest.Messages,
-			Tools:    copyRequest.Tools,
-		},
 		AnthropicVersion: category.AnthropicVersion,
 	}
 	vertexaiRequest.Model = ""

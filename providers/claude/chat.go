@@ -573,32 +573,3 @@ func (h *ClaudeStreamHandler) convertToOpenaiStream(claudeResponse *ClaudeStream
 	responseBody, _ := json.Marshal(chatCompletion)
 	dataChan <- string(responseBody)
 }
-
-// CreateClaudeCountTokens implements counting tokens for Claude messages
-func (p *ClaudeProvider) CreateClaudeCountTokens(request *CountTokensRequest) (*CountTokensResponse, *types.OpenAIErrorWithStatusCode) {
-	// Get count_tokens API URL
-	fullRequestURL := p.GetFullRequestURL("/v1/messages/count_tokens")
-	if fullRequestURL == "" {
-		return nil, common.ErrorWrapperLocal(nil, "invalid_claude_config", http.StatusInternalServerError)
-	}
-
-	// Get request headers and add beta header for count_tokens
-	headers := p.GetOriginalRequestHeaders()
-	headers["anthropic-beta"] = "token-counting-2024-11-01"
-
-	// Create request
-	req, err := p.Requester.NewRequest(http.MethodPost, fullRequestURL, p.Requester.WithBody(request), p.Requester.WithHeader(headers))
-	if err != nil {
-		return nil, common.ErrorWrapperLocal(err, "new_request_failed", http.StatusInternalServerError)
-	}
-	defer req.Body.Close()
-
-	claudeResponse := &CountTokensResponse{}
-	// Send request
-	_, errWithCode := p.Requester.SendRequest(req, claudeResponse, false)
-	if errWithCode != nil {
-		return nil, errWithCode
-	}
-
-	return claudeResponse, nil
-}

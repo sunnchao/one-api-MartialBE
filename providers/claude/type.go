@@ -218,16 +218,3 @@ type Model struct {
 	Type string `json:"type"`
 	ID   string `json:"id"`
 }
-
-// CountTokensRequest represents the request for counting tokens
-type CountTokensRequest struct {
-	Model    string    `json:"model"`
-	System   any       `json:"system,omitempty"`
-	Messages []Message `json:"messages"`
-	Tools    []Tools   `json:"tools,omitempty"`
-}
-
-// CountTokensResponse represents the response for counting tokens
-type CountTokensResponse struct {
-	InputTokens int `json:"input_tokens"`
-}
