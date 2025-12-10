@@ -38,6 +38,7 @@ func (p *JinaProvider) CreateRerank(request *types.RerankRequest) (*types.Rerank
 	}
 
 	p.Usage.PromptTokens = jinaResponse.Usage.PromptTokens
+	p.Usage.PromptTokensDetails.InputTokens = jinaResponse.Usage.PromptTokens
 	p.Usage.TotalTokens = jinaResponse.Usage.TotalTokens
 
 	return jinaResponse, nil

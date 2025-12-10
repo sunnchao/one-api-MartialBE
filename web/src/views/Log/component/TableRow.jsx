@@ -89,17 +89,7 @@ export default function LogTableRow({ item, userIsAdmin, userGroup, columnVisibi
     request_ts = item.completion_tokens / stream_time;
     request_ts_str = `${request_ts.toFixed(2)} t/s`;
   }
-  const {
-    totalInputTokens,
-    totalOutputTokens,
-    show,
-    tokenDetails,
-    cached_write_tokens,
-    cached_read_tokens,
-    reasoning_tokens,
-    cached_read_tokens_ratio,
-    cached_write_tokens_ratio
-  } = useMemo(() => calculateTokens(item), [item]);
+  const { totalInputTokens, totalOutputTokens, show, tokenDetails } = useMemo(() => calculateTokens(item), [item]);
 
   // 计算当前显示的列数
   const colCount = Object.values(columnVisibility).filter(Boolean).length;
@@ -272,10 +262,10 @@ const MetadataTypography = styled(Typography)(({ theme }) => ({
 }));
 
 function viewInput(item, t, totalInputTokens, totalOutputTokens, show, tokenDetails) {
-  const { prompt_tokens } = item;
+  const baseInputTokens = item?.metadata?.input_tokens ?? item.prompt_tokens;
 
-  if (!prompt_tokens) return '';
-  if (!show) return prompt_tokens;
+  if (!baseInputTokens) return '';
+  if (!show) return baseInputTokens;
 
   const tooltipContent = tokenDetails.map(({ key, label, tokens, value, rate, labelParams }) => (
     <MetadataTypography key={key}>{`${t(label, labelParams)}: ${value} *  (${rate} - 1) = ${tokens}`}</MetadataTypography>
@@ -298,7 +288,7 @@ function viewInput(item, t, totalInputTokens, totalOutputTokens, show, tokenDeta
         placement="top"
         arrow
       >
-        <span style={{ cursor: 'help' }}>{prompt_tokens}</span>
+        <span style={{ cursor: 'help' }}>{baseInputTokens}</span>
       </Tooltip>
     </Badge>
   );
@@ -306,23 +296,27 @@ function viewInput(item, t, totalInputTokens, totalOutputTokens, show, tokenDeta
 
 function calculateTokens(item) {
   const { prompt_tokens, completion_tokens, metadata } = item;
-  if (!prompt_tokens || !metadata) {
+  const baseInputTokens = metadata?.input_tokens ?? prompt_tokens ?? 0;
+  const baseOutputTokens = completion_tokens ?? 0;
+
+  if (!metadata) {
     return {
-      totalInputTokens: prompt_tokens || 0,
-      totalOutputTokens: completion_tokens || 0,
+      totalInputTokens: baseInputTokens,
+      totalOutputTokens: baseOutputTokens,
       cached_write_tokens: metadata?.cached_write_tokens || 0,
       cached_write_tokens_ratio: metadata?.cached_write_tokens_ratio || 0,
       cached_read_tokens: metadata?.cached_read_tokens || 0,
       cached_read_tokens_ratio: metadata?.cached_read_tokens_ratio || 0,
       reasoning_tokens: metadata?.reasoning_tokens || 0,
       reasoning_tokens_ratio: metadata?.reasoning_tokens_ratio || 0,
+      input_tokens: metadata?.input_tokens || 0,
       show: false,
       tokenDetails: []
     };
   }
 
-  let totalInputTokens = prompt_tokens;
-  let totalOutputTokens = completion_tokens;
+  let totalInputTokens = baseInputTokens;
+  let totalOutputTokens = baseOutputTokens;
   let show = false;
 
   const input_audio_tokens = metadata?.input_audio_tokens_ratio || 1;
@@ -363,13 +357,22 @@ function calculateTokens(item) {
       labelParams: { ratio: output_audio_tokens }
     },
     { key: 'cached_tokens', label: 'logPage.cachedTokens', rate: cached_ratio, labelParams: { ratio: cached_ratio } },
-    {
-      key: 'cached_write_tokens',
-      label: 'logPage.cachedWriteTokens',
-      rate: cached_write_ratio,
-      labelParams: { ratio: cached_write_ratio }
-    },
-    { key: 'cached_read_tokens', label: 'logPage.cachedReadTokens', rate: cached_read_ratio, labelParams: { ratio: cached_read_ratio } },
+    metadata?.input_tokens
+      ? null
+      : {
+          key: 'cached_write_tokens',
+          label: 'logPage.cachedWriteTokens',
+          rate: cached_write_ratio,
+          labelParams: { ratio: cached_write_ratio }
+        },
+    metadata?.input_tokens
+      ? null
+      : {
+          key: 'cached_read_tokens',
+          label: 'logPage.cachedReadTokens',
+          rate: cached_read_ratio,
+          labelParams: { ratio: cached_read_ratio }
+        },
     { key: 'reasoning_tokens', label: 'logPage.reasoningTokens', rate: reasoning_tokens, labelParams: { ratio: reasoning_tokens } },
     {
       key: 'input_image_tokens',
@@ -384,6 +387,7 @@ function calculateTokens(item) {
       labelParams: { ratio: output_image_tokens }
     }
   ]
+    .filter((item) => item !== null)
     .filter(({ key }) => metadata[key] > 0)
     .map(({ key, label, rate, labelParams }) => {
       const tokens = Math.ceil(metadata[key] * (rate - 1));
@@ -421,24 +425,33 @@ function calculateTokens(item) {
 }
 
 function viewLogContent(item, t) {
+  const cachedTokensLabel = renderCachedTokens(item?.metadata);
+
   // totalOutputTokens is passed but not used in this function
   // Check if we have the necessary data to calculate prices
   if (!item?.metadata?.input_ratio) {
     const free = (item.quota === 0 || item.quota === undefined) && item.type === 2;
-    return free ? (
-      <Stack direction="column" spacing={0.5}>
-        <Label
-          color={free ? 'success' : 'secondary'}
-          variant="soft"
-          sx={{
-            fontSize: 13
-          }}
-        >
-          {t('logPage.content.free')}
-        </Label>
-      </Stack>
+    const baseContent = free ? (
+      <Label
+        color={free ? 'success' : 'secondary'}
+        variant="soft"
+        sx={{
+          fontSize: 12
+        }}
+      >
+        {t('logPage.content.free')}
+      </Label>
     ) : (
-      <span style={{ fontSize: 13 }}>{item.content || ''}</span>
+      <span style={{ fontSize: 12 }}>{item.content || ''}</span>
+    );
+
+    if (!cachedTokensLabel) return baseContent;
+
+    return (
+      <Stack direction="column">
+        {cachedTokensLabel}
+        {baseContent}
+      </Stack>
     );
   }
 
@@ -472,16 +485,44 @@ function viewLogContent(item, t) {
 
   return (
     <Stack direction="row" spacing={0.3} display={'flex'} justifyContent={'center'}>
+      {cachedTokensLabel}
       {inputPriceInfo && (
         <Label color="info" variant="ghost" sx={{ fontSize: 12 }}>
           {inputPriceInfo}
         </Label>
       )}
       {outputPriceInfo && (
-        <Label color="info" variant="ghost">
+        <Label color="info" variant="ghost" sx={{ fontSize: 12 }}>
           {outputPriceInfo}
         </Label>
       )}
     </Stack>
   );
+}
+
+function renderCachedTokens(metadata) {
+  const cachedWriteTokens = Number(metadata?.cached_write_tokens) || 0;
+  const cachedReadTokens = Number(metadata?.cached_read_tokens) || 0;
+
+  if (!cachedWriteTokens && !cachedReadTokens) return null;
+
+  const parts = [];
+  if (cachedWriteTokens) parts.push(`缓存写入: ${cachedWriteTokens}`);
+  if (cachedReadTokens) parts.push(`缓存读取: ${cachedReadTokens}`);
+
+  return metadata?.input_tokens ? (
+    <Label
+      color="default"
+      sx={{
+        fontSize: 11,
+        px: 0.5,
+        py: 0,
+        backgroundColor: 'transparent',
+        borderColor: 'transparent',
+        color: 'text.secondary'
+      }}
+    >
+      {parts.join(' / ')}
+    </Label>
+  ) : null;
 }

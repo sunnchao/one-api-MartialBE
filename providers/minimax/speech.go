@@ -135,6 +135,7 @@ func (p *MiniMaxProvider) CreateSpeech(request *types.SpeechAudioRequest) (*http
 	response.Header.Set("Content-Length", strconv.FormatInt(speechResponse.ExtraInfo.AudioSize, 10))
 
 	p.Usage.PromptTokens = speechResponse.ExtraInfo.UsageCharacters
+	p.Usage.PromptTokensDetails.InputTokens = speechResponse.ExtraInfo.UsageCharacters
 	p.Usage.TotalTokens = speechResponse.ExtraInfo.UsageCharacters
 
 	return response, nil

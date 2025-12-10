@@ -108,6 +108,7 @@ func (p *GeminiProvider) CreateImageGenerations(request *types.ImageRequest) (*t
 	}
 
 	usage.PromptTokens = totalPromptTokens
+	usage.PromptTokensDetails.InputTokens = totalPromptTokens
 	usage.TotalTokens = usage.PromptTokens
 
 	return openaiResponse, nil

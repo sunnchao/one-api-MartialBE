@@ -132,6 +132,7 @@ func (p *ReplicateProvider) convertToChatOpenai(response *ReplicateResponse[[]st
 	}
 
 	p.Usage.PromptTokens = response.Metrics.InputTokenCount
+	p.Usage.PromptTokensDetails.InputTokens = response.Metrics.InputTokenCount
 	p.Usage.CompletionTokens = response.Metrics.OutputTokenCount
 	p.Usage.TotalTokens = p.Usage.PromptTokens + p.Usage.CompletionTokens
 	openaiResponse.Usage = p.Usage
@@ -199,6 +200,7 @@ func (h *ReplicateStreamHandler) HandlerChatStream(rawLine *[]byte, dataChan cha
 		replicateResponse := getPredictionResponse[[]string](h.Provider, h.ID)
 
 		h.Usage.PromptTokens = replicateResponse.Metrics.InputTokenCount
+		h.Usage.PromptTokensDetails.InputTokens = replicateResponse.Metrics.InputTokenCount
 		h.Usage.CompletionTokens = replicateResponse.Metrics.OutputTokenCount
 		h.Usage.TotalTokens = h.Usage.PromptTokens + h.Usage.CompletionTokens
 

@@ -192,6 +192,7 @@ func (h *ollamaStreamHandler) handlerStream(rawLine *[]byte, dataChan chan strin
 
 	if chatResponse.EvalCount > 0 {
 		h.Usage.PromptTokens = chatResponse.PromptEvalCount
+		h.Usage.PromptTokensDetails.InputTokens = chatResponse.PromptEvalCount
 		h.Usage.CompletionTokens = chatResponse.EvalCount
 		h.Usage.TotalTokens = h.Usage.PromptTokens + chatResponse.EvalCount
 	}

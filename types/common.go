@@ -101,6 +101,7 @@ type PromptTokensDetails struct {
 
 	CachedWriteTokens int `json:"-"`
 	CachedReadTokens  int `json:"-"`
+	InputTokens       int `json:"-"`
 }
 
 type CompletionTokensDetails struct {

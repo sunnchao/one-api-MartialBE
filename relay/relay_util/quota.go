@@ -41,13 +41,13 @@ type Quota struct {
 	extraBillingData  map[string]ExtraBillingData
 
 	// ClaudeCode订阅相关字段
-	packageServiceType  string                      // 服务类型 (claude_code, codex_code, gemini_code)
-	subscriptionId      int                         // 使用的订阅ID（第一个成功扣费的订阅）
-	useSubscription     bool                        // 是否使用订阅计费
-	subscriptionQuota   int                         // 从订阅消费的总额度
-	subscriptionHandled bool                        // 订阅是否已处理
-	subscriptionsUsed   []SubscriptionUsageDetail   // 多订阅消费明细
-	quotaFromBalance    int                         // 从普通余额扣除的额度
+	packageServiceType  string                    // 服务类型 (claude_code, codex_code, gemini_code)
+	subscriptionId      int                       // 使用的订阅ID（第一个成功扣费的订阅）
+	useSubscription     bool                      // 是否使用订阅计费
+	subscriptionQuota   int                       // 从订阅消费的总额度
+	subscriptionHandled bool                      // 订阅是否已处理
+	subscriptionsUsed   []SubscriptionUsageDetail // 多订阅消费明细
+	quotaFromBalance    int                       // 从普通余额扣除的额度
 }
 
 func NewQuota(c *gin.Context, modelName string, promptTokens int) (*Quota, *types.OpenAIErrorWithStatusCode) {
@@ -417,6 +417,9 @@ func (q *Quota) GetLogMeta(usage *types.Usage) map[string]any {
 			meta[key] = value
 			extraRatio := q.price.GetExtraRatio(key)
 			meta[key+"_ratio"] = extraRatio
+		}
+		if usage.PromptTokensDetails.InputTokens > 0 {
+			meta["input_tokens"] = usage.PromptTokensDetails.InputTokens
 		}
 	}
 

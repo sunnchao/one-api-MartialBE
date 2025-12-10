@@ -56,6 +56,7 @@ func (p *SiliconflowProvider) convertToImageOpenai(response *ImageRes) (openaiRe
 	}
 
 	p.Usage.PromptTokens = 1
+	p.Usage.PromptTokensDetails.InputTokens = 1
 
 	return
 }

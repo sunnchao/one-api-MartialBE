@@ -298,5 +298,6 @@ func (h *baiduStreamHandler) convertToOpenaiStream(baiduResponse *BaiduChatStrea
 
 	h.Usage.TotalTokens = baiduResponse.Usage.TotalTokens
 	h.Usage.PromptTokens = baiduResponse.Usage.PromptTokens
+	h.Usage.PromptTokensDetails.InputTokens = baiduResponse.Usage.PromptTokens
 	h.Usage.CompletionTokens += baiduResponse.Usage.CompletionTokens
 }

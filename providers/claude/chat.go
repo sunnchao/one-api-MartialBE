@@ -75,7 +75,7 @@ func (p *ClaudeProvider) CreateChatCompletionStream(request *types.ChatCompletio
 	chatHandler := &ClaudeStreamHandler{
 		Usage:   p.Usage,
 		Request: request,
-		Prefix:  `data: {"type"`,
+		Prefix:  `data: {`,
 	}
 
 	eventstream.NewDecoder()
@@ -478,6 +478,7 @@ func (h *ClaudeStreamHandler) HandlerStream(rawLine *[]byte, dataChan chan strin
 	case "message_start":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)
 		h.Usage.PromptTokens = claudeResponse.Message.Usage.InputTokens
+		h.Usage.PromptTokensDetails.InputTokens = claudeResponse.Message.Usage.InputTokens
 
 	case "message_delta":
 		h.convertToOpenaiStream(&claudeResponse, dataChan)

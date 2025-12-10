@@ -57,6 +57,7 @@ func (p *ZhipuProvider) convertToImageOpenai(response *ZhipuImageGenerationRespo
 	}
 
 	p.Usage.PromptTokens = 1000
+	p.Usage.PromptTokensDetails.InputTokens = 1000
 
 	return
 }

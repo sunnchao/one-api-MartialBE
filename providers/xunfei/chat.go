@@ -226,6 +226,7 @@ func (h *xunfeiHandler) handlerData(rawLine *[]byte, isFinished *bool) (*XunfeiC
 	}
 
 	h.Usage.PromptTokens = xunfeiChatResponse.Payload.Usage.Text.PromptTokens
+	h.Usage.PromptTokensDetails.InputTokens = xunfeiChatResponse.Payload.Usage.Text.PromptTokens
 	h.Usage.CompletionTokens = xunfeiChatResponse.Payload.Usage.Text.CompletionTokens
 	h.Usage.TotalTokens = xunfeiChatResponse.Payload.Usage.Text.TotalTokens
 

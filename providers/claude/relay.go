@@ -65,7 +65,7 @@ func (p *ClaudeProvider) CreateClaudeChatStream(request *ClaudeRequest) (request
 	chatHandler := &ClaudeRelayStreamHandler{
 		Usage:     p.Usage,
 		ModelName: request.Model,
-		Prefix:    `data: {"type"`,
+		Prefix:    `data: `,
 	}
 
 	// 发送请求
@@ -86,6 +86,12 @@ func (h *ClaudeRelayStreamHandler) HandlerStream(rawLine *[]byte, dataChan chan 
 	rawStr := string(*rawLine)
 	// 如果rawLine 前缀不为data:，则直接返回
 	if !strings.HasPrefix(rawStr, h.Prefix) {
+		dataChan <- rawStr
+		return
+	}
+
+	// 验证包含 type 字段
+	if !strings.Contains(rawStr, `"type"`) {
 		dataChan <- rawStr
 		return
 	}
@@ -127,7 +133,7 @@ func (h *ClaudeRelayStreamHandler) HandlerStream(rawLine *[]byte, dataChan chan 
 		ClaudeUsageToOpenaiUsage(&claudeResponse.Message.Usage, h.Usage)
 		h.StartUsage = &claudeResponse.Message.Usage
 	case "message_delta":
-		ClaudeUsageMerge(&claudeResponse.Usage, h.StartUsage)
+		//ClaudeUsageMerge(&claudeResponse.Usage, h.StartUsage)
 		ClaudeUsageToOpenaiUsage(&claudeResponse.Usage, h.Usage)
 	case "content_block_delta":
 		h.Usage.TextBuilder.WriteString(claudeResponse.Delta.Text)

@@ -62,6 +62,7 @@ func (p *CloudflareAIProvider) CreateImageGenerations(request *types.ImageReques
 	}
 
 	p.Usage.PromptTokens = 1000
+	p.Usage.PromptTokensDetails.InputTokens = 1000
 
 	return openaiResponse, nil
 }

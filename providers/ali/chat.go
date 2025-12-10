@@ -256,6 +256,7 @@ func (h *aliStreamHandler) convertToOpenaiStream(aliResponse *AliChatResponse, d
 
 	if aliResponse.Usage.OutputTokens != 0 {
 		h.Usage.PromptTokens = aliResponse.Usage.InputTokens
+		h.Usage.PromptTokensDetails.InputTokens = aliResponse.Usage.InputTokens
 		h.Usage.CompletionTokens = aliResponse.Usage.OutputTokens
 		h.Usage.TotalTokens = aliResponse.Usage.InputTokens + aliResponse.Usage.OutputTokens
 	}
