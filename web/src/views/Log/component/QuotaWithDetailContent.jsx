@@ -93,13 +93,16 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
     item.metadata?.output_price ||
     (item.metadata?.output_ratio ? `$${calculatePrice(item.metadata.output_ratio, groupRatio, false)}` : '$0');
 
-  const inputPriceUnit = inputPrice + ' /M';
+  const originaInputPriceUnit = originalInputPrice + ' /M';
+  const originaOutPriceUnit = originalOutputPrice + ' /M';
   const originalCachedWritePriceUnit = originalCachedWritePrice + ' /M';
   const originalCachedReadPriceUnit = originalCachedReadPrice + ' /M';
   const originalReasoningPriceUnit = originalReasoningPrice + ' /M';
   const cachedWritePriceUnit = cachedWritePrice + ' /M';
   const cachedReadPriceUnit = cachedReadPrice + ' /M';
   const reasoningPriceUnit = reasoningPrice + ' /M';
+  
+  const inputPriceUnit = inputPrice + ' /M';
   const outputPriceUnit = outputPrice + ' /M';
 
   let calculateSteps = '';
@@ -174,16 +177,9 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
               {packageServiceType && (
-                <Chip
-                  label={serviceTypeNames[packageServiceType] || packageServiceType}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
+                <Chip label={serviceTypeNames[packageServiceType] || packageServiceType} size="small" color="primary" variant="outlined" />
               )}
-              {resourcePackageId && (
-                <Chip label={`资源包 #${resourcePackageId}`} size="small" color="warning" variant="filled" />
-              )}
+              {resourcePackageId && <Chip label={`资源包 #${resourcePackageId}`} size="small" color="warning" variant="filled" />}
             </Box>
           </Box>
           <Typography variant="caption" sx={{ mt: 0.5, display: 'block', color: 'text.secondary' }}>
@@ -225,10 +221,10 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
             <Typography sx={{ fontWeight: 600, fontSize: 12 }}>{t('logPage.quotaDetail.originalPrice')}</Typography>
           </Box>
           <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, mb: 0.5, textAlign: 'left' }}>
-            {t('logPage.quotaDetail.inputPrice')}: {inputPriceUnit}
+            {t('logPage.quotaDetail.inputPrice')}: {originaInputPriceUnit}
           </Typography>
           <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, textAlign: 'left' }}>
-            {t('logPage.quotaDetail.outputPrice')}: {outputPriceUnit}
+            {t('logPage.quotaDetail.outputPrice')}: {originaOutPriceUnit}
           </Typography>
           {item.metadata?.cached_write_tokens > 0 && (
             <Typography sx={{ fontSize: 12, color: (theme) => theme.palette.text.secondary, mt: 0.5, textAlign: 'left' }}>

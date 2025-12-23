@@ -115,6 +115,7 @@ func setClaudeRouter(router *gin.Engine) {
 	{
 		relayV1Router.POST("/messages", relay.Relay)
 		relayV1Router.GET("/models", relay.ListClaudeModelsByToken)
+		relayV1Router.POST("/event_logging/batch", relay.EventLoggingBatch)
 	}
 }
 

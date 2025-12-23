@@ -373,3 +373,8 @@ func getAvailableModels(groupName string) map[string]*AvailableModelResponse {
 
 	return availableModels
 }
+
+// Claude Code 客户端遥测端点 - 返回成功响应避免 404 日志
+func EventLoggingBatch(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"success": true})
+}
