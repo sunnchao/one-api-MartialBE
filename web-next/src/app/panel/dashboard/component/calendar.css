@@ -1,0 +1,97 @@
+.oneapi-checkin-calendar {
+  --oneapi-green: #52c41a;
+  --oneapi-blue: #1677ff;
+  --oneapi-red: #ff4d4f;
+  --oneapi-amber: #faad14;
+}
+
+.oneapi-checkin-calendar .ant-picker-calendar-date {
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 80px;
+}
+
+.oneapi-checkin-calendar .ant-picker-cell-inner {
+  padding: 0 !important;
+}
+
+.oneapi-checkin-cell {
+  height: 80px;
+  padding: 10px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 12px;
+  transition: background 160ms ease, box-shadow 160ms ease;
+}
+
+.oneapi-checkin-cell--inMonth:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.oneapi-checkin-cell__dateRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.oneapi-checkin-cell__date {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.oneapi-checkin-cell--otherMonth .oneapi-checkin-cell__date {
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.oneapi-checkin-cell__pill {
+  align-self: center;
+  border-radius: 12px;
+  padding: 6px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1;
+  user-select: none;
+}
+
+.oneapi-checkin-cell__pillIcon {
+  font-size: 14px;
+}
+
+.oneapi-checkin-cell--checked .oneapi-checkin-cell__pill {
+  background: rgba(82, 196, 26, 0.12);
+  color: var(--oneapi-green);
+}
+
+.oneapi-checkin-cell--missed .oneapi-checkin-cell__pill {
+  background: rgba(255, 77, 79, 0.12);
+  color: var(--oneapi-red);
+}
+
+.oneapi-checkin-cell--today .oneapi-checkin-cell__pill {
+  background: rgba(22, 119, 255, 0.12);
+  color: var(--oneapi-blue);
+}
+
+.oneapi-checkin-cell--future .oneapi-checkin-cell__pill {
+  background: rgba(250, 173, 20, 0.14);
+  color: #d48806;
+}
+
+.oneapi-checkin-cell--today .oneapi-checkin-cell__date {
+  background: var(--oneapi-blue);
+  color: #fff;
+}
+
+.oneapi-checkin-cell--checked .oneapi-checkin-cell__date {
+  background: rgba(82, 196, 26, 0.12);
+  color: #237804;
+}
+
