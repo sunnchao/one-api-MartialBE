@@ -73,7 +73,6 @@ export default function PricingPage() {
   const onFinish = async (values: any) => {
       try {
           const payload = {
-              cache_input: 0,
               ...values,
               cache_input: values.cache_input ?? 0
           };
@@ -113,9 +112,9 @@ export default function PricingPage() {
       },
       {
           title: t('modelpricePage.modelMultiplier'),
-          dataIndex: 'input',
+          dataIndex: 'model_ratio',
           key: 'modelMultiplier',
-          render: (text: number) => renderMultiplier(text)
+          render: (text: number) => renderMultiplier(text ?? 1)
       },
       {
           title: t('modelpricePage.inputMultiplier'),
@@ -150,7 +149,7 @@ export default function PricingPage() {
                       icon={<EditOutlined />}
                       onClick={() => {
                           setEditingPrice(record);
-                          form.setFieldsValue({ cache_input: 0, ...record });
+                          form.setFieldsValue({ model_ratio: 1, cache_input: 0, ...record });
                           setModalOpen(true);
                       }}
                   />
@@ -171,7 +170,7 @@ export default function PricingPage() {
                     onClick={() => {
                         setEditingPrice(null);
                         form.resetFields();
-                        form.setFieldsValue({ type: 'tokens', cache_input: 0 });
+                        form.setFieldsValue({ type: 'tokens', model_ratio: 1, cache_input: 0 });
                         setModalOpen(true);
                     }}
                     size={"middle"}
@@ -190,6 +189,9 @@ export default function PricingPage() {
             columns={columns}
             rowKey="model"
             size={"middle"}
+            pagination={{
+              pageSize: 100
+            }}
         />
       </Space>
 
@@ -215,6 +217,9 @@ export default function PricingPage() {
                       <Option value="times">Times</Option>
                   </Select>
               </Form.Item>
+              <Form.Item name="model_ratio" label={t('modelpricePage.modelMultiplier')} initialValue={1}>
+                  <InputNumber style={{ width: '100%' }} step={0.001} min={0} size={"middle"}/>
+              </Form.Item>
               <Form.Item name="input" label={t('modelpricePage.inputMultiplier')} rules={[{ required: true }]}>
                   <InputNumber style={{ width: '100%' }} step={0.000001} min={0} size={"middle"}/>
               </Form.Item>
@@ -225,7 +230,7 @@ export default function PricingPage() {
                   <InputNumber style={{ width: '100%' }} step={0.000001} min={0} size={"middle"}/>
               </Form.Item>
               <Form.Item name="channel_type" label={t('pricing_edit.channelType')}>
-                  <Select size={"middle"}>
+                  <Select size={"middle"} showSearch={true}>
                       {ownedby.map((item: any) => (
                           <Option key={item.value} value={item.value}>{item.label}</Option>
                       ))}
