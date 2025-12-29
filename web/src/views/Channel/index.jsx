@@ -17,7 +17,7 @@ import ChannelTableRow from './component/TableRow';
 import KeywordTableHead from 'ui-component/TableHead';
 import { API } from 'utils/api';
 import EditeModal from './component/EditModal';
-import { PAGE_SIZE_OPTIONS, getPageSize, savePageSize } from 'constants';
+import { PAGE_SIZE_OPTIONS, getPageSize, savePageSize, getTableSort, saveTableSort } from 'constants';
 import TableToolBar from './component/TableToolBar';
 import BatchModal from './component/BatchModal';
 import { useTranslation } from 'react-i18next';
@@ -51,7 +51,8 @@ const originalKeyword = {
   test_model: '',
   other: '',
   filter_tag: 0,
-  tag: ''
+  tag: '',
+  base_url: ''
 };
 
 export async function fetchChannelData(page, rowsPerPage, keyword, order, orderBy) {
@@ -111,11 +112,19 @@ export default function ChannelList() {
   const [openBatchModal, setOpenBatchModal] = useState(false);
   const [prices, setPrices] = useState([]);
 
+  // 批量删除相关状态
+  const [selectedChannels, setSelectedChannels] = useState([]);
+  const [batchDeleteConfirm, setBatchDeleteConfirm] = useState(false);
+
+  // 提示框展开状态
+  const [alertExpanded, setAlertExpanded] = useState(false);
+
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
     if (id !== '') {
       setOrder(isAsc ? 'desc' : 'asc');
       setOrderBy(id);
+      saveTableSort('channel', newOrder, id);
     }
   };
 
@@ -307,8 +316,11 @@ export default function ChannelList() {
       }
       const { success, message } = res.data;
       if (success) {
-        showSuccess(t('userPage.operationSuccess'));
-        if (action === 'delete' || action === 'copy' || action == 'delete_tag') {
+        // 对于batch_delete操作，不显示通用成功消息，因为在confirmBatchDelete中已有专门的成功消息
+        if (action !== 'batch_delete') {
+          showSuccess(t('userPage.operationSuccess'));
+        }
+        if (action === 'delete' || action === 'copy' || action == 'delete_tag' || action === 'batch_delete') {
           await handleRefresh(false);
         }
       } else {
@@ -326,6 +338,7 @@ export default function ChannelList() {
     if (reset) {
       setOrderBy('id');
       setOrder('desc');
+      saveTableSort('channel', 'desc', 'id');
       setToolBarValue(originalKeyword);
       setSearchKeyword(originalKeyword);
       setHasSearchChanges(false); // 重置变化标记

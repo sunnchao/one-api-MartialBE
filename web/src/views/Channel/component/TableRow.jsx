@@ -118,6 +118,7 @@ export default function ChannelTableRow({ item, manageChannel, onRefresh, groupO
   const [openCheck, setOpenCheck] = useState(false);
   const [statusSwitch, setStatusSwitch] = useState(item.status);
   const [autoBanSwitch, setAutoBanSwitch] = useState(item.auto_ban);
+  const [deleting, setDeleting] = useState(false)
 
   const [priority, setPriority] = useState(item.priority);
   const [weight, setWeight] = useState(item.weight);
@@ -269,17 +270,24 @@ export default function ChannelTableRow({ item, manageChannel, onRefresh, groupO
     setOpenTest(event.currentTarget);
   };
 
-  const handleDeleteRow = useCallback(async () => {
-    await manageChannel(item.id, 'delete', '');
-  }, [manageChannel, item.id]);
+  const handleDeleteRow = useCallback(async() => {
+    if (deleting) return
 
-  const handleStatus = async () => {
-    const switchVlue = statusSwitch === 1 ? 2 : 1;
-    const { success } = await manageChannel(item.id, 'status', switchVlue);
-    if (success) {
-      setStatusSwitch(switchVlue);
+    setDeleting(true)
+    try {
+      await manageChannel(item.id, 'delete', '')
+    } finally {
+      setDeleting(false)
     }
-  };
+  }, [manageChannel, item.id, deleting])
+
+  const handleStatus = async() => {
+    const switchVlue = statusSwitch === 1 ? 2 : 1
+    const { success } = await manageChannel(item.id, 'status', switchVlue)
+    if (success) {
+      setStatusSwitch(switchVlue)
+    }
+  }
 
   const handleAutoBan = async (value) => {
     const { success } = await manageChannel(item.id, 'auto_ban', value);
@@ -348,7 +356,7 @@ export default function ChannelTableRow({ item, manageChannel, onRefresh, groupO
             )}
           </Box>
         </TableCell>
-        <TableCell sx={{ minWidth: 100, maxWidth: 220 }}>
+        <TableCell sx={{ minWidth: 100, maxWidth: 220, overflow: 'hidden' }}>
           {item.tag ? (
             <Typography
               variant="subtitle1"
@@ -1227,9 +1235,10 @@ export default function ChannelTableRow({ item, manageChannel, onRefresh, groupO
               confirmDelete.onFalse();
             }}
             sx={{ color: 'error.main' }}
+            disabled={deleting}
             autoFocus
           >
-            {t('common.delete')}
+            {deleting ? '删除中...' : t('common.delete')}
           </Button>
         </DialogActions>
       </Dialog>

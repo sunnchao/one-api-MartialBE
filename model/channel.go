@@ -3,13 +3,16 @@ package model
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"gorm.io/datatypes"
-	"gorm.io/gorm"
+	"fmt"
+	"one-api/common/cache"
 	"one-api/common/config"
 	"one-api/common/logger"
 	"one-api/common/utils"
 	"slices"
 	"strings"
+
+	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 type Channel struct {
@@ -386,6 +389,33 @@ func updateChannelUsedQuota(id int, quota int) {
 	if err != nil {
 		logger.SysError("failed to update channel used quota: " + err.Error())
 	}
+}
+
+func ClearChannelTokenCache(channelId int) {
+	cacheKeys := []string{
+		fmt.Sprintf("api_token:codex:%d", channelId),
+		fmt.Sprintf("api_token:geminicli:%d", channelId),
+		fmt.Sprintf("api_token:claudecode:%d", channelId),
+	}
+
+	for _, key := range cacheKeys {
+		if err := cache.DeleteCache(key); err != nil {
+			logger.SysError(fmt.Sprintf("failed to clear token cache %s: %v", key, err))
+		}
+	}
+}
+
+func UpdateChannelKey(id int, key string) error {
+	err := DB.Model(&Channel{}).Where("id = ?", id).Update("key", key).Error
+	if err != nil {
+		logger.SysError("failed to update channel key: " + err.Error())
+		return err
+	}
+
+	ClearChannelTokenCache(id)
+	ChannelGroup.Load()
+
+	return nil
 }
 
 func DeleteDisabledChannel() (int64, error) {

@@ -44,7 +44,7 @@ const defaultConfig = {
   prompt: {
     type: '请选择渠道类型',
     name: '请为渠道命名',
-    base_url: '可空，请输入中转API地址，例如通过cloudflare中转',
+    base_url: '可空，请输入中转API地址，例如通过cloudflare中转。支持使用{model}变量，例如：https://api.example.com/v1/{model}/chat',
     key: '请输入渠道对应的鉴权密钥',
     other: '',
     proxy:
@@ -329,7 +329,7 @@ const typeConfig = {
       test_model: 'claude-3-haiku-20240307'
     },
     prompt: {
-      key: '老版本Bedrock按照如下格式输入：Region|AccessKeyID|SecretAccessKey|SessionToken 其中SessionToken可不填空,新版本Bedrock按照如下格式输入：Region|Token(其中Token不能为空，Token前往新版本Bedrock控制台创建API密钥)'
+      key: '按照如下格式输入：Region|AccessKeyID|SecretAccessKey|SessionToken 其中SessionToken可不填空'
     },
     modelGroup: 'Anthropic'
   },
@@ -421,26 +421,12 @@ const typeConfig = {
     modelGroup: 'Coze'
   },
   39: {
-    inputLabel: {
-      provider_models_list: '从Ollama获取模型'
-    },
     input: {
-      base_url: 'https://ollama.com',
-      models: [
-        'glm-4.6',
-        'kimi-k2:1t',
-        'qwen3-coder:480b',
-        'deepseek-v3.1:671b',
-        'gpt-oss:120b',
-        'gpt-oss:20b',
-        'qwen3-vl:235b',
-        'minimax-m2'
-      ]
+      models: ['phi3', 'llama3']
     },
     prompt: {
-      base_url:
-        '请输入你部署的Ollama地址或者Ollama Cloud地址，例如：http://127.0.0.1:11434或者https://ollama.com，如果你使用了cloudflare Zero Trust，可以在下方Header配置填入授权信息',
-      key: '本地部署可以随便填，Ollama Cloud请填写API KEY，获取地址https://ollama.com/settings/keys'
+      base_url: '请输入你部署的Ollama地址，例如：http://127.0.0.1:11434，如果你使用了cloudflare Zero Trust，可以在下方插件填入授权信息',
+      key: '请随意填写'
     }
   },
   40: {
@@ -471,7 +457,7 @@ const typeConfig = {
     },
     prompt: {
       key: '请参考wiki中的文档获取key. https://github.com/MartialBE/one-hub/wiki/VertexAI',
-      other: 'Region|ProjectID',
+      other: 'Region|ProjectID 或 Region1|Region2|Region3|ProjectID（支持多个Region随机选择）',
       base_url: ''
     },
     modelGroup: 'VertexAI'
@@ -563,6 +549,42 @@ const typeConfig = {
   20: {
     inputLabel: {
       provider_models_list: '从OR获取模型列表'
+    }
+  },
+  57: {
+    inputLabel: {
+      other: 'Project ID'
+    },
+    prompt: {
+      key: '请输入完整的 OAuth2 凭证 JSON，或点击下方"OAuth 授权"按钮自动获取',
+      other: '请输入 Google Cloud Project ID，例如：my-project-123'
+    }
+  },
+  58: {
+    inputLabel: {
+      other: ''
+    },
+    prompt: {
+      key: '请输入 access_token（sk-ant-sid01-xxx）或完整的 OAuth2 凭证 JSON，也可点击下方"OAuth 授权"按钮自动获取',
+      other: ''
+    }
+  },
+  59: {
+    inputLabel: {
+      other: ''
+    },
+    prompt: {
+      key: '请输入完整的 OAuth2 凭证 JSON，或点击下方"OAuth 授权"按钮自动获取',
+      other: ''
+    }
+  },
+  60: {
+    inputLabel: {
+      other: 'Project ID（可选）'
+    },
+    prompt: {
+      key: '请输入完整的 OAuth2 凭证 JSON，或点击下方"OAuth 授权"按钮自动获取',
+      other: '可选，留空将自动检测或随机生成。例如：my-project-123'
     }
   }
 };

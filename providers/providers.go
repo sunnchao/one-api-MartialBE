@@ -4,6 +4,7 @@ import (
 	"one-api/common/config"
 	"one-api/model"
 	"one-api/providers/ali"
+	"one-api/providers/antigravity"
 	"one-api/providers/azure"
 	azurespeech "one-api/providers/azureSpeech"
 	"one-api/providers/azure_v1"
@@ -13,11 +14,14 @@ import (
 	"one-api/providers/base"
 	"one-api/providers/bedrock"
 	"one-api/providers/claude"
+	"one-api/providers/claudecode"
 	"one-api/providers/cloudflareAI"
+	"one-api/providers/codex"
 	"one-api/providers/cohere"
 	"one-api/providers/coze"
 	"one-api/providers/deepseek"
 	"one-api/providers/gemini"
+	"one-api/providers/geminicli"
 	"one-api/providers/github"
 	"one-api/providers/groq"
 	"one-api/providers/hunyuan"
@@ -93,6 +97,10 @@ func init() {
 		config.ChannelTypeAzureDatabricks: azuredatabricks.AzureDatabricksProviderFactory{},
 		config.ChannelTypeAzureV1:         azure_v1.AzureV1ProviderFactory{},
 		config.ChannelTypeXAI:             xAI.XAIProviderFactory{},
+		config.ChannelTypeGeminiCli:       geminicli.GeminiCliProviderFactory{},
+		config.ChannelTypeClaudeCode:      claudecode.ClaudeCodeProviderFactory{},
+		config.ChannelTypeCodex:           codex.CodexProviderFactory{},
+		config.ChannelTypeAntigravity:     antigravity.AntigravityProviderFactory{},
 	}
 }
 

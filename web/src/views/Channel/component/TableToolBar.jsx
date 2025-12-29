@@ -11,6 +11,14 @@ export default function TableToolBar({ filterName, handleFilterName, groupOption
   const grey500 = theme.palette.grey[500];
   const { t } = useTranslation();
 
+  // 处理回车键搜索
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' && onSearch) {
+      event.preventDefault();
+      onSearch();
+    }
+  };
+
   return (
     <>
       <Stack
@@ -31,6 +39,7 @@ export default function TableToolBar({ filterName, handleFilterName, groupOption
             label={t('channel_index.channelName')}
             value={filterName.name}
             onChange={handleFilterName}
+            onKeyDown={handleKeyDown}
             placeholder={t('channel_index.channelName')}
             startAdornment={
               <InputAdornment position="start">
@@ -51,6 +60,7 @@ export default function TableToolBar({ filterName, handleFilterName, groupOption
             label={t('channel_index.channelId')}
             value={filterName.id}
             onChange={handleFilterName}
+            onKeyDown={handleKeyDown}
             placeholder={t('channel_index.channelId')}
             startAdornment={
               <InputAdornment position="start">
@@ -73,6 +83,7 @@ export default function TableToolBar({ filterName, handleFilterName, groupOption
             label={t('channel_index.modelName')}
             value={filterName.models}
             onChange={handleFilterName}
+            onKeyDown={handleKeyDown}
             placeholder={t('channel_index.modelName')}
             startAdornment={
               <InputAdornment position="start">
@@ -92,6 +103,7 @@ export default function TableToolBar({ filterName, handleFilterName, groupOption
             label={t('channel_index.testModel')}
             value={filterName.test_model}
             onChange={handleFilterName}
+            onKeyDown={handleKeyDown}
             placeholder={t('channel_index.testModel')}
             startAdornment={
               <InputAdornment position="start">
@@ -111,6 +123,7 @@ export default function TableToolBar({ filterName, handleFilterName, groupOption
             label="key"
             value={filterName.key}
             onChange={handleFilterName}
+            onKeyDown={handleKeyDown}
             placeholder="key"
             startAdornment={
               <InputAdornment position="start">
@@ -130,10 +143,31 @@ export default function TableToolBar({ filterName, handleFilterName, groupOption
             label={t('channel_index.otherParameters')}
             value={filterName.other}
             onChange={handleFilterName}
+            onKeyDown={handleKeyDown}
             placeholder={t('channel_index.otherParameters')}
             startAdornment={
               <InputAdornment position="start">
                 <Icon icon="solar:settings-bold-duotone" width={20} height={20} color={grey500} />
+              </InputAdornment>
+            }
+          />
+        </FormControl>
+        <FormControl>
+          <InputLabel htmlFor="channel-base_url-label">{t('channel_index.channelApiAddress')}</InputLabel>
+          <OutlinedInput
+            id="base_url"
+            name="base_url"
+            sx={{
+              minWidth: '100%'
+            }}
+            label={t('channel_index.channelApiAddress')}
+            value={filterName.base_url}
+            onChange={handleFilterName}
+            onKeyDown={handleKeyDown}
+            placeholder={t('channel_index.channelApiAddress')}
+            startAdornment={
+              <InputAdornment position="start">
+                <Icon icon="solar:link-bold-duotone" width={20} height={20} color={grey500} />
               </InputAdornment>
             }
           />
@@ -231,6 +265,9 @@ export default function TableToolBar({ filterName, handleFilterName, groupOption
               }
             }}
           >
+            <MenuItem key="all" value="all">
+              {t('channel_index.all')}
+            </MenuItem>
             {groupOptions.map((option) => {
               return (
                 <MenuItem key={option} value={option}>
@@ -289,6 +326,9 @@ export default function TableToolBar({ filterName, handleFilterName, groupOption
               }
             }}
           >
+            <MenuItem key="all" value="all">
+              {t('channel_index.all')}
+            </MenuItem>
             {tags.map((option) => {
               return (
                 <MenuItem key={option.tag} value={option.tag}>
@@ -307,5 +347,6 @@ TableToolBar.propTypes = {
   filterName: PropTypes.object,
   handleFilterName: PropTypes.func,
   groupOptions: PropTypes.array,
-  tags: PropTypes.array
+  tags: PropTypes.array,
+  onSearch: PropTypes.func
 };

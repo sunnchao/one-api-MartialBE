@@ -134,8 +134,40 @@ func (p *BaseProvider) SetOriginalModel(ModelName string) {
 	p.OriginalModel = ModelName
 }
 
+func (p *BaseProvider) GetContext() *gin.Context {
+	return p.Context
+}
+
 func (p *BaseProvider) GetOriginalModel() string {
 	return p.OriginalModel
+}
+
+// GetResponseModelName 获取响应中应该使用的模型名称
+// 默认使用原始模型名称（用户友好），保持用户体验一致性
+func (p *BaseProvider) GetResponseModelName(requestModel string) string {
+	return GetResponseModelNameFromContext(p.Context, requestModel)
+}
+
+// GetResponseModelNameFromContext 从 Context 获取响应模型名称的静态函数
+// 用于流式响应等无法访问 BaseProvider 的场景
+func GetResponseModelNameFromContext(ctx *gin.Context, fallbackModel string) string {
+	if ctx == nil {
+		return fallbackModel
+	}
+
+	// 检查是否启用了统一请求响应模型功能
+	if !config.UnifiedRequestResponseModelEnabled {
+		return fallbackModel
+	}
+
+	// 优先使用存储的原始模型名称
+	if originalModel, exists := ctx.Get("original_model"); exists {
+		if originalModelStr, ok := originalModel.(string); ok && originalModelStr != "" {
+			return originalModelStr
+		}
+	}
+
+	return fallbackModel
 }
 
 func (p *BaseProvider) GetChannel() *model.Channel {
@@ -273,7 +305,7 @@ func (p *BaseProvider) NewRequestWithCustomParams(method, url string, originalRe
 		}
 
 		// 处理自定义额外参数
-		requestMap = p.mergeCustomParams(requestMap, customParams, modelName)
+		requestMap = p.MergeCustomParams(requestMap, customParams, modelName)
 
 		// 使用修改后的请求体创建请求
 		req, err := p.Requester.NewRequest(method, url, p.Requester.WithBody(requestMap), p.Requester.WithHeader(headers))
@@ -386,10 +418,83 @@ func (p *BaseProvider) deepMergeMap(existing map[string]interface{}, new map[str
 }
 
 func (p *BaseProvider) GetRawBody() ([]byte, bool) {
-  if raw, exists := p.Context.Get(config.GinRequestBodyKey); exists {
-    if bytes, ok := raw.([]byte); ok {
-      return bytes, true
-    }
-  }
-  return nil, false
+	if raw, exists := p.Context.Get(config.GinRequestBodyKey); exists {
+		if bytes, ok := raw.([]byte); ok {
+			return bytes, true
+		}
+	}
+	return nil, false
+}
+
+// MergeCustomParams 将自定义参数合并到请求体中
+func (p *BaseProvider) MergeCustomParams(requestMap map[string]interface{}, customParams map[string]interface{}, modelName string) map[string]interface{} {
+	// 检查是否需要覆盖已有参数
+	shouldOverwrite := false
+	if overwriteValue, exists := customParams["overwrite"]; exists {
+		if boolValue, ok := overwriteValue.(bool); ok {
+			shouldOverwrite = boolValue
+		}
+	}
+
+	// 检查是否按照模型粒度控制
+	perModel := false
+	if perModelValue, exists := customParams["per_model"]; exists {
+		if boolValue, ok := perModelValue.(bool); ok {
+			perModel = boolValue
+		}
+	}
+
+	customParamsModel := customParams
+	if perModel && modelName != "" {
+		if v, exists := customParams[modelName]; exists {
+			if modelConfig, ok := v.(map[string]interface{}); ok {
+				customParamsModel = modelConfig
+			} else {
+				customParamsModel = map[string]interface{}{}
+			}
+		} else {
+			customParamsModel = map[string]interface{}{}
+		}
+	}
+
+	// 处理参数删除
+	if removeParams, exists := customParamsModel["remove_params"]; exists {
+		if paramsList, ok := removeParams.([]interface{}); ok {
+			for _, param := range paramsList {
+				if paramName, ok := param.(string); ok {
+					delete(requestMap, paramName)
+				}
+			}
+		}
+	}
+
+	// 添加额外参数
+	for key, value := range customParamsModel {
+		// 忽略控制参数
+		if key == "stream" || key == "overwrite" || key == "per_model" || key == "remove_params" {
+			continue
+		}
+		// 根据覆盖设置决定如何添加参数
+		if shouldOverwrite {
+			// 覆盖模式：直接添加/覆盖参数
+			requestMap[key] = value
+		} else {
+			// 非覆盖模式：进行深度合并
+			if existingValue, exists := requestMap[key]; exists {
+				// 如果都是map类型，进行深度合并
+				if existingMap, ok := existingValue.(map[string]interface{}); ok {
+					if newMap, ok := value.(map[string]interface{}); ok {
+						requestMap[key] = p.deepMergeMap(existingMap, newMap)
+						continue
+					}
+				}
+				// 如果不是map类型或类型不匹配，保持原值（不覆盖）
+			} else {
+				// 参数不存在时直接添加
+				requestMap[key] = value
+			}
+		}
+	}
+
+	return requestMap
 }

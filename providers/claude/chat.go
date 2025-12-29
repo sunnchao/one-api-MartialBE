@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream"
+	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -28,6 +29,7 @@ type ClaudeStreamHandler struct {
 	Request     *types.ChatCompletionRequest
 	StreamTolls int
 	Prefix      string
+	Context     *gin.Context // 添加 Context 用于获取响应模型名称
 }
 
 func (p *ClaudeProvider) CreateChatCompletion(request *types.ChatCompletionRequest) (*types.ChatCompletionResponse, *types.OpenAIErrorWithStatusCode) {

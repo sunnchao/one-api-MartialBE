@@ -35,6 +35,7 @@ func init() {
 type GeminiChatRequest struct {
 	Model             string                     `json:"-"`
 	Stream            bool                       `json:"-"`
+	Action            string                     `json:"-"` // 添加 Action 字段
 	Contents          []GeminiChatContent        `json:"contents"`
 	SafetySettings    []GeminiChatSafetySettings `json:"safetySettings,omitempty"`
 	GenerationConfig  GeminiChatGenerationConfig `json:"generationConfig,omitempty"`
@@ -88,8 +89,8 @@ type GeminiPartCodeExecutionResult struct {
 }
 
 type GeminiFunctionCall struct {
-	Name            string                 `json:"name,omitempty"`
-	Args            map[string]interface{} `json:"args,omitempty"`
+	Name             string                 `json:"name,omitempty"`
+	Args             map[string]interface{} `json:"args,omitempty"`
 	ThoughtSignature string                 `json:"thoughtSignature,omitempty"`
 }
 
@@ -272,13 +273,13 @@ func (candidate *GeminiChatCandidate) ToOpenAIChoice(request *types.ChatCompleti
 }
 
 type GeminiFunctionResponse struct {
-	Name         string          `json:"name,omitempty"`
-	Response     any             `json:"response,omitempty"`
-  ThoughtSignature string `json:"thoughtSignature,omitempty"`
-  WillContinue json.RawMessage `json:"willContinue,omitempty"`
-	Scheduling   json.RawMessage `json:"scheduling,omitempty"`
-	Parts        json.RawMessage `json:"parts,omitempty"`
-	ID           json.RawMessage `json:"id,omitempty"`
+	Name             string          `json:"name,omitempty"`
+	Response         any             `json:"response,omitempty"`
+	ThoughtSignature string          `json:"thoughtSignature,omitempty"`
+	WillContinue     json.RawMessage `json:"willContinue,omitempty"`
+	Scheduling       json.RawMessage `json:"scheduling,omitempty"`
+	Parts            json.RawMessage `json:"parts,omitempty"`
+	ID               json.RawMessage `json:"id,omitempty"`
 }
 
 type GeminiFunctionResponseContent struct {
@@ -340,7 +341,12 @@ type GeminiChatGenerationConfig struct {
 	ResponseMimeType   string          `json:"responseMimeType,omitempty"`
 	ResponseSchema     any             `json:"responseSchema,omitempty"`
 	ResponseModalities []string        `json:"responseModalities,omitempty"`
+	ImageConfig        *ImageConfig    `json:"imageConfig,omitempty"` // 图像生成配置
 	ThinkingConfig     *ThinkingConfig `json:"thinkingConfig,omitempty"`
+}
+
+type ImageConfig struct {
+	AspectRatio string `json:"aspectRatio,omitempty"` // 图像宽高比，如 "16:9", "1:1", "9:16" 等
 }
 
 type ThinkingConfig struct {
@@ -349,9 +355,17 @@ type ThinkingConfig struct {
 }
 
 type GeminiError struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-	Status  string `json:"status"`
+	Code    int                  `json:"code"`
+	Message string               `json:"message"`
+	Status  string               `json:"status"`
+	Details []GeminiErrorDetails `json:"details,omitempty"`
+}
+
+type GeminiErrorDetails struct {
+	Type     string                 `json:"@type,omitempty"`
+	Reason   string                 `json:"reason,omitempty"`
+	Domain   string                 `json:"domain,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 
 func (e *GeminiError) Error() string {
@@ -650,8 +664,8 @@ func (e *GeminiErrors) Error() *GeminiErrorResponse {
 }
 
 type GeminiImageRequest struct {
-	Instances  []GeminiImageInstance `json:"instances"`
-	Parameters GeminiImageParameters `json:"parameters"`
+	Instances  []GeminiImageInstance        `json:"instances"`
+	Parameters GeminiImageParametersDynamic `json:"parameters"`
 }
 
 type GeminiImageInstance struct {
@@ -664,6 +678,8 @@ type GeminiImageParameters struct {
 	SampleCount      int    `json:"sampleCount,omitempty"`
 }
 
+type GeminiImageParametersDynamic map[string]interface{}
+
 type GeminiImageResponse struct {
 	Predictions []GeminiImagePrediction `json:"predictions"`
 }
@@ -673,6 +689,55 @@ type GeminiImagePrediction struct {
 	MimeType           string `json:"mimeType"`
 	RaiFilteredReason  string `json:"raiFilteredReason,omitempty"`
 	SafetyAttributes   any    `json:"safetyAttributes,omitempty"`
+}
+
+// Veo 3.0 Video Generation Types
+type VeoVideoRequest struct {
+	Instances  []VeoVideoInstance  `json:"instances"`
+	Parameters *VeoVideoParameters `json:"parameters,omitempty"`
+}
+
+type VeoVideoInstance struct {
+	Prompt string `json:"prompt"`
+}
+
+type VeoVideoParameters struct {
+	AspectRatio     string `json:"aspectRatio,omitempty"`     // e.g., "16:9"
+	NegativePrompt  string `json:"negativePrompt,omitempty"`  // e.g., "cartoon, drawing, low quality"
+	SampleCount     int    `json:"sampleCount,omitempty"`     // Number of videos to generate
+	DurationSeconds int    `json:"durationSeconds,omitempty"` // Video duration
+}
+
+// Veo 3.0 Long Running Operation Response
+type VeoLongRunningResponse struct {
+	Name     string                 `json:"name"` // Operation name for polling
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	Done     bool                   `json:"done"`
+	Response *VeoVideoResponse      `json:"response,omitempty"`
+	Error    *VeoOperationError     `json:"error,omitempty"`
+}
+
+type VeoVideoResponse struct {
+	GenerateVideoResponse *VeoGenerateVideoResponse `json:"generateVideoResponse,omitempty"`
+}
+
+type VeoGenerateVideoResponse struct {
+	GeneratedSamples []VeoGeneratedSample `json:"generatedSamples"`
+}
+
+type VeoGeneratedSample struct {
+	Video *VeoVideoData `json:"video"`
+}
+
+type VeoVideoData struct {
+	Uri      string `json:"uri"`      // Download URI
+	MimeType string `json:"mimeType"` // e.g., "video/mp4"
+}
+
+type VeoOperationError struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Status  string `json:"status"`
 }
 
 func isEmptyOrOnlyNewlines(s string) bool {

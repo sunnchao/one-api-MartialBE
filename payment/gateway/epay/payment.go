@@ -29,6 +29,10 @@ func (e *Epay) Pay(config *types.PayConfig, gatewayConfig string) (*types.PayReq
 		return nil, err
 	}
 
+	if epayConfig.PayType == "" {
+		epayConfig.PayType = "epay"
+	}
+
 	payArgs := &PayArgs{
 		Type:       epayConfig.PayType,
 		OutTradeNo: config.TradeNo,

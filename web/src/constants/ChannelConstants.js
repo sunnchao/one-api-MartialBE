@@ -271,6 +271,34 @@ export const CHANNEL_OPTIONS = {
     color: 'orange',
     url: 'https://x.ai'
   },
+  57: {
+    key: 57,
+    text: 'GeminiCli',
+    value: 57,
+    color: 'orange',
+    url: 'https://aistudio.google.com/'
+  },
+  58: {
+    key: 58,
+    text: 'ClaudeCode',
+    value: 58,
+    color: 'info',
+    url: 'https://claude.ai/'
+  },
+  59: {
+    key: 59,
+    text: 'Codex',
+    value: 59,
+    color: 'primary',
+    url: 'https://chatgpt.com/'
+  },
+  60: {
+    key: 60,
+    text: 'Antigravity',
+    value: 60,
+    color: 'orange',
+    url: 'https://aistudio.google.com/'
+  },
   8: {
     key: 8,
     text: '自定义渠道',

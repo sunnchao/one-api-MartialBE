@@ -63,6 +63,7 @@ func SetApiRouter(router *gin.Engine) {
 		}
 
 		apiRouter.Any("/payment/notify/:uuid", controller.PaymentCallback)
+		apiRouter.GET("/epay/notify", controller.EpayCallback)
 		apiRouter.Any("/payment/claude-code/notify", controller.ClaudeCodePaymentNotify)
 
 		userRoute := apiRouter.Group("/user")
@@ -204,6 +205,38 @@ func SetApiRouter(router *gin.Engine) {
 			// channelRoute.POST("/key/:id/enable", controller.EnableChannelKey)
 			// channelRoute.POST("/key/:id/disable", controller.DisableChannelKey)
 			// channelRoute.POST("/key/:id/reset", controller.ResetChannelKeyErrors)
+		}
+
+		// GeminiCli OAuth routes (no auth required for callback)
+		geminiCliRoute := apiRouter.Group("/geminicli")
+		{
+			geminiCliRoute.POST("/oauth/start", middleware.AdminAuth(), controller.StartGeminiCliOAuth)
+			geminiCliRoute.GET("/oauth/callback", controller.GeminiCliOAuthCallback)
+			geminiCliRoute.GET("/oauth/status/:state", middleware.AdminAuth(), controller.GetGeminiCliOAuthStatus)
+		}
+
+		// ClaudeCode OAuth routes
+		ccRoute := apiRouter.Group("/claudecode")
+		ccRoute.Use(middleware.AdminAuth())
+		{
+			ccRoute.POST("/oauth/start", controller.StartClaudeCodeOAuth)
+			ccRoute.POST("/oauth/exchange-code", controller.ClaudeCodeOAuthCallback)
+		}
+
+		// Codex OAuth routes
+		codexRoute := apiRouter.Group("/codex")
+		codexRoute.Use(middleware.AdminAuth())
+		{
+			codexRoute.POST("/oauth/start", controller.StartCodexOAuth)
+			codexRoute.POST("/oauth/exchange-code", controller.CodexOAuthCallback)
+		}
+
+		// Antigravity OAuth routes
+		antigravityRoute := apiRouter.Group("/antigravity")
+		{
+			antigravityRoute.POST("/oauth/start", middleware.AdminAuth(), controller.StartAntigravityOAuth)
+			antigravityRoute.GET("/oauth/callback", controller.AntigravityOAuthCallback)
+			antigravityRoute.GET("/oauth/status/:state", middleware.AdminAuth(), controller.GetAntigravityOAuthStatus)
 		}
 		channelTagRoute := apiRouter.Group("/channel_tag")
 		channelTagRoute.Use(middleware.AdminAuth())
