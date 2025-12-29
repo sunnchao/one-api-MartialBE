@@ -138,6 +138,12 @@ func tokenAuth(c *gin.Context, key string) {
 	c.Set("token_setting", utils.GetPointer(token.Setting.Data()))
 
   c.Set("token_billing_type", token.BillingType)
+  packageServiceType := resolvePackageServiceTypeByTokenGroup(token.Group)
+  if packageServiceType != "" {
+    c.Set("package_service_type", packageServiceType)
+  } else {
+    c.Set("package_service_type", "")
+  }
   if err := checkLimitIP(c); err != nil {
     abortWithMessage(c, http.StatusForbidden, err.Error())
     return
@@ -328,5 +334,22 @@ func SpecifiedChannel() func(c *gin.Context) {
 			return
 		}
 		c.Next()
+	}
+}
+
+func resolvePackageServiceTypeByTokenGroup(group string) string {
+	group = strings.TrimSpace(group)
+	if group == "" {
+		return ""
+	}
+	switch {
+	case strings.EqualFold(group, "ClaudeCode"):
+		return "claude_code"
+	case strings.EqualFold(group, "Codex"):
+		return "codex_code"
+	case strings.EqualFold(group, "GeminiCli"):
+		return "gemini_code"
+	default:
+		return ""
 	}
 }
