@@ -169,7 +169,7 @@ const ClaudeCodeTutorialPage = () => {
                 <Button
                   variant="contained"
                   size="large"
-                  onClick={() => navigate('/panel/claude-code/subscription')}
+                  onClick={() => navigate('/panel/packages/subscription')}
                   endIcon={<ArrowForwardIcon />}
                   sx={{ borderRadius: 0, px: 4, py: 1.5, fontSize: '1.1rem', boxShadow: 'none' }}
                 >

@@ -130,7 +130,7 @@ const ClaudeCodeAdmin = () => {
   // 获取套餐列表
   const fetchPlans = async () => {
     try {
-      const res = await API.get('/api/claude-code-admin/plans', {
+      const res = await API.get('/api/packages-admin/plans', {
         params: {
           include_hidden: true
         }
@@ -148,7 +148,7 @@ const ClaudeCodeAdmin = () => {
   const fetchSubscriptions = async () => {
     setLoading(true);
     try {
-      const res = await API.get('/api/claude-code-admin/subscriptions', {
+      const res = await API.get('/api/packages-admin/subscriptions', {
         params: {
           page: subscriptionPage + 1,
           page_size: subscriptionRowsPerPage
@@ -176,7 +176,7 @@ const ClaudeCodeAdmin = () => {
 
     setSearchLoading(true);
     try {
-      const res = await API.get('/api/claude-code-admin/users/search', {
+      const res = await API.get('/api/packages-admin/users/search', {
         params: {
           keyword: searchKeyword,
           page: userPage + 1,
@@ -204,7 +204,7 @@ const ClaudeCodeAdmin = () => {
     }
 
     try {
-      const res = await API.post('/api/claude-code-admin/grant-subscription', {
+      const res = await API.post('/api/packages-admin/grant-subscription', {
         user_id: selectedUser.id,
         plan_type: grantForm.planType,
         duration: grantForm.duration,
@@ -233,7 +233,7 @@ const ClaudeCodeAdmin = () => {
     }
 
     try {
-      const res = await API.delete(`/api/claude-code-admin/subscriptions/${subscriptionId}`);
+      const res = await API.delete(`/api/packages-admin/subscriptions/${subscriptionId}`);
       if (res.data.success) {
         showSuccess('订阅已取消');
         fetchSubscriptions();
@@ -330,7 +330,7 @@ const ClaudeCodeAdmin = () => {
 
   const handleSavePlan = async () => {
     try {
-      const url = editingPlan ? `/api/claude-code-admin/plans/${editingPlan.id}` : '/api/claude-code-admin/plans';
+      const url = editingPlan ? `/api/packages-admin/plans/${editingPlan.id}` : '/api/packages-admin/plans';
       const method = editingPlan ? 'put' : 'post';
 
       const res = await API[method](url, planForm);
@@ -353,7 +353,7 @@ const ClaudeCodeAdmin = () => {
     }
 
     try {
-      const res = await API.delete(`/api/claude-code-admin/plans/${planId}`);
+      const res = await API.delete(`/api/packages-admin/plans/${planId}`);
       if (res.data.success) {
         showSuccess('套餐删除成功');
         fetchPlans();

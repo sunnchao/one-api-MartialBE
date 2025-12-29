@@ -64,7 +64,7 @@ func SetApiRouter(router *gin.Engine) {
 
 		apiRouter.Any("/payment/notify/:uuid", controller.PaymentCallback)
 		apiRouter.GET("/epay/notify", controller.EpayCallback)
-		apiRouter.Any("/payment/claude-code/notify", controller.ClaudeCodePaymentNotify)
+		apiRouter.Any("/payment/packages/notify", controller.ClaudeCodePaymentNotify)
 
 		userRoute := apiRouter.Group("/user")
 		{
@@ -104,21 +104,20 @@ func SetApiRouter(router *gin.Engine) {
 
 			}
 
-			// Claude Code 相关路由
-			claudeCodeRoute := userRoute.Group("/claude-code")
-			claudeCodeRoute.Use(middleware.UserAuth())
+      packagesRoute := userRoute.Group("/packages");
+      packagesRoute.Use(middleware.UserAuth())
 			{
 				// 订阅管理
-				claudeCodeRoute.GET("/plans", controller.GetClaudeCodePlans)
-				claudeCodeRoute.GET("/subscription", controller.GetClaudeCodeSubscription)
-				claudeCodeRoute.POST("/purchase", controller.PurchaseClaudeCodeSubscription)
-				claudeCodeRoute.POST("/cancel", controller.CancelClaudeCodeSubscription)
-				claudeCodeRoute.GET("/usage-stats", controller.GetClaudeCodeUsageStats)
+        packagesRoute.GET("/plans", controller.GetClaudeCodePlans)
+        packagesRoute.GET("/subscription", controller.GetClaudeCodeSubscription)
+        packagesRoute.POST("/purchase", controller.PurchaseClaudeCodeSubscription)
+        packagesRoute.POST("/cancel", controller.CancelClaudeCodeSubscription)
+        packagesRoute.GET("/usage-stats", controller.GetClaudeCodeUsageStats)
 
 				// API Key 管理
-				claudeCodeRoute.GET("/api-keys", controller.GetClaudeCodeAPIKeys)
-				claudeCodeRoute.POST("/api-keys", controller.CreateClaudeCodeAPIKey)
-				claudeCodeRoute.DELETE("/api-keys/:id", controller.DeleteClaudeCodeAPIKey)
+        packagesRoute.GET("/api-keys", controller.GetClaudeCodeAPIKeys)
+        packagesRoute.POST("/api-keys", controller.CreateClaudeCodeAPIKey)
+        packagesRoute.DELETE("/api-keys/:id", controller.DeleteClaudeCodeAPIKey)
 			}
 
 			adminRoute := userRoute.Group("/")
@@ -216,11 +215,11 @@ func SetApiRouter(router *gin.Engine) {
 		}
 
 		// ClaudeCode OAuth routes
-		ccRoute := apiRouter.Group("/claudecode")
-		ccRoute.Use(middleware.AdminAuth())
+		claudCodeRoute := apiRouter.Group("/claudecode")
+    claudCodeRoute.Use(middleware.AdminAuth())
 		{
-			ccRoute.POST("/oauth/start", controller.StartClaudeCodeOAuth)
-			ccRoute.POST("/oauth/exchange-code", controller.ClaudeCodeOAuthCallback)
+      claudCodeRoute.POST("/oauth/start", controller.StartClaudeCodeOAuth)
+      claudCodeRoute.POST("/oauth/exchange-code", controller.ClaudeCodeOAuthCallback)
 		}
 
 		// Codex OAuth routes
@@ -357,7 +356,7 @@ func SetApiRouter(router *gin.Engine) {
 	}
 
 	// Claude Code管理员路由
-	claudeCodeAdminRouter := router.Group("/api/claude-code-admin")
+	claudeCodeAdminRouter := router.Group("/api/packages-admin")
 	claudeCodeAdminRouter.Use(middleware.AdminAuth()) // 使用普通管理员权限
 	{
 		// 订阅管理

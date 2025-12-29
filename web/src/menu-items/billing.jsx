@@ -4,8 +4,7 @@ const icons = {
   IconCreditCard: () => <Icon width={20} icon="solar:card-bold-duotone" />,
   IconBrandGithubCopilot: () => <Icon width={20} icon="solar:box-minimalistic-bold-duotone" />,
   IconSubscription: () => <Icon width={20} icon="solar:card-circle-bold-duotone" />,
-  IconClaudeCodeAdmin: () => <Icon width={20} icon="solar:code-square-bold-duotone" />,
-
+  IconClaudeCodeAdmin: () => <Icon width={20} icon="solar:code-square-bold-duotone" />
 };
 
 const Billing = {
@@ -19,24 +18,24 @@ const Billing = {
       type: 'item',
       url: '/panel/topup',
       icon: icons.IconCreditCard,
-      
+
       breadcrumbs: false
     },
-    // {
-    //   id: 'subscriptions',
-    //   title: '订阅管理',
-    //   type: 'item',
-    //   url: '/panel/subscriptions',
-    //   icon: icons.IconClaudeCodeAdmin,
-    //   breadcrumbs: false
-    // },
+    {
+      id: 'subscriptions',
+      title: '订阅管理',
+      type: 'item',
+      url: '/panel/subscriptions',
+      icon: icons.IconClaudeCodeAdmin,
+      breadcrumbs: false
+    },
     {
       id: 'model_price',
       title: '可用模型',
       type: 'item',
       url: '/panel/model_price',
       icon: icons.IconBrandGithubCopilot,
-      breadcrumbs: false,
+      breadcrumbs: false
     }
   ]
 };

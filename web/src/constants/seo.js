@@ -83,7 +83,7 @@ const ROUTE_SEO = {
     title: '模型价格 - Chirou API',
     description: '查看 Chirou API 支持的各类模型价格与计费方式，快速评估成本并选择合适的模型方案。'
   },
-  '/claude-code': {
+  '/packages': {
     title: 'Claude Code 套餐 - Chirou API',
     description: '订阅 Claude Code 套餐，体验面向开发者的专业编程助手能力与增值服务。'
   },

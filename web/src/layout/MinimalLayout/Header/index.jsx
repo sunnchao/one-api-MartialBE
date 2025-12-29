@@ -156,7 +156,7 @@ const Header = () => {
             <Button
               variant="text"
               onClick={handleOpenCodeMenu}
-              color={pathname.startsWith('/claude-code') || pathname.startsWith('/codex-code') ? 'primary' : 'inherit'}
+              color={pathname.startsWith('/packages') || pathname.startsWith('/codex-code') ? 'primary' : 'inherit'}
               sx={{
                 fontSize: '0.875rem',
                 fontWeight: 500,

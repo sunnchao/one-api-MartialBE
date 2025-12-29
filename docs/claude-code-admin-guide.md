@@ -44,12 +44,12 @@
 
 ### 管理员搜索用户
 ```
-GET /api/claude-code-admin/users/search?keyword={keyword}&page={page}&page_size={page_size}
+GET /api/packages-admin/users/search?keyword={keyword}&page={page}&page_size={page_size}
 ```
 
 ### 发放订阅
 ```
-POST /api/claude-code-admin/grant-subscription
+POST /api/packages-admin/grant-subscription
 {
   "user_id": 123,
   "plan_type": "basic",
@@ -60,12 +60,12 @@ POST /api/claude-code-admin/grant-subscription
 
 ### 取消订阅
 ```
-DELETE /api/claude-code-admin/subscriptions/{subscription_id}
+DELETE /api/packages-admin/subscriptions/{subscription_id}
 ```
 
 ### 查看所有订阅
 ```
-GET /api/claude-code-admin/subscriptions?page={page}&page_size={page_size}
+GET /api/packages-admin/subscriptions?page={page}&page_size={page_size}
 ```
 
 ## 权限要求
