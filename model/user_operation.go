@@ -54,7 +54,7 @@ const (
 	BonusProbability              = 0.1   // 额外奖励概率 10%
 	HighRatioProbability          = 0.5   // 获得高额度(>0.2)的概率 75%
 	CouponProbability             = 0     // 获得优惠券的概率 5%
-	SubscriptionRewardProbability = 0.75  // 获得订阅奖励的概率 50%
+	SubscriptionRewardProbability = 0     // 获得订阅奖励的概率 50%
 )
 
 const checkInClaudCodeSubscriptionRewardSource = "claude_code_checkin_reward"
