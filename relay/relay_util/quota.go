@@ -43,7 +43,7 @@ type Quota struct {
 
 	// ClaudeCode订阅相关字段
 	packageServiceType  string                    // 服务类型 (claude_code, codex_code, gemini_code)
-	subscriptionId      int                       // 使用的订阅ID（第一个成功扣费的订阅）
+	subscriptionHashId  string                    // 使用的订阅ID（第一个成功扣费的订阅）
 	useSubscription     bool                      // 是否使用订阅计费
 	subscriptionQuota   int                       // 从订阅消费的总额度
 	subscriptionHandled bool                      // 订阅是否已处理
@@ -55,15 +55,15 @@ func NewQuota(c *gin.Context, modelName string, promptTokens int) (*Quota, *type
 	isBackupGroup := c.GetBool("is_backupGroup")
 
 	quota := &Quota{
-		modelName:     modelName,
-		promptTokens:  promptTokens,
-		userId:        c.GetInt("id"),
-		channelId:     c.GetInt("channel_id"),
-		tokenId:       c.GetInt("token_id"),
-		HandelStatus:  false,
-    unlimitedQuota: c.GetBool("token_unlimited_quota"),
-    isSearch:      modelName == "search",
-		isBackupGroup: isBackupGroup, // 记录是否使用备用分组
+		modelName:      modelName,
+		promptTokens:   promptTokens,
+		userId:         c.GetInt("id"),
+		channelId:      c.GetInt("channel_id"),
+		tokenId:        c.GetInt("token_id"),
+		HandelStatus:   false,
+		unlimitedQuota: c.GetBool("token_unlimited_quota"),
+		isSearch:       modelName == "search",
+		isBackupGroup:  isBackupGroup, // 记录是否使用备用分组
 	}
 
 	price, err := model.PricingInstance.GetPrice(quota.modelName)
@@ -98,10 +98,10 @@ func NewQuota(c *gin.Context, modelName string, promptTokens int) (*Quota, *type
 		quota.packageServiceType = packageServiceTypeStr
 
 		// 尝试获取用户可用的订阅
-		subscription, subErr := model.GetUserActiveClaudeCodeSubscription(quota.userId, packageServiceTypeStr)
+		subscription, subErr := model.GetUserActivePackagesSubscription(quota.userId, packageServiceTypeStr)
 		if subErr == nil && subscription != nil && subscription.CanUseService() {
 			quota.useSubscription = true
-			quota.subscriptionId = subscription.Id
+			quota.subscriptionHashId = subscription.HashId
 		}
 	}
 
@@ -198,7 +198,7 @@ func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, 
 	// 优先使用订阅扣费（仅对 ClaudeCode/CodexCode/GeminiCode 请求）
 	if q.useSubscription && quota > 0 && q.packageServiceType != "" {
 		// 获取用户所有活跃订阅，按到期时间升序排序（优先消耗快到期的）
-		subscriptions, err := model.GetUserActiveClaudeCodeSubscriptions(q.userId, q.packageServiceType)
+		subscriptions, err := model.GetUserActivePackagesSubscriptions(q.userId, q.packageServiceType, true)
 		if err == nil && len(subscriptions) > 0 {
 			remainingQuota := quota
 			q.subscriptionsUsed = make([]SubscriptionUsageDetail, 0, len(subscriptions))
@@ -232,7 +232,7 @@ func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, 
 
 					// 如果是第一个成功扣费的订阅，记录订阅ID
 					if !q.subscriptionHandled {
-						q.subscriptionId = sub.Id
+						q.subscriptionHashId = sub.HashId
 						q.subscriptionHandled = true
 					}
 				}
@@ -243,7 +243,7 @@ func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, 
 				// 订阅扣费成功，退还预消费的配额
 				if q.preConsumedQuota > 0 {
 					go func() {
-						err := model.PostConsumeTokenQuota(q.tokenId, -q.preConsumedQuota)
+						err := model.PostConsumeTokenQuotaWithInfo(q.tokenId, q.userId, q.unlimitedQuota, -q.preConsumedQuota)
 						if err != nil {
 							logger.LogError(ctx, "error refunding pre-consumed quota after subscription: "+err.Error())
 						}
@@ -286,7 +286,6 @@ func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, 
 		}
 	}
 
-	// 普通扣费逻辑
 	if quota > 0 {
 		quotaDelta := quota - q.preConsumedQuota
 		err := model.PostConsumeTokenQuotaWithInfo(q.tokenId, q.userId, q.unlimitedQuota, quotaDelta)
@@ -435,7 +434,7 @@ func (q *Quota) GetLogMeta(usage *types.Usage) map[string]any {
 func (q *Quota) getSubscriptionLogMeta(usage *types.Usage) map[string]any {
 	meta := q.GetLogMeta(usage)
 	meta["billing_type"] = "resource_package"
-	meta["resource_package_id"] = q.subscriptionId
+	meta["resource_package_id"] = q.subscriptionHashId
 	meta["package_service_type"] = q.packageServiceType
 
 	// 添加多订阅消费明细

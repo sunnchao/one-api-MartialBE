@@ -44,6 +44,7 @@ import {
 } from '@mui/icons-material';
 import { renderQuota, showError, showSuccess, showWarning, timestamp2string } from 'utils/common';
 import { API } from 'utils/api';
+import { useTranslation } from 'react-i18next';
 
 const durationUnitOptions = [
   { value: 'day', label: '按日', suffix: '天', short: '日' },
@@ -68,6 +69,7 @@ const getDurationLabel = (unit = 'month', value = 1) => {
 };
 
 const ClaudeCodeAdmin = () => {
+  const { t } = useTranslation();
   const [tabValue, setTabValue] = useState(0);
   const [subscriptions, setSubscriptions] = useState([]);
   const [users, setUsers] = useState([]);
@@ -112,7 +114,7 @@ const ClaudeCodeAdmin = () => {
   const [planForm, setPlanForm] = useState({
     name: '',
     type: '',
-    service_type: 'claude_code',
+    service_type: '',
     description: '',
     price: 0,
     currency: 'USD',
@@ -207,16 +209,14 @@ const ClaudeCodeAdmin = () => {
       const res = await API.post('/api/packages-admin/grant-subscription', {
         user_id: selectedUser.id,
         plan_type: grantForm.planType,
-        duration: grantForm.duration,
-        duration_unit: grantForm.durationUnit,
         reason: grantForm.reason
       });
 
       if (res.data.success) {
         showSuccess('套餐发放成功');
-		setGrantDialogOpen(false);
-		setSelectedUser(null);
-		setGrantForm({ planType: 'basic', duration: 1, durationUnit: 'month', reason: '' });
+        setGrantDialogOpen(false);
+        setSelectedUser(null);
+        setGrantForm({ planType: 'basic', duration: 1, durationUnit: 'month', reason: '' });
         fetchSubscriptions(); // 刷新订阅列表
       } else {
         showError('发放失败: ' + res.data.message);
@@ -311,7 +311,7 @@ const ClaudeCodeAdmin = () => {
     setPlanForm({
       name: plan.name,
       type: plan.type,
-      service_type: plan.service_type || 'claude_code',
+      service_type: plan.service_type,
       description: plan.description,
       price: plan.price,
       currency: plan.currency,
@@ -389,7 +389,7 @@ const ClaudeCodeAdmin = () => {
   const handleGrantDialogClose = () => {
     setGrantDialogOpen(false);
     setSelectedUser(null);
-		setGrantForm({ planType: 'basic', duration: 1, durationUnit: 'month', reason: '' });
+    setGrantForm({ planType: 'basic', duration: 1, durationUnit: 'month', reason: '' });
   };
 
   return (
@@ -422,8 +422,8 @@ const ClaudeCodeAdmin = () => {
                 <TableHead>
                   <TableRow>
                     <TableCell>用户ID</TableCell>
-                    <TableCell>服务类型</TableCell>
-                    <TableCell>套餐名称</TableCell>
+                    <TableCell>{t('packages.subscription.serviceType')}</TableCell>
+                    <TableCell>{t('packages.subscription.packageName')}</TableCell>
                     <TableCell>状态</TableCell>
                     <TableCell>开始时间</TableCell>
                     <TableCell>结束时间</TableCell>
@@ -622,8 +622,8 @@ const ClaudeCodeAdmin = () => {
                 <TableHead>
                   <TableRow>
                     <TableCell>ID</TableCell>
-                    <TableCell>服务类型</TableCell>
-                    <TableCell>套餐名称</TableCell>
+                    <TableCell>{t('packages.subscription.serviceType')}</TableCell>
+                    <TableCell>{t('packages.subscription.packageName')}</TableCell>
                     <TableCell>套餐类型</TableCell>
                     <TableCell>价格</TableCell>
                     <TableCell>时间限制</TableCell>
@@ -677,16 +677,16 @@ const ClaudeCodeAdmin = () => {
                           ${plan.price} {plan.currency}
                         </TableCell>
                         <TableCell>
-						{plan.is_unlimited_time ? (
-							<Chip label="无时间限制" color="success" size="small" variant="outlined" />
-						) : (
-							<Chip
-								label={getDurationLabel(plan.duration_unit || 'month', plan.duration_value || plan.duration_months || 1)}
-								color="info"
-								size="small"
-								variant="outlined"
-							/>
-						)}
+                          {plan.is_unlimited_time ? (
+                            <Chip label="无时间限制" color="success" size="small" variant="outlined" />
+                          ) : (
+                            <Chip
+                              label={getDurationLabel(plan.duration_unit || 'month', plan.duration_value || plan.duration_months || 1)}
+                              color="info"
+                              size="small"
+                              variant="outlined"
+                            />
+                          )}
                         </TableCell>
                         <TableCell>${(plan.total_quota / 500000).toFixed(2)}</TableCell>
                         <TableCell>{plan.max_client_count}</TableCell>
@@ -738,7 +738,6 @@ const ClaudeCodeAdmin = () => {
 
       {/* 发放套餐对话框 */}
       <Dialog open={grantDialogOpen} onClose={handleGrantDialogClose} maxWidth="sm" fullWidth>
-        <DialogTitle>为用户 "{selectedUser?.username}" 发放 Claude Code 套餐</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2 }}>
             <Alert severity="info" sx={{ mb: 3 }}>
@@ -752,45 +751,18 @@ const ClaudeCodeAdmin = () => {
                 label="套餐类型"
                 onChange={(e) => setGrantForm({ ...grantForm, planType: e.target.value })}
               >
-			    {plans.map((plan) => {
-			      const unit = plan.duration_unit || 'month';
-			      const value = plan.duration_value || plan.duration_months || 1;
-			      return (
-			        <MenuItem key={plan.type} value={plan.type}>
-		          {plan.name} - ${plan.price}/{plan.currency}/
-		          {plan.is_unlimited_time ? '永久' : getDurationShortLabel(unit)} (默认 {plan.is_unlimited_time ? '无时间限制' : getDurationLabel(unit, value)})
-			  {!plan.show_in_portal && '（前台隐藏）'}
-			        </MenuItem>
-			      );
-			    })}
+                {plans.map((plan) => {
+                  const unit = plan.duration_unit || 'month';
+                  const value = plan.duration_value || plan.duration_months || 1;
+                  return (
+                    <MenuItem key={plan.type} value={plan.type}>
+                      {plan.name} - ${plan.price}/{plan.currency}/{plan.is_unlimited_time ? '永久' : getDurationShortLabel(unit)}({' '}
+                      {plan.is_unlimited_time ? '无时间限制' : getDurationLabel(unit, value)}){!plan.show_in_portal && '（前台隐藏）'}
+                    </MenuItem>
+                  );
+                })}
               </Select>
             </FormControl>
-
-			<FormControl fullWidth sx={{ mb: 2 }}>
-			  <InputLabel>时长单位</InputLabel>
-			  <Select
-			    value={grantForm.durationUnit}
-			    label="时长单位"
-			    onChange={(e) => setGrantForm({ ...grantForm, durationUnit: e.target.value })}
-			  >
-			    {durationUnitOptions.map((option) => (
-			      <MenuItem key={option.value} value={option.value}>
-			        {option.label}
-			      </MenuItem>
-			    ))}
-			  </Select>
-			</FormControl>
-
-            <TextField
-              fullWidth
-			  label="订阅时长"
-              type="number"
-              value={grantForm.duration}
-              onChange={(e) => setGrantForm({ ...grantForm, duration: parseInt(e.target.value) || 1 })}
-			  inputProps={{ min: 1, max: 365 }}
-              sx={{ mb: 2 }}
-			  helperText={`当前为 ${getDurationLabel(grantForm.durationUnit, grantForm.duration)}`}
-            />
 
             <TextField
               fullWidth
@@ -820,7 +792,7 @@ const ClaudeCodeAdmin = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="套餐名称"
+                  label={t('packages.subscription.packageName')}
                   value={planForm.name}
                   onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
                   required
@@ -828,11 +800,11 @@ const ClaudeCodeAdmin = () => {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
-                  <InputLabel>服务类型</InputLabel>
+                  <InputLabel>{t('packages.subscription.serviceType')}</InputLabel>
                   <Select
                     value={planForm.service_type}
                     onChange={(e) => setPlanForm({ ...planForm, service_type: e.target.value })}
-                    label="服务类型"
+                    label={t('packages.subscription.serviceType')}
                   >
                     <MenuItem value="claude_code">Claude Code</MenuItem>
                     <MenuItem value="codex_code">Codex Code</MenuItem>
@@ -915,74 +887,69 @@ const ClaudeCodeAdmin = () => {
                   inputProps={{ min: 1 }}
                 />
               </Grid>
-		      <Grid item xs={12} sm={6}>
-		        <FormControl fullWidth>
-		          <InputLabel>时间限制类型</InputLabel>
-		          <Select
-		            value={planForm.is_unlimited_time}
-		            onChange={(e) => setPlanForm({ ...planForm, is_unlimited_time: e.target.value })}
-		            label="时间限制类型"
-		          >
-		            <MenuItem value={false}>限制时间</MenuItem>
-		            <MenuItem value={true}>无时间限制</MenuItem>
-		          </Select>
-		        </FormControl>
-		      </Grid>
-		      {!planForm.is_unlimited_time && (
-		        <>
-		          <Grid item xs={12} sm={6}>
-		            <FormControl fullWidth>
-		              <InputLabel>时长单位</InputLabel>
-		              <Select
-		                value={planForm.duration_unit}
-		                label="时长单位"
-		                onChange={(e) => {
-		                  const unit = e.target.value;
-		                  setPlanForm((prev) => ({
-		                    ...prev,
-		                    duration_unit: unit,
-		                    duration_months:
-		                      unit === 'month'
-		                        ? prev.duration_value
-		                        : unit === 'quarter'
-		                          ? prev.duration_value * 3
-		                          : prev.duration_months || prev.duration_value
-		                  }));
-		                }}
-		              >
-		                {durationUnitOptions.map((option) => (
-		                  <MenuItem key={option.value} value={option.value}>
-		                    {option.label}
-		                  </MenuItem>
-		                ))}
-		              </Select>
-		            </FormControl>
-		          </Grid>
-		          <Grid item xs={12} sm={6}>
-		            <TextField
-		              fullWidth
-		              label="订阅时长数值"
-		              type="number"
-		              value={planForm.duration_value}
-		              onChange={(e) => {
-		                const value = parseInt(e.target.value, 10) || 1;
-		                setPlanForm((prev) => ({
-		                  ...prev,
-		                  duration_value: value,
-		                  duration_months:
-		                    prev.duration_unit === 'month'
-		                      ? value
-		                      : prev.duration_unit === 'quarter'
-		                        ? value * 3
-		                        : value
-		                }));
-		              }}
-		              inputProps={{ min: 1, max: 120 }}
-		              helperText="与选择的单位组合成完整时长"
-		            />
-		          </Grid>
-		        </>
-		      )}
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>时间限制类型</InputLabel>
+                  <Select
+                    value={planForm.is_unlimited_time}
+                    onChange={(e) => setPlanForm({ ...planForm, is_unlimited_time: e.target.value })}
+                    label="时间限制类型"
+                  >
+                    <MenuItem value={false}>限制时间</MenuItem>
+                    <MenuItem value={true}>无时间限制</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              {!planForm.is_unlimited_time && (
+                <>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>时长单位</InputLabel>
+                      <Select
+                        value={planForm.duration_unit}
+                        label="时长单位"
+                        onChange={(e) => {
+                          const unit = e.target.value;
+                          setPlanForm((prev) => ({
+                            ...prev,
+                            duration_unit: unit,
+                            duration_months:
+                              unit === 'month'
+                                ? prev.duration_value
+                                : unit === 'quarter'
+                                  ? prev.duration_value * 3
+                                  : prev.duration_months || prev.duration_value
+                          }));
+                        }}
+                      >
+                        {durationUnitOptions.map((option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="订阅时长数值"
+                      type="number"
+                      value={planForm.duration_value}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value, 10) || 1;
+                        setPlanForm((prev) => ({
+                          ...prev,
+                          duration_value: value,
+                          duration_months: prev.duration_unit === 'month' ? value : prev.duration_unit === 'quarter' ? value * 3 : value
+                        }));
+                      }}
+                      inputProps={{ min: 1, max: 120 }}
+                      helperText="与选择的单位组合成完整时长"
+                    />
+                  </Grid>
+                </>
+              )}
               <Grid item xs={12} sm={planForm.is_unlimited_time ? 12 : 6}>
                 <FormControl fullWidth>
                   <InputLabel>状态</InputLabel>

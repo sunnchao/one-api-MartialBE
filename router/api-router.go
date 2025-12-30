@@ -72,6 +72,17 @@ func SetApiRouter(router *gin.Engine) {
 			userRoute.POST("/login", middleware.CriticalRateLimit(), middleware.TurnstileCheck(), controller.Login)
 			userRoute.GET("/logout", controller.Logout)
 
+			// 订阅管理路由 - 必须在 adminRoute 之前注册以避免被 /:id 拦截
+			packagesRoute := userRoute.Group("/packages")
+			packagesRoute.Use(middleware.UserAuth())
+			{
+				packagesRoute.GET("/plans", controller.GetPackagesPlans)
+				packagesRoute.GET("/subscriptions", controller.GetPackagesSubscription)
+				packagesRoute.POST("/purchase", controller.PurchasePackagesSubscription)
+				packagesRoute.POST("/cancel", controller.CancelPackagesSubscription)
+				packagesRoute.GET("/usage-stats", controller.GetPackagesUsageStats)
+			}
+
 			selfRoute := userRoute.Group("/")
 			selfRoute.Use(middleware.UserAuth())
 			{
@@ -104,22 +115,6 @@ func SetApiRouter(router *gin.Engine) {
 
 			}
 
-      packagesRoute := userRoute.Group("/packages");
-      packagesRoute.Use(middleware.UserAuth())
-			{
-				// 订阅管理
-        packagesRoute.GET("/plans", controller.GetClaudeCodePlans)
-        packagesRoute.GET("/subscription", controller.GetClaudeCodeSubscription)
-        packagesRoute.POST("/purchase", controller.PurchaseClaudeCodeSubscription)
-        packagesRoute.POST("/cancel", controller.CancelClaudeCodeSubscription)
-        packagesRoute.GET("/usage-stats", controller.GetClaudeCodeUsageStats)
-
-				// API Key 管理
-        packagesRoute.GET("/api-keys", controller.GetClaudeCodeAPIKeys)
-        packagesRoute.POST("/api-keys", controller.CreateClaudeCodeAPIKey)
-        packagesRoute.DELETE("/api-keys/:id", controller.DeleteClaudeCodeAPIKey)
-			}
-
 			adminRoute := userRoute.Group("/")
 			adminRoute.Use(middleware.AdminAuth())
 			{
@@ -133,6 +128,7 @@ func SetApiRouter(router *gin.Engine) {
 				adminRoute.GET("/token/:userId", controller.GetUserTokensListByUserId)
 			}
 		}
+
 		optionRoute := apiRouter.Group("/option")
 		optionRoute.Use(middleware.RootAuth())
 		{
@@ -216,10 +212,10 @@ func SetApiRouter(router *gin.Engine) {
 
 		// ClaudeCode OAuth routes
 		claudCodeRoute := apiRouter.Group("/claudecode")
-    claudCodeRoute.Use(middleware.AdminAuth())
+		claudCodeRoute.Use(middleware.AdminAuth())
 		{
-      claudCodeRoute.POST("/oauth/start", controller.StartClaudeCodeOAuth)
-      claudCodeRoute.POST("/oauth/exchange-code", controller.ClaudeCodeOAuthCallback)
+			claudCodeRoute.POST("/oauth/start", controller.StartClaudeCodeOAuth)
+			claudCodeRoute.POST("/oauth/exchange-code", controller.ClaudeCodeOAuthCallback)
 		}
 
 		// Codex OAuth routes
@@ -355,22 +351,20 @@ func SetApiRouter(router *gin.Engine) {
 		sseRouter.POST("/channel/check", middleware.AdminAuth(), controller.CheckChannel)
 	}
 
-	// Claude Code管理员路由
-	claudeCodeAdminRouter := router.Group("/api/packages-admin")
-	claudeCodeAdminRouter.Use(middleware.AdminAuth()) // 使用普通管理员权限
+	// 套餐管理
+	packagesAdminRouter := router.Group("/api/packages-admin")
+	packagesAdminRouter.Use(middleware.AdminAuth()) // 使用普通管理员权限
 	{
-		// 订阅管理
-		claudeCodeAdminRouter.GET("/subscriptions", controller.GetAllClaudeCodeSubscriptions)
-		claudeCodeAdminRouter.GET("/users/search", controller.AdminSearchUsers)
-		claudeCodeAdminRouter.POST("/grant-subscription", controller.AdminGrantClaudeCodeSubscription)
-		claudeCodeAdminRouter.DELETE("/subscriptions/:id", controller.AdminCancelClaudeCodeSubscription)
+		packagesAdminRouter.GET("/subscriptions", controller.GetAllPackagesSubscriptions)
+		packagesAdminRouter.GET("/users/search", controller.AdminSearchUsers)
+		packagesAdminRouter.POST("/grant-subscription", controller.AdminGrantPackagesSubscription)
+		packagesAdminRouter.DELETE("/subscriptions/:id", controller.AdminCancelPackagesSubscription)
 
-		// 套餐管理
-		claudeCodeAdminRouter.GET("/plans", controller.GetClaudeCodePlans)
-		claudeCodeAdminRouter.GET("/plans/:id", controller.GetClaudeCodePlanById)
-		claudeCodeAdminRouter.POST("/plans", controller.CreateClaudeCodePlan)
-		claudeCodeAdminRouter.PUT("/plans/:id", controller.UpdateClaudeCodePlan)
-		claudeCodeAdminRouter.DELETE("/plans/:id", controller.DeleteClaudeCodePlan)
+		packagesAdminRouter.GET("/plans", controller.GetPackagesPlans)
+		packagesAdminRouter.GET("/plans/:id", controller.GetPackagesPlanById)
+		packagesAdminRouter.POST("/plans", controller.CreatePackagesPlan)
+		packagesAdminRouter.PUT("/plans/:id", controller.UpdatePackagesPlan)
+		packagesAdminRouter.DELETE("/plans/:id", controller.DeletePackagesPlan)
 	}
 
 }

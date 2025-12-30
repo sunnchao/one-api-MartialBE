@@ -63,17 +63,24 @@
     "welcomeBack": "Welcome Back",
     "claude-code": "Claude Code"
   },
-  "claudeCode": {
+  "packages": {
     "subscription": {
       "title": "Subscription Management",
       "currentSubscription": "Current Subscription",
       "planType": "Plan Type",
+      "serviceType": "Service Type",
+      "packageName": "Package Name",
+      "packageDescription": "Package Description",
       "subscriptionPeriod": "Subscription Period",
       "price": "Price",
       "monthlyUsage": "Monthly Usage: {{used}} / {{total}}",
       "usagePercentage": "Used {{percentage}}%",
       "cancelSubscription": "Cancel Subscription",
-      "noActiveSubscription": "You currently have no active Claude Code subscription, please select a suitable plan to get started.",
+      "cancelConfirmMessage": "Are you sure you want to cancel the subscription? The subscription will expire at the end of the period.",
+      "cancelSuccess": "Subscription cancelled",
+      "cancelFailed": "Failed to cancel",
+      "confirmCancel": "Confirm Cancel",
+      "noActiveSubscription": "You currently have no active Claude Code/Codex Code/Gemini CLI subscription, please select a suitable plan to get started. You can obtain it by purchasing a subscription, daily check-ins, or contacting an admin.",
       "apiKeysManagement": "API Keys Management",
       "createApiKey": "Create API Key",
       "selectPlan": "Select Subscription Plan",
@@ -105,7 +112,14 @@
         "expired": "Expired",
         "cancelled": "Cancelled",
         "pending": "Pending",
+        "exhausted": "Exhausted",
         "unknown": "Unknown"
+      },
+      "tabs": {
+        "all": "All",
+        "active": "Active",
+        "cancelled": "Cancelled",
+        "other": "Other"
       },
       "paymentMethods": {
         "balance": "Account Balance",

@@ -16,13 +16,13 @@ import (
 )
 
 // 获取所有套餐
-func GetClaudeCodePlans(c *gin.Context) {
+func GetPackagesPlans(c *gin.Context) {
 	includeHidden := c.DefaultQuery("include_hidden", "false") == "true"
 	role := c.GetInt("role")
 	if includeHidden && role < config.RoleAdminUser {
 		includeHidden = false
 	}
-	plans, err := model.GetAllClaudeCodePlans(includeHidden)
+	plans, err := model.GetAllPackagesPlans(includeHidden)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -37,11 +37,17 @@ func GetClaudeCodePlans(c *gin.Context) {
 	})
 }
 
+type GetPackagesSubscriptionResponse struct {
+	*model.PackagesSubscription
+	PackagePlan *model.PackagesPlan `json:"package_plan"`
+}
+
 // 获取用户订阅状态
-func GetClaudeCodeSubscription(c *gin.Context) {
+func GetPackagesSubscription(c *gin.Context) {
 	userId := c.GetInt("id")
 
-	subscription, err := model.GetUserActiveClaudeCodeSubscription(userId, "claude_code")
+	subscriptions, err := model.GetUserActivePackagesSubscriptions(userId, "", false)
+
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -51,23 +57,59 @@ func GetClaudeCodeSubscription(c *gin.Context) {
 		return
 	}
 
+	// 根据subscriptions的plan_type获取订阅信息，先去重
+	var planTypes = make(map[string]string)
+	var plans []*model.PackagesPlan
+	for _, sub := range subscriptions {
+		planTypes[sub.PlanType] = sub.PlanType
+	}
+	for _, planType := range planTypes {
+		plan, err := model.GetPackagesPlanByType(planType)
+		if err != nil {
+			continue
+		}
+		newPlan := &model.PackagesPlan{
+			Description: plan.Description,
+			Type:        plan.Type,
+			HashId:      plan.HashId,
+		}
+		plans = append(plans, newPlan)
+	}
+
+	// 组装返回 GetPackagesSubscriptionResponse格式
+	var newSubscriptions []*GetPackagesSubscriptionResponse
+	for i := range subscriptions {
+		sub := &subscriptions[i]
+		subscription := &GetPackagesSubscriptionResponse{
+			PackagesSubscription: sub,
+		}
+		for _, plan := range plans {
+			if plan.Type == sub.PlanType {
+				subscription.PackagePlan = plan
+				break
+			}
+		}
+		newSubscriptions = append(newSubscriptions, subscription)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"data":    subscription,
+		"data":    newSubscriptions,
 	})
 }
 
 // 购买订阅请求结构
-type PurchaseClaudeCodeRequest struct {
+type PurchaseSubscriptionRequest struct {
 	PlanType      string `json:"plan_type" binding:"required"`
-	PaymentMethod string `json:"payment_method" binding:"required"` // stripe, alipay, wxpay
+	HashId        string `json:"hash_id" binding:"required"`
+	PaymentMethod string `json:"payment_method"`
 }
 
 // 购买订阅
-func PurchaseClaudeCodeSubscription(c *gin.Context) {
+func PurchasePackagesSubscription(c *gin.Context) {
 	userId := c.GetInt("id")
 
-	var req PurchaseClaudeCodeRequest
+	var req PurchaseSubscriptionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -76,18 +118,8 @@ func PurchaseClaudeCodeSubscription(c *gin.Context) {
 		return
 	}
 
-	// 检查是否已有有效订阅
-	existingSubscription, _ := model.GetUserActiveClaudeCodeSubscription(userId, "claude_code")
-	if existingSubscription != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": "您已有有效订阅，请等待当前订阅过期后再购买",
-		})
-		return
-	}
-
 	// 获取套餐信息
-	plan, err := model.GetClaudeCodePlanByType(req.PlanType)
+	plan, err := model.GetPackagesPlanByType(req.PlanType)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -181,7 +213,7 @@ func PurchaseClaudeCodeSubscription(c *gin.Context) {
 		endTime = now + durationSeconds
 	}
 
-	subscription := &model.ClaudeCodeSubscription{
+	subscription := &model.PackagesSubscription{
 		UserId:         userId,
 		PlanType:       plan.Type,
 		Status:         "pending", // 待支付状态
@@ -197,7 +229,7 @@ func PurchaseClaudeCodeSubscription(c *gin.Context) {
 		OrderId:        orderId,
 	}
 
-	if err := model.CreateClaudeCodeSubscription(subscription); err != nil {
+	if err := model.CreatePackagesSubscription(subscription); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": "创建订阅记录失败",
@@ -229,7 +261,7 @@ func ClaudeCodePaymentNotify(c *gin.Context) {
 	// 模拟支付成功
 	orderId := c.Query("order_id")
 	if orderId != "" {
-		err := activateClaudeCodeSubscription(orderId)
+		err := activatePackagesSubscription(orderId)
 		if err != nil {
 			logger.SysError("激活Claude Code订阅失败: " + err.Error())
 		}
@@ -239,8 +271,8 @@ func ClaudeCodePaymentNotify(c *gin.Context) {
 }
 
 // 激活订阅
-func activateClaudeCodeSubscription(orderId string) error {
-	var subscription model.ClaudeCodeSubscription
+func activatePackagesSubscription(orderId string) error {
+	var subscription model.PackagesSubscription
 	if err := model.DB.Where("order_id = ? AND status = 'pending'", orderId).First(&subscription).Error; err != nil {
 		return err
 	}
@@ -254,133 +286,7 @@ func activateClaudeCodeSubscription(orderId string) error {
 	subscription.StartTime = utils.GetTimestamp()
 	subscription.EndTime = subscription.StartTime + duration
 
-	return model.UpdateClaudeCodeSubscription(&subscription)
-}
-
-// 获取用户的API Keys
-func GetClaudeCodeAPIKeys(c *gin.Context) {
-	userId := c.GetInt("id")
-
-	apiKeys, err := model.GetUserClaudeCodeAPIKeys(userId)
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": "获取API Keys失败",
-		})
-		return
-	}
-
-	// 不返回实际的key，只返回基本信息
-	var safeKeys []map[string]interface{}
-	for _, key := range apiKeys {
-		safeKeys = append(safeKeys, map[string]interface{}{
-			"id":             key.Id,
-			"name":           key.Name,
-			"status":         key.Status,
-			"last_used_time": key.LastUsedTime,
-			"usage_count":    key.UsageCount,
-			"created_time":   key.CreatedTime,
-		})
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"data":    safeKeys,
-	})
-}
-
-// 创建API Key请求结构
-type CreateAPIKeyRequest struct {
-	Name string `json:"name" binding:"required"`
-}
-
-// 创建API Key
-func CreateClaudeCodeAPIKey(c *gin.Context) {
-	userId := c.GetInt("id")
-
-	var req CreateAPIKeyRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "参数错误",
-		})
-		return
-	}
-
-	// 检查是否有有效订阅
-	subscription, err := model.GetUserActiveClaudeCodeSubscription(userId, "claude_code")
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": "需要有效的订阅才能创建API Key",
-		})
-		return
-	}
-
-	// 检查现有API Key数量
-	existingKeys, _ := model.GetUserClaudeCodeAPIKeys(userId)
-	activeKeyCount := 0
-	for _, key := range existingKeys {
-		if key.Status == 1 {
-			activeKeyCount++
-		}
-	}
-
-	if activeKeyCount >= 5 { // 限制每个用户最多5个活跃的API Key
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": "API Key数量已达到上限",
-		})
-		return
-	}
-
-	// 创建新的API Key
-	apiKey, keyString, err := model.CreateClaudeCodeAPIKey(userId, subscription.Id, req.Name)
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": "创建API Key失败",
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "API Key创建成功",
-		"data": map[string]interface{}{
-			"id":           apiKey.Id,
-			"name":         apiKey.Name,
-			"key":          keyString, // 只在创建时返回一次
-			"created_time": apiKey.CreatedTime,
-		},
-	})
-}
-
-// 删除API Key
-func DeleteClaudeCodeAPIKey(c *gin.Context) {
-	userId := c.GetInt("id")
-	keyId, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "无效的API Key ID",
-		})
-		return
-	}
-
-	err = model.DeleteClaudeCodeAPIKey(keyId, userId)
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": "删除失败",
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "删除成功",
-	})
+	return model.UpdatePackagesSubscription(&subscription)
 }
 
 // Claude代理请求结构
@@ -409,7 +315,7 @@ func getAvailableClaudeChannel() (*model.Channel, error) {
 }
 
 // 获取使用统计
-func GetClaudeCodeUsageStats(c *gin.Context) {
+func GetPackagesUsageStats(c *gin.Context) {
 	userId := c.GetInt("id")
 
 	// 获取查询参数
@@ -424,7 +330,7 @@ func GetClaudeCodeUsageStats(c *gin.Context) {
 		startTime = utils.GetTimestamp() - 30*24*60*60
 	}
 
-	stats, err := model.GetClaudeCodeUsageStats(userId, startTime, endTime)
+	stats, err := model.GetPackagesUsageStats(userId, startTime, endTime)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -440,10 +346,19 @@ func GetClaudeCodeUsageStats(c *gin.Context) {
 }
 
 // 取消订阅
-func CancelClaudeCodeSubscription(c *gin.Context) {
+func CancelPackagesSubscription(c *gin.Context) {
 	userId := c.GetInt("id")
 
-	subscription, err := model.GetUserActiveClaudeCodeSubscription(userId, "claude_code")
+	var req PurchaseSubscriptionRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "参数错误: " + err.Error(),
+		})
+		return
+	}
+
+	subscription, err := model.GetUserActivePackagesSubscriptionByHashId(userId, req.HashId)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -456,7 +371,7 @@ func CancelClaudeCodeSubscription(c *gin.Context) {
 	subscription.Status = "cancelled"
 	subscription.AutoRenew = false
 
-	if err := model.UpdateClaudeCodeSubscription(subscription); err != nil {
+	if err := model.UpdatePackagesSubscription(subscription); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": "取消订阅失败",
@@ -466,12 +381,12 @@ func CancelClaudeCodeSubscription(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "订阅已取消，将在到期时失效",
+		"message": "订阅已取消",
 	})
 }
 
 // 管理员获取所有订阅（管理后台用）
-func GetAllClaudeCodeSubscriptions(c *gin.Context) {
+func GetAllPackagesSubscriptions(c *gin.Context) {
 	// 检查管理员权限
 	if c.GetInt("role") < config.RoleAdminUser {
 		c.JSON(http.StatusForbidden, gin.H{
@@ -484,11 +399,11 @@ func GetAllClaudeCodeSubscriptions(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 
-	var subscriptions []model.ClaudeCodeSubscription
+	var subscriptions []model.PackagesSubscription
 	var total int64
 
 	// 构建查询
-	query := model.DB.Model(&model.ClaudeCodeSubscription{})
+	query := model.DB.Model(&model.PackagesSubscription{})
 
 	// 添加筛选条件
 	if status := c.Query("status"); status != "" {
@@ -525,15 +440,14 @@ func GetAllClaudeCodeSubscriptions(c *gin.Context) {
 
 // 管理员手动发放套餐请求结构
 type AdminGrantSubscriptionRequest struct {
-	UserId       int    `json:"user_id" binding:"required"`
-	PlanType     string `json:"plan_type" binding:"required"`
-	Duration     int    `json:"duration" binding:"required"` // 订阅时长数值
-	DurationUnit string `json:"duration_unit"`               // day, week, month, quarter
-	Reason       string `json:"reason"`                      // 发放原因
+	UserId   int    `json:"user_id" binding:"required"`
+	PlanType string `json:"plan_type" binding:"required"`
+	HashId   string `json:"hash_id"`
+	Reason   string `json:"reason"` // 发放原因
 }
 
 // 管理员手动发放套餐
-func AdminGrantClaudeCodeSubscription(c *gin.Context) {
+func AdminGrantPackagesSubscription(c *gin.Context) {
 	var req AdminGrantSubscriptionRequest
 
 	// 验证请求参数
@@ -556,7 +470,7 @@ func AdminGrantClaudeCodeSubscription(c *gin.Context) {
 	}
 
 	// 验证套餐是否存在
-	plan, err := model.GetClaudeCodePlanByType(req.PlanType)
+	plan, err := model.GetPackagesPlanByType(req.PlanType)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -565,54 +479,14 @@ func AdminGrantClaudeCodeSubscription(c *gin.Context) {
 		return
 	}
 
-	// 检查用户是否已有活跃订阅
-	existingSubscription, _ := model.GetUserActiveClaudeCodeSubscription(req.UserId, plan.ServiceType)
-	if existingSubscription != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": "用户已有活跃订阅，请先处理现有订阅",
-		})
-		return
-	}
-
 	// 计算订阅时间
-	now := utils.GetTimestamp()
 	var endTime int64
-	var appliedDurationValue = req.Duration
-	var appliedDurationUnit string
-	if plan.IsUnlimitedTime {
-		// 无时间限制，设置为很久的未来时间 (100年后)
-		endTime = now + 100*365*24*60*60
-	} else {
-		appliedDurationUnit = plan.DurationUnit
-		if req.DurationUnit != "" {
-			if !model.IsSupportedDurationUnit(req.DurationUnit) {
-				c.JSON(http.StatusBadRequest, gin.H{
-					"success": false,
-					"message": "不支持的订阅时长单位",
-				})
-				return
-			}
-			appliedDurationUnit = model.NormalizeDurationUnit(req.DurationUnit)
-		}
-		if appliedDurationUnit == "" {
-			appliedDurationUnit = model.DurationUnitMonth
-		}
-		if appliedDurationValue <= 0 {
-			appliedDurationValue = plan.DurationValue
-		}
-		if appliedDurationValue <= 0 {
-			appliedDurationValue = 1
-		}
-		durationSeconds := model.DurationValueToSeconds(appliedDurationUnit, appliedDurationValue)
-		if durationSeconds <= 0 {
-			durationSeconds = 30 * 24 * 60 * 60
-		}
-		endTime = now + durationSeconds
-	}
+	now := utils.GetTimestamp()
+	durationSeconds := model.DurationValueToSeconds(plan.DurationUnit, plan.DurationValue)
+	endTime = now + durationSeconds
 
 	// 创建订阅记录
-	subscription := &model.ClaudeCodeSubscription{
+	subscription := &model.PackagesSubscription{
 		UserId:         req.UserId,
 		PlanType:       plan.Type,
 		Status:         "active",
@@ -620,7 +494,6 @@ func AdminGrantClaudeCodeSubscription(c *gin.Context) {
 		EndTime:        endTime,
 		AutoRenew:      false, // 手动发放的订阅默认不自动续费
 		MaxClientCount: plan.MaxClientCount,
-		AllowedClients: "",
 		Price:          0, // 管理员发放免费
 		Currency:       plan.Currency,
 		PaymentMethod:  "admin_grant",
@@ -630,10 +503,12 @@ func AdminGrantClaudeCodeSubscription(c *gin.Context) {
 		TotalQuota:     plan.TotalQuota,
 		RemainQuota:    plan.TotalQuota,
 		UsedQuota:      0,
+		ServiceType:    plan.ServiceType,
+		HashId:         utils.GetUUID(),
 	}
 
 	// 保存订阅
-	if err := model.CreateClaudeCodeSubscription(subscription); err != nil {
+	if err := model.CreatePackagesSubscription(subscription); err != nil {
 		logger.SysError("管理员发放套餐失败: " + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -646,7 +521,7 @@ func AdminGrantClaudeCodeSubscription(c *gin.Context) {
 	adminId := c.GetInt("id")
 	durationDesc := "永久"
 	if !plan.IsUnlimitedTime {
-		durationDesc = formatDurationLabel(appliedDurationUnit, appliedDurationValue)
+		durationDesc = formatDurationLabel(plan.DurationUnit, plan.DurationValue)
 	}
 	logger.SysLog(fmt.Sprintf("管理员 %d 为用户 %d 手动发放 %s 套餐，时长 %s，原因: %s",
 		adminId, req.UserId, req.PlanType, durationDesc, req.Reason))
@@ -716,7 +591,7 @@ func AdminSearchUsers(c *gin.Context) {
 }
 
 // 管理员取消用户订阅
-func AdminCancelClaudeCodeSubscription(c *gin.Context) {
+func AdminCancelPackagesSubscription(c *gin.Context) {
 	subscriptionId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -727,7 +602,7 @@ func AdminCancelClaudeCodeSubscription(c *gin.Context) {
 	}
 
 	// 获取订阅信息
-	subscription, err := model.GetClaudeCodeSubscriptionById(subscriptionId)
+	subscription, err := model.GetPackagesSubscriptionById(subscriptionId)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -740,7 +615,7 @@ func AdminCancelClaudeCodeSubscription(c *gin.Context) {
 	subscription.Status = "cancelled"
 	subscription.UpdatedTime = utils.GetTimestamp()
 
-	if err := model.UpdateClaudeCodeSubscription(subscription); err != nil {
+	if err := model.UpdatePackagesSubscription(subscription); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": "取消订阅失败",
@@ -799,8 +674,8 @@ type UpdatePlanRequest struct {
 	ShowInPortal    *bool                  `json:"show_in_portal"`
 }
 
-// CreateClaudeCodePlan 创建套餐
-func CreateClaudeCodePlan(c *gin.Context) {
+// CreatePackagesPlan 创建套餐
+func CreatePackagesPlan(c *gin.Context) {
 	// 检查管理员权限
 	if c.GetInt("role") < config.RoleAdminUser {
 		c.JSON(http.StatusForbidden, gin.H{
@@ -820,7 +695,7 @@ func CreateClaudeCodePlan(c *gin.Context) {
 	}
 
 	// 检查套餐类型是否已存在
-	existingPlan, _ := model.GetClaudeCodePlanByType(req.Type)
+	existingPlan, _ := model.GetPackagesPlanByType(req.Type)
 	if existingPlan != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -884,7 +759,7 @@ func CreateClaudeCodePlan(c *gin.Context) {
 	}
 
 	now := utils.GetTimestamp()
-	plan := &model.ClaudeCodePlan{
+	plan := &model.PackagesPlan{
 		Name:            req.Name,
 		Type:            req.Type,
 		Description:     req.Description,
@@ -904,7 +779,7 @@ func CreateClaudeCodePlan(c *gin.Context) {
 		UpdatedTime:     now,
 	}
 
-	if err := model.CreateClaudeCodePlan(plan); err != nil {
+	if err := model.CreatePackagesPlan(plan); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": "创建套餐失败",
@@ -919,8 +794,8 @@ func CreateClaudeCodePlan(c *gin.Context) {
 	})
 }
 
-// UpdateClaudeCodePlan 更新套餐
-func UpdateClaudeCodePlan(c *gin.Context) {
+// UpdatePackagesPlan 更新套餐
+func UpdatePackagesPlan(c *gin.Context) {
 	// 检查管理员权限
 	if c.GetInt("role") < config.RoleAdminUser {
 		c.JSON(http.StatusForbidden, gin.H{
@@ -949,7 +824,7 @@ func UpdateClaudeCodePlan(c *gin.Context) {
 	}
 
 	// 获取现有套餐
-	plan, err := model.GetClaudeCodePlanById(planId)
+	plan, err := model.GetPackagesPlanById(planId)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -1047,7 +922,7 @@ func UpdateClaudeCodePlan(c *gin.Context) {
 	plan.SortOrder = req.SortOrder
 	plan.UpdatedTime = utils.GetTimestamp()
 
-	if err := model.UpdateClaudeCodePlan(plan); err != nil {
+	if err := model.UpdatePackagesPlan(plan); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": "更新套餐失败",
@@ -1062,8 +937,8 @@ func UpdateClaudeCodePlan(c *gin.Context) {
 	})
 }
 
-// DeleteClaudeCodePlan 删除套餐
-func DeleteClaudeCodePlan(c *gin.Context) {
+// DeletePackagesPlan 删除套餐
+func DeletePackagesPlan(c *gin.Context) {
 	// 检查管理员权限
 	if c.GetInt("role") < config.RoleAdminUser {
 		c.JSON(http.StatusForbidden, gin.H{
@@ -1083,7 +958,7 @@ func DeleteClaudeCodePlan(c *gin.Context) {
 	}
 
 	// 检查是否有关联的订阅
-	hasSubscriptions, err := model.CheckClaudeCodePlanHasSubscriptions(planId)
+	hasSubscriptions, err := model.CheckPackagesPlanHasSubscriptions(planId)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
@@ -1100,7 +975,7 @@ func DeleteClaudeCodePlan(c *gin.Context) {
 		return
 	}
 
-	if err := model.DeleteClaudeCodePlan(planId); err != nil {
+	if err := model.DeletePackagesPlan(planId); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": "删除套餐失败",
@@ -1114,8 +989,8 @@ func DeleteClaudeCodePlan(c *gin.Context) {
 	})
 }
 
-// GetClaudeCodePlanById 获取套餐详情
-func GetClaudeCodePlanById(c *gin.Context) {
+// GetPackagesPlanById 获取套餐详情
+func GetPackagesPlanById(c *gin.Context) {
 	// 检查管理员权限
 	if c.GetInt("role") < config.RoleAdminUser {
 		c.JSON(http.StatusForbidden, gin.H{
@@ -1134,7 +1009,7 @@ func GetClaudeCodePlanById(c *gin.Context) {
 		return
 	}
 
-	plan, err := model.GetClaudeCodePlanById(planId)
+	plan, err := model.GetPackagesPlanById(planId)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,

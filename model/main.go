@@ -191,10 +191,9 @@ func InitDB() (err error) {
 	businessModels := []interface{}{
 		&Order{},
 		&Payment{},
-		&ClaudeCodeSubscription{},
-		&ClaudeCodePlan{},
-		&ClaudeCodeUsageLog{},
-		&ClaudeCodeAPIKey{},
+		&PackagesSubscription{},
+		&PackagesPlan{},
+		&PackagesUsageLog{},
 		&Task{},
 		&Statistics{},
 		&UserOperation{},

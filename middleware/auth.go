@@ -138,24 +138,24 @@ func tokenAuth(c *gin.Context, key string) {
 	c.Set("token_unlimited_quota", token.UnlimitedQuota)
 	c.Set("token_setting", utils.GetPointer(token.Setting.Data()))
 
-  c.Set("token_billing_type", token.BillingType)
-  packageServiceType := resolvePackageServiceTypeByTokenGroup(token.Group)
-  if packageServiceType != "" {
-    c.Set("package_service_type", packageServiceType)
-  } else {
-    c.Set("package_service_type", "")
-  }
-  if err := checkLimitIP(c); err != nil {
-    abortWithMessage(c, http.StatusForbidden, err.Error())
-    return
-  }
+	c.Set("token_billing_type", token.BillingType)
+	packageServiceType := resolvePackageServiceTypeByTokenGroup(token.Group)
+	if packageServiceType != "" {
+		c.Set("package_service_type", packageServiceType)
+	} else {
+		c.Set("package_service_type", "")
+	}
+	if err := checkLimitIP(c); err != nil {
+		abortWithMessage(c, http.StatusForbidden, err.Error())
+		return
+	}
 
-  if token.ModelLimitsEnabled {
-    c.Set("token_model_limit_enabled", true)
-    c.Set("token_model_limit", token.GetModelLimitsMap())
-  } else {
-    c.Set("token_model_limit_enabled", false)
-  }
+	if token.ModelLimitsEnabled {
+		c.Set("token_model_limit_enabled", true)
+		c.Set("token_model_limit", token.GetModelLimitsMap())
+	} else {
+		c.Set("token_model_limit_enabled", false)
+	}
 	if len(parts) > 1 {
 		if model.IsAdmin(token.UserId) {
 			if token.ModelLimitsEnabled {
@@ -253,10 +253,6 @@ func ClaudeAuth() func(c *gin.Context) {
 		if key == "" {
 			key = c.Request.Header.Get("Authorization")
 		}
-
-		// 标记资源包服务类型为 claude_code
-		// 用于资源包优先扣费逻辑
-		c.Set("package_service_type", "claude_code")
 
 		tokenAuth(c, key)
 	}

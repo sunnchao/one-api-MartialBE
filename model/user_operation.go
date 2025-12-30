@@ -54,24 +54,26 @@ const (
 	BonusProbability              = 0.1   // 额外奖励概率 10%
 	HighRatioProbability          = 0.5   // 获得高额度(>0.2)的概率 75%
 	CouponProbability             = 0     // 获得优惠券的概率 5%
-	SubscriptionRewardProbability = 0.5     // 获得订阅奖励的概率 5%
+	SubscriptionRewardProbability = 0.75  // 获得订阅奖励的概率 50%
 )
 
-const checkInSubscriptionRewardSource = "checkin_reward"
+const checkInClaudCodeSubscriptionRewardSource = "claude_code_checkin_reward"
+const checkInCodexSubscriptionRewardSource = "codex_checkin_reward"
+const checkInGeminiCliSubscriptionRewardSource = "gemini_cli_checkin_reward"
 
 // 签到奖励结果
 type CheckInRewardResult struct {
-	Quota                int                     `json:"quota"`
-	Coupon               *UserCoupon             `json:"coupon,omitempty"`
-	Subscription         *ClaudeCodeSubscription `json:"subscription,omitempty"`
-	SubscriptionExtended bool                    `json:"subscription_extended,omitempty"`
+	Quota                int                   `json:"quota"`
+	Coupon               *UserCoupon           `json:"coupon,omitempty"`
+	Subscription         *PackagesSubscription `json:"subscription,omitempty"`
+	SubscriptionExtended bool                  `json:"subscription_extended,omitempty"`
 }
 
 // ProcessCheckIn 处理用户签到
 func ProcessCheckIn(userId int, requestIP string) (*CheckInRewardResult, error) {
 	var (
 		quota                int
-		subscription         *ClaudeCodeSubscription
+		subscription         *PackagesSubscription
 		subscriptionExtended bool
 		err                  error
 	)
@@ -267,13 +269,21 @@ func shouldGrantSubscriptionReward() bool {
 	return rng.Float64() < SubscriptionRewardProbability
 }
 
-func grantCheckinSubscriptionReward(userId int) (*ClaudeCodeSubscription, bool, error) {
-	plan, err := EnsureCheckinRewardPlan()
+func grantCheckinSubscriptionReward(userId int) (*PackagesSubscription, bool, error) {
+
+	// 签到奖励不允许叠加，如果已有订阅则创建新订阅
+	packageTypes := []string{
+		checkInClaudCodeSubscriptionRewardSource,
+		checkInCodexSubscriptionRewardSource,
+		checkInGeminiCliSubscriptionRewardSource,
+	}
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+	packageType := packageTypes[rng.Intn(len(packageTypes))]
+	plan, err := EnsureCheckinRewardPlan(packageType)
 	if err != nil {
 		return nil, false, err
 	}
-	// 签到奖励不允许叠加，如果已有订阅则创建新订阅
-	return GrantPlanToUser(userId, plan, checkInSubscriptionRewardSource, false)
+	return GrantPlanToUser(userId, plan, packageType, false)
 }
 
 // 检查优惠券奖励是否启用

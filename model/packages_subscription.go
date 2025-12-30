@@ -2,7 +2,6 @@ package model
 
 import (
 	"crypto/md5"
-	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -30,17 +29,10 @@ var durationUnitToSeconds = map[string]int64{
 	DurationUnitQuarter: 90 * 24 * 60 * 60,
 }
 
-const (
-	CheckinRewardPlanType        = "claude_code_checkin_reward"
-	checkinRewardPlanName        = "Claude Code 签到福利"
-	checkinRewardPlanDescription = "每日签到赠送的体验套餐"
-	checkinRewardPlanQuota       = 200000
-	checkinRewardPlanDuration    = 1
-)
-
-// Claude Code 订阅模型
-type ClaudeCodeSubscription struct {
+// PackagesSubscription 订阅模型
+type PackagesSubscription struct {
 	Id            int     `json:"id" gorm:"primaryKey"`
+	HashId        string  `json:"hash_id"`
 	UserId        int     `json:"user_id" gorm:"index"`
 	ServiceType   string  `json:"service_type" gorm:"type:varchar(50);index;default:'claude_code'"` // claude_code, codex_code, gemini_code
 	PlanType      string  `json:"plan_type"`                                                        // basic, pro, enterprise
@@ -65,8 +57,9 @@ type ClaudeCodeSubscription struct {
 }
 
 // Claude Code 套餐模型
-type ClaudeCodePlan struct {
+type PackagesPlan struct {
 	Id             int     `json:"id" gorm:"primaryKey"`
+	HashId         string  `json:"hash_id"`
 	Name           string  `json:"name"`
 	Type           string  `json:"type" gorm:"unique"`
 	ServiceType    string  `json:"service_type" gorm:"type:varchar(50);index;default:'claude_code'"` // claude_code, codex_code, gemini_code
@@ -104,7 +97,7 @@ func IsSupportedDurationUnit(unit string) bool {
 	return ok
 }
 
-func (plan *ClaudeCodePlan) NormalizeDurationFields() {
+func (plan *PackagesPlan) NormalizeDurationFields() {
 	if plan == nil {
 		return
 	}
@@ -131,7 +124,7 @@ func (plan *ClaudeCodePlan) NormalizeDurationFields() {
 	}
 }
 
-func (plan *ClaudeCodePlan) DurationSeconds() int64 {
+func (plan *PackagesPlan) DurationSeconds() int64 {
 	if plan == nil {
 		return 0
 	}
@@ -152,8 +145,8 @@ func DurationValueToSeconds(unit string, value int) int64 {
 	return int64(value) * baseSeconds
 }
 
-func EnsureCheckinRewardPlan() (*ClaudeCodePlan, error) {
-	plan, err := GetClaudeCodePlanByType(CheckinRewardPlanType)
+func EnsureCheckinRewardPlan(packageType string) (*PackagesPlan, error) {
+	plan, err := GetPackagesPlanByType(packageType)
 	if err == nil {
 		return plan, nil
 	}
@@ -161,26 +154,9 @@ func EnsureCheckinRewardPlan() (*ClaudeCodePlan, error) {
 		return nil, err
 	}
 	now := utils.GetTimestamp()
-	plan = &ClaudeCodePlan{
-		Name:            checkinRewardPlanName,
-		Type:            CheckinRewardPlanType,
-		ServiceType:     "claude_code",
-		Description:     checkinRewardPlanDescription,
-		Price:           0,
-		Currency:        "USD",
-		TotalQuota:      checkinRewardPlanQuota,
-		MaxClientCount:  1,
-		IsUnlimitedTime: false,
-		DurationUnit:    DurationUnitDay,
-		DurationValue:   checkinRewardPlanDuration,
-		DurationMonths:  0,
-		Features:        database.JSONType[map[string]interface{}]{},
-		IsActive:        true,
-		ShowInPortal:    false,
-		SortOrder:       100,
-		CreatedTime:     now,
-		UpdatedTime:     now,
-	}
+
+	plan.CreatedTime = now
+	plan.UpdatedTime = now
 
 	if err := DB.Create(plan).Error; err != nil {
 		return nil, err
@@ -189,17 +165,14 @@ func EnsureCheckinRewardPlan() (*ClaudeCodePlan, error) {
 	return plan, nil
 }
 
-func GrantPlanToUser(userId int, plan *ClaudeCodePlan, source string, allowStack bool) (*ClaudeCodeSubscription, bool, error) {
+func GrantPlanToUser(userId int, plan *PackagesPlan, source string, allowStack bool) (*PackagesSubscription, bool, error) {
 	if plan == nil {
 		return nil, false, errors.New("plan is nil")
 	}
 	now := utils.GetTimestamp()
 	durationSeconds := plan.DurationSeconds()
-	if plan.ServiceType == "" {
-		plan.ServiceType = "claude_code"
-	}
 
-	subscription, err := GetUserActiveClaudeCodeSubscription(userId, plan.ServiceType)
+	subscription, err := GetUserActivePackagesSubscription(userId, plan.ServiceType)
 	if err == nil && subscription != nil && allowStack {
 		// 允许叠加：在原有订阅上增加额度和时长
 		updates := map[string]interface{}{
@@ -213,7 +186,8 @@ func GrantPlanToUser(userId int, plan *ClaudeCodePlan, source string, allowStack
 		if plan.IsUnlimitedTime {
 			updates["end_time"] = now + 100*365*24*60*60
 		}
-		if err := DB.Model(&ClaudeCodeSubscription{}).Where("id = ?", subscription.Id).Updates(updates).Error; err != nil {
+
+		if err := DB.Model(&PackagesSubscription{}).Where("id = ?", subscription.Id).Updates(updates).Error; err != nil {
 			return nil, false, err
 		}
 		subscription.TotalQuota += plan.TotalQuota
@@ -239,7 +213,7 @@ func GrantPlanToUser(userId int, plan *ClaudeCodePlan, source string, allowStack
 		endTime += 30 * 24 * 60 * 60
 	}
 
-	newSubscription := &ClaudeCodeSubscription{
+	newSubscription := &PackagesSubscription{
 		UserId:         userId,
 		PlanType:       plan.Type,
 		ServiceType:    plan.ServiceType,
@@ -257,9 +231,10 @@ func GrantPlanToUser(userId int, plan *ClaudeCodePlan, source string, allowStack
 		CreatedTime:    now,
 		UpdatedTime:    now,
 		MaxClientCount: plan.MaxClientCount,
+		HashId:         utils.GetUUID(),
 	}
 
-	if err := CreateClaudeCodeSubscription(newSubscription); err != nil {
+	if err := CreatePackagesSubscription(newSubscription); err != nil {
 		return nil, true, err
 	}
 
@@ -267,7 +242,7 @@ func GrantPlanToUser(userId int, plan *ClaudeCodePlan, source string, allowStack
 }
 
 // Claude Code 使用记录
-type ClaudeCodeUsageLog struct {
+type PackagesUsageLog struct {
 	Id             int    `json:"id" gorm:"primaryKey"`
 	UserId         int    `json:"user_id" gorm:"index"`
 	SubscriptionId int    `json:"subscription_id" gorm:"index"`
@@ -277,20 +252,6 @@ type ClaudeCodeUsageLog struct {
 	IpAddress      string `json:"ip_address"`
 	UserAgent      string `json:"user_agent"`
 	CreatedTime    int64  `json:"created_time" gorm:"index"`
-}
-
-// Claude Code API Key 模型
-type ClaudeCodeAPIKey struct {
-	Id             int    `json:"id" gorm:"primaryKey"`
-	UserId         int    `json:"user_id" gorm:"index"`
-	SubscriptionId int    `json:"subscription_id" gorm:"index"`
-	KeyHash        string `json:"key_hash" gorm:"type:varchar(64);uniqueIndex"` // API Key的哈希值，限制长度
-	Name           string `json:"name"`
-	Status         int    `json:"status" gorm:"default:1"` // 1=active, 0=disabled
-	LastUsedTime   int64  `json:"last_used_time"`
-	UsageCount     int64  `json:"usage_count" gorm:"default:0"`
-	CreatedTime    int64  `json:"created_time"`
-	UpdatedTime    int64  `json:"updated_time"`
 }
 
 // 客户端指纹结构
@@ -309,20 +270,9 @@ func getMD5Hash(text string) string {
 	return hex.EncodeToString(hash[:])
 }
 
-// 允许的客户端数据库字段
-var allowedClaudeCodeSubscriptionOrderFields = map[string]bool{
-	"id":           true,
-	"user_id":      true,
-	"plan_type":    true,
-	"status":       true,
-	"start_time":   true,
-	"end_time":     true,
-	"created_time": true,
-}
-
 // 获取用户当前有效订阅（按服务类型查询）
-func GetUserActiveClaudeCodeSubscription(userId int, serviceType string) (*ClaudeCodeSubscription, error) {
-	var subscription ClaudeCodeSubscription
+func GetUserActivePackagesSubscription(userId int, serviceType string) (*PackagesSubscription, error) {
+	var subscription PackagesSubscription
 	now := utils.GetTimestamp()
 
 	query := DB.Where("user_id = ? AND status = 'active' AND end_time > ?",
@@ -333,7 +283,7 @@ func GetUserActiveClaudeCodeSubscription(userId int, serviceType string) (*Claud
 		query = query.Where("service_type = ?", serviceType)
 	}
 
-	err := query.First(&subscription).Error
+	err := query.Find(&subscription).Error
 
 	if err != nil {
 		return nil, err
@@ -342,17 +292,35 @@ func GetUserActiveClaudeCodeSubscription(userId int, serviceType string) (*Claud
 	return &subscription, nil
 }
 
-// GetUserActiveClaudeCodeSubscriptions 获取用户所有活跃订阅（按到期时间升序排序，优先返回快过期的）
-func GetUserActiveClaudeCodeSubscriptions(userId int, serviceType string) ([]ClaudeCodeSubscription, error) {
-	var subscriptions []ClaudeCodeSubscription
-	now := utils.GetTimestamp()
+// 获取用户当前订阅（按HashId查询）
+func GetUserActivePackagesSubscriptionByHashId(userId int, hashId string) (*PackagesSubscription, error) {
+	var subscription PackagesSubscription
 
-	query := DB.Where("user_id = ? AND status = 'active' AND end_time > ? AND remain_quota > 0",
-		userId, now)
+	query := DB.Where("user_id = ? AND hash_id = ?",
+		userId, hashId)
+
+	err := query.Find(&subscription).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &subscription, nil
+}
+
+// GetUserActivePackagesSubscriptions 获取用户所有活跃订阅（按到期时间升序排序，优先返回快过期的）
+func GetUserActivePackagesSubscriptions(userId int, serviceType string, isActive bool) ([]PackagesSubscription, error) {
+	var subscriptions []PackagesSubscription
+
+	query := DB.Where("user_id = ?", userId)
 
 	// 如果指定了服务类型，添加过滤条件
 	if serviceType != "" {
 		query = query.Where("service_type = ?", serviceType)
+	}
+
+	if isActive {
+		query = query.Where("status = 'active'")
 	}
 
 	// 按到期时间升序排序，优先返回快过期的订阅
@@ -366,28 +334,28 @@ func GetUserActiveClaudeCodeSubscriptions(userId int, serviceType string) ([]Cla
 }
 
 // 根据订阅ID获取订阅
-func GetClaudeCodeSubscriptionById(id int) (*ClaudeCodeSubscription, error) {
-	var subscription ClaudeCodeSubscription
+func GetPackagesSubscriptionById(id int) (*PackagesSubscription, error) {
+	var subscription PackagesSubscription
 	err := DB.Where("id = ?", id).First(&subscription).Error
 	return &subscription, err
 }
 
 // 创建订阅
-func CreateClaudeCodeSubscription(subscription *ClaudeCodeSubscription) error {
+func CreatePackagesSubscription(subscription *PackagesSubscription) error {
 	subscription.CreatedTime = utils.GetTimestamp()
 	subscription.UpdatedTime = utils.GetTimestamp()
 	return DB.Create(subscription).Error
 }
 
 // 更新订阅
-func UpdateClaudeCodeSubscription(subscription *ClaudeCodeSubscription) error {
+func UpdatePackagesSubscription(subscription *PackagesSubscription) error {
 	subscription.UpdatedTime = utils.GetTimestamp()
 	return DB.Save(subscription).Error
 }
 
 // 更新订阅使用量（改为额度制）
 func UpdateClaudeCodeUsage(subscriptionId int, quotaUsed int) error {
-	result := DB.Model(&ClaudeCodeSubscription{}).
+	result := DB.Model(&PackagesSubscription{}).
 		Where("id = ? AND remain_quota >= ?", subscriptionId, quotaUsed).
 		Updates(map[string]interface{}{
 			"remain_quota": gorm.Expr("remain_quota - ?", quotaUsed),
@@ -405,10 +373,10 @@ func UpdateClaudeCodeUsage(subscriptionId int, quotaUsed int) error {
 
 	// 检查额度是否用尽，更新状态
 	go func() {
-		var sub ClaudeCodeSubscription
+		var sub PackagesSubscription
 		if err := DB.Where("id = ?", subscriptionId).First(&sub).Error; err == nil {
 			if sub.RemainQuota <= 0 {
-				DB.Model(&ClaudeCodeSubscription{}).
+				DB.Model(&PackagesSubscription{}).
 					Where("id = ?", subscriptionId).
 					Update("status", "exhausted")
 			}
@@ -420,7 +388,7 @@ func UpdateClaudeCodeUsage(subscriptionId int, quotaUsed int) error {
 
 // 重置月度使用量（定时任务调用）
 func ResetMonthlyClaudeCodeUsage() error {
-	return DB.Model(&ClaudeCodeSubscription{}).
+	return DB.Model(&PackagesSubscription{}).
 		Where("status = 'active'").
 		Updates(map[string]interface{}{
 			"used_requests_this_month": 0,
@@ -429,7 +397,7 @@ func ResetMonthlyClaudeCodeUsage() error {
 }
 
 // 检查订阅是否可以使用
-func (s *ClaudeCodeSubscription) CanUseService() bool {
+func (s *PackagesSubscription) CanUseService() bool {
 	now := utils.GetTimestamp()
 	return s.Status == "active" &&
 		s.StartTime <= now &&
@@ -438,11 +406,11 @@ func (s *ClaudeCodeSubscription) CanUseService() bool {
 }
 
 // 验证客户端指纹
-func (s *ClaudeCodeSubscription) ValidateClientFingerprint(fingerprint string) error {
+func (s *PackagesSubscription) ValidateClientFingerprint(fingerprint string) error {
 	if s.ClientFingerprint == "" {
 		// 首次使用，记录客户端指纹
 		s.ClientFingerprint = fingerprint
-		return UpdateClaudeCodeSubscription(s)
+		return UpdatePackagesSubscription(s)
 	}
 
 	// 检查是否是已注册的客户端
@@ -479,7 +447,7 @@ func (s *ClaudeCodeSubscription) ValidateClientFingerprint(fingerprint string) e
 	}
 
 	s.AllowedClients = string(allowedClientsJSON)
-	return UpdateClaudeCodeSubscription(s)
+	return UpdatePackagesSubscription(s)
 }
 
 // 生成客户端指纹
@@ -496,85 +464,9 @@ func GenerateClientFingerprint(clientInfo ClientFingerprint) string {
 	return hex.EncodeToString(hash[:])
 }
 
-// 创建 Claude Code API Key
-func CreateClaudeCodeAPIKey(userId, subscriptionId int, name string) (*ClaudeCodeAPIKey, string, error) {
-	// 生成随机密钥
-	randomBytes := make([]byte, 32)
-	_, err := rand.Read(randomBytes)
-	if err != nil {
-		return nil, "", err
-	}
-
-	keyString := fmt.Sprintf("cc-sk-%s", hex.EncodeToString(randomBytes))
-	keyHash := getMD5Hash(keyString)
-
-	apiKey := &ClaudeCodeAPIKey{
-		UserId:         userId,
-		SubscriptionId: subscriptionId,
-		KeyHash:        keyHash,
-		Name:           name,
-		Status:         1,
-		CreatedTime:    utils.GetTimestamp(),
-		UpdatedTime:    utils.GetTimestamp(),
-	}
-
-	err = DB.Create(apiKey).Error
-	if err != nil {
-		return nil, "", err
-	}
-
-	return apiKey, keyString, nil
-}
-
-// 验证 Claude Code API Key
-func ValidateClaudeCodeAPIKey(keyString string) (*ClaudeCodeAPIKey, *ClaudeCodeSubscription, error) {
-	keyHash := getMD5Hash(keyString)
-
-	var apiKey ClaudeCodeAPIKey
-	err := DB.Where("key_hash = ? AND status = 1", keyHash).First(&apiKey).Error
-	if err != nil {
-		return nil, nil, errors.New("无效的API Key")
-	}
-
-	// 获取订阅信息
-	subscription, err := GetClaudeCodeSubscriptionById(apiKey.SubscriptionId)
-	if err != nil {
-		return nil, nil, errors.New("订阅不存在")
-	}
-
-	// 检查订阅是否有效
-	if !subscription.CanUseService() {
-		return nil, nil, errors.New("订阅已过期或已达到使用限制")
-	}
-
-	// 更新使用信息
-	go func() {
-		DB.Model(&apiKey).Updates(map[string]interface{}{
-			"last_used_time": utils.GetTimestamp(),
-			"usage_count":    gorm.Expr("usage_count + 1"),
-			"updated_time":   utils.GetTimestamp(),
-		})
-	}()
-
-	return &apiKey, subscription, nil
-}
-
-// 获取用户的 Claude Code API Keys
-func GetUserClaudeCodeAPIKeys(userId int) ([]ClaudeCodeAPIKey, error) {
-	var apiKeys []ClaudeCodeAPIKey
-	err := DB.Where("user_id = ?", userId).Order("created_time DESC").Find(&apiKeys).Error
-	return apiKeys, err
-}
-
-// 删除 Claude Code API Key
-func DeleteClaudeCodeAPIKey(id, userId int) error {
-	return DB.Where("id = ? AND user_id = ?", id, userId).Delete(&ClaudeCodeAPIKey{}).Error
-}
-
 // 获取所有套餐
-
-func GetAllClaudeCodePlans(includeHidden bool) ([]ClaudeCodePlan, error) {
-	var plans []ClaudeCodePlan
+func GetAllPackagesPlans(includeHidden bool) ([]PackagesPlan, error) {
+	var plans []PackagesPlan
 	query := DB.Where("is_active = true")
 	if !includeHidden {
 		query = query.Where("show_in_portal = true")
@@ -590,8 +482,8 @@ func GetAllClaudeCodePlans(includeHidden bool) ([]ClaudeCodePlan, error) {
 }
 
 // 根据类型获取套餐
-func GetClaudeCodePlanByType(planType string) (*ClaudeCodePlan, error) {
-	var plan ClaudeCodePlan
+func GetPackagesPlanByType(planType string) (*PackagesPlan, error) {
+	var plan PackagesPlan
 	err := DB.Where("type = ? AND is_active = true", planType).First(&plan).Error
 	if err != nil {
 		return nil, err
@@ -600,9 +492,9 @@ func GetClaudeCodePlanByType(planType string) (*ClaudeCodePlan, error) {
 	return &plan, nil
 }
 
-// GetClaudeCodePlanById 根据ID获取套餐
-func GetClaudeCodePlanById(planId int) (*ClaudeCodePlan, error) {
-	var plan ClaudeCodePlan
+// GetPackagesPlanById 根据ID获取套餐
+func GetPackagesPlanById(planId int) (*PackagesPlan, error) {
+	var plan PackagesPlan
 	err := DB.Where("id = ?", planId).First(&plan).Error
 	if err != nil {
 		return nil, err
@@ -611,30 +503,30 @@ func GetClaudeCodePlanById(planId int) (*ClaudeCodePlan, error) {
 	return &plan, nil
 }
 
-// CreateClaudeCodePlan 创建套餐
-func CreateClaudeCodePlan(plan *ClaudeCodePlan) error {
+// CreatePackagesPlan 创建套餐
+func CreatePackagesPlan(plan *PackagesPlan) error {
 	return DB.Create(plan).Error
 }
 
-// UpdateClaudeCodePlan 更新套餐
-func UpdateClaudeCodePlan(plan *ClaudeCodePlan) error {
+// UpdatePackagesPlan 更新套餐
+func UpdatePackagesPlan(plan *PackagesPlan) error {
 	return DB.Save(plan).Error
 }
 
-// DeleteClaudeCodePlan 删除套餐
-func DeleteClaudeCodePlan(planId int) error {
-	return DB.Delete(&ClaudeCodePlan{}, planId).Error
+// DeletePackagesPlan 删除套餐
+func DeletePackagesPlan(planId int) error {
+	return DB.Delete(&PackagesPlan{}, planId).Error
 }
 
-// CheckClaudeCodePlanHasSubscriptions 检查套餐是否有关联的订阅
-func CheckClaudeCodePlanHasSubscriptions(planId int) (bool, error) {
-	var plan ClaudeCodePlan
+// CheckPackagesPlanHasSubscriptions 检查套餐是否有关联的订阅
+func CheckPackagesPlanHasSubscriptions(planId int) (bool, error) {
+	var plan PackagesPlan
 	if err := DB.Where("id = ?", planId).First(&plan).Error; err != nil {
 		return false, err
 	}
 
 	var count int64
-	err := DB.Model(&ClaudeCodeSubscription{}).
+	err := DB.Model(&PackagesSubscription{}).
 		Where("plan_type = ?", plan.Type).
 		Count(&count).Error
 
@@ -642,18 +534,18 @@ func CheckClaudeCodePlanHasSubscriptions(planId int) (bool, error) {
 }
 
 // 创建使用日志
-func CreateClaudeCodeUsageLog(log *ClaudeCodeUsageLog) error {
+func CreatePackagesUsageLog(log *PackagesUsageLog) error {
 	log.CreatedTime = utils.GetTimestamp()
 	return DB.Create(log).Error
 }
 
 // 获取用户使用统计
-func GetClaudeCodeUsageStats(userId int, startTime, endTime int64) (map[string]interface{}, error) {
+func GetPackagesUsageStats(userId int, startTime, endTime int64) (map[string]interface{}, error) {
 	var stats map[string]interface{}
 
 	// 总请求数
 	var totalRequests int64
-	DB.Model(&ClaudeCodeUsageLog{}).
+	DB.Model(&PackagesUsageLog{}).
 		Where("user_id = ? AND created_time BETWEEN ? AND ?", userId, startTime, endTime).
 		Count(&totalRequests)
 
@@ -662,7 +554,7 @@ func GetClaudeCodeUsageStats(userId int, startTime, endTime int64) (map[string]i
 		RequestType string `json:"request_type"`
 		Count       int64  `json:"count"`
 	}
-	DB.Model(&ClaudeCodeUsageLog{}).
+	DB.Model(&PackagesUsageLog{}).
 		Select("request_type, count(*) as count").
 		Where("user_id = ? AND created_time BETWEEN ? AND ?", userId, startTime, endTime).
 		Group("request_type").
@@ -677,66 +569,11 @@ func GetClaudeCodeUsageStats(userId int, startTime, endTime int64) (map[string]i
 }
 
 // 初始化 Claude Code 套餐
-func InitClaudeCodePlans() {
-	plans := []ClaudeCodePlan{
-		{
-			Name:            "基础版",
-			Type:            "basic",
-			Description:     "适合个人开发者的基础AI编程助手",
-			Price:           9.99,
-			Currency:        "USD",
-			MaxClientCount:  1,
-			IsUnlimitedTime: false,
-			DurationMonths:  1,
-			DurationUnit:    DurationUnitMonth,
-			DurationValue:   1,
-			Features:        database.JSONType[map[string]interface{}]{},
-			IsActive:        true,
-			ShowInPortal:    true,
-			SortOrder:       1,
-			CreatedTime:     utils.GetTimestamp(),
-			UpdatedTime:     utils.GetTimestamp(),
-		},
-		{
-			Name:            "专业版",
-			Type:            "pro",
-			Description:     "适合专业开发团队的完整AI编程解决方案",
-			Price:           29.99,
-			Currency:        "USD",
-			MaxClientCount:  3,
-			IsUnlimitedTime: false,
-			DurationMonths:  1,
-			DurationUnit:    DurationUnitMonth,
-			DurationValue:   1,
-			Features:        database.JSONType[map[string]interface{}]{},
-			IsActive:        true,
-			ShowInPortal:    true,
-			SortOrder:       2,
-			CreatedTime:     utils.GetTimestamp(),
-			UpdatedTime:     utils.GetTimestamp(),
-		},
-		{
-			Name:            "企业版",
-			Type:            "enterprise",
-			Description:     "适合大型企业的定制化AI编程服务",
-			Price:           99.99,
-			Currency:        "USD",
-			MaxClientCount:  10,
-			IsUnlimitedTime: true,
-			DurationMonths:  0, // 无时间限制时设为0
-			DurationUnit:    DurationUnitMonth,
-			DurationValue:   0,
-			Features:        database.JSONType[map[string]interface{}]{},
-			IsActive:        true,
-			ShowInPortal:    true,
-			SortOrder:       3,
-			CreatedTime:     utils.GetTimestamp(),
-			UpdatedTime:     utils.GetTimestamp(),
-		},
-	}
+func InitPackagesPlans() {
+	plans := []PackagesPlan{}
 
 	for _, plan := range plans {
-		var existingPlan ClaudeCodePlan
+		var existingPlan PackagesPlan
 		if err := DB.Where("type = ?", plan.Type).First(&existingPlan).Error; err != nil {
 			// 套餐不存在，创建新的
 			if err := DB.Create(&plan).Error; err != nil {
@@ -749,9 +586,9 @@ func InitClaudeCodePlans() {
 }
 
 // 检查过期订阅并更新状态
-func CheckExpiredClaudeCodeSubscriptions() error {
+func CheckExpiredPackagesSubscriptions() error {
 	now := utils.GetTimestamp()
-	return DB.Model(&ClaudeCodeSubscription{}).
+	return DB.Model(&PackagesSubscription{}).
 		Where("status = 'active' AND end_time <= ?", now).
 		Update("status", "expired").Error
 }

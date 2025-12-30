@@ -531,17 +531,24 @@
     "welcomeBack": "歡迎回來",
     "claude-code": "Claude Code"
   },
-  "claudeCode": {
+  "packages": {
     "subscription": {
       "title": "訂閱管理",
       "currentSubscription": "當前訂閱",
       "planType": "套餐類型",
+      "serviceType": "服務類型",
+      "packageName": "套餐名稱",
+      "packageDescription": "套餐描述",
       "subscriptionPeriod": "訂閱期間",
       "price": "價格",
       "monthlyUsage": "本月使用量: {{used}} / {{total}}",
       "usagePercentage": "已使用 {{percentage}}%",
       "cancelSubscription": "取消訂閱",
-      "noActiveSubscription": "您當前沒有有效的 Claude Code 訂閱，請選擇合適的套餐開始使用。",
+      "cancelConfirmMessage": "確定要取消訂閱嗎？訂閱將在到期時失效。",
+      "cancelSuccess": "訂閱已取消",
+      "cancelFailed": "取消失敗",
+      "confirmCancel": "確認取消",
+      "noActiveSubscription": "您當前沒有有效的 Claude Code/Codex Code/Gemini CLI 訂閱，請選擇合適的套餐開始使用。可透過購買訂閱以及每日簽到或聯絡管理員獲取。",
       "apiKeysManagement": "API Keys 管理",
       "createApiKey": "創建 API Key",
       "selectPlan": "選擇訂閱套餐",
@@ -573,7 +580,14 @@
         "expired": "已過期",
         "cancelled": "已取消",
         "pending": "待支付",
+        "exhausted": "已耗盡",
         "unknown": "未知"
+      },
+      "tabs": {
+        "all": "全部",
+        "active": "活躍",
+        "cancelled": "已取消",
+        "other": "其它"
       },
       "paymentMethods": {
         "balance": "帳戶餘額",

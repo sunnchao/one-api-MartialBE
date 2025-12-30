@@ -527,17 +527,24 @@
     "welcomeBack": "おかえりなさい",
     "claude-code": "Claude Code"
   },
-  "claudeCode": {
+  "packages": {
     "subscription": {
       "title": "サブスクリプション管理",
       "currentSubscription": "現在のサブスクリプション",
       "planType": "プランタイプ",
+      "serviceType": "サービス種別",
+      "packageName": "パッケージ名",
+      "packageDescription": "パッケージ説明",
       "subscriptionPeriod": "サブスクリプション期間",
       "price": "価格",
       "monthlyUsage": "今月の使用量: {{used}} / {{total}}",
       "usagePercentage": "使用済み {{percentage}}%",
       "cancelSubscription": "サブスクリプションをキャンセル",
-      "noActiveSubscription": "現在有効なClaude Codeサブスクリプションがありません。適切なプランを選択して開始してください。",
+      "cancelConfirmMessage": "サブスクリプションをキャンセルしてもよろしいですか？期間終了時に無効になります。",
+      "cancelSuccess": "サブスクリプションがキャンセルされました",
+      "cancelFailed": "キャンセルに失敗しました",
+      "confirmCancel": "キャンセルを確認",
+      "noActiveSubscription": "現在有効な Claude Code/Codex Code/Gemini CLI サブスクリプションがありません。適切なプランを選択して開始してください。購入または毎日のチェックイン、もしくは管理者に連絡して取得できます。",
       "apiKeysManagement": "API Keys 管理",
       "createApiKey": "API Key を作成",
       "selectPlan": "サブスクリプションプランを選択",
@@ -569,7 +576,14 @@
         "expired": "期限切れ",
         "cancelled": "キャンセル済み",
         "pending": "支払い待ち",
+        "exhausted": "使い切り",
         "unknown": "不明"
+      },
+      "tabs": {
+        "all": "すべて",
+        "active": "アクティブ",
+        "cancelled": "キャンセル済み",
+        "other": "その他"
       },
       "paymentMethods": {
         "balance": "アカウント残高",

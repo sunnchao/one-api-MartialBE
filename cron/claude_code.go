@@ -40,7 +40,7 @@ func InitClaudeCodeCron(c *cron.Cron) {
 func CheckExpiredSubscriptions() {
 	logger.SysLog("开始检查Claude Code过期订阅")
 
-	if err := model.CheckExpiredClaudeCodeSubscriptions(); err != nil {
+	if err := model.CheckExpiredPackagesSubscriptions(); err != nil {
 		logger.SysError("检查Claude Code过期订阅失败: " + err.Error())
 	} else {
 		logger.SysLog("Claude Code过期订阅检查完成")
@@ -68,7 +68,7 @@ func CheckExpiringSubscriptions() {
 	oneDayLater := time.Now().AddDate(0, 0, 1).Unix()
 
 	// 7天内到期提醒
-	var subscriptions7Days []model.ClaudeCodeSubscription
+	var subscriptions7Days []model.PackagesSubscription
 	if err := model.DB.Where("status = 'active' AND end_time <= ? AND end_time > ?",
 		sevenDaysLater, threeDaysLater).Find(&subscriptions7Days).Error; err == nil {
 
@@ -78,7 +78,7 @@ func CheckExpiringSubscriptions() {
 	}
 
 	// 3天内到期提醒
-	var subscriptions3Days []model.ClaudeCodeSubscription
+	var subscriptions3Days []model.PackagesSubscription
 	if err := model.DB.Where("status = 'active' AND end_time <= ? AND end_time > ?",
 		threeDaysLater, oneDayLater).Find(&subscriptions3Days).Error; err == nil {
 
@@ -88,7 +88,7 @@ func CheckExpiringSubscriptions() {
 	}
 
 	// 1天内到期提醒
-	var subscriptions1Day []model.ClaudeCodeSubscription
+	var subscriptions1Day []model.PackagesSubscription
 	if err := model.DB.Where("status = 'active' AND end_time <= ?",
 		oneDayLater).Find(&subscriptions1Day).Error; err == nil {
 
@@ -101,7 +101,7 @@ func CheckExpiringSubscriptions() {
 }
 
 // 发送到期提醒
-func sendExpirationNotice(subscription *model.ClaudeCodeSubscription, daysLeft int) {
+func sendExpirationNotice(subscription *model.PackagesSubscription, daysLeft int) {
 	// 获取用户信息
 	user, err := model.GetUserById(subscription.UserId, false)
 	if err != nil {

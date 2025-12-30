@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Container,
   Typography,
@@ -21,7 +21,9 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  Tabs,
+  Tab
 } from '@mui/material';
 import {
   Star as StarIcon,
@@ -74,25 +76,22 @@ const getQuotaDurationText = (plan) => {
   return `${value}${unitLabel}`;
 };
 
-const ClaudeCodeSubscription = () => {
+const PackagesSubscription = () => {
   const { t } = useTranslation();
   const account = useSelector((state) => state.account);
   const siteInfo = useSelector((state) => state.siteInfo);
   const quotaPerUnit = Number(siteInfo?.quota_per_unit) || 500000;
   const balanceQuota = account?.user?.quota || 0;
-  const [subscription, setSubscription] = useState(null);
+  const [subscriptions, setSubscriptions] = useState([]);
   const [plans, setPlans] = useState([]);
-  const [apiKeys, setApiKeys] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [createKeyDialog, setCreateKeyDialog] = useState(false);
-  const [newKeyName, setNewKeyName] = useState('');
   const [purchaseDialog, setPurchaseDialog] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('balance');
-  const [newApiKey, setNewApiKey] = useState('');
+  const [activeTab, setActiveTab] = useState(1);
+  const [cancelDialog, setCancelDialog] = useState(false);
+  const [cancelingSubscription, setCancelingSubscription] = useState(null);
   const selectedPlanDuration = selectedPlan ? resolvePlanDuration(selectedPlan) : null;
-  const currentPlan = subscription ? plans.find((plan) => plan.type === subscription.plan_type) : null;
-  const currentPlanDuration = currentPlan ? resolvePlanDuration(currentPlan) : null;
   const formatQuotaCount = (value) => {
     if (typeof value !== 'number' || Number.isNaN(value)) {
       return '0';
@@ -114,18 +113,18 @@ const ClaudeCodeSubscription = () => {
   const balanceCost = calculateBalanceCost(selectedPlan);
   const hasEnoughBalance = paymentMethod !== 'balance' || balanceQuota >= balanceCost;
 
-  // 获取用户订阅状态
-  const fetchSubscription = async () => {
+  // 获取用户订阅
+  const fetchSubscriptions = async () => {
     try {
-      const res = await API.get('/api/user/packages/subscription');
+      const res = await API.get('/api/user/packages/subscriptions');
       if (res.data.success) {
-        setSubscription(res.data.data);
+        setSubscriptions(res.data.data || []);
       } else {
-        setSubscription(null);
+        setSubscriptions([]);
       }
     } catch (error) {
       console.error('获取订阅信息失败:', error);
-      setSubscription(null);
+      setSubscriptions([]);
     }
   };
 
@@ -141,21 +140,6 @@ const ClaudeCodeSubscription = () => {
     } catch (error) {
       showError('获取套餐信息失败');
       setPlans([]);
-    }
-  };
-
-  // 获取API Keys
-  const fetchApiKeys = async () => {
-    try {
-      const res = await API.get('/api/user/packages/api-keys');
-      if (res.data.success) {
-        setApiKeys(res.data.data || []);
-      } else {
-        setApiKeys([]);
-      }
-    } catch (error) {
-      console.error('获取API Keys失败:', error);
-      setApiKeys([]);
     }
   };
 
@@ -178,7 +162,7 @@ const ClaudeCodeSubscription = () => {
         if (paymentMethod === 'balance') {
           showSuccess(res.data.message || '订阅已激活');
           setPurchaseDialog(false);
-          fetchSubscription();
+          fetchSubscriptions();
           return;
         }
         showSuccess('订单创建成功！正在跳转到支付页面...');
@@ -187,7 +171,7 @@ const ClaudeCodeSubscription = () => {
         }
         setPurchaseDialog(false);
         setTimeout(() => {
-          fetchSubscription();
+          fetchSubscriptions();
         }, 3000);
       } else {
         showError(res.data.message);
@@ -199,69 +183,31 @@ const ClaudeCodeSubscription = () => {
     }
   };
 
-  // 创建API Key
-  const createApiKey = async () => {
-    if (!newKeyName.trim()) {
-      showError('请输入API Key名称');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await API.post('/api/user/packages/api-keys', {
-        name: newKeyName
-      });
-
-      if (res.data.success) {
-        showSuccess('API Key创建成功！');
-        setNewApiKey(res.data.data.key);
-        setNewKeyName('');
-        fetchApiKeys();
-      } else {
-        showError(res.data.message);
-      }
-    } catch (error) {
-      showError('创建失败');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 删除API Key
-  const deleteApiKey = async (keyId) => {
-    if (!window.confirm('确定要删除这个API Key吗？删除后将无法恢复！')) {
-      return;
-    }
-
-    try {
-      const res = await API.delete(`/api/user/packages/api-keys/${keyId}`);
-      if (res.data.success) {
-        showSuccess('删除成功');
-        fetchApiKeys();
-      } else {
-        showError(res.data.message);
-      }
-    } catch (error) {
-      showError('删除失败');
-    }
+  // 打开取消订阅弹框
+  const openCancelDialog = (subscription) => {
+    setCancelingSubscription(subscription);
+    setCancelDialog(true);
   };
 
   // 取消订阅
   const cancelSubscription = async () => {
-    if (!window.confirm('确定要取消订阅吗？订阅将在到期时失效。')) {
-      return;
-    }
+    if (!cancelingSubscription) return;
 
     try {
-      const res = await API.post('/api/user/packages/cancel');
+      const res = await API.post('/api/user/packages/cancel', {
+        plan_type: cancelingSubscription.service_type,
+        hash_id: cancelingSubscription.hash_id
+      });
       if (res.data.success) {
-        showSuccess('订阅已取消');
-        fetchSubscription();
+        showSuccess(t('packages.subscription.cancelSuccess'));
+        fetchSubscriptions();
+        setCancelDialog(false);
+        setCancelingSubscription(null);
       } else {
         showError(res.data.message);
       }
     } catch (error) {
-      showError('取消失败');
+      showError(t('packages.subscription.cancelFailed'));
     }
   };
 
@@ -273,9 +219,8 @@ const ClaudeCodeSubscription = () => {
   };
 
   useEffect(() => {
-    fetchSubscription();
+    fetchSubscriptions();
     fetchPlans();
-    fetchApiKeys();
   }, []);
 
   const getStatusColor = (status) => {
@@ -288,6 +233,8 @@ const ClaudeCodeSubscription = () => {
         return 'warning';
       case 'pending':
         return 'info';
+      case 'exhausted':
+        return 'error';
       default:
         return 'default';
     }
@@ -296,15 +243,17 @@ const ClaudeCodeSubscription = () => {
   const getStatusText = (status) => {
     switch (status) {
       case 'active':
-        return t('claudeCode.subscription.status.active');
+        return t('packages.subscription.status.active');
       case 'expired':
-        return t('claudeCode.subscription.status.expired');
+        return t('packages.subscription.status.expired');
       case 'cancelled':
-        return t('claudeCode.subscription.status.cancelled');
+        return t('packages.subscription.status.cancelled');
       case 'pending':
-        return t('claudeCode.subscription.status.pending');
+        return t('packages.subscription.status.pending');
+      case 'exhausted':
+        return t('packages.subscription.status.exhausted');
       default:
-        return t('claudeCode.subscription.status.unknown');
+        return t('packages.subscription.status.unknown');
     }
   };
 
@@ -318,6 +267,8 @@ const ClaudeCodeSubscription = () => {
         return <CancelIcon />;
       case 'pending':
         return <InfoIcon />;
+      case 'exhausted':
+        return <WarningIcon />;
       default:
         return <InfoIcon />;
     }
@@ -333,154 +284,168 @@ const ClaudeCodeSubscription = () => {
     });
   };
 
-  const totalQuota = subscription ? (subscription.total_quota ?? subscription.max_requests_per_month ?? 0) : 0;
-  const fallbackUsedQuota =
-    subscription && typeof subscription?.total_quota === 'number' && typeof subscription?.remain_quota === 'number'
-      ? subscription.total_quota - subscription.remain_quota
-      : (subscription?.used_requests_this_month ?? 0);
-  const usedQuota = subscription ? (subscription.used_quota ?? fallbackUsedQuota) : fallbackUsedQuota;
-  const normalizedTotalQuota =
-    typeof totalQuota === 'number' && totalQuota > 0 ? totalQuota : currentPlan ? getPlanQuotaValue(currentPlan) : 0;
-  const normalizedUsedQuota = typeof usedQuota === 'number' && usedQuota > 0 ? Math.min(usedQuota, normalizedTotalQuota || usedQuota) : 0;
-  const usagePercentage = normalizedTotalQuota > 0 ? (normalizedUsedQuota / normalizedTotalQuota) * 100 : 0;
-  const isUnlimitedSubscription = Boolean(subscription?.is_unlimited_time ?? currentPlan?.is_unlimited_time);
-  const subscriptionQuotaDescription = (() => {
-    if (!subscription && !currentPlan) {
-      return '';
+  // 计算单个订阅的使用情况
+  const getSubscriptionUsage = (subscription) => {
+    const totalQuota = subscription.total_quota ?? subscription.max_requests_per_month ?? 0;
+    const fallbackUsedQuota =
+      typeof subscription.total_quota === 'number' && typeof subscription.remain_quota === 'number'
+        ? subscription.total_quota - subscription.remain_quota
+        : subscription.used_requests_this_month ?? 0;
+    const usedQuota = subscription.used_quota ?? fallbackUsedQuota;
+    const normalizedTotalQuota = typeof totalQuota === 'number' && totalQuota > 0 ? totalQuota : 0;
+    const normalizedUsedQuota = typeof usedQuota === 'number' && usedQuota > 0 ? Math.min(usedQuota, normalizedTotalQuota || usedQuota) : 0;
+    const usagePercentage = normalizedTotalQuota > 0 ? (normalizedUsedQuota / normalizedTotalQuota) * 100 : 0;
+    return { totalQuota: normalizedTotalQuota, usedQuota: normalizedUsedQuota, usagePercentage };
+  };
+
+  // 根据 Tab 过滤订阅
+  const filteredSubscriptions = useMemo(() => {
+    switch (activeTab) {
+      case 0: // 全部
+        return subscriptions;
+      case 1: // 活跃
+        return subscriptions.filter((sub) => sub.status === 'active');
+      case 2: // 已取消
+        return subscriptions.filter((sub) => sub.status === 'cancelled');
+      case 3: // 未激活 (expired, pending, exhausted, 其他)
+        return subscriptions.filter(
+          (sub) => ['expired', 'pending', 'exhausted'].includes(sub.status) || !['active', 'cancelled'].includes(sub.status)
+        );
+      default:
+        return subscriptions;
     }
-    const quotaCountDisplay = formatQuotaCount(normalizedTotalQuota);
-    if (isUnlimitedSubscription) {
-      return t('claudeCode.subscription.quotaDisplay.unlimited', { count: quotaCountDisplay });
-    }
-    if (currentPlan) {
-      const durationText = getQuotaDurationText(currentPlan) || currentPlanDuration?.text || durationDisplayMap.month.label;
-      return t('claudeCode.subscription.quotaDisplay.perDuration', {
-        duration: durationText,
-        count: quotaCountDisplay
-      });
-    }
-    return t('claudeCode.subscription.quotaDisplay.total', { count: quotaCountDisplay });
-  })();
+  }, [subscriptions, activeTab]);
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={4}>
+    <Container>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
         <Typography variant="h2" gutterBottom>
-          {t('claudeCode.subscription.title')}
+          {t('packages.subscription.title')}
         </Typography>
         <Stack direction="row" spacing={1}>
           {/*<Button*/}
           {/*  variant="outlined"*/}
           {/*  startIcon={<RefreshIcon />}*/}
           {/*  onClick={() => {*/}
-          {/*    fetchSubscription();*/}
-          {/*    fetchApiKeys();*/}
+          {/*    fetchSubscriptions();*/}
           {/*  }}*/}
           {/*>*/}
           {/*  {t('common.refresh')}*/}
           {/*</Button>*/}
-          {/*<Button*/}
-          {/*  variant="contained"*/}
-          {/*  startIcon={<AddIcon />}*/}
-          {/*  onClick={() => setCreateKeyDialog(true)}*/}
-          {/*  disabled={!subscription || subscription.status !== 'active'}*/}
-          {/*>*/}
-          {/*  {t('claudeCode.subscription.createApiKey')}*/}
-          {/*</Button>*/}
         </Stack>
       </Stack>
 
-      {/* 当前订阅状态 */}
-      {subscription ? (
-        <Card sx={{ mb: 4 }}>
-          <CardContent>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-              <Typography variant="h5">{t('claudeCode.subscription.currentSubscription')}</Typography>
-              <Stack direction="row" spacing={1} alignItems="center">
-                {getStatusIcon(subscription.status)}
-                <Chip label={getStatusText(subscription.status)} color={getStatusColor(subscription.status)} />
-              </Stack>
-            </Box>
+      {/* Tab 菜单 */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}>
+        <Tabs value={activeTab} onChange={handleTabChange}>
+          <Tab label={t('packages.subscription.tabs.all')} />
+          <Tab label={t('packages.subscription.tabs.active')} />
+          <Tab label={t('packages.subscription.tabs.cancelled')} />
+          <Tab label={t('packages.subscription.tabs.other')} />
+        </Tabs>
+      </Box>
 
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <Stack spacing={2}>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      {t('claudeCode.subscription.planType')}
-                    </Typography>
-                    <Typography variant="h6">{subscription.plan_type}</Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      {t('claudeCode.subscription.subscriptionPeriod')}
-                    </Typography>
-                    <Typography variant="body1">
-                      {subscription.end_time > subscription.start_time + 50 * 365 * 24 * 60 * 60 ? (
-                        <>
-                          {formatDate(subscription.start_time)} - <Chip label="无时间限制" color="success" size="small" />
-                        </>
-                      ) : (
-                        `${formatDate(subscription.start_time)} - ${formatDate(subscription.end_time)}`
+      {/* 订阅列表 */}
+      {filteredSubscriptions.length > 0 ? (
+        <Grid container spacing={3}>
+          {filteredSubscriptions.map((subscription) => {
+            const usage = getSubscriptionUsage(subscription);
+            return (
+              <Grid item xs={12} md={6} key={subscription.id}>
+                <Card>
+                  <CardContent>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                      <Typography variant="h6">{subscription.service_type}</Typography>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        {getStatusIcon(subscription.status)}
+                        <Chip label={getStatusText(subscription.status)} color={getStatusColor(subscription.status)} size="small" />
+                      </Stack>
+                    </Box>
+
+                    <Stack spacing={2}>
+                      <Box>
+                        <Typography variant="body2" color="text.secondary">
+                          {t('packages.subscription.subscriptionPeriod')}
+                        </Typography>
+                        <Typography variant="body2">
+                          {subscription.end_time > subscription.start_time + 50 * 365 * 24 * 60 * 60 ? (
+                            <>
+                              {formatDate(subscription.start_time)} - <Chip label="无时间限制" color="success" size="small" />
+                            </>
+                          ) : (
+                            `${formatDate(subscription.start_time)} - ${formatDate(subscription.end_time)}`
+                          )}
+                        </Typography>
+                      </Box>
+
+                      <Box>
+                        <Typography variant="body2" color="text.secondary">
+                          {t('packages.subscription.price')}
+                        </Typography>
+                        <Typography variant="body1" color="primary">
+                          ${subscription.price} {subscription.currency}/月
+                        </Typography>
+                      </Box>
+
+                      <Box>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          {t('packages.subscription.quotaDisplay.total', { count: renderQuota(usage.totalQuota, 6) })}
+                        </Typography>
+                        <LinearProgress
+                          variant="determinate"
+                          value={Math.min(usage.usagePercentage, 100)}
+                          sx={{
+                            height: 6,
+                            borderRadius: 3,
+                            backgroundColor: 'rgba(0,0,0,0.1)',
+                            '& .MuiLinearProgress-bar': {
+                              borderRadius: 3,
+                              backgroundColor: usage.usagePercentage > 80 ? 'error.main' : 'primary.main'
+                            }
+                          }}
+                        />
+                        <Typography variant="caption" color="text.secondary">
+                          {t('packages.subscription.usagePercentage', { percentage: usage.usagePercentage.toFixed(1) })}
+                        </Typography>
+                      </Box>
+
+                      {subscription.package_plan.description && (
+                        <Typography variant="caption" color="text.secondary">
+                          {subscription.package_plan.description}
+                        </Typography>
                       )}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      {t('claudeCode.subscription.price')}
-                    </Typography>
-                    <Typography variant="h6" color="primary">
-                      ${subscription.price} {subscription.currency}/月
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Grid>
 
-              <Grid item xs={12} md={6}>
-                <Stack spacing={2}>
-                  <Box>
-                    {subscriptionQuotaDescription && (
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
-                        {subscriptionQuotaDescription}
-                      </Typography>
-                    )}
-                    <LinearProgress
-                      variant="determinate"
-                      value={Math.min(usagePercentage, 100)}
-                      sx={{
-                        height: 8,
-                        borderRadius: 4,
-                        backgroundColor: 'rgba(0,0,0,0.1)',
-                        '& .MuiLinearProgress-bar': {
-                          borderRadius: 4,
-                          backgroundColor: usagePercentage > 80 ? 'error.main' : 'primary.main'
-                        }
-                      }}
-                    />
-                    <Typography variant="caption" color="text.secondary">
-                      {t('claudeCode.subscription.usagePercentage', { percentage: usagePercentage.toFixed(1) })}
-                    </Typography>
-                  </Box>
-
-                  {subscription.status === 'active' && (
-                    <Button variant="outlined" color="error" size="small" onClick={cancelSubscription} startIcon={<CancelIcon />}>
-                      {t('claudeCode.subscription.cancelSubscription')}
-                    </Button>
-                  )}
-                </Stack>
+                      {subscription.status === 'active' && (
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          size="small"
+                          onClick={() => openCancelDialog(subscription)}
+                          startIcon={<CancelIcon />}
+                        >
+                          {t('packages.subscription.cancelSubscription')}
+                        </Button>
+                      )}
+                    </Stack>
+                  </CardContent>
+                </Card>
               </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
+            );
+          })}
+        </Grid>
       ) : (
         <Alert severity="info" sx={{ mb: 4 }}>
-          {t('claudeCode.subscription.noActiveSubscription')}
+          {t('packages.subscription.noActiveSubscription')}
         </Alert>
       )}
 
       {/* 可用套餐 */}
       {/*<Typography variant="h4" gutterBottom sx={{ mt: 4 }}>*/}
-      {/*  {t('claudeCode.subscription.selectPlan')}*/}
+      {/*  {t('packages.subscription.selectPlan')}*/}
       {/*</Typography>*/}
       {/*<Alert severity="info" sx={{ mb: 3 }}>*/}
       {/*  管理员统一配置以下套餐，可直接使用账户余额或在线支付购买。*/}
@@ -492,8 +457,8 @@ const ClaudeCodeSubscription = () => {
       {/*    .map((plan) => {*/}
       {/*    const durationInfo = resolvePlanDuration(plan);*/}
       {/*    const planQuotaDescription = plan.is_unlimited_time*/}
-      {/*      ? t('claudeCode.subscription.quotaDisplay.unlimited', { count: formatQuotaCount(getPlanQuotaValue(plan)) })*/}
-      {/*      : t('claudeCode.subscription.quotaDisplay.perDuration', {*/}
+      {/*      ? t('packages.subscription.quotaDisplay.unlimited', { count: formatQuotaCount(getPlanQuotaValue(plan)) })*/}
+      {/*      : t('packages.subscription.quotaDisplay.perDuration', {*/}
       {/*        duration: getQuotaDurationText(plan) || durationInfo.text,*/}
       {/*        count: formatQuotaCount(getPlanQuotaValue(plan))*/}
       {/*      });*/}
@@ -532,7 +497,7 @@ const ClaudeCodeSubscription = () => {
       {/*            >*/}
       {/*              <StarIcon sx={{ fontSize: 16, mr: 0.5 }} />*/}
       {/*              <Typography variant="caption" fontWeight="bold">*/}
-      {/*                {t('claudeCode.subscription.recommended')}*/}
+      {/*                {t('packages.subscription.recommended')}*/}
       {/*              </Typography>*/}
       {/*            </Box>*/}
       {/*          )}*/}
@@ -601,8 +566,8 @@ const ClaudeCodeSubscription = () => {
       {/*              }}*/}
       {/*            >*/}
       {/*              {subscription?.plan_type === plan.type && subscription?.status === 'active'*/}
-      {/*                ? t('claudeCode.subscription.currentPlan')*/}
-      {/*                : t('claudeCode.subscription.selectThisPlan')}*/}
+      {/*                ? t('packages.subscription.currentPlan')*/}
+      {/*                : t('packages.subscription.selectThisPlan')}*/}
       {/*            </Button>*/}
       {/*          </Box>*/}
       {/*        </Card>*/}
@@ -611,99 +576,9 @@ const ClaudeCodeSubscription = () => {
       {/*    })}*/}
       {/*</Grid>*/}
 
-      {/* 创建API Key对话框 */}
-      <Dialog open={createKeyDialog} onClose={() => setCreateKeyDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{t('claudeCode.subscription.createApiKey')}</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label={t('claudeCode.subscription.apiKeyName')}
-            fullWidth
-            variant="outlined"
-            value={newKeyName}
-            onChange={(e) => setNewKeyName(e.target.value)}
-            placeholder={t('claudeCode.subscription.apiKeyPlaceholder')}
-          />
-
-          {newApiKey && (
-            <Alert severity="success" sx={{ mt: 2 }}>
-              <Typography variant="body2" gutterBottom>
-                <strong>{t('claudeCode.subscription.apiKeyCreatedSuccess')}</strong>
-              </Typography>
-              <Box
-                sx={{
-                  backgroundColor: 'rgba(0,0,0,0.05)',
-                  p: 1,
-                  borderRadius: 1,
-                  mt: 1,
-                  cursor: 'pointer'
-                }}
-                onClick={() => copyToClipboard(newApiKey)}
-              >
-                <Typography variant="code" sx={{ wordBreak: 'break-all' }}>
-                  {newApiKey}
-                </Typography>
-              </Box>
-              <Typography variant="caption" color="text.secondary">
-                {t('claudeCode.subscription.clickToCopy')}
-              </Typography>
-            </Alert>
-          )}
-
-          <Divider sx={{ my: 3 }} />
-          <Stack spacing={1.5}>
-            <Typography variant="subtitle2">{t('claudeCode.subscription.apiKeysManagement')}</Typography>
-            {apiKeys.length === 0 ? (
-              <Typography variant="body2" color="text.secondary">
-                {t('claudeCode.subscription.noApiKeys')}
-              </Typography>
-            ) : (
-              apiKeys.map((key) => (
-                <Stack key={key.id} direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
-                  <Box>
-                    <Typography variant="body2">{key.name}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {key.last_used_time ? formatDate(key.last_used_time) : t('claudeCode.subscription.neverUsed')}
-                    </Typography>
-                  </Box>
-                  <Stack direction="row" spacing={1}>
-                    <Chip
-                      label={key.status === 1 ? t('claudeCode.subscription.status.active') : t('claudeCode.subscription.status.disabled')}
-                      size="small"
-                      color={key.status === 1 ? 'success' : 'default'}
-                      variant="outlined"
-                    />
-                    <Button size="small" color="error" onClick={() => deleteApiKey(key.id)}>
-                      {t('common.delete')}
-                    </Button>
-                  </Stack>
-                </Stack>
-              ))
-            )}
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
-              setCreateKeyDialog(false);
-              setNewKeyName('');
-              setNewApiKey('');
-            }}
-          >
-            {newApiKey ? t('common.close') : t('common.cancel')}
-          </Button>
-          {!newApiKey && (
-            <Button onClick={createApiKey} variant="contained" disabled={loading}>
-              {loading ? <CircularProgress size={20} /> : t('common.create')}
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
-
       {/* 购买确认对话框 */}
       <Dialog open={purchaseDialog} onClose={() => setPurchaseDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{t('claudeCode.subscription.confirmPurchase')}</DialogTitle>
+        <DialogTitle>{t('packages.subscription.confirmPurchase')}</DialogTitle>
         <DialogContent>
           {selectedPlan && (
             <Box>
@@ -723,16 +598,16 @@ const ClaudeCodeSubscription = () => {
               </Typography>
 
               <FormControl fullWidth sx={{ mt: 2 }}>
-                <InputLabel>{t('claudeCode.subscription.paymentMethod')}</InputLabel>
+                <InputLabel>{t('packages.subscription.paymentMethod')}</InputLabel>
                 <Select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  label={t('claudeCode.subscription.paymentMethod')}
+                  label={t('packages.subscription.paymentMethod')}
                 >
-                  <MenuItem value="balance">{t('claudeCode.subscription.paymentMethods.balance')}</MenuItem>
-                  <MenuItem value="stripe">{t('claudeCode.subscription.paymentMethods.stripe')}</MenuItem>
-                  <MenuItem value="alipay">{t('claudeCode.subscription.paymentMethods.alipay')}</MenuItem>
-                  <MenuItem value="wxpay">{t('claudeCode.subscription.paymentMethods.wxpay')}</MenuItem>
+                  <MenuItem value="balance">{t('packages.subscription.paymentMethods.balance')}</MenuItem>
+                  <MenuItem value="stripe">{t('packages.subscription.paymentMethods.stripe')}</MenuItem>
+                  <MenuItem value="alipay">{t('packages.subscription.paymentMethods.alipay')}</MenuItem>
+                  <MenuItem value="wxpay">{t('packages.subscription.paymentMethods.wxpay')}</MenuItem>
                 </Select>
               </FormControl>
 
@@ -749,7 +624,28 @@ const ClaudeCodeSubscription = () => {
         <DialogActions>
           <Button onClick={() => setPurchaseDialog(false)}>{t('common.cancel')}</Button>
           <Button onClick={purchaseSubscription} variant="contained" disabled={loading || !hasEnoughBalance}>
-            {loading ? <CircularProgress size={20} /> : t('claudeCode.subscription.confirmPurchase')}
+            {loading ? <CircularProgress size={20} /> : t('packages.subscription.confirmPurchase')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* 取消订阅确认弹框 */}
+      <Dialog open={cancelDialog} onClose={() => setCancelDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>{t('packages.subscription.cancelSubscription')}</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mt: 2 }}>{t('packages.subscription.cancelConfirmMessage')}</Typography>
+          {cancelingSubscription && (
+            <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
+              <Typography variant="body2" color="text.secondary">
+                {t('packages.subscription.serviceType')}: {cancelingSubscription.service_type}
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCancelDialog(false)}>{t('common.cancel')}</Button>
+          <Button onClick={cancelSubscription} variant="contained" color="error">
+            {t('packages.subscription.confirmCancel')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -757,4 +653,4 @@ const ClaudeCodeSubscription = () => {
   );
 };
 
-export default ClaudeCodeSubscription;
+export default PackagesSubscription;

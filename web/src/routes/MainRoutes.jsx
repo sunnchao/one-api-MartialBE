@@ -32,7 +32,7 @@ const Dashboard = Loadable(lazy(() => import('views/Dashboard')));
 
 const SystemInfo = Loadable(lazy(() => import('views/SystemInfo')));
 const ClaudeCode = Loadable(lazy(() => import('views/ClaudeCode')));
-const ClaudeCodeSubscription = Loadable(lazy(() => import('views/ClaudeCode/Subscription')));
+const PackagesSubscription = Loadable(lazy(() => import('views/ClaudeCode/Subscription')));
 const ClaudeCodeAdmin = Loadable(lazy(() => import('views/ClaudeCode/Admin')));
 const CodexCode = Loadable(lazy(() => import('views/CodexCode')));
 const GeminiCode = Loadable(lazy(() => import('views/GeminiCode')));
@@ -157,7 +157,7 @@ const MainRoutes = {
     },
     {
       path: 'subscriptions',
-      element: <ClaudeCodeSubscription />
+      element: <PackagesSubscription />
     },
     {
       path: 'operation_subscriptions',

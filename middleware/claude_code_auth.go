@@ -15,78 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Claude Code 认证中间件 - 基于实际Claude API请求格式
-func ClaudeCodeAuth() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// 1. 获取Authorization头部
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			respondWithError(c, http.StatusUnauthorized, "authentication_error", "Missing Authorization header")
-			return
-		}
-
-		// 2. 验证Bearer token格式
-		if !strings.HasPrefix(authHeader, "Bearer ") {
-			respondWithError(c, http.StatusUnauthorized, "authentication_error", "Invalid Authorization header format. Expected 'Bearer <token>'")
-			return
-		}
-
-		// 3. 提取API Key
-		apiKey := strings.TrimPrefix(authHeader, "Bearer ")
-		if apiKey == "" {
-			respondWithError(c, http.StatusUnauthorized, "authentication_error", "Missing API key in Authorization header")
-			return
-		}
-
-		// 4. 验证API Key格式 (支持Claude Code格式)
-		if !strings.HasPrefix(apiKey, "cc-sk-") {
-			respondWithError(c, http.StatusUnauthorized, "authentication_error", "Invalid API key format. Expected format: cc-sk-...")
-			return
-		}
-
-		// 5. 验证API Key有效性
-		keyModel, subscription, err := model.ValidateClaudeCodeAPIKey(apiKey)
-		if err != nil {
-			respondWithError(c, http.StatusUnauthorized, "authentication_error", err.Error())
-			return
-		}
-
-		// 6. 检查订阅状态
-		if !subscription.CanUseService() {
-			respondWithError(c, http.StatusForbidden, "permission_error", "Subscription expired or usage limit exceeded")
-			return
-		}
-
-		// 7. 验证内容类型（Claude API通常要求application/json）
-		contentType := c.GetHeader("Content-Type")
-		if contentType != "" && !strings.Contains(contentType, "application/json") {
-			respondWithError(c, http.StatusUnsupportedMediaType, "invalid_request_error", "Content-Type must be application/json")
-			return
-		}
-
-		// 8. 验证Claude API版本（如果有）
-		apiVersion := c.GetHeader("anthropic-version")
-		if apiVersion != "" && !isValidAnthropicVersion(apiVersion) {
-			respondWithError(c, http.StatusBadRequest, "invalid_request_error", "Unsupported anthropic-version")
-			return
-		}
-
-		// 9. 基础的客户端验证（更宽松）
-		if err := validateBasicClient(c, subscription); err != nil {
-			respondWithError(c, http.StatusForbidden, "permission_error", err.Error())
-			return
-		}
-
-		// 10. 将认证信息存储到上下文
-		c.Set("api_key_model", keyModel)
-		c.Set("subscription", subscription)
-		c.Set("user_id", subscription.UserId)
-		c.Set("api_key", apiKey)
-
-		c.Next()
-	}
-}
-
 // 响应错误的统一格式（符合Claude API错误格式）
 func respondWithError(c *gin.Context, status int, errorType, message string) {
 	c.JSON(status, gin.H{
@@ -117,7 +45,7 @@ func isValidAnthropicVersion(version string) bool {
 }
 
 // 基础客户端验证（更宽松的验证，符合实际使用场景）
-func validateBasicClient(c *gin.Context, subscription *model.ClaudeCodeSubscription) error {
+func validateBasicClient(c *gin.Context, subscription *model.PackagesSubscription) error {
 	// 1. 检查User-Agent是否存在（但不强制特定格式）
 	userAgent := c.GetHeader("User-Agent")
 	if userAgent == "" {
@@ -156,7 +84,7 @@ func validateBasicClient(c *gin.Context, subscription *model.ClaudeCodeSubscript
 }
 
 // 原有的严格客户端验证（保留用于特殊情况）
-func validateStrictClient(c *gin.Context, subscription *model.ClaudeCodeSubscription) error {
+func validateStrictClient(c *gin.Context, subscription *model.PackagesSubscription) error {
 	// 1. 验证User-Agent
 	userAgent := c.GetHeader("User-Agent")
 	if !strings.Contains(userAgent, "claude-cli") {
@@ -248,7 +176,7 @@ func ClaudeCodeRateLimit() gin.HandlerFunc {
 			return
 		}
 
-		sub := subscription.(*model.ClaudeCodeSubscription)
+		sub := subscription.(*model.PackagesSubscription)
 
 		limit := sub.TotalQuota
 		if limit <= 0 {
