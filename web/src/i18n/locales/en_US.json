@@ -80,7 +80,7 @@
       "cancelSuccess": "Subscription cancelled",
       "cancelFailed": "Failed to cancel",
       "confirmCancel": "Confirm Cancel",
-      "noActiveSubscription": "You currently have no active Claude Code/Codex Code/Gemini CLI subscription, please select a suitable plan to get started. You can obtain it by purchasing a subscription, daily check-ins, or contacting an admin.",
+      "noActiveSubscription": "You currently have no active subscription. Please click the 'View Plans' button on the right to select a suitable plan.",
       "apiKeysManagement": "API Keys Management",
       "createApiKey": "Create API Key",
       "selectPlan": "Select Subscription Plan",
@@ -131,7 +131,16 @@
         "unlimited": "No time limit; total {{count}} quota",
         "perDuration": "Every {{duration}} {{count}} quota",
         "total": "Total {{count}} quota"
-      }
+      },
+      "noPackages": "No packages"
+    },
+    "menu": {
+      "title": "Subscription Plans",
+      "viewAll": "View All",
+      "viewPlans": "View Plans",
+      "subscribe": "Subscribe Now",
+      "noPlan": "No plans available",
+      "planDescription": "The following plans are configured by the administrator. You can purchase with account balance or online payment."
     }
   },
   "sidebar": {

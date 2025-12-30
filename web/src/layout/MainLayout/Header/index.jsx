@@ -13,6 +13,7 @@ import Profile from './Profile';
 import ThemeButton from 'ui-component/ThemeButton';
 import I18nButton from 'ui-component/i18nButton';
 import { NoticeButton } from 'ui-component/notice';
+import PackagesMenu from './PackagesMenu';
 
 // assets
 // import { Icon } from '@iconify/react';
@@ -76,6 +77,7 @@ const Header = ({ handleLeftDrawerToggle, toggleProfileDrawer }) => {
       {/* 右侧功能按钮区 */}
       <Stack direction="row" spacing={1} alignItems="center">
         <NoticeButton />
+        {isConsoleRoute && <PackagesMenu />}
         <ThemeButton />
         <I18nButton />
         {isConsoleRoute && <Profile toggleProfileDrawer={toggleProfileDrawer} />}

@@ -72,7 +72,7 @@
       "cancelSuccess": "订阅已取消",
       "cancelFailed": "取消失败",
       "confirmCancel": "确认取消",
-      "noActiveSubscription": "您当前没有有效的 Claude Code/Codex Code/Gemini CLI 订阅，请选择合适的套餐开始使用。可通过购买订阅以及每日签到或联系管理员获取。",
+      "noActiveSubscription": "您当前没有有效的订阅，请点击右侧“查看套餐”按钮选择适合您的套餐。",
       "apiKeysManagement": "API Keys 管理",
       "createApiKey": "创建 API Key",
       "selectPlan": "选择订阅套餐",
@@ -124,7 +124,16 @@
         "unlimited": "无时间限制；共 {{count}} 额度",
         "perDuration": "每{{duration}} {{count}} 额度",
         "total": "共 {{count}} 额度"
-      }
+      },
+      "noPackages": "暂无套餐"
+    },
+    "menu": {
+      "title": "订阅套餐",
+      "viewAll": "查看全部",
+      "viewPlans": "查看套餐",
+      "subscribe": "立即订阅",
+      "noPlan": "暂无可用套餐",
+      "planDescription": "管理员统一配置以下套餐，可直接使用账户余额或在线支付购买。"
     }
   },
   "sidebar": {
@@ -1238,7 +1247,6 @@
     "githubCountError": "出现错误，第 {{count}} 次重试中...",
     "githubLogin": "GitHub 登录",
     "linuxdoLogin": "Linux DO 登录",
-
     "oidcError": "操作失败，重定向至登录界面中...",
     "oidcCountError": "出现错误，第 {{count}} 次重试中...",
     "oidcLogin": "OIDC 登录",

@@ -548,7 +548,7 @@
       "cancelSuccess": "訂閱已取消",
       "cancelFailed": "取消失敗",
       "confirmCancel": "確認取消",
-      "noActiveSubscription": "您當前沒有有效的 Claude Code/Codex Code/Gemini CLI 訂閱，請選擇合適的套餐開始使用。可透過購買訂閱以及每日簽到或聯絡管理員獲取。",
+      "noActiveSubscription": "您當前沒有有效的訂閱，請點擊右側“查看套餐”按鈕選擇適合您的套餐。",
       "apiKeysManagement": "API Keys 管理",
       "createApiKey": "創建 API Key",
       "selectPlan": "選擇訂閱套餐",
@@ -599,7 +599,16 @@
         "unlimited": "無時間限制；共 {{count}} 額度",
         "perDuration": "每{{duration}} {{count}} 額度",
         "total": "共 {{count}} 額度"
-      }
+      },
+      "noPackages": "暫無套餐"
+    },
+    "menu": {
+      "title": "訂閱套餐",
+      "viewAll": "查看全部",
+      "viewPlans": "查看套餐",
+      "subscribe": "立即訂閱",
+      "noPlan": "暫無可用套餐",
+      "planDescription": "管理員統一配置以下套餐，可直接使用帳戶餘額或在線支付購買。"
     }
   },
   "midjourneyPage": {

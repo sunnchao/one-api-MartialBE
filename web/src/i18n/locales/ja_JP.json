@@ -544,7 +544,7 @@
       "cancelSuccess": "サブスクリプションがキャンセルされました",
       "cancelFailed": "キャンセルに失敗しました",
       "confirmCancel": "キャンセルを確認",
-      "noActiveSubscription": "現在有効な Claude Code/Codex Code/Gemini CLI サブスクリプションがありません。適切なプランを選択して開始してください。購入または毎日のチェックイン、もしくは管理者に連絡して取得できます。",
+      "noActiveSubscription": "現在、有効なサブスクリプションがありません。右側の「プランを見る」ボタンをクリックして、適切なプランを選択してください。",
       "apiKeysManagement": "API Keys 管理",
       "createApiKey": "API Key を作成",
       "selectPlan": "サブスクリプションプランを選択",
@@ -595,7 +595,16 @@
         "unlimited": "時間制限なし・合計 {{count}} クォータ",
         "perDuration": "毎{{duration}} {{count}} クォータ",
         "total": "合計 {{count}} クォータ"
-      }
+      },
+      "noPackages": "パッケージなし"
+    },
+    "menu": {
+      "title": "サブスクリプションプラン",
+      "viewAll": "すべて表示",
+      "viewPlans": "プランを見る",
+      "subscribe": "今すぐ購読",
+      "noPlan": "利用可能なプランがありません",
+      "planDescription": "管理者が設定した以下のプランをアカウント残高またはオンライン決済で購入できます。"
     }
   },
   "midjourneyPage": {

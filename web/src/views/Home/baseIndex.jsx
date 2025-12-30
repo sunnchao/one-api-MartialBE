@@ -17,7 +17,10 @@ import {
   Check,
   Brightness4,
   Brightness7,
-  SettingsBrightness
+  SettingsBrightness,
+  Terminal,
+  Code,
+  AutoAwesome
 } from '@mui/icons-material';
 import { keyframes, useTheme } from '@mui/system';
 import { usePackyTheme } from 'components/PackyThemeProvider';
@@ -702,6 +705,260 @@ const BaseIndex = () => {
               </Box>
             </Container>
           </Box>
+
+          <Box
+            sx={{
+              py: { xs: 10, md: 16 },
+              position: 'relative'
+            }}
+          >
+            <Typography
+              variant="h3"
+              align="center"
+              sx={{
+                fontWeight: 800,
+                mb: 2,
+                fontSize: { xs: '2.2rem', md: '2.7rem' },
+                background: 'linear-gradient(45deg, #fff 30%, #90caf9 90%)',
+                backgroundClip: 'text',
+                textFillColor: 'transparent',
+                position: 'relative',
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: '-15px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '80px',
+                  height: '4px',
+                  background: 'linear-gradient(90deg, #64b5f6, transparent)',
+                  borderRadius: '2px'
+                }
+              }}
+            >
+              Vibe Coding - AI 编程助手全家桶
+            </Typography>
+
+            <Typography
+              variant="body1"
+              align="center"
+              sx={{
+                color: 'rgba(255,255,255,0.8)',
+                maxWidth: '700px',
+                mx: 'auto',
+                mb: 10,
+                mt: 4,
+                fontSize: '1.1rem'
+              }}
+            >
+              三款强大 AI 编程工具，全面提升您的开发效率
+            </Typography>
+
+            <Grid container spacing={4} justifyContent="center">
+              {[
+                {
+                  icon: <Terminal sx={{ fontSize: 40, color: '#fff' }} />,
+                  title: 'Claude Code',
+                  tag: '终端集成 · 结对编程',
+                  features: [
+                    'Claude 4.5 Sonnet 驱动',
+                    '深度理解代码上下文',
+                    '智能调试与文档生成',
+                    '全平台 CLI 支持'
+                  ],
+                  path: '/claude-code',
+                  gradient: 'linear-gradient(145deg, rgba(22,119,255,0.15) 0%, rgba(25,118,210,0.08) 100%)'
+                },
+                {
+                  icon: <Code sx={{ fontSize: 40, color: '#fff' }} />,
+                  title: 'Codex Code',
+                  tag: '企业级 · 智能重构',
+                  features: [
+                    'GPT-5.1 企业级模型',
+                    '实时联网能力',
+                    '智能代码重构',
+                    'VSCode 深度集成'
+                  ],
+                  path: '/codex-code',
+                  gradient: 'linear-gradient(145deg, rgba(156,39,176,0.15) 0%, rgba(123,31,162,0.08) 100%)'
+                },
+                {
+                  icon: <AutoAwesome sx={{ fontSize: 40, color: '#fff' }} />,
+                  title: 'Gemini Code',
+                  tag: '超大上下文 · Agent模式',
+                  features: [
+                    '1M tokens 超大上下文',
+                    'Agent Mode 自动规划任务',
+                    '内置 Google Search',
+                    '多模态输入支持'
+                  ],
+                  path: '/gemini-code',
+                  gradient: 'linear-gradient(145deg, rgba(255,87,34,0.15) 0%, rgba(230,81,0,0.08) 100%)'
+                }
+              ].map((product, index) => (
+                <Grid item xs={12} md={4} key={index}>
+                  <Box
+                    sx={{
+                      height: '100%',
+                      transform: 'translateY(0)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-8px)',
+                        '& .vibe-card': {
+                          boxShadow: '0 20px 40px rgba(22,119,255,0.25)',
+                          borderColor: 'rgba(100,181,246,0.5)'
+                        },
+                        '& .vibe-icon': {
+                          transform: 'scale(1.1)'
+                        }
+                      }
+                    }}
+                  >
+                    <Stack
+                      className="vibe-card"
+                      spacing={4}
+                      sx={{
+                        p: 4,
+                        height: '100%',
+                        background: product.gradient,
+                        backdropFilter: 'blur(10px)',
+                        borderRadius: '24px',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          background: 'radial-gradient(circle at top right, rgba(144,202,249,0.1), transparent 70%)',
+                          zIndex: -1
+                        }
+                      }}
+                    >
+                      <Box
+                        className="vibe-icon"
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: 70,
+                          height: 70,
+                          borderRadius: '20px',
+                          mb: 1,
+                          background: 'rgba(255,255,255,0.1)',
+                          backdropFilter: 'blur(10px)',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                          boxShadow: '0 8px 20px rgba(0,0,0,0.2)'
+                        }}
+                      >
+                        {product.icon}
+                      </Box>
+                      <Box
+                        sx={{
+                          px: 2.5,
+                          py: 1,
+                          borderRadius: '50px',
+                          background: 'rgba(255,255,255,0.1)',
+                          backdropFilter: 'blur(10px)',
+                          border: '1px solid rgba(255,255,255,0.15)',
+                          mb: 2
+                        }}
+                      >
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 600,
+                            color: '#90caf9',
+                            fontSize: '0.85rem'
+                          }}
+                        >
+                          {product.tag}
+                        </Typography>
+                      </Box>
+                      <Typography
+                        variant="h5"
+                        align="center"
+                        sx={{
+                          fontWeight: 700,
+                          color: '#fff',
+                          fontSize: { xs: '1.4rem', md: '1.6rem' },
+                          mb: 3
+                        }}
+                      >
+                        {product.title}
+                      </Typography>
+                      <Stack spacing={2} sx={{ width: '100%' }}>
+                        {product.features.map((feature, i) => (
+                          <Box
+                            key={i}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1.5,
+                              px: 1
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 6,
+                                height: 6,
+                                borderRadius: '50%',
+                                backgroundColor: '#64b5f6',
+                                flexShrink: 0
+                              }}
+                            />
+                            <Typography
+                              sx={{
+                                color: 'rgba(255,255,255,0.85)',
+                                fontSize: '0.9rem',
+                                lineHeight: 1.6
+                              }}
+                            >
+                              {feature}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Stack>
+                      <Button
+                        variant="contained"
+                        onClick={() => navigate(product.path)}
+                        sx={{
+                          mt: 'auto',
+                          width: '100%',
+                          py: 1.5,
+                          borderRadius: '12px',
+                          fontSize: '1rem',
+                          fontWeight: 600,
+                          background: 'linear-gradient(45deg, #1677ff, #64b5f6)',
+                          color: '#fff',
+                          boxShadow: '0 8px 20px rgba(22,119,255,0.3)',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          '&:hover': {
+                            background: 'linear-gradient(45deg, #64b5f6, #90caf9)',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 12px 28px rgba(22,119,255,0.4)'
+                          }
+                        }}
+                        endIcon={<ArrowRightAlt />}
+                      >
+                        立即体验
+                      </Button>
+                    </Stack>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+
           <Box
             ref={advantagesRef}
             sx={{

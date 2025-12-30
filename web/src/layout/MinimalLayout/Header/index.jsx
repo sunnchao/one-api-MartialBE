@@ -163,7 +163,7 @@ const Header = () => {
                 textTransform: 'none'
               }}
             >
-              AI Code
+              Vibe Coding
             </Button>
             <Menu
               anchorEl={codeMenuAnchor}
@@ -182,7 +182,6 @@ const Header = () => {
               <MenuItem component={Link} to="/gemini-code" onClick={handleCloseCodeMenu} selected={pathname === '/gemini-code'}>
                 Gemini Code
               </MenuItem>
-
             </Menu>
 
             {siteInfo.UptimeEnabled && (

@@ -653,6 +653,7 @@ type CreatePlanRequest struct {
 	IsActive        bool                   `json:"is_active"`
 	SortOrder       int                    `json:"sort_order"`
 	ShowInPortal    bool                   `json:"show_in_portal"`
+  ServiceType     string                 `json:"service_type" binding:"required"`
 }
 
 // UpdatePlanRequest 更新套餐请求结构
@@ -777,6 +778,8 @@ func CreatePackagesPlan(c *gin.Context) {
 		SortOrder:       req.SortOrder,
 		CreatedTime:     now,
 		UpdatedTime:     now,
+    HashId:           utils.GetUUID(),
+    ServiceType:      req.ServiceType,
 	}
 
 	if err := model.CreatePackagesPlan(plan); err != nil {
@@ -921,6 +924,9 @@ func UpdatePackagesPlan(c *gin.Context) {
 	}
 	plan.SortOrder = req.SortOrder
 	plan.UpdatedTime = utils.GetTimestamp()
+  if plan.HashId == "" {
+    plan.HashId = utils.GetUUID()
+  }
 
 	if err := model.UpdatePackagesPlan(plan); err != nil {
 		c.JSON(http.StatusOK, gin.H{
