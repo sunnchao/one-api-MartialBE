@@ -45,6 +45,7 @@ import CodeBlock from 'ui-component/CodeBlock';
 import WindowsTutorial from './WindowsTutorial';
 import MacOSTutorial from './MacOSTutorial';
 import LinuxTutorial from './LinuxTutorial';
+import { useNavigate } from 'react-router-dom';
 
 // 主要功能特性
 const features = [
@@ -392,6 +393,7 @@ gemini search "最新的 React 19 特性"`}
 const GeminiCodeTutorialPage = () => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
+  const navigate = useNavigate();
 
   const handleChange = (_, newValue) => {
     setValue(newValue);
@@ -435,19 +437,27 @@ const GeminiCodeTutorialPage = () => {
                 <Button
                   variant="contained"
                   size="large"
-                  onClick={() => setValue(1)}
+                  onClick={() => navigate('/panel/subscriptions')}
                   endIcon={<ArrowForwardIcon />}
                   sx={{ borderRadius: 0, px: 4, py: 1.5, fontSize: '1.1rem', boxShadow: 'none' }}
                 >
-                  立即开始
+                  订阅管理
                 </Button>
                 <Button
                   variant="outlined"
                   size="large"
-                  onClick={() => window.open('https://deepmind.google/technologies/gemini/', '_blank')}
+                  onClick={() => setValue(1)}
                   sx={{ borderRadius: 0, px: 4, py: 1.5, fontSize: '1.1rem' }}
                 >
-                  了解更多
+                  立即开始
+                </Button>
+                <Button
+                  variant="text"
+                  size="large"
+                  onClick={() => window.open('https://developers.google.com/gemini-code-assist', '_blank')}
+                  sx={{ borderRadius: 0, px: 4, py: 1.5, fontSize: '1.1rem' }}
+                >
+                  查看文档
                 </Button>
               </Stack>
             </Grid>

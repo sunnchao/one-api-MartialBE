@@ -34,18 +34,22 @@ const mergeSeo = (base, override = {}) => ({
 });
 
 const DEFAULT_SEO = {
-  title: 'Chirou API - 让 AI 为您服务',
+  title: 'Chirou API - Vibe Coding AI编程助手',
   description:
-    'Chirou API 提供多家主流模型供应商的统一接入与计费，具备魔法般的响应速度、星级稳定性保障以及灵活扩展能力，帮助开发者快速构建 AI 应用。',
-  keywords: ['Chirou API', 'AI 接口', 'OpenAI 代理', 'Claude', 'Gemini', '多模型聚合'],
+    'Chirou API - Vibe Coding AI编程助手全家桶。支持Claude Code、Codex CLI、Gemini CLI三大AI编程工具，让AI帮你写代码。提供OpenAI、Claude、Gemini等主流大模型API接口，极速响应，稳定可靠。',
+  keywords: ['Vibe Coding', 'AI编程助手', 'Claude Code', 'Codex CLI', 'Gemini CLI', 'AI写代码', 'Chirou API', 'OpenAI API', 'Claude API', 'Gemini API', 'AI代码生成', '智能编程', 'AI辅助开发', 'Cursor替代', 'Copilot替代', '大模型API'],
   robots: 'index,follow',
   openGraph: {
     type: 'website',
     siteName: 'Chirou API',
+    title: 'Chirou API - Vibe Coding AI编程助手全家桶',
+    description: '支持Claude Code、Codex CLI、Gemini CLI三大AI编程工具。提供OpenAI、Claude、Gemini等主流大模型API接口，让AI帮你写代码。',
     image: getAbsoluteUrl(DEFAULT_IMAGE_PATH)
   },
   twitter: {
     card: 'summary_large_image',
+    title: 'Chirou API - Vibe Coding AI编程助手全家桶',
+    description: '支持Claude Code、Codex CLI、Gemini CLI三大AI编程工具。提供OpenAI、Claude、Gemini等主流大模型API接口。',
     image: getAbsoluteUrl(DEFAULT_IMAGE_PATH)
   }
 };
@@ -63,16 +67,16 @@ const PANEL_SEO = {
 
 const ROUTE_SEO = {
   '/': {
-    title: '✨ Chirou API - 让 AI 为您服务',
+    title: '✨ Chirou API - Vibe Coding AI编程助手 | Claude Code/Codex CLI/Gemini CLI',
     description:
-      'Chirou API 聚合 OpenAI、Claude、Gemini 等主流模型供应商，提供极速稳定的接口体验与灵活计费方案，让您的应用拥有真正的魔法力量。',
+      'Chirou API - Vibe Coding AI编程助手全家桶。支持Claude Code、Codex CLI、Gemini CLI三大AI编程工具，让AI帮你写代码。提供OpenAI、Claude、Gemini等主流大模型API接口。',
     structuredData: {
       '@context': 'https://schema.org',
       '@type': 'Organization',
       name: 'Chirou API',
       url: getAbsoluteUrl('/'),
       logo: getAbsoluteUrl(DEFAULT_IMAGE_PATH),
-      description: '让 AI 为您服务的接口平台，提供魔法般的响应速度和星级稳定性保障，支持 OpenAI、Claude、Gemini 等主流模型。'
+      description: 'Vibe Coding AI编程助手平台，支持Claude Code、Codex CLI、Gemini CLI，提供OpenAI、Claude、Gemini等主流大模型API接口。'
     }
   },
   '/about': {
@@ -83,13 +87,42 @@ const ROUTE_SEO = {
     title: '模型价格 - Chirou API',
     description: '查看 Chirou API 支持的各类模型价格与计费方式，快速评估成本并选择合适的模型方案。'
   },
+  '/claude-code': {
+    title: 'Claude Code - Vibe Coding AI终端编程助手 | Anthropic Claude Opus 4.5',
+    description: 'Claude Code 是 Anthropic 官方推出的 AI 编程助手，基于 Claude Opus 4.5 驱动，支持终端集成、结对编程、智能调试与文档生成。Vibe Coding 必备工具。',
+    structuredData: {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: 'Claude Code',
+      description: 'Anthropic 官方 AI 编程助手，基于 Claude Opus 4.5，支持终端集成和结对编程',
+      brand: { '@type': 'Brand', name: 'Anthropic' }
+    }
+  },
   '/packages': {
-    title: 'Claude Code 套餐 - Chirou API',
-    description: '订阅 Claude Code 套餐，体验面向开发者的专业编程助手能力与增值服务。'
+    title: 'Claude Code 套餐 - Vibe Coding AI编程助手订阅 | Chirou API',
+    description: '订阅 Claude Code 套餐，体验 Anthropic 官方 AI 编程助手。支持 Claude Opus 4.5 驱动的智能编程、代码补全、调试与文档生成。Vibe Coding 开发者首选。'
   },
   '/codex-code': {
-    title: 'Codex Code 套餐 - Chirou API',
-    description: '探索 Codex Code 套餐，为开发者提供高效的 AI 编程体验与全方位支持。'
+    title: 'Codex CLI - Vibe Coding AI编程助手 | OpenAI GPT 5.2 驱动',
+    description: '探索 OpenAI Codex CLI 套餐，基于 GPT 5.2 的企业级 AI 编程助手。支持实时联网、智能代码重构、VSCode 深度集成。Vibe Coding 高效开发工具。',
+    structuredData: {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: 'Codex CLI',
+      description: 'OpenAI 企业级 AI 编程助手，基于 GPT 5.2，支持实时联网和智能重构',
+      brand: { '@type': 'Brand', name: 'OpenAI' }
+    }
+  },
+  '/gemini-code': {
+    title: 'Gemini CLI - Vibe Coding AI编程助手 | Google 1M上下文 Agent模式',
+    description: 'Google Gemini CLI，支持 1M tokens 超大上下文的 AI 编程助手。内置 Agent Mode 自动规划、Google Search 和多模态输入。Vibe Coding 云端开发利器。',
+    structuredData: {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: 'Gemini CLI',
+      description: 'Google AI 编程助手，支持 1M tokens 超大上下文和 Agent Mode',
+      brand: { '@type': 'Brand', name: 'Google' }
+    }
   },
   '/playground': {
     title: '体验中心 - Chirou API',

@@ -46,13 +46,14 @@ import WindowsTutorial from './WindowsTutorial';
 import MacOSTutorial from './MacOSTutorial';
 import LinuxTutorial from './LinuxTutorial';
 import VSCodeTutorial from './VSCodeTutorial';
+import { useNavigate } from 'react-router-dom';
 
 // 主要功能特性
 const features = [
   {
     icon: <RocketLaunchIcon fontSize="large" />,
     title: '智能代码生成',
-    description: '基于 GPT-5.1 的高质量代码生成和智能补全',
+    description: '基于 GPT-5.2 的高质量代码生成和智能补全',
     color: '#2196f3'
   },
   {
@@ -75,7 +76,7 @@ const features = [
   },
   {
     icon: <TerminalIcon fontSize="large" />,
-    title: 'GPT-5 驱动',
+    title: 'GPT 5.2 驱动',
     description: '企业级 AI 编程助手，强大的推理能力',
     color: '#ff9800'
   }
@@ -84,7 +85,7 @@ const features = [
 // 支持的平台信息
 const supportedPlatforms = [
   { icon: <TerminalIcon />, name: 'CLI 工具', version: 'npm 全局安装' },
-  { icon: <CodeIcon />, name: 'GPT-5.1 模型', version: '企业级 AI 助手' },
+  { icon: <CodeIcon />, name: 'GPT-5.2 模型', version: '企业级 AI 助手' },
   { icon: <SearchIcon />, name: '网络访问', version: '实时联网能力' }
 ];
 
@@ -163,6 +164,7 @@ const CodexVSCodeTutorial = () => <VSCodeTutorial />;
 const CodexCodeTutorialPage = () => {
   const theme = useTheme();
   const [value, setValue] = useState(0);
+  const navigate = useNavigate();
 
   const handleChange = (_, newValue) => {
     setValue(newValue);
@@ -186,7 +188,7 @@ const CodexCodeTutorialPage = () => {
             <Grid item xs={12} md={7}>
               <Chip
                 icon={<AutoAwesomeIcon fontSize="small" />}
-                label="GPT-5.1 强力驱动"
+                label="GPT-5.2 强力驱动"
                 color="primary"
                 variant="outlined"
                 sx={{ mb: 2, fontWeight: 'bold', borderRadius: 0 }}
@@ -200,25 +202,33 @@ const CodexCodeTutorialPage = () => {
               <Typography variant="h5" color="text.secondary" paragraph sx={{ mb: 4, lineHeight: 1.6 }}>
                 不仅仅是代码补全，而是真正的结对编程伙伴。
                 <br />
-                基于 GPT-5.1 模型，提供深度代码分析和智能重构能力。
+                基于 GPT-5.2 模型，提供深度代码分析和智能重构能力。
               </Typography>
               <Stack direction="row" spacing={2}>
                 <Button
                   variant="contained"
                   size="large"
-                  onClick={() => setValue(1)}
+                  onClick={() => navigate('/panel/subscriptions')}
                   endIcon={<ArrowForwardIcon />}
                   sx={{ borderRadius: 0, px: 4, py: 1.5, fontSize: '1.1rem', boxShadow: 'none' }}
                 >
-                  立即开始
+                  订阅管理
                 </Button>
                 <Button
                   variant="outlined"
                   size="large"
-                  onClick={() => window.open('https://openai.com/blog/openai-codex', '_blank')}
+                  onClick={() => setValue(1)}
                   sx={{ borderRadius: 0, px: 4, py: 1.5, fontSize: '1.1rem' }}
                 >
-                  了解更多
+                  立即开始
+                </Button>
+                <Button
+                  variant="text"
+                  size="large"
+                  onClick={() => window.open('https://openai.com/index/introducing-codex/', '_blank')}
+                  sx={{ borderRadius: 0, px: 4, py: 1.5, fontSize: '1.1rem' }}
+                >
+                  查看文档
                 </Button>
               </Stack>
             </Grid>

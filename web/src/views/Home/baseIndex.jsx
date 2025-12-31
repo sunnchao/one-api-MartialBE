@@ -712,199 +712,278 @@ const BaseIndex = () => {
               position: 'relative'
             }}
           >
-            <Typography
-              variant="h3"
-              align="center"
-              sx={{
-                fontWeight: 800,
-                mb: 2,
-                fontSize: { xs: '2.2rem', md: '2.7rem' },
-                background: 'linear-gradient(45deg, #fff 30%, #90caf9 90%)',
-                backgroundClip: 'text',
-                textFillColor: 'transparent',
-                position: 'relative',
-                '&::after': {
-                  content: '""',
-                  position: 'absolute',
-                  bottom: '-15px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: '80px',
-                  height: '4px',
-                  background: 'linear-gradient(90deg, #64b5f6, transparent)',
-                  borderRadius: '2px'
-                }
-              }}
-            >
-              Vibe Coding - AI 编程助手全家桶
-            </Typography>
+            {/* 标题区域 */}
+            <Box sx={{ textAlign: 'center', mb: { xs: 6, md: 10 } }}>
+              <Box
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  px: 3,
+                  py: 1.5,
+                  mb: 4,
+                  borderRadius: '50px',
+                  background: 'linear-gradient(135deg, rgba(124,58,237,0.2) 0%, rgba(139,92,246,0.1) 100%)',
+                  border: '1px solid rgba(139,92,246,0.3)',
+                  backdropFilter: 'blur(10px)'
+                }}
+              >
+                <AutoAwesome sx={{ fontSize: 18, color: '#a78bfa' }} />
+                <Typography
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                    background: 'linear-gradient(90deg, #c4b5fd 0%, #a78bfa 100%)',
+                    backgroundClip: 'text',
+                    textFillColor: 'transparent'
+                  }}
+                >
+                  AI-Powered Development
+                </Typography>
+              </Box>
 
-            <Typography
-              variant="body1"
-              align="center"
-              sx={{
-                color: 'rgba(255,255,255,0.8)',
-                maxWidth: '700px',
-                mx: 'auto',
-                mb: 10,
-                mt: 4,
-                fontSize: '1.1rem'
-              }}
-            >
-              三款强大 AI 编程工具，全面提升您的开发效率
-            </Typography>
+              <Typography
+                variant="h3"
+                sx={{
+                  fontWeight: 800,
+                  mb: 3,
+                  fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+                  background: 'linear-gradient(135deg, #fff 0%, #e0e7ff 50%, #a78bfa 100%)',
+                  backgroundClip: 'text',
+                  textFillColor: 'transparent',
+                  letterSpacing: '-0.02em'
+                }}
+              >
+                Vibe Coding
+              </Typography>
 
-            <Grid container spacing={4} justifyContent="center">
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 600,
+                  mb: 3,
+                  fontSize: { xs: '1.2rem', md: '1.5rem' },
+                  color: 'rgba(255,255,255,0.9)'
+                }}
+              >
+                AI 编程助手全家桶
+              </Typography>
+
+              <Typography
+                variant="body1"
+                sx={{
+                  color: 'rgba(255,255,255,0.7)',
+                  maxWidth: '600px',
+                  mx: 'auto',
+                  fontSize: '1.05rem',
+                  lineHeight: 1.8
+                }}
+              >
+                三款强大 AI 编程工具，覆盖终端、IDE、云端全场景，全面提升您的开发效率
+              </Typography>
+            </Box>
+
+            <Grid container spacing={{ xs: 3, md: 4 }} justifyContent="center">
               {[
                 {
-                  icon: <Terminal sx={{ fontSize: 40, color: '#fff' }} />,
+                  icon: (
+                    <Box
+                      component="img"
+                      src="https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/claude.webp"
+                      alt="Claude"
+                      sx={{ width: 32, height: 32, objectFit: 'contain' }}
+                    />
+                  ),
                   title: 'Claude Code',
                   tag: '终端集成 · 结对编程',
-                  features: [
-                    'Claude 4.5 Sonnet 驱动',
-                    '深度理解代码上下文',
-                    '智能调试与文档生成',
-                    '全平台 CLI 支持'
-                  ],
+                  badge: 'Anthropic',
+                  badgeColor: '#f97316',
+                  features: ['Claude Opus 4.5 驱动', '深度理解代码上下文', '智能调试与文档生成', '全平台 CLI 支持'],
                   path: '/claude-code',
-                  gradient: 'linear-gradient(145deg, rgba(22,119,255,0.15) 0%, rgba(25,118,210,0.08) 100%)'
+                  primaryColor: '#f97316',
+                  secondaryColor: '#fb923c',
+                  gradient: 'linear-gradient(145deg, rgba(249,115,22,0.15) 0%, rgba(251,146,60,0.05) 100%)',
+                  iconBg: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)',
+                  glowColor: 'rgba(249,115,22,0.4)'
                 },
                 {
-                  icon: <Code sx={{ fontSize: 40, color: '#fff' }} />,
-                  title: 'Codex Code',
+                  icon: (
+                    <Box
+                      component="img"
+                      src="https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/openai.webp"
+                      alt="OpenAI"
+                      sx={{ width: 32, height: 32, objectFit: 'contain' }}
+                    />
+                  ),
+                  title: 'Codex CLI',
                   tag: '企业级 · 智能重构',
-                  features: [
-                    'GPT-5.1 企业级模型',
-                    '实时联网能力',
-                    '智能代码重构',
-                    'VSCode 深度集成'
-                  ],
+                  badge: 'OpenAI',
+                  badgeColor: '#10b981',
+                  features: ['GPT 5.2驱动', '实时联网能力', '智能代码重构', 'VSCode 深度集成'],
                   path: '/codex-code',
-                  gradient: 'linear-gradient(145deg, rgba(156,39,176,0.15) 0%, rgba(123,31,162,0.08) 100%)'
+                  primaryColor: '#10b981',
+                  secondaryColor: '#34d399',
+                  gradient: 'linear-gradient(145deg, rgba(16,185,129,0.15) 0%, rgba(52,211,153,0.05) 100%)',
+                  iconBg: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)',
+                  glowColor: 'rgba(16,185,129,0.4)'
                 },
                 {
-                  icon: <AutoAwesome sx={{ fontSize: 40, color: '#fff' }} />,
-                  title: 'Gemini Code',
+                  icon: (
+                    <Box
+                      component="img"
+                      src="https://registry.npmmirror.com/@lobehub/icons-static-webp/latest/files/dark/gemini.webp"
+                      alt="Gemini"
+                      sx={{ width: 32, height: 32, objectFit: 'contain' }}
+                    />
+                  ),
+                  title: 'Gemini CLI',
                   tag: '超大上下文 · Agent模式',
-                  features: [
-                    '1M tokens 超大上下文',
-                    'Agent Mode 自动规划任务',
-                    '内置 Google Search',
-                    '多模态输入支持'
-                  ],
+                  badge: 'Google',
+                  badgeColor: '#8b5cf6',
+                  features: ['1M tokens 超大上下文', 'Agent Mode 自动规划', '内置 Google Search', '多模态输入支持'],
                   path: '/gemini-code',
-                  gradient: 'linear-gradient(145deg, rgba(255,87,34,0.15) 0%, rgba(230,81,0,0.08) 100%)'
+                  primaryColor: '#8b5cf6',
+                  secondaryColor: '#a78bfa',
+                  gradient: 'linear-gradient(145deg, rgba(139,92,246,0.15) 0%, rgba(167,139,250,0.05) 100%)',
+                  iconBg: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)',
+                  glowColor: 'rgba(139,92,246,0.4)'
                 }
               ].map((product, index) => (
-                <Grid item xs={12} md={4} key={index}>
+                <Grid item xs={12} sm={6} md={4} key={index}>
                   <Box
                     sx={{
                       height: '100%',
                       transform: 'translateY(0)',
-                      transition: 'all 0.3s ease',
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                       '&:hover': {
-                        transform: 'translateY(-8px)',
+                        transform: 'translateY(-12px)',
                         '& .vibe-card': {
-                          boxShadow: '0 20px 40px rgba(22,119,255,0.25)',
-                          borderColor: 'rgba(100,181,246,0.5)'
+                          boxShadow: `0 25px 50px ${product.glowColor}`,
+                          borderColor: product.primaryColor
                         },
                         '& .vibe-icon': {
-                          transform: 'scale(1.1)'
+                          transform: 'scale(1.1) rotate(5deg)',
+                          boxShadow: `0 15px 30px ${product.glowColor}`
+                        },
+                        '& .vibe-btn': {
+                          background: `linear-gradient(135deg, ${product.primaryColor} 0%, ${product.secondaryColor} 100%)`
                         }
                       }
                     }}
                   >
                     <Stack
                       className="vibe-card"
-                      spacing={4}
+                      spacing={3}
                       sx={{
-                        p: 4,
+                        p: { xs: 3, md: 4 },
                         height: '100%',
                         background: product.gradient,
-                        backdropFilter: 'blur(10px)',
-                        borderRadius: '24px',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '28px',
                         position: 'relative',
                         overflow: 'hidden',
                         border: '1px solid rgba(255,255,255,0.1)',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                         display: 'flex',
                         flexDirection: 'column',
-                        alignItems: 'center',
                         '&::before': {
                           content: '""',
                           position: 'absolute',
                           top: 0,
                           left: 0,
+                          right: 0,
+                          height: '1px',
+                          background: `linear-gradient(90deg, transparent 0%, ${product.primaryColor}40 50%, transparent 100%)`
+                        },
+                        '&::after': {
+                          content: '""',
+                          position: 'absolute',
+                          top: '-50%',
+                          right: '-50%',
                           width: '100%',
                           height: '100%',
-                          background: 'radial-gradient(circle at top right, rgba(144,202,249,0.1), transparent 70%)',
-                          zIndex: -1
+                          background: `radial-gradient(circle, ${product.primaryColor}15 0%, transparent 70%)`,
+                          pointerEvents: 'none'
                         }
                       }}
                     >
+                      {/* Badge */}
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 20,
+                          right: 20,
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: '8px',
+                          background: product.badgeColor,
+                          boxShadow: `0 4px 12px ${product.badgeColor}60`
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            color: '#fff',
+                            letterSpacing: '0.05em'
+                          }}
+                        >
+                          {product.badge}
+                        </Typography>
+                      </Box>
+
+                      {/* Icon */}
                       <Box
                         className="vibe-icon"
                         sx={{
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          width: 70,
-                          height: 70,
-                          borderRadius: '20px',
-                          mb: 1,
-                          background: 'rgba(255,255,255,0.1)',
-                          backdropFilter: 'blur(10px)',
-                          border: '1px solid rgba(255,255,255,0.2)',
-                          transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                          boxShadow: '0 8px 20px rgba(0,0,0,0.2)'
+                          width: 64,
+                          height: 64,
+                          borderRadius: '18px',
+                          background: product.iconBg,
+                          boxShadow: `0 10px 25px ${product.glowColor}`,
+                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                       >
                         {product.icon}
                       </Box>
-                      <Box
-                        sx={{
-                          px: 2.5,
-                          py: 1,
-                          borderRadius: '50px',
-                          background: 'rgba(255,255,255,0.1)',
-                          backdropFilter: 'blur(10px)',
-                          border: '1px solid rgba(255,255,255,0.15)',
-                          mb: 2
-                        }}
-                      >
+
+                      {/* Title & Tag */}
+                      <Box>
                         <Typography
-                          variant="body2"
+                          variant="h5"
                           sx={{
-                            fontWeight: 600,
-                            color: '#90caf9',
-                            fontSize: '0.85rem'
+                            fontWeight: 700,
+                            color: '#fff',
+                            fontSize: { xs: '1.3rem', md: '1.5rem' },
+                            mb: 1
+                          }}
+                        >
+                          {product.title}
+                        </Typography>
+                        <Typography
+                          sx={{
+                            fontSize: '0.85rem',
+                            color: product.secondaryColor,
+                            fontWeight: 500
                           }}
                         >
                           {product.tag}
                         </Typography>
                       </Box>
-                      <Typography
-                        variant="h5"
-                        align="center"
-                        sx={{
-                          fontWeight: 700,
-                          color: '#fff',
-                          fontSize: { xs: '1.4rem', md: '1.6rem' },
-                          mb: 3
-                        }}
-                      >
-                        {product.title}
-                      </Typography>
-                      <Stack spacing={2} sx={{ width: '100%' }}>
+
+                      {/* Features */}
+                      <Stack spacing={1.5} sx={{ flex: 1 }}>
                         {product.features.map((feature, i) => (
                           <Box
                             key={i}
                             sx={{
                               display: 'flex',
                               alignItems: 'center',
-                              gap: 1.5,
-                              px: 1
+                              gap: 1.5
                             }}
                           >
                             <Box
@@ -912,15 +991,16 @@ const BaseIndex = () => {
                                 width: 6,
                                 height: 6,
                                 borderRadius: '50%',
-                                backgroundColor: '#64b5f6',
+                                background: product.primaryColor,
+                                boxShadow: `0 0 8px ${product.primaryColor}`,
                                 flexShrink: 0
                               }}
                             />
                             <Typography
                               sx={{
-                                color: 'rgba(255,255,255,0.85)',
+                                color: 'rgba(255,255,255,0.8)',
                                 fontSize: '0.9rem',
-                                lineHeight: 1.6
+                                lineHeight: 1.5
                               }}
                             >
                               {feature}
@@ -928,24 +1008,27 @@ const BaseIndex = () => {
                           </Box>
                         ))}
                       </Stack>
+
+                      {/* Button */}
                       <Button
+                        className="vibe-btn"
                         variant="contained"
                         onClick={() => navigate(product.path)}
                         sx={{
-                          mt: 'auto',
+                          mt: 2,
                           width: '100%',
                           py: 1.5,
-                          borderRadius: '12px',
-                          fontSize: '1rem',
+                          borderRadius: '14px',
+                          fontSize: '0.95rem',
                           fontWeight: 600,
-                          background: 'linear-gradient(45deg, #1677ff, #64b5f6)',
+                          background: 'rgba(255,255,255,0.1)',
                           color: '#fff',
-                          boxShadow: '0 8px 20px rgba(22,119,255,0.3)',
+                          border: `1px solid ${product.primaryColor}50`,
+                          backdropFilter: 'blur(10px)',
                           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                           '&:hover': {
-                            background: 'linear-gradient(45deg, #64b5f6, #90caf9)',
                             transform: 'translateY(-2px)',
-                            boxShadow: '0 12px 28px rgba(22,119,255,0.4)'
+                            boxShadow: `0 10px 25px ${product.glowColor}`
                           }
                         }}
                         endIcon={<ArrowRightAlt />}
@@ -957,6 +1040,43 @@ const BaseIndex = () => {
                 </Grid>
               ))}
             </Grid>
+
+            {/* 底部说明 */}
+            <Box
+              sx={{
+                mt: { xs: 6, md: 8 },
+                textAlign: 'center'
+              }}
+            >
+              <Typography
+                sx={{
+                  color: 'rgba(255,255,255,0.5)',
+                  fontSize: '0.9rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 1
+                }}
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    width: 40,
+                    height: 1,
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3))'
+                  }}
+                />
+                统一 API 接口，一键切换不同 AI 编程助手
+                <Box
+                  component="span"
+                  sx={{
+                    width: 40,
+                    height: 1,
+                    background: 'linear-gradient(90deg, rgba(255,255,255,0.3), transparent)'
+                  }}
+                />
+              </Typography>
+            </Box>
           </Box>
 
           <Box

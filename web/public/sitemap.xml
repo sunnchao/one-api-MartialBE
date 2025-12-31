@@ -16,14 +16,29 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://wochirou.com/packagesoc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <loc>https://wochirou.com/claude-code</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://wochirou.com/packages</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://wochirou.com/codex-code</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://wochirou.com/gemini-code</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://wochirou.com/playground</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://wochirou.com/login</loc>
@@ -34,20 +49,5 @@
     <loc>https://wochirou.com/register</loc>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://wochirou.com/reset</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://wochirou.com/user/reset</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://wochirou.com/playground</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
   </url>
 </urlset>
