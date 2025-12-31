@@ -8,7 +8,6 @@ import componentStyleOverrides from './compStyleOverride';
 import themePalette from './palette';
 import themeTypography from './typography';
 import { varAlpha, createGradient } from './utils';
-import { borderRadius } from '@mui/system';
 
 // 创建自定义渐变背景色
 const customGradients = {
@@ -44,7 +43,7 @@ export const theme = (customization) => {
       }
     },
     shape: {
-      borderRadius: themeOption?.customization?.borderRadius || 12
+      borderRadius: themeOption?.customization?.borderRadius ?? colors.borderRadius ?? 8
     },
     typography: themeTypography(themeOption),
     breakpoints: {
@@ -60,8 +59,7 @@ export const theme = (customization) => {
       modal: 1300,
       snackbar: 1400,
       tooltip: 1500
-    },
-    borderRadius: 0
+    }
   };
 
   const themes = createTheme(themeOptions);
@@ -74,26 +72,27 @@ export default theme;
 
 function GetDarkOption() {
   const color = colors;
+  const surface = color.darkLevel1;
   return {
     mode: 'dark',
     heading: color.darkTextTitle,
-    paper: '#1A1D23',
-    backgroundDefault: '#13151A',
-    background: '#1E2128',
-    darkTextPrimary: '#E0E4EC',
-    darkTextSecondary: '#A9B2C3',
-    textDark: '#F8F9FC',
-    menuSelected: color.primary200,
-    menuSelectedBack: varAlpha(color.primaryMain, 0.12),
-    divider: 'rgba(255, 255, 255, 0.1)',
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    menuButton: '#292D36',
-    menuButtonColor: color.primaryMain,
-    menuChip: '#292D36',
-    headBackgroundColor: '#25282F',
-    headBackgroundColorHover: varAlpha('#25282F', 0.08),
-    tableBorderBottom: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 0
+    paper: color.darkPaper,
+    backgroundDefault: color.darkBackground,
+    background: surface,
+    darkTextPrimary: color.darkTextPrimary,
+    darkTextSecondary: color.darkTextSecondary,
+    textDark: color.darkTextPrimary,
+    menuSelected: color.darkPrimaryMain,
+    menuSelectedBack: varAlpha(color.darkPrimary200, 0.16),
+    divider: varAlpha(color.darkTextSecondary, 0.24),
+    borderColor: varAlpha(color.darkTextSecondary, 0.24),
+    menuButton: varAlpha(color.darkTextSecondary, 0.12),
+    menuButtonColor: color.darkTextPrimary,
+    menuChip: surface,
+    headBackgroundColor: color.darkLevel2,
+    headBackgroundColorHover: varAlpha(color.darkLevel2, 0.16),
+    tableBorderBottom: varAlpha(color.darkTextSecondary, 0.32),
+    borderRadius: color.borderRadius ?? 8
   };
 }
 
@@ -101,23 +100,23 @@ function GetLightOption() {
   const color = colors;
   return {
     mode: 'light',
-    heading: '#202939',
-    paper: '#FFFFFF',
-    backgroundDefault: '#f5f5f5',
-    background: '#F8FAFD',
-    darkTextPrimary: '#3E4555',
-    darkTextSecondary: '#6C7A92',
-    textDark: '#252F40',
+    heading: color.primaryMain,
+    paper: '#ffffff',
+    backgroundDefault: '#f8fafc',
+    background: '#ffffff',
+    darkTextPrimary: color.primaryMain,
+    darkTextSecondary: color.grey600,
+    textDark: color.primaryMain,
     menuSelected: color.primaryMain,
-    menuSelectedBack: varAlpha(color.primary200, 0.08),
-    divider: '#E9EDF5',
-    borderColor: '#E0E6ED',
-    menuButton: varAlpha(color.primary200, 0.12),
+    menuSelectedBack: varAlpha(color.primary200, 0.12),
+    divider: color.grey200,
+    borderColor: color.grey200,
+    menuButton: varAlpha(color.primary200, 0.16),
     menuButtonColor: color.primaryMain,
-    menuChip: '#EEF2F6',
-    headBackgroundColor: '#f5f5f5',
+    menuChip: color.secondaryLight,
+    headBackgroundColor: '#f8fafc',
     headBackgroundColorHover: '#ffffff',
-    tableBorderBottom: '#E9EDF5',
-    borderRadius: 0
+    tableBorderBottom: color.tableBorderBottom,
+    borderRadius: color.borderRadius ?? 8
   };
 }
