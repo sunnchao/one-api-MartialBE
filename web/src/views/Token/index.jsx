@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useMemo } from 'react';
-import { showError, showSuccess, trims, copy } from 'utils/common';
+import { showError, showSuccess, trims, copy, useIsReliable } from 'utils/common';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -42,6 +42,8 @@ export default function Token() {
   const [editTokenId, setEditTokenId] = useState(0);
   const siteInfo = useSelector((state) => state.siteInfo);
   const { userGroup } = useSelector((state) => state.account);
+  const userIsReliable = useIsReliable();
+
   const [selectedProvider, setSelectedProvider] = useState('openai');
 
   const normalizedBaseAddress = useMemo(() => {
@@ -284,14 +286,14 @@ export default function Token() {
                 headLabel={[
                   { id: 'name', label: t('token_index.name'), disableSort: false, width: 150 },
                   { id: 'group', label: t('token_index.userGroup'), disableSort: false, width: 200, minWidth: 180 },
+                  { id: 'billing_tag', label: t('token_index.billingTag'), disableSort: true, hide: !userIsReliable },
                   { id: 'status', label: t('token_index.status'), disableSort: false, width: 100, minWidth: 100 },
-                  { id: 'billing_type', label: t('token_index.billingType.header'), disableSort: false, width: 100, minWidth: 100 },
                   { id: 'used_quota', label: t('token_index.usedQuota'), disableSort: false, width: 100, minWidth: 100 },
                   { id: 'remain_quota', label: t('token_index.remainingQuota'), disableSort: false, width: 120, minWidth: 100 },
                   { id: 'created_time', label: t('token_index.createdTime'), disableSort: false, width: 130, minWidth: 100 },
                   { id: 'expired_time', label: t('token_index.expiryTime'), disableSort: false, width: 130, minWidth: 100 },
                   { id: 'action', label: t('token_index.actions'), disableSort: true, width: 200 }
-                ]}
+                ].filter(col => !col.hide)}
               />
               <TableBody>
                 {tokens.map((row) => (
@@ -303,6 +305,7 @@ export default function Token() {
                     setModalTokenId={setEditTokenId}
                     userGroup={userGroup}
                     userGroupOptions={userGroupOptions}
+                    userIsReliable={userIsReliable}
                   />
                 ))}
               </TableBody>

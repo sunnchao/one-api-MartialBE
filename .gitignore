@@ -17,8 +17,8 @@ dist
 test.yaml
 one-api
 _output
+.claude
 
 pkg
-.claude
 .codex
 .kiro
