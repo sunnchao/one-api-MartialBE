@@ -46,7 +46,8 @@ type GetPackagesSubscriptionResponse struct {
 func GetPackagesSubscription(c *gin.Context) {
 	userId := c.GetInt("id")
 
-	subscriptions, err := model.GetUserActivePackagesSubscriptions(userId, "", false)
+	var subscription model.PackagesSubscription
+	subscriptions, err := model.GetUserActivePackagesSubscriptions(userId, subscription, false)
 
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -227,7 +228,10 @@ func PurchasePackagesSubscription(c *gin.Context) {
 		Currency:       plan.Currency,
 		PaymentMethod:  req.PaymentMethod,
 		OrderId:        orderId,
+		ServiceType:    plan.ServiceType,
+		HashId:         utils.GetUUID(),
 	}
+	model.ApplyPlanLimitsToSubscription(subscription, plan)
 
 	if err := model.CreatePackagesSubscription(subscription); err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -506,6 +510,7 @@ func AdminGrantPackagesSubscription(c *gin.Context) {
 		ServiceType:    plan.ServiceType,
 		HashId:         utils.GetUUID(),
 	}
+	model.ApplyPlanLimitsToSubscription(subscription, plan)
 
 	// 保存订阅
 	if err := model.CreatePackagesSubscription(subscription); err != nil {
@@ -638,41 +643,49 @@ func AdminCancelPackagesSubscription(c *gin.Context) {
 
 // CreatePlanRequest 创建套餐请求结构
 type CreatePlanRequest struct {
-	Name            string                 `json:"name" binding:"required"`
-	Type            string                 `json:"type" binding:"required"`
-	Description     string                 `json:"description"`
-	Price           *float64               `json:"price" binding:"required"`
-	Currency        string                 `json:"currency"`
-	TotalQuota      int                    `json:"total_quota" binding:"required"`
-	MaxClientCount  int                    `json:"max_client_count"`
-	IsUnlimitedTime bool                   `json:"is_unlimited_time"`
-	DurationMonths  int                    `json:"duration_months"`
-	DurationUnit    string                 `json:"duration_unit"`
-	DurationValue   int                    `json:"duration_value"`
-	Features        map[string]interface{} `json:"features"`
-	IsActive        bool                   `json:"is_active"`
-	SortOrder       int                    `json:"sort_order"`
-	ShowInPortal    bool                   `json:"show_in_portal"`
-  ServiceType     string                 `json:"service_type" binding:"required"`
+	Name                string                 `json:"name" binding:"required"`
+	Type                string                 `json:"type" binding:"required"`
+	Description         string                 `json:"description"`
+	Price               *float64               `json:"price" binding:"required"`
+	Currency            string                 `json:"currency"`
+	TotalQuota          int                    `json:"total_quota" binding:"required"`
+	MaxClientCount      int                    `json:"max_client_count"`
+	IsUnlimitedTime     bool                   `json:"is_unlimited_time"`
+	DurationMonths      int                    `json:"duration_months"`
+	DurationUnit        string                 `json:"duration_unit"`
+	DurationValue       int                    `json:"duration_value"`
+	Features            map[string]interface{} `json:"features"`
+	IsActive            bool                   `json:"is_active"`
+	SortOrder           int                    `json:"sort_order"`
+	ShowInPortal        bool                   `json:"show_in_portal"`
+	ServiceType         string                 `json:"service_type" binding:"required"`
+	DailyQuotaPerPlan   int                    `json:"daily_quota_per_plan"`
+	WeeklyQuotaPerPlan  int                    `json:"weekly_quota_per_plan"`
+	MonthlyQuotaPerPlan int                    `json:"monthly_quota_per_plan"`
+	DeductionGroup      string                 `json:"deduction_group"`
 }
 
 // UpdatePlanRequest 更新套餐请求结构
 type UpdatePlanRequest struct {
-	Name            string                 `json:"name"`
-	Description     string                 `json:"description"`
-	Price           *float64               `json:"price"`
-	Currency        string                 `json:"currency"`
-	MaxClientCount  int                    `json:"max_client_count"`
-	IsUnlimitedTime *bool                  `json:"is_unlimited_time"`
-	DurationMonths  int                    `json:"duration_months"`
-	DurationUnit    string                 `json:"duration_unit"`
-	DurationValue   int                    `json:"duration_value"`
-	Features        map[string]interface{} `json:"features"`
-	IsActive        *bool                  `json:"is_active"`
-	SortOrder       int                    `json:"sort_order"`
-	ServiceType     string                 `json:"service_type" gorm:"type:varchar(50);index;default:'claude_code'"` // claude_code, codex_code, gemini_code
-	TotalQuota      int                    `json:"total_quota" gorm:"default:0"`                                     // 总额度
-	ShowInPortal    *bool                  `json:"show_in_portal"`
+	Name                string                 `json:"name"`
+	Description         string                 `json:"description"`
+	Price               *float64               `json:"price"`
+	Currency            string                 `json:"currency"`
+	MaxClientCount      int                    `json:"max_client_count"`
+	IsUnlimitedTime     *bool                  `json:"is_unlimited_time"`
+	DurationMonths      int                    `json:"duration_months"`
+	DurationUnit        string                 `json:"duration_unit"`
+	DurationValue       int                    `json:"duration_value"`
+	Features            map[string]interface{} `json:"features"`
+	IsActive            *bool                  `json:"is_active"`
+	SortOrder           int                    `json:"sort_order"`
+	ServiceType         string                 `json:"service_type" gorm:"type:varchar(50);index;default:'claude_code'"` // claude_code, codex_code, gemini_code
+	TotalQuota          int                    `json:"total_quota" gorm:"default:0"`                                     // 总额度
+	ShowInPortal        *bool                  `json:"show_in_portal"`
+	DailyQuotaPerPlan   *int                   `json:"daily_quota_per_plan"`
+	WeeklyQuotaPerPlan  *int                   `json:"weekly_quota_per_plan"`
+	MonthlyQuotaPerPlan *int                   `json:"monthly_quota_per_plan"`
+	DeductionGroup      *string                `json:"deduction_group"`
 }
 
 // CreatePackagesPlan 创建套餐
@@ -758,28 +771,39 @@ func CreatePackagesPlan(c *gin.Context) {
 		})
 		return
 	}
+	if req.DailyQuotaPerPlan < 0 || req.WeeklyQuotaPerPlan < 0 || req.MonthlyQuotaPerPlan < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "限额不能为负数",
+		})
+		return
+	}
 
 	now := utils.GetTimestamp()
 	plan := &model.PackagesPlan{
-		Name:            req.Name,
-		Type:            req.Type,
-		Description:     req.Description,
-		Price:           priceValue,
-		Currency:        req.Currency,
-		TotalQuota:      req.TotalQuota,
-		MaxClientCount:  req.MaxClientCount,
-		IsUnlimitedTime: req.IsUnlimitedTime,
-		DurationMonths:  req.DurationMonths,
-		DurationUnit:    durationUnit,
-		DurationValue:   durationValue,
-		Features:        database.JSONType[map[string]interface{}]{},
-		IsActive:        req.IsActive,
-		ShowInPortal:    req.ShowInPortal,
-		SortOrder:       req.SortOrder,
-		CreatedTime:     now,
-		UpdatedTime:     now,
-    HashId:           utils.GetUUID(),
-    ServiceType:      req.ServiceType,
+		Name:                req.Name,
+		Type:                req.Type,
+		Description:         req.Description,
+		Price:               priceValue,
+		Currency:            req.Currency,
+		TotalQuota:          req.TotalQuota,
+		MaxClientCount:      req.MaxClientCount,
+		IsUnlimitedTime:     req.IsUnlimitedTime,
+		DurationMonths:      req.DurationMonths,
+		DurationUnit:        durationUnit,
+		DurationValue:       durationValue,
+		Features:            database.JSONType[map[string]interface{}]{},
+		IsActive:            req.IsActive,
+		ShowInPortal:        req.ShowInPortal,
+		SortOrder:           req.SortOrder,
+		CreatedTime:         now,
+		UpdatedTime:         now,
+		HashId:              utils.GetUUID(),
+		ServiceType:         req.ServiceType,
+		DailyQuotaPerPlan:   req.DailyQuotaPerPlan,
+		WeeklyQuotaPerPlan:  req.WeeklyQuotaPerPlan,
+		MonthlyQuotaPerPlan: req.MonthlyQuotaPerPlan,
+		DeductionGroup:      req.DeductionGroup,
 	}
 
 	if err := model.CreatePackagesPlan(plan); err != nil {
@@ -832,6 +856,16 @@ func UpdatePackagesPlan(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": "套餐不存在",
+		})
+		return
+	}
+
+	if req.DailyQuotaPerPlan != nil && *req.DailyQuotaPerPlan < 0 ||
+		req.WeeklyQuotaPerPlan != nil && *req.WeeklyQuotaPerPlan < 0 ||
+		req.MonthlyQuotaPerPlan != nil && *req.MonthlyQuotaPerPlan < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "限额不能为负数",
 		})
 		return
 	}
@@ -915,6 +949,18 @@ func UpdatePackagesPlan(c *gin.Context) {
 	if req.TotalQuota > 0 {
 		plan.TotalQuota = req.TotalQuota
 	}
+	if req.DailyQuotaPerPlan != nil {
+		plan.DailyQuotaPerPlan = *req.DailyQuotaPerPlan
+	}
+	if req.WeeklyQuotaPerPlan != nil {
+		plan.WeeklyQuotaPerPlan = *req.WeeklyQuotaPerPlan
+	}
+	if req.MonthlyQuotaPerPlan != nil {
+		plan.MonthlyQuotaPerPlan = *req.MonthlyQuotaPerPlan
+	}
+	if req.DeductionGroup != nil {
+		plan.DeductionGroup = *req.DeductionGroup
+	}
 	// TODO: Handle features update properly when needed
 	if req.IsActive != nil {
 		plan.IsActive = *req.IsActive
@@ -924,9 +970,9 @@ func UpdatePackagesPlan(c *gin.Context) {
 	}
 	plan.SortOrder = req.SortOrder
 	plan.UpdatedTime = utils.GetTimestamp()
-  if plan.HashId == "" {
-    plan.HashId = utils.GetUUID()
-  }
+	if plan.HashId == "" {
+		plan.HashId = utils.GetUUID()
+	}
 
 	if err := model.UpdatePackagesPlan(plan); err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -934,6 +980,10 @@ func UpdatePackagesPlan(c *gin.Context) {
 			"message": "更新套餐失败",
 		})
 		return
+	}
+
+	if err := model.UpdatePackagesSubscriptionsByPlan(plan); err != nil {
+		logger.SysError("更新套餐关联订阅失败: " + err.Error())
 	}
 
 	c.JSON(http.StatusOK, gin.H{

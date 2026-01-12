@@ -102,6 +102,13 @@ const PackagesSubscription = () => {
     }
     return Math.max(value, 0).toLocaleString();
   };
+  const formatQuotaLimit = (value) => {
+    if (!value || value <= 0) {
+      return '不限';
+    }
+    return renderQuota(value, 6);
+  };
+  const formatQuotaUsed = (value) => renderQuota(value || 0, 6);
   const getPlanQuotaValue = (plan) => {
     if (!plan) return 0;
     const quota = plan.total_quota ?? plan.max_requests_per_month ?? 0;
@@ -295,7 +302,7 @@ const PackagesSubscription = () => {
     const fallbackUsedQuota =
       typeof subscription.total_quota === 'number' && typeof subscription.remain_quota === 'number'
         ? subscription.total_quota - subscription.remain_quota
-        : (subscription.used_requests_this_month ?? 0);
+        : subscription.used_requests_this_month ?? 0;
     const usedQuota = subscription.used_quota ?? fallbackUsedQuota;
     const normalizedTotalQuota = typeof totalQuota === 'number' && totalQuota > 0 ? totalQuota : 0;
     const normalizedUsedQuota = typeof usedQuota === 'number' && usedQuota > 0 ? Math.min(usedQuota, normalizedTotalQuota || usedQuota) : 0;
@@ -416,6 +423,25 @@ const PackagesSubscription = () => {
                         </Typography>
                       </Box>
 
+                      {subscription.status === 'active' && (
+                      <Box>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          订阅限额
+                        </Typography>
+                        <Stack spacing={0.5}>
+                          <Typography variant="caption">
+                            日限额: {formatQuotaUsed(subscription.daily_quota_used)} / {formatQuotaLimit(subscription.daily_quota_limit)}
+                          </Typography>
+                          <Typography variant="caption">
+                            周限额: {formatQuotaUsed(subscription.weekly_quota_used)} / {formatQuotaLimit(subscription.weekly_quota_limit)}
+                          </Typography>
+                          <Typography variant="caption">
+                            月限额: {formatQuotaUsed(subscription.monthly_quota_used)} / {formatQuotaLimit(subscription.monthly_quota_limit)}
+                          </Typography>
+                        </Stack>
+                      </Box>
+                      )}
+
                       {subscription.package_plan.description && (
                         <Typography variant="caption" color="text.secondary">
                           {subscription.package_plan.description}
@@ -467,11 +493,14 @@ const PackagesSubscription = () => {
               .map((plan) => {
                 const durationInfo = resolvePlanDuration(plan);
                 const planQuotaDescription = plan.is_unlimited_time
-                  ? t('packages.subscription.quotaDisplay.unlimited', { count: formatQuotaCount(getPlanQuotaValue(plan)) })
+                  ? t('packages.subscription.quotaDisplay.unlimited', { count: renderQuota(getPlanQuotaValue(plan), 6) })
                   : t('packages.subscription.quotaDisplay.perDuration', {
-                    duration: getQuotaDurationText(plan) || durationInfo.text,
-                    count: formatQuotaCount(getPlanQuotaValue(plan))
-                  });
+                      duration: getQuotaDurationText(plan) || durationInfo.text,
+                      count: renderQuota(getPlanQuotaValue(plan), 6)
+                    });
+                const planDailyLimit = formatQuotaLimit(plan.daily_quota_per_plan);
+                const planWeeklyLimit = formatQuotaLimit(plan.weekly_quota_per_plan);
+                const planMonthlyLimit = formatQuotaLimit(plan.monthly_quota_per_plan);
                 return (
                   <Grid item xs={12} md={4} key={plan.id}>
                     <Card
@@ -535,6 +564,12 @@ const PackagesSubscription = () => {
                           <Box display="flex" alignItems="center">
                             <CheckCircleIcon color="success" sx={{ fontSize: 20, mr: 1 }} />
                             <Typography variant="body2">{planQuotaDescription}</Typography>
+                          </Box>
+                          <Box display="flex" alignItems="center">
+                            <CheckCircleIcon color="success" sx={{ fontSize: 20, mr: 1 }} />
+                            <Typography variant="body2">
+                              日/周/月限额: {planDailyLimit} / {planWeeklyLimit} / {planMonthlyLimit}
+                            </Typography>
                           </Box>
 
                           <Box display="flex" alignItems="center">

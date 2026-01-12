@@ -24,6 +24,7 @@ import {
   MenuItem,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   InputLabel,
   Chip,
   Alert,
@@ -53,6 +54,8 @@ const durationUnitOptions = [
   { value: 'quarter', label: '按季度', suffix: '个季度', short: '季度' }
 ];
 
+const quotaUnit = 500000;
+
 const getDurationSuffix = (unit) => {
   const option = durationUnitOptions.find((item) => item.value === unit);
   return option ? option.suffix : '个月';
@@ -66,6 +69,15 @@ const getDurationShortLabel = (unit) => {
 const getDurationLabel = (unit = 'month', value = 1) => {
   const safeValue = value > 0 ? value : 1;
   return `${safeValue}${getDurationSuffix(unit)}`;
+};
+
+const quotaToDisplay = (value) => (value || 0) / quotaUnit;
+const displayToQuota = (value) => {
+  const parsed = parseFloat(value);
+  if (!parsed || parsed <= 0) {
+    return 0;
+  }
+  return Math.round(parsed * quotaUnit);
 };
 
 const ClaudeCodeAdmin = () => {
@@ -97,6 +109,8 @@ const ClaudeCodeAdmin = () => {
   });
 
   const [plans, setPlans] = useState([]);
+  const [userGroupMap, setUserGroupMap] = useState({});
+  const [userGroupOptions, setUserGroupOptions] = useState([]);
 
   const planNameMap = useMemo(() => {
     const map = {};
@@ -126,7 +140,11 @@ const ClaudeCodeAdmin = () => {
     duration_value: 1,
     is_active: true,
     sort_order: 0,
-    show_in_portal: true
+    show_in_portal: true,
+    daily_quota_per_plan: 0,
+    weekly_quota_per_plan: 0,
+    monthly_quota_per_plan: 0,
+    deduction_group: ''
   });
 
   // 获取套餐列表
@@ -143,6 +161,27 @@ const ClaudeCodeAdmin = () => {
     } catch (error) {
       console.error('获取套餐列表失败:', error);
       setPlans([]);
+    }
+  };
+
+  const fetchUserGroups = async () => {
+    try {
+      const res = await API.get('/api/user_group_map_by_admin');
+      if (res.data.success) {
+        const data = res.data.data || {};
+        const groups = Object.keys(data);
+        groups.sort((a, b) => {
+          if (a === 'default') return -1;
+          if (b === 'default') return 1;
+          return a.localeCompare(b);
+        });
+        setUserGroupMap(data);
+        setUserGroupOptions(groups);
+      }
+    } catch (error) {
+      console.error('获取用户分组失败:', error);
+      setUserGroupMap({});
+      setUserGroupOptions([]);
     }
   };
 
@@ -291,7 +330,7 @@ const ClaudeCodeAdmin = () => {
       description: '',
       price: 0,
       currency: 'USD',
-      total_quota: 500000,
+      total_quota: quotaUnit,
       max_client_count: 1,
       is_unlimited_time: false,
       duration_months: 1,
@@ -299,7 +338,11 @@ const ClaudeCodeAdmin = () => {
       duration_value: 1,
       is_active: true,
       sort_order: 0,
-      show_in_portal: true
+      show_in_portal: true,
+      daily_quota_per_plan: 0,
+      weekly_quota_per_plan: 0,
+      monthly_quota_per_plan: 0,
+      deduction_group: ''
     });
     setPlanDialogOpen(true);
   };
@@ -315,7 +358,7 @@ const ClaudeCodeAdmin = () => {
       description: plan.description,
       price: plan.price,
       currency: plan.currency,
-      total_quota: plan.total_quota || 500000,
+      total_quota: plan.total_quota || quotaUnit,
       max_client_count: plan.max_client_count,
       is_unlimited_time: plan.is_unlimited_time || false,
       duration_months: plan.duration_months || 1,
@@ -323,7 +366,11 @@ const ClaudeCodeAdmin = () => {
       duration_value: durationValue,
       is_active: plan.is_active,
       sort_order: plan.sort_order,
-      show_in_portal: plan.show_in_portal ?? true
+      show_in_portal: plan.show_in_portal ?? true,
+      daily_quota_per_plan: plan.daily_quota_per_plan || 0,
+      weekly_quota_per_plan: plan.weekly_quota_per_plan || 0,
+      monthly_quota_per_plan: plan.monthly_quota_per_plan || 0,
+      deduction_group: plan.deduction_group || ''
     });
     setPlanDialogOpen(true);
   };
@@ -367,6 +414,7 @@ const ClaudeCodeAdmin = () => {
 
   useEffect(() => {
     fetchPlans();
+    fetchUserGroups();
   }, []);
 
   useEffect(() => {
@@ -628,6 +676,7 @@ const ClaudeCodeAdmin = () => {
                     <TableCell>价格</TableCell>
                     <TableCell>时间限制</TableCell>
                     <TableCell>总额度</TableCell>
+                    <TableCell>抵扣分组</TableCell>
                     <TableCell>设备数</TableCell>
                     <TableCell>状态</TableCell>
                     <TableCell>前台展示</TableCell>
@@ -637,8 +686,8 @@ const ClaudeCodeAdmin = () => {
                 </TableHead>
                 <TableBody>
                   {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={11} sx={{ textAlign: 'center', py: 3 }}>
+                      <TableRow>
+                      <TableCell colSpan={13} sx={{ textAlign: 'center', py: 3 }}>
                         <CircularProgress />
                       </TableCell>
                     </TableRow>
@@ -688,7 +737,8 @@ const ClaudeCodeAdmin = () => {
                             />
                           )}
                         </TableCell>
-                        <TableCell>${(plan.total_quota / 500000).toFixed(2)}</TableCell>
+                        <TableCell>${quotaToDisplay(plan.total_quota).toFixed(2)}</TableCell>
+                        <TableCell>{plan.deduction_group || '不限'}</TableCell>
                         <TableCell>{plan.max_client_count}</TableCell>
                         <TableCell>
                           <Chip
@@ -724,7 +774,7 @@ const ClaudeCodeAdmin = () => {
                   )}
                   {!loading && plans.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={11} align="center">
+                      <TableCell colSpan={13} align="center">
                         <Typography color="text.secondary">暂无套餐，点击上方按钮创建</Typography>
                       </TableCell>
                     </TableRow>
@@ -869,8 +919,8 @@ const ClaudeCodeAdmin = () => {
                   fullWidth
                   label="总额度（USD）"
                   type="number"
-                  value={planForm.total_quota / 500000}
-                  onChange={(e) => setPlanForm({ ...planForm, total_quota: Math.round(parseFloat(e.target.value) * 500000) || 500000 })}
+                  value={quotaToDisplay(planForm.total_quota)}
+                  onChange={(e) => setPlanForm({ ...planForm, total_quota: displayToQuota(e.target.value) || quotaUnit })}
                   required
                   inputProps={{ min: 0, step: 0.01 }}
                   helperText="显示金额，实际额度 = 金额 × 500000"
@@ -885,6 +935,60 @@ const ClaudeCodeAdmin = () => {
                   onChange={(e) => setPlanForm({ ...planForm, max_client_count: parseInt(e.target.value) || 1 })}
                   required
                   inputProps={{ min: 1 }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>抵扣分组</InputLabel>
+                  <Select
+                    value={planForm.deduction_group}
+                    onChange={(e) => setPlanForm({ ...planForm, deduction_group: e.target.value })}
+                    label="抵扣分组"
+                  >
+                    <MenuItem value="">不限分组</MenuItem>
+                    {userGroupOptions.map((group) => (
+                      <MenuItem key={group} value={group}>
+                        {userGroupMap[group]?.name || group}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <FormHelperText>仅该用户分组扣费</FormHelperText>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="subtitle2">周期限额（USD）</Typography>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  label="订阅日限额"
+                  type="number"
+                  value={quotaToDisplay(planForm.daily_quota_per_plan)}
+                  onChange={(e) => setPlanForm({ ...planForm, daily_quota_per_plan: displayToQuota(e.target.value) })}
+                  inputProps={{ min: 0, step: 0.01 }}
+                  helperText="0 表示不限"
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  label="订阅周限额"
+                  type="number"
+                  value={quotaToDisplay(planForm.weekly_quota_per_plan)}
+                  onChange={(e) => setPlanForm({ ...planForm, weekly_quota_per_plan: displayToQuota(e.target.value) })}
+                  inputProps={{ min: 0, step: 0.01 }}
+                  helperText="0 表示不限"
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  label="订阅月限额"
+                  type="number"
+                  value={quotaToDisplay(planForm.monthly_quota_per_plan)}
+                  onChange={(e) => setPlanForm({ ...planForm, monthly_quota_per_plan: displayToQuota(e.target.value) })}
+                  inputProps={{ min: 0, step: 0.01 }}
+                  helperText="0 表示不限"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>

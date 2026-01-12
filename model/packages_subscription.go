@@ -11,6 +11,7 @@ import (
 	"one-api/common/utils"
 	"strconv"
 	"strings"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -54,6 +55,20 @@ type PackagesSubscription struct {
 	ClientFingerprint string `json:"client_fingerprint" gorm:"index"`   // 客户端指纹
 	AllowedClients    string `json:"allowed_clients"`                   // 允许的客户端列表，JSON格式
 	MaxClientCount    int    `json:"max_client_count" gorm:"default:3"` // 最大允许的客户端数量
+
+	// 订阅周期额度限制（单订阅）
+	DailyQuotaLimit     int   `json:"daily_quota_limit" gorm:"default:0"`
+	WeeklyQuotaLimit    int   `json:"weekly_quota_limit" gorm:"default:0"`
+	MonthlyQuotaLimit   int   `json:"monthly_quota_limit" gorm:"default:0"`
+	DailyQuotaUsed      int   `json:"daily_quota_used" gorm:"default:0"`
+	WeeklyQuotaUsed     int   `json:"weekly_quota_used" gorm:"default:0"`
+	MonthlyQuotaUsed    int   `json:"monthly_quota_used" gorm:"default:0"`
+	DailyQuotaResetAt   int64 `json:"daily_quota_reset_at" gorm:"default:0"`
+	WeeklyQuotaResetAt  int64 `json:"weekly_quota_reset_at" gorm:"default:0"`
+	MonthlyQuotaResetAt int64 `json:"monthly_quota_reset_at" gorm:"default:0"`
+
+	// 套餐指定抵扣分组
+	DeductionGroup string `json:"deduction_group" gorm:"type:varchar(32);default:''"`
 }
 
 // Claude Code 套餐模型
@@ -79,6 +94,49 @@ type PackagesPlan struct {
 	SortOrder       int                                       `json:"sort_order" gorm:"default:0"`
 	CreatedTime     int64                                     `json:"created_time"`
 	UpdatedTime     int64                                     `json:"updated_time"`
+
+	// 周期额度限制
+	DailyQuotaPerPlan   int `json:"daily_quota_per_plan" gorm:"default:0"`
+	WeeklyQuotaPerPlan  int `json:"weekly_quota_per_plan" gorm:"default:0"`
+	MonthlyQuotaPerPlan int `json:"monthly_quota_per_plan" gorm:"default:0"`
+
+	DeductionGroup string `json:"deduction_group" gorm:"type:varchar(32);default:''"`
+}
+
+func ApplyPlanLimitsToSubscription(subscription *PackagesSubscription, plan *PackagesPlan) {
+	if subscription == nil || plan == nil {
+		return
+	}
+	subscription.DailyQuotaLimit = plan.DailyQuotaPerPlan
+	subscription.WeeklyQuotaLimit = plan.WeeklyQuotaPerPlan
+	subscription.MonthlyQuotaLimit = plan.MonthlyQuotaPerPlan
+	subscription.DeductionGroup = strings.TrimSpace(plan.DeductionGroup)
+}
+
+func getPackagesQuotaResetStarts(now time.Time) (int64, int64, int64) {
+	dayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+
+	weekday := int(now.Weekday())
+	offset := (weekday + 6) % 7 // Monday as week start
+	weekStart := dayStart.AddDate(0, 0, -offset)
+
+	monthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	return dayStart.Unix(), weekStart.Unix(), monthStart.Unix()
+}
+
+func resetSubscriptionQuotaIfNeeded(subscription *PackagesSubscription, dayStart, weekStart, monthStart int64) {
+	if subscription.DailyQuotaResetAt != dayStart {
+		subscription.DailyQuotaUsed = 0
+		subscription.DailyQuotaResetAt = dayStart
+	}
+	if subscription.WeeklyQuotaResetAt != weekStart {
+		subscription.WeeklyQuotaUsed = 0
+		subscription.WeeklyQuotaResetAt = weekStart
+	}
+	if subscription.MonthlyQuotaResetAt != monthStart {
+		subscription.MonthlyQuotaUsed = 0
+		subscription.MonthlyQuotaResetAt = monthStart
+	}
 }
 
 func NormalizeDurationUnit(unit string) string {
@@ -180,6 +238,10 @@ func GrantPlanToUser(userId int, plan *PackagesPlan, source string, allowStack b
 			"remain_quota": gorm.Expr("remain_quota + ?", plan.TotalQuota),
 			"updated_time": now,
 		}
+		updates["daily_quota_limit"] = plan.DailyQuotaPerPlan
+		updates["weekly_quota_limit"] = plan.WeeklyQuotaPerPlan
+		updates["monthly_quota_limit"] = plan.MonthlyQuotaPerPlan
+		updates["deduction_group"] = strings.TrimSpace(plan.DeductionGroup)
 		if !plan.IsUnlimitedTime && durationSeconds > 0 {
 			updates["end_time"] = subscription.EndTime + durationSeconds
 		}
@@ -198,6 +260,7 @@ func GrantPlanToUser(userId int, plan *PackagesPlan, source string, allowStack b
 			subscription.EndTime += durationSeconds
 		}
 		subscription.UpdatedTime = now
+		ApplyPlanLimitsToSubscription(subscription, plan)
 		return subscription, true, nil
 	}
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -233,6 +296,7 @@ func GrantPlanToUser(userId int, plan *PackagesPlan, source string, allowStack b
 		MaxClientCount: plan.MaxClientCount,
 		HashId:         utils.GetUUID(),
 	}
+	ApplyPlanLimitsToSubscription(newSubscription, plan)
 
 	if err := CreatePackagesSubscription(newSubscription); err != nil {
 		return nil, true, err
@@ -309,14 +373,17 @@ func GetUserActivePackagesSubscriptionByHashId(userId int, hashId string) (*Pack
 }
 
 // GetUserActivePackagesSubscriptions 获取用户所有活跃订阅（按到期时间升序排序，优先返回快过期的）
-func GetUserActivePackagesSubscriptions(userId int, serviceType string, isActive bool) ([]PackagesSubscription, error) {
+func GetUserActivePackagesSubscriptions(userId int, sub PackagesSubscription, isActive bool) ([]PackagesSubscription, error) {
 	var subscriptions []PackagesSubscription
 
 	query := DB.Where("user_id = ?", userId)
 
 	// 如果指定了服务类型，添加过滤条件
-	if serviceType != "" {
-		query = query.Where("service_type = ?", serviceType)
+	if sub.ServiceType != "" {
+		query = query.Where("service_type = ?", sub.ServiceType)
+	}
+	if sub.DeductionGroup != "" {
+		query = query.Where("deduction_group = ?", sub.DeductionGroup)
 	}
 
 	if isActive {
@@ -353,37 +420,101 @@ func UpdatePackagesSubscription(subscription *PackagesSubscription) error {
 	return DB.Save(subscription).Error
 }
 
-// 更新订阅使用量（改为额度制）
-func UpdateClaudeCodeUsage(subscriptionId int, quotaUsed int) error {
-	result := DB.Model(&PackagesSubscription{}).
-		Where("id = ? AND remain_quota >= ?", subscriptionId, quotaUsed).
-		Updates(map[string]interface{}{
-			"remain_quota": gorm.Expr("remain_quota - ?", quotaUsed),
-			"used_quota":   gorm.Expr("used_quota + ?", quotaUsed),
-			"updated_time": utils.GetTimestamp(),
-		})
-
-	if result.Error != nil {
-		return result.Error
+// 计算可扣除额度，综合剩余额度与日/周/月限额
+func calculateSubscriptionDeduct(subscription *PackagesSubscription, quotaUsed int) int {
+	if subscription == nil || quotaUsed <= 0 {
+		return 0
 	}
 
-	if result.RowsAffected == 0 {
-		return errors.New("订阅额度不足")
+	available := quotaUsed
+
+	if subscription.RemainQuota < available {
+		available = subscription.RemainQuota
 	}
 
-	// 检查额度是否用尽，更新状态
-	go func() {
-		var sub PackagesSubscription
-		if err := DB.Where("id = ?", subscriptionId).First(&sub).Error; err == nil {
-			if sub.RemainQuota <= 0 {
-				DB.Model(&PackagesSubscription{}).
-					Where("id = ?", subscriptionId).
-					Update("status", "exhausted")
+	if subscription.DailyQuotaLimit > 0 {
+		dailyRemain := subscription.DailyQuotaLimit - subscription.DailyQuotaUsed
+		if dailyRemain < available {
+			available = dailyRemain
+		}
+	}
+
+	if subscription.WeeklyQuotaLimit > 0 {
+		weeklyRemain := subscription.WeeklyQuotaLimit - subscription.WeeklyQuotaUsed
+		if weeklyRemain < available {
+			available = weeklyRemain
+		}
+	}
+
+	if subscription.MonthlyQuotaLimit > 0 {
+		monthlyRemain := subscription.MonthlyQuotaLimit - subscription.MonthlyQuotaUsed
+		if monthlyRemain < available {
+			available = monthlyRemain
+		}
+	}
+
+	if available < 0 {
+		return 0
+	}
+
+	return available
+}
+
+// 更新订阅使用量（改为额度制），返回实际扣除额度
+func UpdateSubscriptionPackageUsage(subscriptionId int, quotaUsed int, tokenGroup string) (int, error) {
+	if quotaUsed <= 0 {
+		return 0, nil
+	}
+	now := utils.GetTimestamp()
+	location, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		location = time.Local
+	}
+	nowTime := time.Unix(now, 0).In(location)
+	dayStart, weekStart, monthStart := getPackagesQuotaResetStarts(nowTime)
+
+	var deducted int
+
+	txErr := DB.Transaction(func(tx *gorm.DB) error {
+		var subscription PackagesSubscription
+		if err := tx.Where("id = ?", subscriptionId).First(&subscription).Error; err != nil {
+			return err
+		}
+
+		if subscription.DeductionGroup != "" {
+			if tokenGroup != subscription.DeductionGroup {
+				return errors.New("订阅分组不匹配")
 			}
 		}
-	}()
 
-	return nil
+		resetSubscriptionQuotaIfNeeded(&subscription, dayStart, weekStart, monthStart)
+
+		deducted = calculateSubscriptionDeduct(&subscription, quotaUsed)
+
+		// 即使不可扣费，也需要更新重置后的时间戳
+		if deducted <= 0 {
+			subscription.UpdatedTime = now
+			return tx.Save(&subscription).Error
+		}
+
+		subscription.RemainQuota -= deducted
+		subscription.UsedQuota += deducted
+		subscription.DailyQuotaUsed += deducted
+		subscription.WeeklyQuotaUsed += deducted
+		subscription.MonthlyQuotaUsed += deducted
+		subscription.UpdatedTime = now
+		if subscription.RemainQuota <= 0 {
+			subscription.Status = "exhausted"
+		}
+
+		return tx.Save(&subscription).Error
+	})
+
+	if txErr != nil {
+		return 0, txErr
+	}
+
+	return deducted, nil
 }
 
 // 重置月度使用量（定时任务调用）
@@ -511,6 +642,22 @@ func CreatePackagesPlan(plan *PackagesPlan) error {
 // UpdatePackagesPlan 更新套餐
 func UpdatePackagesPlan(plan *PackagesPlan) error {
 	return DB.Save(plan).Error
+}
+
+func UpdatePackagesSubscriptionsByPlan(plan *PackagesPlan) error {
+	if plan == nil {
+		return nil
+	}
+	updates := map[string]interface{}{
+		"daily_quota_limit":   plan.DailyQuotaPerPlan,
+		"weekly_quota_limit":  plan.WeeklyQuotaPerPlan,
+		"monthly_quota_limit": plan.MonthlyQuotaPerPlan,
+		"deduction_group":     strings.TrimSpace(plan.DeductionGroup),
+		"service_type":        plan.ServiceType,
+	}
+	return DB.Model(&PackagesSubscription{}).
+		Where("plan_type = ?", plan.Type).
+		Updates(updates).Error
 }
 
 // DeletePackagesPlan 删除套餐

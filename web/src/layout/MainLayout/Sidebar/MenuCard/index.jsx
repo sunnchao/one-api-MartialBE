@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import dayjs from 'dayjs';
+import { renderQuota } from 'utils/common';
 
 const CardStyle = styled(Card)(({ theme }) => ({
   background: theme.palette.mode === 'dark' ? alpha(theme.palette.background.paper, 0.8) : alpha(theme.palette.background.paper, 0.9),
@@ -86,13 +87,13 @@ const MenuCard = () => {
 
   const quotaPerUnit = localStorage.getItem('quota_per_unit') || 500000;
 
-  const totalQuota = parseFloat(balance) + parseFloat(usedQuota);
-  const progressValue = (parseFloat(usedQuota) / totalQuota) * 100;
+  const totalQuota = parseFloat(user.quota) + parseFloat(user.used_quota);
+  const progressValue = (parseFloat(user.used_quota) / totalQuota) * 100;
 
   useEffect(() => {
     if (user) {
-      setBalance(((user.quota || 0) / quotaPerUnit).toFixed(2));
-      setUsedQuota(((user.used_quota || 0) / quotaPerUnit).toFixed(2));
+      setBalance(renderQuota(user.quota, 6));
+      setUsedQuota(renderQuota(user.used_quota, 6));
       setRequestCount(user.request_count || 0);
     }
   }, [user, quotaPerUnit]);
@@ -225,7 +226,7 @@ const MenuCard = () => {
                 mt: 0.5
               }}
             >
-              {`$${usedQuota} (${Math.round(progressValue)}%)`}
+              {`${usedQuota} (${Math.round(progressValue)}%)`}
             </Typography>
           </Box>
 

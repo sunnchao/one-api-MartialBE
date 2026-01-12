@@ -543,9 +543,9 @@ export function renderQuota(quota, digits = 2) {
   displayInCurrency = displayInCurrency === 'true';
   if (displayInCurrency) {
     if (quota < 0) {
-      return '-$' + calculateQuota(Math.abs(quota), digits);
+      return '-' + calculateQuota(Math.abs(quota), digits);
     }
-    return '$' + calculateQuota(quota, digits);
+    return '' + calculateQuota(quota, digits);
   }
   return renderNumber(quota);
 }

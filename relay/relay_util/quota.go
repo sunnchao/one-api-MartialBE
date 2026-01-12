@@ -11,6 +11,7 @@ import (
 	"one-api/common/logger"
 	"one-api/model"
 	"one-api/types"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -92,8 +93,12 @@ func NewQuota(c *gin.Context, modelName string, promptTokens int) (*Quota, *type
 	quota.inputRatio = quota.price.GetInput() * quota.groupRatio
 	quota.outputRatio = quota.price.GetOutput() * quota.groupRatio
 
-	// 检测服务类型（从 context 获取）
+	// 检测服务类型：默认取 context，若使用备用分组则基于备用分组重新解析
 	packageServiceTypeStr := c.GetString("package_service_type")
+	if quota.isBackupGroup && quota.backupGroupName != "" {
+		packageServiceTypeStr = resolvePackageServiceTypeByTokenGroup(quota.backupGroupName)
+	}
+
 	if packageServiceTypeStr != "" {
 		quota.packageServiceType = packageServiceTypeStr
 
@@ -198,7 +203,20 @@ func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, 
 	// 优先使用订阅扣费（仅对 ClaudeCode/CodexCode/GeminiCode 请求）
 	if q.useSubscription && quota > 0 && q.packageServiceType != "" {
 		// 获取用户所有活跃订阅，按到期时间升序排序（优先消耗快到期的）
-		subscriptions, err := model.GetUserActivePackagesSubscriptions(q.userId, q.packageServiceType, true)
+		var tokenGroupName string
+		if q.backupGroupName != "" {
+			tokenGroupName = q.backupGroupName
+		} else {
+			tokenGroupName = q.groupName
+		}
+
+		var subscription model.PackagesSubscription
+		//if q.packageServiceType != "" {
+		//	subscription.ServiceType = q.packageServiceType
+		//}
+		subscription.DeductionGroup = tokenGroupName
+
+		subscriptions, err := model.GetUserActivePackagesSubscriptions(q.userId, subscription, true)
 		if err == nil && len(subscriptions) > 0 {
 			remainingQuota := quota
 			q.subscriptionsUsed = make([]SubscriptionUsageDetail, 0, len(subscriptions))
@@ -210,31 +228,32 @@ func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, 
 				}
 
 				sub := &subscriptions[i]
-				// 计算本次从该订阅扣除的额度
-				deductQuota := remainingQuota
-				if sub.RemainQuota < deductQuota {
-					deductQuota = sub.RemainQuota
+
+				deducted, updateErr := model.UpdateSubscriptionPackageUsage(sub.Id, remainingQuota, tokenGroupName)
+				if updateErr != nil {
+					logger.LogError(ctx, "subscription deduction failed: "+updateErr.Error())
+					continue
 				}
 
-				// 从该订阅扣费
-				updateErr := model.UpdateClaudeCodeUsage(sub.Id, deductQuota)
-				if updateErr == nil {
-					q.subscriptionQuota += deductQuota
-					remainingQuota -= deductQuota
+				if deducted <= 0 {
+					continue
+				}
 
-					// 记录该订阅的消费明细
-					q.subscriptionsUsed = append(q.subscriptionsUsed, SubscriptionUsageDetail{
-						SubscriptionId: sub.Id,
-						PlanType:       sub.PlanType,
-						Quota:          deductQuota,
-						EndTime:        sub.EndTime,
-					})
+				q.subscriptionQuota += deducted
+				remainingQuota -= deducted
 
-					// 如果是第一个成功扣费的订阅，记录订阅ID
-					if !q.subscriptionHandled {
-						q.subscriptionHashId = sub.HashId
-						q.subscriptionHandled = true
-					}
+				// 记录该订阅的消费明细
+				q.subscriptionsUsed = append(q.subscriptionsUsed, SubscriptionUsageDetail{
+					SubscriptionId: sub.Id,
+					PlanType:       sub.PlanType,
+					Quota:          deducted,
+					EndTime:        sub.EndTime,
+				})
+
+				// 如果是第一个成功扣费的订阅，记录订阅ID
+				if !q.subscriptionHandled {
+					q.subscriptionHashId = sub.HashId
+					q.subscriptionHandled = true
 				}
 			}
 
@@ -248,6 +267,8 @@ func (q *Quota) completedQuotaConsumption(usage *types.Usage, tokenName string, 
 							logger.LogError(ctx, "error refunding pre-consumed quota after subscription: "+err.Error())
 						}
 					}()
+					// 已经全部退还预消费额度，后续按剩余余额部分结算
+					q.preConsumedQuota = 0
 				}
 
 				// 如果订阅完全覆盖了消费，记录日志并返回
@@ -550,6 +571,24 @@ type ExtraBillingData struct {
 	Type      string  `json:"type"`
 	CallCount int     `json:"call_count"`
 	Price     float64 `json:"price"`
+}
+
+// resolvePackageServiceTypeByTokenGroup 依据分组名称解析资源包服务类型
+func resolvePackageServiceTypeByTokenGroup(group string) string {
+	group = strings.TrimSpace(group)
+	if group == "" {
+		return ""
+	}
+	switch {
+	case strings.EqualFold(group, "ClaudeCode"):
+		return "claude_code"
+	case strings.EqualFold(group, "Codex"):
+		return "codex_code"
+	case strings.EqualFold(group, "GeminiCli"):
+		return "gemini_code"
+	default:
+		return ""
+	}
 }
 
 // SubscriptionUsageDetail 订阅消费明细

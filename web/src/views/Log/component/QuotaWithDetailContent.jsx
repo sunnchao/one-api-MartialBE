@@ -140,6 +140,9 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
   const isResourcePackage = item?.metadata?.billing_type === 'resource_package';
   const resourcePackageId = item?.metadata?.resource_package_id;
   const packageServiceType = item?.metadata?.package_service_type;
+  const quotaFromSubscription = Number(item?.metadata?.quota_from_subscription || 0);
+  const quotaFromBalance = Number(item?.metadata?.quota_from_balance || 0);
+  const subscriptionQuotaDisplay = quotaFromSubscription > 0 ? quotaFromSubscription : quota;
 
   // 服务类型显示名称映射
   const serviceTypeNames = {
@@ -183,7 +186,9 @@ export default function QuotaWithDetailContent({ item, userGroup, totalInputToke
             </Box>
           </Box>
           <Typography variant="caption" sx={{ mt: 0.5, display: 'block', color: 'text.secondary' }}>
-            此次请求未消耗用户余额，已从资源包中扣除 {renderQuota(quota, 6)}
+            {quotaFromBalance > 0
+              ? `本次请求已从资源包扣除 ${renderQuota(subscriptionQuotaDisplay, 6)}，并消耗用户余额 ${renderQuota(quotaFromBalance, 6)}`
+              : `此次请求未消耗用户余额，已从资源包中扣除 ${renderQuota(subscriptionQuotaDisplay, 6)}`}
           </Typography>
         </Alert>
       )}
